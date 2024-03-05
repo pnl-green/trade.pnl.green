@@ -22,6 +22,7 @@ export const TextBtn = styled(Button)(() => ({
     transition: "transform 0.3s ease",
     transformOrigin: "right top",
     transform: "scaleX(0)",
+    zindex: 2,
   },
   "&:hover::after": {
     transformOrigin: "left top",
@@ -40,6 +41,22 @@ export const GreenBtn = styled(Button)(() => ({
   fontFamily: "Montserrat",
 
   "&:hover": {
+    backgroundColor: "#049260",
+  },
+}));
+
+export const BuySellBtn = styled(Button)(() => ({
+  color: "#fff",
+  backgroundColor: "#171b26",
+  textTransform: "none",
+  fontFamily: "Montserrat",
+  padding: "5px 5px !important",
+
+  "&:hover": {
+    backgroundColor: "#171b26",
+  },
+
+  "&.active": {
     backgroundColor: "#049260",
   },
 }));
