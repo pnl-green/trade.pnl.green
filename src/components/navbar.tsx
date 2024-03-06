@@ -1,21 +1,21 @@
 import React from "react";
 import { NavbarContainer } from "@/styles/navbar.styles";
-import { GreenBtn, TextBtn } from "@/styles/buttons.styles";
 import { Box } from "@mui/material";
+import { GreenBtn, TextBtn } from "@/styles/common.styles";
 
 const Navbar = () => {
   return (
     <NavbarContainer>
-      <div className="logo">
+      <Box className="logo">
         <img src="PNL.GREEN.svg" alt="PNL.GREEN" />
-      </div>
+      </Box>
 
-      <div className="external-links">
+      <Box className="external-links">
         <TextBtn className="active">Docs</TextBtn>
         <TextBtn>Twitter</TextBtn>
         <TextBtn>Discord</TextBtn>
         <TextBtn>Original Frontend</TextBtn>
-      </div>
+      </Box>
 
       <Box className="user-config">
         <GreenBtn>Wallet Connect</GreenBtn>

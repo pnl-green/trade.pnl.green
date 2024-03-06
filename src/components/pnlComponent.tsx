@@ -1,43 +1,21 @@
 import {
+  ChatBox,
   OrderBookBox,
   PnlWrapper,
   TickerWrapper,
   TradingViewComponent,
+  WalletBox,
 } from "@/styles/pnl.styles";
-import React, { useEffect, useState } from "react";
-import {
-  AdvancedChart,
-  Ticker,
-  MarketData,
-  SingleTicker,
-  TickerTape,
-} from "react-tradingview-embed";
+import React from "react";
+import { AdvancedChart, TickerTape } from "react-tradingview-embed";
 import { OrderBook } from "@lab49/react-order-book";
 import { Box } from "@mui/material";
-import RiskManagementComponent from "./riskManagement";
-// import axios from "axios";
+import RiskManagementComponent from "./riskManager-leverage-marginType";
+import { FlexItems } from "@/styles/common.styles";
+import PositionsOrdersHistory from "./positions-history-components";
+import ChatComponent from "./chatComponent";
 
 const PnlComponent = () => {
-  // const [orderBook, setOrderBook] = useState({ asks: [], bids: [] });
-
-  // useEffect(() => {
-  //   const fetchOrderBook = async () => {
-  //     try {
-  //       const symbol = "LDOUSDT";
-  //       const { data } = await axios.get(
-  //         `https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=5000`
-  //       );
-  //       setOrderBook({ asks: data.asks, bids: data.bids });
-  //     } catch (error) {
-  //       console.error("Error fetching order book:", error);
-  //     }
-  //   };
-
-  //   fetchOrderBook();
-  // }, []);
-
-  // console.log("orderBook", orderBook);
-
   const book = {
     asks: [
       ["11661.89", "7.38470214"],
@@ -77,10 +55,11 @@ const PnlComponent = () => {
 
   return (
     <PnlWrapper>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
         <TickerWrapper>
           <TickerTape widgetProps={{ displayMode: "Adaptive" }} />
         </TickerWrapper>
+
         <TradingViewComponent>
           <AdvancedChart
             widgetProps={{
@@ -90,19 +69,56 @@ const PnlComponent = () => {
             }}
           />
         </TradingViewComponent>
+
+        <PositionsOrdersHistory />
       </Box>
-      <OrderBookBox>
-        <OrderBook
-          askColor={[255, 0, 0]}
-          book={{ asks: book.asks, bids: book.bids }}
-          fullOpacity
-          interpolateColor={(color) => color}
-          listLength={10}
-          showSpread={true}
-          stylePrefix="MakeItNice"
-        />
-      </OrderBookBox>
-      <RiskManagementComponent />
+
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+        <OrderBookBox>
+          <OrderBook
+            askColor={[255, 0, 0]}
+            book={{ asks: book.asks, bids: book.bids }}
+            fullOpacity
+            interpolateColor={(color) => color}
+            listLength={10}
+            showSpread={true}
+            stylePrefix="MakeItNice"
+          />
+        </OrderBookBox>
+        {/*chat section*/}
+        <ChatComponent />
+      </Box>
+
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <RiskManagementComponent />
+
+        <WalletBox sx={{ span: { fontSize: "15px" } }} id="wallet-component">
+          <FlexItems>
+            <span>Balance</span>
+            <span>$0.00</span>
+          </FlexItems>
+          <FlexItems>
+            <span>uPNL</span>
+            <span>$0.00</span>
+          </FlexItems>
+          <FlexItems>
+            <span>Equity</span>
+            <span>$0.00</span>
+          </FlexItems>
+          <FlexItems>
+            <span>Cross Margin Ratio</span>
+            <span className="green">$0.00</span>
+          </FlexItems>
+          <FlexItems>
+            <span>Maintenance Margin</span>
+            <span>$0.00</span>
+          </FlexItems>
+          <FlexItems>
+            <span>Cross Account Leverage</span>
+            <span>$0.00</span>
+          </FlexItems>
+        </WalletBox>
+      </Box>
     </PnlWrapper>
   );
 };

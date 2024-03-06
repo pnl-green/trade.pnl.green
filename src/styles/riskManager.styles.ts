@@ -9,8 +9,10 @@ export const RiskManagerWrapper = styled(Box)(() => ({
   height: "651px",
   padding: "10px",
   position: "relative",
-  border: "1px solid rgba(255, 255, 255, 0.1)",
+  border: "2px solid rgba(255, 255, 255, 0.1)",
   borderRadius: "8px",
+  // marginTop:"61px",
+
 
   ".captions": {
     display: "flex",
@@ -71,18 +73,6 @@ export const TabsButton = styled("button")(() => ({
   },
 }));
 
-export const FlexItems = styled(Box)(() => ({
-  display: "flex",
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  span: {
-    fontSize: "13px",
-    fontWeight: "400",
-    fontFamily: "Sora",
-  },
-}));
-
 export const LiquidationWrapper = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
@@ -117,6 +107,7 @@ export const InputCheckBox = styled(Checkbox)(() => ({
 export const SelectItemsBox = styled(Box)(() => ({
   display: "flex",
   flexDirection: "row",
+  justifyContent: "space-between",
   gap: "10px",
   width: "100%",
   height: "35px",
