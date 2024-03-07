@@ -6,13 +6,12 @@ export const RiskManagerWrapper = styled(Box)(() => ({
   gap: "10px",
   backgroundColor: "#13121296",
   width: "306px",
-  height: "651px",
+  height: "620px",
   padding: "10px",
   position: "relative",
   border: "2px solid rgba(255, 255, 255, 0.1)",
   borderRadius: "8px",
   // marginTop:"61px",
-
 
   ".captions": {
     display: "flex",
@@ -22,6 +21,11 @@ export const RiskManagerWrapper = styled(Box)(() => ({
     fontSize: "14px",
     fontWeight: "400",
     fontFamily: "Sora",
+    cursor: "pointer",
+
+    "&:hover": {
+      background: "#0F1A1F",
+    },
   },
 }));
 

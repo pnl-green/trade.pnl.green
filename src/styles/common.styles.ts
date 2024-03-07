@@ -95,12 +95,12 @@ export const BuySellBtn = styled(Button)(() => ({
   fontFamily: "Montserrat",
   padding: "5px 5px !important",
 
-  "&:hover": {
-    backgroundColor: "#171b26",
+  "&.buyBtn": {
+    backgroundColor: "#049260",
   },
 
-  "&.active": {
-    backgroundColor: "#049260",
+  "&.sellBtn": {
+    backgroundColor: "#B04747",
   },
 }));
 

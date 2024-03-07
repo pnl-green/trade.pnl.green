@@ -2,25 +2,37 @@ import { Box, Button, styled } from "@mui/material";
 
 export const PnlWrapper = styled(Box)(() => ({
   display: "flex",
-  //flexDirection: "column",
-  gap: "50px",
+  flexDirection: "row",
+  justifyContent: "space-between",
+  gap: "20px",
   backgroundColor: "#000",
-  width: "100%",
+  width: "100vw",
   minHeight: "calc(100vh - 70px)",
   height: "auto",
   padding: "10px 30px",
 
-  // flexWrap: "wrap",
+  "@media (max-width: 1535px)": {
+    flexWrap: "wrap",
+  },
+
   // justifyContent: "space-between",
   // alignContent: "flex-start",
 }));
 
 export const TickerWrapper = styled(Box)(() => ({
   display: "flex",
-  width: "calc(757px + 350px)",
+  width: "calc(100vw - 720px)",
   height: "46px",
   borderRadius: "5px",
-  backgroundColor: "#fff",
+  backgroundColor: "#171b26",
+
+  "@media (max-width: 1535px)": {
+    width: "calc(100vw - 400px)",
+  },
+
+  "@media (max-width: 899px)": {
+    width: "calc(100vw - 70px)",
+  },
 
   div: {
     width: "100%",
@@ -30,20 +42,30 @@ export const TickerWrapper = styled(Box)(() => ({
 
 export const TradingViewComponent = styled(Box)(() => ({
   display: "flex",
-  width: "calc(757px + 350px)",
-  height: "578px",
+  width: "calc(100vw - 720px)",
+  height: "550px",
   borderRadius: "5px",
-  backgroundColor: "#fff",
+  backgroundColor: "#171b26",
+
+  "@media (max-width: 1535px)": {
+    width: "calc(100vw - 400px)",
+  },
+
+  "@media (max-width: 899px)": {
+    width: "calc(100vw - 70px)",
+  },
 
   div: {
     width: "100%",
   },
 }));
 
+//if total screen is 1920px then 1107 to % is 57.5%
+
 export const OrderBookBox = styled(Box)(() => ({
   display: "flex",
   width: "310px",
-  height: "578px",
+  height: "550px",
   borderRadius: "5px",
   overflowX: "hidden",
   overflowY: "auto",
@@ -59,8 +81,9 @@ export const WalletBox = styled(Box)(() => ({
   border: "2px solid rgba(255, 255, 255, 0.1)",
   borderRadius: "7.29px",
   width: "306px",
+  height: "auto",
   minHeight: "232px",
-  marginTop: "15px",
+  maxHeight: "max-content",
   background:
     "linear-gradient(180deg, rgba(4, 146, 96, 0.12) 0%, rgba(15, 57, 74, 0.12) 100%)",
 

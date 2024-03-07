@@ -6,7 +6,7 @@ export const NavbarContainer = styled(Box)(() => ({
   alignItems: "center",
   padding: "10px 30px",
   width: "100vw",
-  height: "70px",
+  // height: "70px",
   backgroundColor: "#000",
   zIndex: 100,
 

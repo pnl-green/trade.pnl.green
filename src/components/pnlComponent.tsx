@@ -55,7 +55,7 @@ const PnlComponent = () => {
 
   return (
     <PnlWrapper>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         <TickerWrapper>
           <TickerTape widgetProps={{ displayMode: "Adaptive" }} />
         </TickerWrapper>
@@ -73,7 +73,7 @@ const PnlComponent = () => {
         <PositionsOrdersHistory />
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         <OrderBookBox>
           <OrderBook
             askColor={[255, 0, 0]}
@@ -89,7 +89,21 @@ const PnlComponent = () => {
         <ChatComponent />
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+          "@media (max-width: 1535px)": {
+            flexDirection: "row",
+            flexWrap: "wrap",
+          },
+          "@media (max-width: 899px)": {
+            flexDirection: "column",
+            flexWrap: "nowrap",
+          },
+        }}
+      >
         <RiskManagementComponent />
 
         <WalletBox sx={{ span: { fontSize: "15px" } }} id="wallet-component">

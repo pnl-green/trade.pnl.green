@@ -67,10 +67,12 @@ const LimitComponent = () => {
           mt: "30px",
         }}
       >
-        <BuySellBtn sx={{ width: "112px" }} className="active">
+        <BuySellBtn sx={{ width: "112px" }} className="buyBtn">
           Buy
         </BuySellBtn>
-        <BuySellBtn sx={{ width: "112px" }}>Sell</BuySellBtn>
+        <BuySellBtn sx={{ width: "112px" }} className="sellBtn">
+          Sell
+        </BuySellBtn>
       </Box>
     </>
   );
