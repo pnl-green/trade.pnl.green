@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import {
-  PositionTabsButtons,
   PositionTabsButtonsWrapper,
   PositionsOrdersHistoryWrapper,
 } from "@/styles/positionsOrdersHistory.styles";
 import PositionComponentTable from "./positions";
 import OpenOrdersComponentTable from "./openOrders";
 import TwapComponentTable from "./twap";
+import TradeHistoryComponentTable from "./tradehistory";
+import FundingHistoryComponentTable from "./fundingHistory";
+import OrderHistoryComponentTable from "./orderHistory";
+import { TabsButtons } from "@/styles/common.styles";
 
 const PositionsOrdersHistory = () => {
   const tabLabels = [
@@ -28,12 +31,12 @@ const PositionsOrdersHistory = () => {
     <PositionsOrdersHistoryWrapper>
       <PositionTabsButtonsWrapper>
         {tabLabels.map((label) => (
-          <PositionTabsButtons
+          <TabsButtons
             className={activeTab === label ? "active" : ""}
             onClick={() => handleTabClick(label)}
           >
             {label}
-          </PositionTabsButtons>
+          </TabsButtons>
         ))}
       </PositionTabsButtonsWrapper>
 
@@ -41,6 +44,9 @@ const PositionsOrdersHistory = () => {
       {activeTab === "Positions" && <PositionComponentTable />}
       {activeTab === "Open Orders" && <OpenOrdersComponentTable />}
       {activeTab === "TWAP" && <TwapComponentTable />}
+      {activeTab === "Trade History" && <TradeHistoryComponentTable />}
+      {activeTab === "Funding History" && <FundingHistoryComponentTable />}
+      {activeTab === "Order History" && <OrderHistoryComponentTable />}
     </PositionsOrdersHistoryWrapper>
   );
 };

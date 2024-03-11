@@ -60,19 +60,6 @@ export const TradingViewComponent = styled(Box)(() => ({
   },
 }));
 
-//if total screen is 1920px then 1107 to % is 57.5%
-
-export const OrderBookBox = styled(Box)(() => ({
-  display: "flex",
-  width: "310px",
-  height: "550px",
-  borderRadius: "5px",
-  overflowX: "hidden",
-  overflowY: "auto",
-  border: "2px solid rgba(255, 255, 255, 0.1)",
-  // marginTop:"61px"
-}));
-
 export const WalletBox = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
@@ -100,7 +87,7 @@ export const ChatBox = styled(Box)(() => ({
   border: "2px solid rgba(255, 255, 255, 0.1)",
   borderRadius: "7.29px",
   width: "310px",
-  height: "360px",
+  height: "340px",
   background: "#13121296",
 
   ".header_nav": {

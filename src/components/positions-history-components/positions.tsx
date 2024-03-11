@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Box,
   Paper,
   Table,
   TableBody,
@@ -38,192 +39,7 @@ const columns: Column[] = [
   { id: "tpsl", label: "TP/SL", align: "center" },
 ];
 
-const row = [
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    coin: "BTC",
-    size: "0.01",
-    positionValue: "0.01",
-    entryPrice: "0.01",
-    markPrice: "0.01",
-    pnl: "0.01",
-    liqPrice: "0.01",
-    margin: "0.01",
-    funding: "0.01",
-    tpsl: "0.01",
-  },
-];
+const row: any[] = [];
 
 const PositionComponentTable = () => {
   return (
@@ -254,30 +70,46 @@ const PositionComponentTable = () => {
               ))}
             </TableRow>
           </TableHead>
-          <TableBody sx={{}}>
-            {row.map((row, index) => {
-              return (
-                <TableRow key={index}>
-                  {columns.map((column) => {
-                    const value = row[column.id];
-                    return (
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        sx={{
-                          background: "transparent",
-                          color: "white",
-                          padding: "8px",
-                          border: "none",
-                        }}
-                      >
-                        {value}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
+          <TableBody>
+            {row.length === 0 ? (
+              <Box
+                sx={{
+                  color: "#fff",
+                  fontFamily: "Sora",
+                  fontWeight: "400",
+                  fontSize: "13px",
+                  p: "10px",
+                }}
+              >
+                No open position yet
+              </Box>
+            ) : (
+              <>
+                {row.map((row, index) => {
+                  return (
+                    <TableRow key={index}>
+                      {columns.map((column) => {
+                        const value = row[column.id];
+                        return (
+                          <TableCell
+                            key={column.id}
+                            align={column.align}
+                            sx={{
+                              background: "transparent",
+                              color: "white",
+                              padding: "8px",
+                              border: "none",
+                            }}
+                          >
+                            {value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
+              </>
+            )}
           </TableBody>
         </Table>
       </TableContainer>

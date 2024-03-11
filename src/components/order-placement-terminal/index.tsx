@@ -9,7 +9,7 @@ import {
 import MarketComponent from "./market";
 import LimitComponent from "./limit";
 
-const RiskManagementComponent = () => {
+const OrderPlacementTerminal = () => {
   const [activeTab, setActiveTab] = useState("Market");
 
   const handleTabChange = (tabName: string) => {
@@ -17,7 +17,7 @@ const RiskManagementComponent = () => {
   };
 
   return (
-    <RiskManagerWrapper>
+    <RiskManagerWrapper id="order-placement-terminal">
       <Box
         sx={{
           display: "flex",
@@ -70,4 +70,4 @@ const RiskManagementComponent = () => {
   );
 };
 
-export default RiskManagementComponent;
+export default OrderPlacementTerminal;

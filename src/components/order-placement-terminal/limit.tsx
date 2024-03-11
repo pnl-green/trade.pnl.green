@@ -32,7 +32,7 @@ const LimitComponent = () => {
         <HandleSelectItems
           selectItem={selectSize}
           setSelectItem={setSelectSize}
-          selectDataItems={["Default size", "Asset qty"]}
+          selectDataItems={["ETH", "USD"]}
           menuItemPlaceholder="size"
         />
       </SelectItemsBox>
@@ -54,8 +54,8 @@ const LimitComponent = () => {
         <HandleSelectItems
           selectItem={selectOrderType}
           setSelectItem={setSelectOrderType}
-          selectDataItems={["Default size", "Asset qty"]}
-          menuItemPlaceholder="GTC"
+          selectDataItems={["GTC", "IOC", "ALO"]}
+          menuItemPlaceholder="order-type"
         />
       </SelectItemsBox>
 

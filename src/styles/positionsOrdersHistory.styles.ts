@@ -30,21 +30,3 @@ export const PositionTabsButtonsWrapper = styled(Box)(() => ({
   // paddingBottom: "1px",
   // borderBottom: "1px solid #FFFFFF99",
 }));
-export const PositionTabsButtons = styled(Button)(() => ({
-  width: "fit-content",
-  height: "33px",
-  borderRadius: "7px",
-  backgroundColor: "#0F1A1F",
-  textTransform: "none",
-  color: "#FFFFFF",
-  fontSize: "15px",
-  fontWeight: "600",
-  fontFamily: "Sora",
-
-  "&:hover": {
-    backgroundColor: "#049260",
-  },
-  "&.active": {
-    backgroundColor: "#049260",
-  },
-}));

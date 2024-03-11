@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Box,
   Paper,
   Table,
   TableBody,
@@ -38,117 +39,7 @@ const columns: Column[] = [
   { id: "tpsl", label: "TP/SL", align: "center" },
 ];
 
-const row: any[] = [
-  //dummy data
-  {
-    time: "10:00",
-    type: "Limit",
-    coin: "BTC",
-    direction: "Buy",
-    size: "0.01",
-    originalPrice: "0.01",
-    orderValue: "0.01",
-    price: "0.01",
-    triggerCondition: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    time: "10:00",
-    type: "Limit",
-    coin: "BTC",
-    direction: "Buy",
-    size: "0.01",
-    originalPrice: "0.01",
-    orderValue: "0.01",
-    price: "0.01",
-    triggerCondition: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    time: "10:00",
-    type: "Limit",
-    coin: "BTC",
-    direction: "Buy",
-    size: "0.01",
-    originalPrice: "0.01",
-    orderValue: "0.01",
-    price: "0.01",
-    triggerCondition: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    time: "10:00",
-    type: "Limit",
-    coin: "BTC",
-    direction: "Buy",
-    size: "0.01",
-    originalPrice: "0.01",
-    orderValue: "0.01",
-    price: "0.01",
-    triggerCondition: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    time: "10:00",
-    type: "Limit",
-    coin: "BTC",
-    direction: "Buy",
-    size: "0.01",
-    originalPrice: "0.01",
-    orderValue: "0.01",
-    price: "0.01",
-    triggerCondition: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    time: "10:00",
-    type: "Limit",
-    coin: "BTC",
-    direction: "Buy",
-    size: "0.01",
-    originalPrice: "0.01",
-    orderValue: "0.01",
-    price: "0.01",
-    triggerCondition: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    time: "10:00",
-    type: "Limit",
-    coin: "BTC",
-    direction: "Buy",
-    size: "0.01",
-    originalPrice: "0.01",
-    orderValue: "0.01",
-    price: "0.01",
-    triggerCondition: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    time: "10:00",
-    type: "Limit",
-    coin: "BTC",
-    direction: "Buy",
-    size: "0.01",
-    originalPrice: "0.01",
-    orderValue: "0.01",
-    price: "0.01",
-    triggerCondition: "0.01",
-    tpsl: "0.01",
-  },
-  {
-    time: "10:00",
-    type: "Limit",
-    coin: "BTC",
-    direction: "Buy",
-    size: "0.01",
-    originalPrice: "0.01",
-    orderValue: "0.01",
-    price: "0.01",
-    triggerCondition: "0.01",
-    tpsl: "0.01",
-  },
-];
+const row: any[] = []
 
 const OpenOrdersComponentTable = () => {
   return (
@@ -180,29 +71,45 @@ const OpenOrdersComponentTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {row.map((row, index) => {
-              return (
-                <TableRow key={index}>
-                  {columns.map((column) => {
-                    const value = row[column.id];
-                    return (
-                      <TableCell
-                        key={column.id}
-                        align={column.align}
-                        sx={{
-                          background: "transparent",
-                          color: "white",
-                          padding: "8px",
-                          border: "none",
-                        }}
-                      >
-                        {value}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
+            {row.length === 0 ? (
+              <Box
+                sx={{
+                  color: "#fff",
+                  fontFamily: "Sora",
+                  fontWeight: "400",
+                  fontSize: "13px",
+                  p: "10px",
+                }}
+              >
+                No open orders yet
+              </Box>
+            ) : (
+              <>
+                {row.map((row, index) => {
+                  return (
+                    <TableRow key={index}>
+                      {columns.map((column) => {
+                        const value = row[column.id];
+                        return (
+                          <TableCell
+                            key={column.id}
+                            align={column.align}
+                            sx={{
+                              background: "transparent",
+                              color: "white",
+                              padding: "8px",
+                              border: "none",
+                            }}
+                          >
+                            {value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
+              </>
+            )}
           </TableBody>
         </Table>
       </TableContainer>

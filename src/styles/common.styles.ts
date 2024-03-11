@@ -112,3 +112,22 @@ export const FlexItems = styled(Box)(() => ({
   alignItems: "center",
   span: { fontSize: "13px", fontWeight: "400", fontFamily: "Sora" },
 }));
+
+export const TabsButtons = styled(Button)(() => ({
+  width: "fit-content",
+  height: "33px",
+  borderRadius: "7px",
+  backgroundColor: "#0F1A1F",
+  textTransform: "none",
+  color: "#FFFFFF",
+  fontSize: "15px",
+  fontWeight: "600",
+  fontFamily: "Sora",
+
+  "&:hover": {
+    backgroundColor: "#049260",
+  },
+  "&.active": {
+    backgroundColor: "#049260",
+  },
+}));
