@@ -67,8 +67,8 @@ export const OrderBookTable = styled("table")(() => ({
   },
 
   td: {
-    padding: "4px 5px",
     position: "relative",
+    padding: "4px 5px",
   },
 
   tbody: {
@@ -76,6 +76,7 @@ export const OrderBookTable = styled("table")(() => ({
     fontSize: "10px",
     fontWeight: "400",
     fontFamily: "Sora",
+    color: "#FFFFFF",
   },
   tr: {
     position: "relative",
@@ -89,27 +90,28 @@ export const OrderBookTable = styled("table")(() => ({
 
 interface TablerowsProps {
   type?: string;
-  width?: string;
+  width?: any;
 }
 
 export const Tablerows = styled("tr")<TablerowsProps>((props) => ({
-    position: "relative",
+  position: "relative",
+  zIndex: 1,
 
-    "&:hover": {
-      backgroundColor: "#0F1A1F",
-      cursor: "pointer",
-    },
+  ".first-column": {
+    color: props.type === "bids" ? "rgb(0, 255, 0)" : "rgb(255, 0, 0)",
+  },
 
-    "&::before": {
-      content: '""',
-      position: "absolute",
-      display: "block",
-      top: "50%",
-      transform: "translateY(-50%)",
-      left: "0",
-      width: props.width,
-      height: "90%",
-      backgroundColor:
-        props.type === "bids" ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 0, 0, 0.5)",
-    },
+  "::after": {
+    content: "''",
+    position: "absolute",
+    display: "block",
+    top: "50%",
+    transform: "translateY(-50%)",
+    left: "0",
+    width: `${props.width}%`,
+    height: "90%",
+    zIndex: -1,
+    backgroundColor:
+      props.type === "bids" ? "rgba(0, 255, 0, 0.3)" : "rgba(255, 0, 0, 0.3)",
+  },
 }));

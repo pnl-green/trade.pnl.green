@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   SpreadAndPairSelects,
   ItemsSelect,
@@ -14,58 +14,60 @@ interface OrderBookProps {
   setPair: (pair: string) => void;
 }
 
-const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
-  const bookData = {
-    asks: [
-      [3000, 0.1, 300],
-      [2999, 0.2, 599.8],
-      [2998, 0.5, 1499],
-      [2997, 0.3, 899.1],
-      [2996, 1, 2996],
-      [2995, 0.8, 2396],
-      [2994, 0.4, 1197.6],
-      [2993, 0.6, 1795.8],
-      [2992, 0.7, 2094.4],
-      [2991, 0.9, 2691.9],
-    ],
-    bids: [
-      [2990, 0.2, 598],
-      [2989, 0.3, 896.7],
-      [2988, 0.1, 298.8],
-      [2987, 0.6, 1792.2],
-      [2986, 0.4, 1194.4],
-      [2985, 0.8, 2388],
-      [2984, 0.5, 1492],
-      [2983, 0.7, 2088.1],
-      [2982, 0.9, 2683.8],
-      [2981, 0.1, 298.1],
-    ],
-  };
+const bookData = {
+  asks: [
+    [3000, 0.1, 300],
+    [2999, 0.2, 599.8],
+    [2998, 0.5, 1499],
+    [2997, 0.3, 899.1],
+    [2996, 0.5, 2996],
+    [2995, 0.8, 2396],
+    [2994, 0.4, 1197.6],
+    [2993, 0.6, 1795.8],
+    [2992, 0.3, 2094.4],
+    [2991, 0.1, 2691.9],
+  ],
+  bids: [
+    [2990, 0.2, 598],
+    [2989, 0.3, 896.7],
+    [2988, 0.1, 298.8],
+    [2987, 0.6, 1792.2],
+    [2986, 0.4, 1194.4],
+    [2985, 0.8, 2388],
+    [2984, 0.5, 1492],
+    [2983, 0.2, 2088.1],
+    [2982, 0.3, 2683.8],
+    [2981, 0.2, 298.1],
+  ],
+};
 
-  const calculateWidth = (size: number, total: number) => {
-    // Calculate the width based on your logic
-    // For example, you can use linear scale or any other formula to map size and total to width
-    const maxWidth = 100; // Set maximum width for bars
-    const width = (size / total) * maxWidth; // Example: Width proportional to size/total
-    return `${width}%`;
-  };
+const calculateBarWidth = (size: number, max: number) => {
+  return (size / max) * 100; // Assuming a percentage-based width
+};
 
-  const renderOrderBookTable = (orders: any, type: string) => (
+const renderOrderBookTable = (orders: any, type: string) => {
+  const maxOrderSize = Math.max(...orders.map((order: any) => order[1]));
+
+  return (
     <tbody>
       {orders.map((order: any, index: any) => (
         <Tablerows
           key={index}
           type={type}
-          width={calculateWidth(order[1], order[1])}
+          width={calculateBarWidth(order[1], maxOrderSize)}
         >
           {order.map((data: any, idx: any) => (
-            <td key={idx}>{data}</td>
+            <td key={idx} className={idx === 0 ? "first-column" : ""}>
+              {data}
+            </td>
           ))}
         </Tablerows>
       ))}
     </tbody>
   );
+};
 
+const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
   return (
     <Box>
       <SpreadAndPairSelects>
