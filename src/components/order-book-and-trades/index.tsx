@@ -1,27 +1,11 @@
 import React, { useState } from "react";
 import { TabsButtons } from "@/styles/common.styles";
 import {
-  ItemsSelect,
   OrderBookContainer,
-  OrderBookTable,
   OrderBookTabsWrapper,
-  SpreadAndPairSelects,
 } from "@/styles/orderbook.styles";
 import OrderBook from "./orderBook";
-
-const renderOrderBookTable = (orders: any) => (
-  <OrderBookTable>
-    <tbody>
-      {orders.map((order: any, index: any) => (
-        <tr key={index}>
-          {order.map((data: any, idx: any) => (
-            <td key={idx}>{data}</td>
-          ))}
-        </tr>
-      ))}
-    </tbody>
-  </OrderBookTable>
-);
+import Trades from "./trades";
 
 const OrderBookAndTrades = () => {
   const [activeTab, setActiveTab] = useState("Order Book");
@@ -59,7 +43,7 @@ const OrderBookAndTrades = () => {
           setPair={setPair}
         />
       )}
-      {activeTab === "Trade" && <div>Trades</div>}
+      {activeTab === "Trade" && <Trades/>}
     </OrderBookContainer>
   );
 };

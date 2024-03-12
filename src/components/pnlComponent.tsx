@@ -6,13 +6,11 @@ import {
 } from "@/styles/pnl.styles";
 import React from "react";
 import { AdvancedChart, TickerTape } from "react-tradingview-embed";
-import { OrderBook } from "@lab49/react-order-book";
 import { Box } from "@mui/material";
 import OrderPlacement from "./order-placement-terminal";
 import { FlexItems } from "@/styles/common.styles";
 import PositionsOrdersHistory from "./positions-history-components";
 import ChatComponent from "./chatComponent";
-import Orderbook from "./order-book-and-trades/orderBook";
 import OrderBookAndTrades from "./order-book-and-trades";
 
 const PnlComponent = () => {

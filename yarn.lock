@@ -254,11 +254,6 @@
     wrap-ansi "^8.1.0"
     wrap-ansi-cjs "npm:wrap-ansi@^7.0.0"
 
-"@lab49/react-order-book@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@lab49/react-order-book/-/react-order-book-0.1.4.tgz#ed367df36349bfa6000fb8bed83410015d97ef47"
-  integrity sha512-nJP8LYb+ZV4Sh6sG4EIZ02uG+r914cyzwRC/u6GLPZv8R9M+7RYs3o8bmZKnZwOogH/Ca2YOGhYcEywvYlh/AQ==
-
 "@mui/base@5.0.0-beta.37":
   version "5.0.0-beta.37"
   resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-beta.37.tgz#0e7e0f28402391fcfbb05476d5acc6c4f2d817b1"

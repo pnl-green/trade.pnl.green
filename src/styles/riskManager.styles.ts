@@ -119,10 +119,12 @@ export const SelectItemsBox = styled(Box)(() => ({
   background: "#171b26",
   marginTop: "10px",
   alignItems: "center",
-  padding: "0 10px",
+  padding: "0 10px 0 5px",
   "*": {
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: "400",
     fontFamily: "Sora",
   },
+
+  span: { fontSize: "12px" },
 }));

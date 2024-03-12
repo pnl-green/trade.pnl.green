@@ -1,35 +1,32 @@
 import React from "react";
-import { MenuItem } from "@mui/material";
-import { SelectItems } from "@/styles/common.styles";
+import { ItemsSelect } from "@/styles/common.styles";
 
 export interface HandleSelectProps {
-  selectItem: string;
+  selectItem: any;
   setSelectItem: any;
   menuItemPlaceholder?: string;
   selectDataItems: string[];
+  styles?: React.CSSProperties;
 }
 
 const HandleSelectItems = ({
   selectItem,
   setSelectItem,
-  menuItemPlaceholder,
   selectDataItems,
+  styles,
 }: HandleSelectProps) => {
   return (
-    <SelectItems
+    <ItemsSelect
+      sx={styles}
       value={selectItem}
       onChange={(e) => setSelectItem(e.target.value)}
-      displayEmpty
     >
-      <MenuItem value="" disabled>
-        {menuItemPlaceholder}
-      </MenuItem>
-      {selectDataItems?.map((item: any, index: any) => (
-        <MenuItem key={index} value={item}>
-          {item}
-        </MenuItem>
+      {selectDataItems.map((value, index) => (
+        <option key={index} value={value}>
+          {value}
+        </option>
       ))}
-    </SelectItems>
+    </ItemsSelect>
   );
 };
 

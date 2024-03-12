@@ -1,5 +1,11 @@
 import { Box, styled } from "@mui/material";
 
+interface TablerowsProps {
+  type?: string;
+  width?: any;
+  increase?: boolean;
+}
+
 export const OrderBookContainer = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
@@ -31,20 +37,10 @@ export const SpreadAndPairSelects = styled(Box)(() => ({
   width: "100%",
 }));
 
-export const ItemsSelect = styled("select")(() => ({
-  //   width: "max-content",
-  height: "30px",
-  padding: "5px",
-  borderRadius: "5px",
-  backgroundColor: "#131212",
-  color: "#fff",
-  border: "none",
-  cursor: "pointer",
-}));
-
-export const OrderBookTable = styled("table")(() => ({
+export const StyledTable = styled("table")(() => ({
   width: "100%",
   borderCollapse: "collapse",
+  margin: "0 2px",
 
   thead: {
     color: "#FFFFFF99",
@@ -52,7 +48,7 @@ export const OrderBookTable = styled("table")(() => ({
     fontWeight: "400",
     fontFamily: "Sora",
     width: "100%",
-    textAlign: "center",
+    textAlign: "left",
     th: {},
   },
 
@@ -63,16 +59,16 @@ export const OrderBookTable = styled("table")(() => ({
   },
 
   th: {
-    padding: "5px",
+    padding: "5px 10px",
   },
 
   td: {
     position: "relative",
-    padding: "4px 5px",
+    padding: "4px 10px",
   },
 
   tbody: {
-    textAlign: "center",
+    textAlign: "left",
     fontSize: "10px",
     fontWeight: "400",
     fontFamily: "Sora",
@@ -88,11 +84,6 @@ export const OrderBookTable = styled("table")(() => ({
   },
 }));
 
-interface TablerowsProps {
-  type?: string;
-  width?: any;
-}
-
 export const Tablerows = styled("tr")<TablerowsProps>((props) => ({
   position: "relative",
   zIndex: 1,
@@ -105,13 +96,32 @@ export const Tablerows = styled("tr")<TablerowsProps>((props) => ({
     content: "''",
     position: "absolute",
     display: "block",
-    top: "50%",
+    top: "54%",
     transform: "translateY(-50%)",
     left: "0",
     width: `${props.width}%`,
-    height: "90%",
+    height: "86%",
     zIndex: -1,
     backgroundColor:
       props.type === "bids" ? "rgba(0, 255, 0, 0.3)" : "rgba(255, 0, 0, 0.3)",
+  },
+}));
+
+export const TradesRows = styled("tr")<TablerowsProps>((props) => ({
+  ".first-column": {
+    color: props.increase ? "rgb(0, 255, 0)" : "rgb(255, 0, 0)",
+  },
+  ".last-column": {},
+
+  ".details-icon": {
+    padding: "4px 8px 0 0",
+    cursor: "pointer",
+    "&:hover": {
+      backgroundColor: "rgb(0, 255, 0, 0.1)", //rgb(0, 255, 0, 0.3)
+    },
+    img: {
+      width: "15px",
+      height: "15px",
+    },
   },
 }));

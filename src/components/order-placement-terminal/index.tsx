@@ -8,6 +8,9 @@ import {
 } from "@/styles/riskManager.styles";
 import MarketComponent from "./market";
 import LimitComponent from "./limit";
+import TwapOrderTerminal from "./twap";
+import ChaseOrderTerminal from "./chase";
+import ScaleOrderTerminal from "./scale";
 
 const OrderPlacementTerminal = () => {
   const [activeTab, setActiveTab] = useState("Market");
@@ -44,9 +47,9 @@ const OrderPlacementTerminal = () => {
       {/* Conditionally render components based on active tab */}
       {activeTab === "Market" && <MarketComponent />}
       {activeTab === "Limit" && <LimitComponent />}
-      {/* {activeTab === "TWAP" && <TwapComponent />}
-      {activeTab === "Chase" && <ChaseComponent />}
-      {activeTab === "Scale" && <ScaleComponent />} */}
+      {activeTab === "TWAP" && <TwapOrderTerminal />}
+      {activeTab === "Chase" && <ChaseOrderTerminal />}
+      {activeTab === "Scale" && <ScaleOrderTerminal />}
 
       <LiquidationWrapper>
         <Box className="items">

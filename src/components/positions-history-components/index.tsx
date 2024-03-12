@@ -30,8 +30,9 @@ const PositionsOrdersHistory = () => {
   return (
     <PositionsOrdersHistoryWrapper>
       <PositionTabsButtonsWrapper>
-        {tabLabels.map((label) => (
+        {tabLabels.map((label, index) => (
           <TabsButtons
+            key={index}
             className={activeTab === label ? "active" : ""}
             onClick={() => handleTabClick(label)}
           >

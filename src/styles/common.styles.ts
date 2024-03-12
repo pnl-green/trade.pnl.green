@@ -42,6 +42,17 @@ export const SelectItems = styled(Select)({
   //   },
 });
 
+export const ItemsSelect = styled("select")(() => ({
+  //   width: "max-content",
+  height: "30px",
+  padding: "5px",
+  borderRadius: "5px",
+  backgroundColor: "#171b26", //171b26 //131212
+  color: "#fff",
+  border: "none",
+  cursor: "pointer",
+}));
+
 //buttons
 export const TextBtn = styled(Button)(() => ({
   color: "#fff",

@@ -1,11 +1,11 @@
 import React from "react";
 import {
   SpreadAndPairSelects,
-  ItemsSelect,
-  OrderBookTable,
+  StyledTable,
   Tablerows,
 } from "@/styles/orderbook.styles";
 import { Box } from "@mui/material";
+import HandleSelectItems from "../handleSelectItems";
 
 interface OrderBookProps {
   spread: number;
@@ -72,30 +72,25 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
     <Box>
       <SpreadAndPairSelects>
         <div>
-          <ItemsSelect
-            value={spread}
-            onChange={(e) => setSpread(parseInt(e.target.value))}
-          >
-            {[1, 2, 5, 10, 100, 1000].map((value, index) => (
-              <option key={index} value={value}>
-                {value}
-              </option>
-            ))}
-          </ItemsSelect>
+          <HandleSelectItems
+            styles={{ background: "#131212" }}
+            selectItem={spread}
+            setSelectItem={setSpread}
+            selectDataItems={["1", "2", "5", "10", "100", "1000"]}
+          />
         </div>
         <div>
-          <ItemsSelect value={pair} onChange={(e) => setPair(e.target.value)}>
-            {["USD", "ETH"].map((value, index) => (
-              <option key={index} value={value}>
-                {value}
-              </option>
-            ))}
-          </ItemsSelect>
+          <HandleSelectItems
+            styles={{ background: "#131212" }}
+            selectItem={pair}
+            setSelectItem={setPair}
+            selectDataItems={["ETH", "USD"]}
+          />
         </div>
       </SpreadAndPairSelects>
 
       <div id="the-order-book">
-        <OrderBookTable>
+        <StyledTable>
           <thead id="header">
             <tr>
               <th>Price</th>
@@ -112,7 +107,7 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
             </tr>
           </thead>
           {renderOrderBookTable(bookData.bids, "bids")}
-        </OrderBookTable>
+        </StyledTable>
       </div>
     </Box>
   );
