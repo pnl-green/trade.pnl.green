@@ -4,6 +4,7 @@ interface TablerowsProps {
   type?: string;
   width?: any;
   increase?: boolean;
+  fontSize?: string;
 }
 
 export const OrderBookContainer = styled(Box)(() => ({
@@ -12,19 +13,16 @@ export const OrderBookContainer = styled(Box)(() => ({
   width: "310px",
   height: "570px",
   borderRadius: "5px",
-  overflowX: "hidden",
-  overflowY: "auto",
   border: "2px solid rgba(255, 255, 255, 0.1)",
-  // marginTop:"61px"
   backgroundColor: "#13121296",
 }));
 
 export const OrderBookTabsWrapper = styled(Box)(() => ({
   display: "flex",
   flexDirection: "row",
-  justifyContent: "space-around",
+  justifyContent: "space-between",
   gap: "10px",
-  padding: "10px 20px 0px 20px",
+  padding: "10px 10px 0px 10px",
   width: "100%",
 }));
 
@@ -33,23 +31,22 @@ export const SpreadAndPairSelects = styled(Box)(() => ({
   flexDirection: "row",
   justifyContent: "space-between",
   gap: "10px",
-  padding: "4px 30px",
+  padding: "4px 10px",
   width: "100%",
 }));
 
-export const StyledTable = styled("table")(() => ({
+export const StyledTable = styled("table")<TablerowsProps>((props) => ({
   width: "100%",
   borderCollapse: "collapse",
   margin: "0 2px",
 
   thead: {
     color: "#FFFFFF99",
-    fontSize: "13px",
+    fontSize: props.fontSize ? props.fontSize : "13px",
     fontWeight: "400",
     fontFamily: "Sora",
     width: "100%",
     textAlign: "left",
-    th: {},
   },
 
   ".spread": {
@@ -69,7 +66,7 @@ export const StyledTable = styled("table")(() => ({
 
   tbody: {
     textAlign: "left",
-    fontSize: "10px",
+    fontSize: props.fontSize ? props.fontSize : "10px",
     fontWeight: "400",
     fontFamily: "Sora",
     color: "#FFFFFF",
@@ -114,7 +111,7 @@ export const TradesRows = styled("tr")<TablerowsProps>((props) => ({
   ".last-column": {},
 
   ".details-icon": {
-    padding: "4px 8px 0 0",
+    padding: "4px 8px 4px 5px",
     cursor: "pointer",
     "&:hover": {
       backgroundColor: "rgb(0, 255, 0, 0.1)", //rgb(0, 255, 0, 0.3)
