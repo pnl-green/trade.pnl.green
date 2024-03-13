@@ -1,25 +1,23 @@
 import {
   PnlWrapper,
-  TickerWrapper,
   TradingViewComponent,
   WalletBox,
 } from "@/styles/pnl.styles";
 import React from "react";
-import { AdvancedChart, TickerTape } from "react-tradingview-embed";
+import { AdvancedChart } from "react-tradingview-embed";
 import { Box } from "@mui/material";
 import OrderPlacement from "./order-placement-terminal";
 import { FlexItems } from "@/styles/common.styles";
 import PositionsOrdersHistory from "./positions-history-components";
 import ChatComponent from "./chatComponent";
 import OrderBookAndTrades from "./order-book-and-trades";
+import TokenPairInformation from "./token-pair-information";
 
 const PnlComponent = () => {
   return (
     <PnlWrapper>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        <TickerWrapper>
-          <TickerTape widgetProps={{ displayMode: "Adaptive" }} />
-        </TickerWrapper>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+        <TokenPairInformation />
 
         <TradingViewComponent>
           <AdvancedChart

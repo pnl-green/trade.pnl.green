@@ -19,27 +19,6 @@ export const PnlWrapper = styled(Box)(() => ({
   // alignContent: "flex-start",
 }));
 
-export const TickerWrapper = styled(Box)(() => ({
-  display: "flex",
-  width: "calc(100vw - 720px)",
-  height: "46px",
-  borderRadius: "5px",
-  backgroundColor: "#171b26",
-
-  "@media (max-width: 1535px)": {
-    width: "calc(100vw - 400px)",
-  },
-
-  "@media (max-width: 899px)": {
-    width: "calc(100vw - 70px)",
-  },
-
-  div: {
-    width: "100%",
-    height: "46px",
-  },
-}));
-
 export const TradingViewComponent = styled(Box)(() => ({
   display: "flex",
   width: "calc(100vw - 720px)",
