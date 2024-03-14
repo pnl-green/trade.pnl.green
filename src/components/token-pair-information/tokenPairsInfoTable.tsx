@@ -4,7 +4,7 @@ import {
   TokenTableTabsWrapper,
 } from "@/styles/tokenPairs.styles";
 import { Box, ClickAwayListener } from "@mui/material";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
@@ -179,6 +179,7 @@ const TokenPairsInfoTable = ({
 }: TokenPairsInfoTableProps) => {
   const [activeTab, setActiveTab] = useState("All"); // Default active tab
   const [fav, setFav] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const tabs = [
     "All",
@@ -201,19 +202,39 @@ const TokenPairsInfoTable = ({
     setSelectPairsToken(data);
   };
 
-  // Sort the pairDataArray based on whether they are favorited or not
-  const sortedPairDataArray = [...pairDataArray].sort((a, b) => {
-    const isAFav = fav.includes(a.id);
-    const isBFav = fav.includes(b.id);
-    if (isAFav && !isBFav) return -1;
-    if (!isAFav && isBFav) return 1;
-    return 0;
-  });
+  // Sort the data based on the fav array
+  const sortingDataFunction = (pairDataArray: any) => {
+    const sortedPairDataArray = [...pairDataArray].sort((a, b) => {
+      const isAFav = fav.includes(a.id);
+      const isBFav = fav.includes(b.id);
+      if (isAFav && !isBFav) return -1;
+      if (!isAFav && isBFav) return 1;
+      return 0;
+    });
+    return sortedPairDataArray;
+  };
+
+  // Filter the data based on the search query
+  const filteredPairDataArray = pairDataArray.filter((pairData) =>
+    pairData.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const sortedOrBySearchData = () => {
+    if (searchQuery.trim() === "") {
+      return sortingDataFunction(pairDataArray);
+    } else {
+      return sortingDataFunction(filteredPairDataArray);
+    }
+  };
 
   return (
     <ClickAwayListener onClickAway={() => handleClose?.()}>
       <TokenPairsInfoTableWrapper>
-        <input placeholder="Search coins..." />
+        <input
+          placeholder="Search coins..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         <TokenTableTabsWrapper>
           {tabs.map((tabName) => (
             <button
@@ -252,7 +273,7 @@ const TokenPairsInfoTable = ({
               </tr>
             </thead>
             <tbody>
-              {sortedPairDataArray.map((pairData, index) => (
+              {sortedOrBySearchData().map((pairData, index) => (
                 <tr
                   key={index}
                   onClick={(event) => handleSelectPairs(pairData, event)}

@@ -1,12 +1,11 @@
 import React from "react";
 import { TokenPairsWrapper } from "@/styles/tokenPairs.styles";
 import { Box } from "@mui/material";
-import { PairData } from "./tokenPairsInfoTable";
 
 interface SingleTokenPairInfoProps {
   tableISOpen: boolean;
   toggleTablePairs: () => void;
-  selectPairsToken: PairData;
+  selectPairsToken?: any;
 }
 
 const PairDetail = ({ label, value, isRed }: any) => (
@@ -24,7 +23,7 @@ const SingleTokenPairInfo = ({
   return (
     <TokenPairsWrapper tableISOpen={tableISOpen}>
       <Box className="pair_tokens" onClick={toggleTablePairs}>
-        <span>{selectPairsToken.symbol}</span>
+        <span>{selectPairsToken?.symbol}</span>
         <div className="upDownIcon">
           <img src="/upDownIcon.svg" alt="" />
         </div>

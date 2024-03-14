@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import SingleTokenPairInfo from "./singleTokenPairInfo";
-import TokenPairsInfoTable from "./tokenPairsInfoTable";
+import TokenPairsInfoTable, { PairData } from "./tokenPairsInfoTable";
 import { Box } from "@mui/material";
 
 const TokenPairInformation = () => {
   const [tableISOpen, setTableISOpen] = useState(false);
-  const [selectedPairsToken, setSelectPairsToken] = useState({});
+  const [selectedPairsToken, setSelectPairsToken] = useState<PairData | null>(
+    null
+  );
   const toggleTablePairs = () => {
     setTableISOpen((prev) => !prev);
   };
