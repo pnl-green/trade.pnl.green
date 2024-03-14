@@ -28,8 +28,7 @@ const TwapOrderTerminal = () => {
       </Box>
 
       <SelectItemsBox>
-        <Box>Time Between Intervals</Box>
-
+        <input placeholder="Time Between Intervals" />
         <HandleSelectItems
           selectItem={timeBtwnIntervals}
           setSelectItem={setTimeBtwnIntervals}
@@ -43,8 +42,7 @@ const TwapOrderTerminal = () => {
       </FlexItems>
 
       <SelectItemsBox>
-        <Box>Size</Box>
-
+        <input placeholder="Size" />
         <HandleSelectItems
           selectItem={size}
           setSelectItem={setSize}

@@ -28,7 +28,7 @@ const LimitComponent = () => {
       </Box>
 
       <SelectItemsBox>
-        <Box>Size</Box>
+      <input placeholder="Size" />
         <HandleSelectItems
           selectItem={selectSize}
           setSelectItem={setSelectSize}
@@ -50,7 +50,7 @@ const LimitComponent = () => {
       </Box>
 
       <SelectItemsBox>
-        <Box>Order Type</Box>
+        <input placeholder="Order Type" />
         <HandleSelectItems
           selectItem={selectOrderType}
           setSelectItem={setSelectOrderType}

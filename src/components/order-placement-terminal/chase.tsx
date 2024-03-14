@@ -32,7 +32,7 @@ const ChaseOrderTerminal = () => {
       </SelectItemsBox>
 
       <SelectItemsBox>
-        <Box>Size</Box>
+        <input placeholder="Size" />
         <HandleSelectItems
           selectItem={selectItem}
           setSelectItem={setSelectItem}
@@ -54,7 +54,7 @@ const ChaseOrderTerminal = () => {
       </Box>
 
       <SelectItemsBox>
-        <Box>Size</Box>
+        <input placeholder="Size" />
         <HandleSelectItems
           selectItem={selectItem}
           setSelectItem={setSelectItem}

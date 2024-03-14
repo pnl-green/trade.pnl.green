@@ -27,7 +27,7 @@ const ScaleOrderTerminal = () => {
       </Box>
 
       <SelectItemsBox>
-        <Box>Size</Box>
+        <input placeholder="Size" />
         <HandleSelectItems
           selectItem={selectItem}
           setSelectItem={setSelectItem}

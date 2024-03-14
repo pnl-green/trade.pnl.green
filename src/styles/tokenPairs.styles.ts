@@ -51,11 +51,11 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
       fontFamily: "Sora",
       fontSize: "13px",
       fontWeight: "300",
-      color: "rgba(255, 255, 255, 0.5)",
+      color: "#FFFFFF99",
     },
 
     "#toRed": {
-      color: "#B04747",
+      color: "#E10000",
     },
 
     "#toGreen": {
@@ -88,5 +88,104 @@ export const TokenPairsInfoTableWrapper = styled(Box)(() => ({
   zIndex: 1,
   top: "calc(100% + 2px)",
   left: "2px",
-  transition: "all 0.3s ease-in-out",
+  padding: "5px",
+
+  "*": {
+    fontFamily: "Sora",
+    fontSize: "12px",
+    fontWeight: "400",
+  },
+
+  input: {
+    width: "100%",
+    height: "34px",
+    borderRadius: "5px",
+    backgroundColor: "transparent",
+    border: "1px solid #D9D9D947",
+    color: "#fff",
+    padding: "0 10px",
+
+    "&::placeholder": {
+      color: "#fff",
+    },
+  },
+}));
+
+export const TokenTableTabsWrapper = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "row",
+  gap: "20px",
+  width: "100%",
+  height: "30px",
+  paddingBottom: "1px",
+
+  button: {
+    border: "none",
+    backgroundColor: "transparent",
+    color: "#FFFFFF9C",
+    cursor: "pointer",
+    fontWeight: "600",
+
+    "&:hover": {
+      color: "#049260",
+    },
+
+    "&.active": {
+      color: "#049260",
+    },
+  },
+}));
+
+export const PairTableContainer = styled("table")(() => ({
+  width: "100%",
+  borderCollapse: "collapse",
+  marginTop: "8px",
+
+  thead: {
+    color: "#FFFFFF99",
+    fontSize: "13px",
+    fontWeight: "400",
+    fontFamily: "Sora",
+    width: "100%",
+    textAlign: "left",
+
+    th: {
+      minWidth: "20px",
+    },
+  },
+
+  tbody: {
+    tr: {
+      position: "relative",
+      "&:hover": {
+        backgroundColor: "#0F1A1F",
+        cursor: "pointer",
+      },
+    },
+
+    td: {
+      padding: "5px 0px",
+    },
+
+    "#centered-content": {
+      display: "flex",
+      alignItems: "center",
+    },
+  },
+
+  ".favButton": {
+    marginRight: "5px",
+  },
+
+  "& .greenBox": {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#049260",
+    width: "32px",
+    height: "20px",
+    padding: "1px",
+    borderRadius: "4px",
+    marginLeft: "5px",
+  },
 }));

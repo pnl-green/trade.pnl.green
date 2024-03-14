@@ -125,6 +125,25 @@ export const SelectItemsBox = styled(Box)(() => ({
     fontWeight: "400",
     fontFamily: "Sora",
   },
+  input: {
+    border: "none",
+    outline: "none",
+    background: "transparent",
+    width: "100%",
+    height: "100%",
+    color: "#fff",
+    paddingLeft: "10px",
+    // cursor: "",
+
+    "&:hover": {
+      outline: "1px solid #FFFFFF99",
+      borderRadius: "8px",
+    },
+  },
+
+  "input::placeholder": {
+    color: "#fff",
+  },
 
   span: { fontSize: "12px" },
 }));
