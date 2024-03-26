@@ -26,6 +26,8 @@ const bookData = {
     [2993, 0.6, 1795.8],
     [2992, 0.3, 2094.4],
     [2991, 0.1, 2691.9],
+    [2991, 0.1, 2691.9],
+    [2991, 0.1, 2691.9],
   ],
   bids: [
     [2990, 0.2, 598],
@@ -68,6 +70,17 @@ const renderOrderBookTable = (orders: any, type: string) => {
 };
 
 const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
+  const [spreadPercentage, setSpreadPercentage] = React.useState(0);
+
+  function getBookData() {
+    let limit = 10;
+    const asks = bookData.asks.slice(0, limit);
+    const bids = bookData.bids.slice(0, limit);
+    return { asks, bids };
+  }
+
+// const 
+
   return (
     <Box>
       <SpreadAndPairSelects>
@@ -98,15 +111,15 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
               <th>Total({pair})</th>
             </tr>
           </thead>
-          {renderOrderBookTable(bookData.asks, "asks")}
+          {renderOrderBookTable(getBookData().asks, "asks")}
           <thead className="spread">
             <tr>
               <th>Spread</th>
               <th>{spread}</th>
-              <th></th>
+              <th>{spreadPercentage}%</th>
             </tr>
           </thead>
-          {renderOrderBookTable(bookData.bids, "bids")}
+          {renderOrderBookTable(getBookData().bids, "bids")}
         </StyledTable>
       </div>
     </Box>

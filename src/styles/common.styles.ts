@@ -1,53 +1,10 @@
-import { Box, Button, Select, styled } from "@mui/material";
-
-export const SelectItems = styled(Select)({
-  display: "flex",
-  minWidth: "64px",
-  width: "100%",
-  maxWidth: "105px",
-  height: "35px",
-  background: "#171b26",
-  color: "#D1D5DB",
-
-  fontSize: "13px",
-  fontWeight: "400",
-  fontFamily: "Sora",
-  position: "relative",
-
-  "&.MuiInputBase-root": {
-    padding: "2px",
-    "& fieldset": {},
-    "&:hover fieldset": {
-      borderColor: "#049260",
-      borderWidth: "1px",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#049260",
-      borderWidth: "1px",
-      display: "none",
-    },
-    "& .MuiOutlinedInput-input": {
-      display: "flex",
-      alignItems: "center",
-      padding: "0 !important",
-    },
-    "& .MuiSelect-icon": {
-      color: "#D1D5DB",
-      //   right: "-20px",
-    },
-  },
-
-  //   "@media screen and (max-width: 1050px)": {
-  //     width: "100%",
-  //   },
-});
+import { Box, Button, styled } from "@mui/material";
 
 export const ItemsSelect = styled("select")(() => ({
-  //   width: "max-content",
   height: "30px",
   padding: "5px",
   borderRadius: "5px",
-  backgroundColor: "#171b26", //171b26 //131212
+  backgroundColor: "#171b26",
   color: "#fff",
   border: "none",
   cursor: "pointer",
@@ -64,28 +21,6 @@ export const TextBtn = styled(Button)(() => ({
   "&:hover": {
     backgroundColor: "#000",
   },
-
-  "::after": {
-    position: "absolute",
-    content: "''",
-    display: "block",
-    width: "100%",
-    height: "2px",
-    backgroundColor: "#049260",
-    top: "100%",
-    transition: "transform 0.3s ease",
-    transformOrigin: "right top",
-    transform: "scaleX(0)",
-    zindex: 2,
-  },
-  "&:hover::after": {
-    transformOrigin: "left top",
-    transform: "scaleX(1)",
-  },
-
-  "&.active::after": {
-    transform: "scaleX(1)",
-  },
 }));
 
 export const GreenBtn = styled(Button)(() => ({
@@ -98,6 +33,15 @@ export const GreenBtn = styled(Button)(() => ({
     backgroundColor: "#049260",
   },
 }));
+
+export const ButtonStyles = {
+  display: "flex",
+  flexDirection: "row",
+  justifyContent: "space-evenly",
+  width: "100%",
+  position: "absolute",
+  bottom: "142px",
+};
 
 export const BuySellBtn = styled(Button)(() => ({
   color: "#fff",

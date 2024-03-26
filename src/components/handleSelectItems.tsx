@@ -4,7 +4,6 @@ import { ItemsSelect } from "@/styles/common.styles";
 export interface HandleSelectProps {
   selectItem: any;
   setSelectItem: any;
-  menuItemPlaceholder?: string;
   selectDataItems: string[];
   styles?: React.CSSProperties;
 }

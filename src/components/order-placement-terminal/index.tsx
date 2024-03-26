@@ -50,25 +50,6 @@ const OrderPlacementTerminal = () => {
       {activeTab === "TWAP" && <TwapOrderTerminal />}
       {activeTab === "Chase" && <ChaseOrderTerminal />}
       {activeTab === "Scale" && <ScaleOrderTerminal />}
-
-      <LiquidationWrapper>
-        <Box className="items">
-          <span>Liquidation Price</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Order Value</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Margin Required</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Fees</span>
-          <span>N/A</span>
-        </Box>
-      </LiquidationWrapper>
     </RiskManagerWrapper>
   );
 };

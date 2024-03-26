@@ -1,12 +1,13 @@
-import { Box, Checkbox, styled } from "@mui/material";
+import { Box, Checkbox, Radio, styled } from "@mui/material";
 
 export const RiskManagerWrapper = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
   gap: "10px",
   backgroundColor: "#13121296",
-  width: "306px",
-  height: "620px",
+  width: "325px",
+  minHeight: "620px",
+  height: "auto",
   padding: "10px",
   position: "relative",
   border: "2px solid rgba(255, 255, 255, 0.1)",
@@ -83,10 +84,11 @@ export const LiquidationWrapper = styled(Box)(() => ({
   gap: "10px",
   padding: "20px 10px",
   borderTop: "1px solid #FFFFFF99",
-  position: "absolute",
-  bottom: "0",
+  // position: "absolute",
+  // bottom: "0",
   width: "100%",
-  left: "0",
+  height: "135px",
+  // left: "0",
 
   ".items": {
     display: "flex",
@@ -96,15 +98,6 @@ export const LiquidationWrapper = styled(Box)(() => ({
     fontSize: "14px",
     fontWeight: "400",
     fontFamily: "Sora",
-  },
-}));
-
-export const InputCheckBox = styled(Checkbox)(() => ({
-  color: "#fff",
-  padding: "0",
-
-  "&.Mui-checked": {
-    color: "#fff",
   },
 }));
 
@@ -145,5 +138,63 @@ export const SelectItemsBox = styled(Box)(() => ({
     color: "#fff",
   },
 
+  "&:hover": {
+    border: "1px solid #FFFFFF99",
+    borderRadius: "8px",
+  },
+
   span: { fontSize: "12px" },
+}));
+
+export const InputBox = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "row",
+  justifyContent: "space-between",
+  gap: "10px",
+  width: "100%",
+  height: "35px",
+  borderRadius: "8px",
+  background: "#171b26",
+  alignItems: "center",
+  padding: "0 10px 0 5px",
+
+  "*": {
+    fontSize: "13px",
+    fontWeight: "400",
+    fontFamily: "Sora",
+  },
+
+  ".placeholder_box": {
+    width: "60%",
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+
+  input: {
+    border: "none",
+    outline: "none",
+    background: "transparent",
+    width: "50%",
+    height: "100%",
+    color: "#fff",
+    paddingLeft: "10px",
+    justifyContent: "flex-end",
+    textAlign: "right",
+
+    "&:hover": {
+      outline: "none !important",
+      border: "none !important",
+    },
+  },
+
+  "input::placeholder": {
+    color: "gray !important",
+  },
+
+  "&:hover": {
+    border: "1px solid #FFFFFF99",
+    borderRadius: "8px",
+  },
 }));

@@ -25,14 +25,17 @@ const PnlComponent = () => {
               theme: "dark",
               locale: "en",
               autosize: true,
+              enable_publishing: false,
+              symbol: "ETHUSDT",
             }}
+            // widgetPropsAny={{ backgroundColor: "#000" }}
           />
         </TradingViewComponent>
 
         <PositionsOrdersHistory />
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
         <OrderBookAndTrades />
         <ChatComponent />
       </Box>
@@ -41,7 +44,7 @@ const PnlComponent = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: "8px",
+          gap: "5px",
           "@media (max-width: 1535px)": {
             flexDirection: "row",
             flexWrap: "wrap",
