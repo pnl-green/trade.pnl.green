@@ -10,7 +10,7 @@ interface TablerowsProps {
 export const OrderBookContainer = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
-  width: "310px",
+  width: "325px",
   height: "570px",
   borderRadius: "5px",
   border: "2px solid rgba(255, 255, 255, 0.1)",

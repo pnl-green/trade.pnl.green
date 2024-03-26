@@ -12,7 +12,7 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
   width: "calc(100vw - 720px)",
   height: "55px",
   borderRadius: "5px",
-  backgroundColor: "#171b26",
+  backgroundColor: "#13121296",
   gap: "25px",
   border: "1px solid rgba(255, 255, 255, 0.1)",
 

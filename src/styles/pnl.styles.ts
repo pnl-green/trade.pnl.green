@@ -3,13 +3,13 @@ import { Box, Button, styled } from "@mui/material";
 export const PnlWrapper = styled(Box)(() => ({
   display: "flex",
   flexDirection: "row",
-  justifyContent: "space-between",
-  gap: "20px",
+  justifyContent: "center",
+  gap: "5px",
   backgroundColor: "#000",
   width: "100vw",
   minHeight: "calc(100vh - 70px)",
   height: "auto",
-  padding: "10px 30px",
+  padding: "10px 20px",
 
   "@media (max-width: 1535px)": {
     flexWrap: "wrap",
@@ -46,12 +46,11 @@ export const WalletBox = styled(Box)(() => ({
   padding: "50px 20px 15px 20px", //top right bottom left
   border: "2px solid rgba(255, 255, 255, 0.1)",
   borderRadius: "7.29px",
-  width: "306px",
+  width: "325px",
   height: "auto",
   minHeight: "232px",
   maxHeight: "max-content",
-  background:
-    "linear-gradient(180deg, rgba(4, 146, 96, 0.12) 0%, rgba(15, 57, 74, 0.12) 100%)",
+  background: "#13121296",
 
   "& .green": {
     color: "#049160",
@@ -65,7 +64,7 @@ export const ChatBox = styled(Box)(() => ({
   padding: "10px 15px 20px 15px",
   border: "2px solid rgba(255, 255, 255, 0.1)",
   borderRadius: "7.29px",
-  width: "310px",
+  width: "325px",
   height: "340px",
   background: "#13121296",
 

@@ -1,14 +1,30 @@
 import React, { useState } from "react";
-import { InputCheckBox, SelectItemsBox } from "@/styles/riskManager.styles";
+import {
+  LiquidationWrapper,
+  SelectItemsBox,
+} from "@/styles/riskManager.styles";
 import { Box } from "@mui/material";
 import HandleSelectItems from "../handleSelectItems";
-import { BuySellBtn, FlexItems } from "@/styles/common.styles";
+import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
+import { RenderInput } from "./common-input";
 
 const TwapOrderTerminal = () => {
   const [timeBtwnIntervals, setTimeBtwnIntervals] = useState("");
   const [size, setSize] = useState("");
+  const [radioValue, setRadioValue] = useState("");
+
+  const handleRadioChange = (e: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
+    setRadioValue(e.target.value);
+  };
   return (
-    <>
+    <Box
+      sx={{
+        position: "relative",
+        height: radioValue === "2" ? "calc(100% + 20px)" : "100%",
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -28,21 +44,45 @@ const TwapOrderTerminal = () => {
       </Box>
 
       <SelectItemsBox>
-        <input placeholder="Time Between Intervals" />
+        <RenderInput
+          label="Time Between Intervals"
+          placeholder="|"
+          styles={{
+            padding: "0 2px",
+            ".placeholder_box": {
+              width: "70% !important",
+              fontSize: "12px",
+            },
+            background: "transparent",
+            ":hover": {
+              border: "none !important",
+              "*": {
+                fontSize: "11px",
+              },
+            },
+            input: {
+              width: "30%",
+            },
+          }}
+        />
         <HandleSelectItems
           selectItem={timeBtwnIntervals}
           setSelectItem={setTimeBtwnIntervals}
-          selectDataItems={["ETH", "USD"]}
+          selectDataItems={["S", "M"]}
         />
       </SelectItemsBox>
 
-      <FlexItems sx={{ mt: "15px" }}>
-        <span>Total intervals</span>
-        <span>10:00</span>
-      </FlexItems>
-
       <SelectItemsBox>
-        <input placeholder="Size" />
+        <RenderInput
+          label="Size"
+          placeholder="|"
+          styles={{
+            background: "transparent",
+            ":hover": {
+              border: "none !important",
+            },
+          }}
+        />
         <HandleSelectItems
           selectItem={size}
           setSelectItem={setSize}
@@ -50,26 +90,117 @@ const TwapOrderTerminal = () => {
         />
       </SelectItemsBox>
 
-      <Box sx={{ mt: "20px" }}>
-        <FlexItems sx={{ justifyContent: "flex-start" }}>
-          <InputCheckBox />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          mt: "20px",
+          gap: "8px",
+          label: {
+            marginRight: "8px",
+            cursor: "pointer",
+          },
+        }}
+      >
+        <FlexItems
+          sx={{
+            justifyContent: "flex-start",
+          }}
+        >
+          <label>
+            <input
+              type="radio"
+              name="radio"
+              value="1"
+              onChange={handleRadioChange}
+            />
+          </label>
           <span>Reduce Only</span>
         </FlexItems>
 
         <FlexItems sx={{ justifyContent: "flex-start" }}>
-          <InputCheckBox />
+          <label>
+            <input
+              type="radio"
+              name="radio"
+              value="2"
+              onChange={handleRadioChange}
+            />
+          </label>
           <span>Take Profit / Stop Loss</span>
         </FlexItems>
       </Box>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-          mt: "10px",
-        }}
-      >
+      {radioValue === "2" && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            mt: "10px",
+            height: "70px",
+            gap: "2px",
+          }}
+        >
+          <FlexItems>
+            <RenderInput
+              label="TP Price"
+              placeholder="0"
+              styles={{
+                gap: 0,
+                width: "49%",
+                ".placeholder_box": {
+                  fontSize: "12px",
+                },
+                input: { width: "30%", padding: "0" },
+              }}
+            />
+
+            <RenderInput
+              label="Gain"
+              placeholder="$"
+              styles={{
+                gap: 0,
+                width: "49%",
+                ".placeholder_box": {
+                  fontSize: "12px",
+                },
+                input: { width: "30%", padding: "0" },
+              }}
+            />
+          </FlexItems>
+
+          <FlexItems>
+            <RenderInput
+              label="SL Price"
+              placeholder="0"
+              styles={{
+                gap: 0,
+                width: "49%",
+                ".placeholder_box": {
+                  width: "90% !important",
+                  fontSize: "12px",
+                },
+                input: { width: "20%", padding: "0" },
+              }}
+            />
+
+            <RenderInput
+              label="Loss"
+              placeholder="$"
+              styles={{
+                gap: 0,
+                width: "49%",
+                ".placeholder_box": {
+                  fontSize: "12px",
+                },
+                input: { width: "30%", padding: "0" },
+              }}
+            />
+          </FlexItems>
+        </Box>
+      )}
+
+      <Box sx={{ ...ButtonStyles }}>
         <BuySellBtn sx={{ width: "112px" }} className="buyBtn">
           Buy
         </BuySellBtn>
@@ -77,7 +208,26 @@ const TwapOrderTerminal = () => {
           Sell
         </BuySellBtn>
       </Box>
-    </>
+
+      <LiquidationWrapper sx={{ position: "absolute", bottom: 0 }}>
+        <Box className="items">
+          <span>Liquidation Price</span>
+          <span>N/A</span>
+        </Box>
+        <Box className="items">
+          <span>Order Value</span>
+          <span>N/A</span>
+        </Box>
+        <Box className="items">
+          <span>Margin Required</span>
+          <span>N/A</span>
+        </Box>
+        <Box className="items">
+          <span>Fees</span>
+          <span>N/A</span>
+        </Box>
+      </LiquidationWrapper>
+    </Box>
   );
 };
 
