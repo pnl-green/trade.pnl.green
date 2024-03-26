@@ -32,6 +32,7 @@ export const PairTokensProvider = ({ children }: any) => {
   //split token pairs with - and return both tokens
   const splitTokenPairs = () => {
     try {
+      console.log(selectedPairsTokenData);
       if (selectedPairsTokenData) {
         const splitPairs = selectedPairsTokenData?.symbol.split("-");
         setTokenPairs(splitPairs);
