@@ -16,7 +16,6 @@ import { usePairTokens } from "@/context/pairTokensContext";
 
 const PnlComponent = () => {
   const { tokenPairs } = usePairTokens();
-  console.log(tokenPairs.length);
   return (
     <PnlWrapper>
       <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
@@ -30,7 +29,7 @@ const PnlComponent = () => {
                 locale: "en",
                 autosize: true,
                 enable_publishing: false,
-                symbol: `${tokenPairs[0]}${tokenPairs[1]}`,
+                symbol: tokenPairs ? `${tokenPairs[0]}${tokenPairs[1]}` : "",
               }}
               // widgetPropsAny={{ backgroundColor: "#000" }}
             />
