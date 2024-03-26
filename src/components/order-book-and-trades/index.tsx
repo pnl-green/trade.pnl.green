@@ -18,6 +18,7 @@ const OrderBookAndTrades = () => {
     setActiveTab(tab);
   };
 
+  //set default pair
   useEffect(() => {
     setPair(`${tokenPairs[0]}`);
   }, [tokenPairs]);
