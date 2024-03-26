@@ -6,7 +6,7 @@ import { Box } from "@mui/material";
 import React, { useState } from "react";
 import HandleSelectItems from "../handleSelectItems";
 import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
-import { RenderInput } from "./common-input";
+import { RenderInput } from "./commonInput";
 
 const LimitComponent = () => {
   const [selectSize, setSelectSize] = useState("");

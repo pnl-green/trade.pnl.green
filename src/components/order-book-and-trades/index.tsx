@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TabsButtons } from "@/styles/common.styles";
 import {
   OrderBookContainer,
@@ -6,20 +6,26 @@ import {
 } from "@/styles/orderbook.styles";
 import OrderBook from "./orderBook";
 import Trades from "./trades";
+import { usePairTokens } from "@/context/pairTokensContext";
 
 const OrderBookAndTrades = () => {
   const [activeTab, setActiveTab] = useState("Order Book");
   const [spread, setSpread] = useState(1);
-  const [pair, setPair] = useState("USD");
+  const { tokenPairs } = usePairTokens();
+  const [pair, setPair] = useState(`${tokenPairs[0]}`);
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
 
+  useEffect(() => {
+    setPair(`${tokenPairs[0]}`);
+  }, [tokenPairs]);
+
   return (
     <OrderBookContainer>
       <OrderBookTabsWrapper>
-        {["Order Book", "Trade"].map((label) => (
+        {["Order Book", "Trades"].map((label) => (
           <TabsButtons
             key={label}
             sx={{
@@ -43,7 +49,7 @@ const OrderBookAndTrades = () => {
           setPair={setPair}
         />
       )}
-      {activeTab === "Trade" && <Trades/>}
+      {activeTab === "Trades" && <Trades />}
     </OrderBookContainer>
   );
 };

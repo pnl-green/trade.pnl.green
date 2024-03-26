@@ -6,6 +6,7 @@ import {
 } from "@/styles/orderbook.styles";
 import { Box } from "@mui/material";
 import HandleSelectItems from "../handleSelectItems";
+import { usePairTokens } from "@/context/pairTokensContext";
 
 interface OrderBookProps {
   spread: number;
@@ -70,6 +71,7 @@ const renderOrderBookTable = (orders: any, type: string) => {
 };
 
 const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
+  const { tokenPairs } = usePairTokens();
   const [spreadPercentage, setSpreadPercentage] = React.useState(0);
 
   function getBookData() {
@@ -79,7 +81,7 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
     return { asks, bids };
   }
 
-// const 
+  // const
 
   return (
     <Box>
@@ -97,7 +99,7 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
             styles={{ background: "#131212" }}
             selectItem={pair}
             setSelectItem={setPair}
-            selectDataItems={["ETH", "USD"]}
+            selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
           />
         </div>
       </SpreadAndPairSelects>

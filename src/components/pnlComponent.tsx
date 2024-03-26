@@ -12,24 +12,29 @@ import PositionsOrdersHistory from "./positions-history-components";
 import ChatComponent from "./chatComponent";
 import OrderBookAndTrades from "./order-book-and-trades";
 import TokenPairInformation from "./token-pair-information";
+import { usePairTokens } from "@/context/pairTokensContext";
 
 const PnlComponent = () => {
+  const { tokenPairs } = usePairTokens();
+  console.log(tokenPairs.length);
   return (
     <PnlWrapper>
       <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
         <TokenPairInformation />
 
         <TradingViewComponent>
-          <AdvancedChart
-            widgetProps={{
-              theme: "dark",
-              locale: "en",
-              autosize: true,
-              enable_publishing: false,
-              symbol: "ETHUSDT",
-            }}
-            // widgetPropsAny={{ backgroundColor: "#000" }}
-          />
+          {tokenPairs.length > 1 && (
+            <AdvancedChart
+              widgetProps={{
+                theme: "dark",
+                locale: "en",
+                autosize: true,
+                enable_publishing: false,
+                symbol: `${tokenPairs[0]}${tokenPairs[1]}`,
+              }}
+              // widgetPropsAny={{ backgroundColor: "#000" }}
+            />
+          )}
         </TradingViewComponent>
 
         <PositionsOrdersHistory />
