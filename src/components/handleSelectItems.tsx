@@ -20,7 +20,7 @@ const HandleSelectItems = ({
       value={selectItem}
       onChange={(e) => setSelectItem(e.target.value)}
     >
-      {selectDataItems.map((value, index) => (
+      {selectDataItems?.map((value, index) => (
         <option key={index} value={value}>
           {value}
         </option>

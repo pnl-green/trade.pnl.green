@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { TokenPairsWrapper } from "@/styles/tokenPairs.styles";
 import { Box } from "@mui/material";
+import { PairData } from "../../../types";
 
 interface SingleTokenPairInfoProps {
   tableISOpen: boolean;
   toggleTablePairs: () => void;
-  selectPairsToken?: any;
+  selectPairsToken?: PairData | null;
 }
 
 const PairDetail = ({ label, value, isRed }: any) => (
@@ -29,23 +30,25 @@ const SingleTokenPairInfo = ({
         </div>
       </Box>
 
-      <PairDetail label="Mark Price" value="32000" />
-      <PairDetail label="Oracle Price" value="32000" />
+      <PairDetail label="Mark Price" value={selectPairsToken?.markPrice} />
+      <PairDetail label="Oracle Price" value={selectPairsToken?.oraclePrice} />
       <Box className="pairDetails">
         <span>
           24hr change(<span id="toRed">in % </span>and <span id="toRed">$</span>
           )
         </span>
         <span className="value" id="toRed">
-          {"-0.000396"} / {"-2.14"}%
+          {selectPairsToken?.hr24change}
         </span>
       </Box>
-      <PairDetail label="24hr Volume" value="32000" />
+      <PairDetail label="24hr Volume" value={selectPairsToken?.volume} />
       <PairDetail label="OI" value="32000" />
       <Box className="pairDetails">
         <span>Funding/Funding Countdown</span>
         <span className="value">
-          <span id="toGreen">{"0.012"}%</span>&nbsp;&nbsp;{"00.55.52"}
+          <span id="toGreen">{selectPairsToken?.funding}&nbsp;&nbsp; </span>
+          &nbsp;&nbsp;
+          {selectPairsToken?.countDown}
         </span>
       </Box>
     </TokenPairsWrapper>

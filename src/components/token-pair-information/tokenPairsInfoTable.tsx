@@ -8,6 +8,7 @@ import React, { useState } from "react";
 
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
+import { pairDataArray } from "@/context/pairDataArray-dummydata";
 
 interface TokenPairsInfoTableProps {
   handleClose?: () => void;
@@ -17,134 +18,6 @@ interface TokenPairsInfoTableProps {
   selectPairsToken?: any;
   setSelectPairsToken?: any;
 }
-
-export interface PairData {
-  id: any;
-  symbol: string;
-  label: string;
-  lastPrice: number;
-  hr24change: string;
-  changeIncrease: boolean;
-  funding: string;
-  volume: number;
-  openInterest: number;
-}
-
-const pairDataArray: PairData[] = [
-  {
-    id: "1",
-    symbol: "ETH-USD",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: false,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-
-  {
-    id: "2",
-    symbol: "ETH-WIF",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: true,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-
-  {
-    id: "3",
-    symbol: "ETH-BTC",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: false,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-  {
-    id: "4",
-    symbol: "ETH-JUP",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: true,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-
-  {
-    id: "5",
-    symbol: "ETH-JUP",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: true,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-  {
-    id: "6",
-    symbol: "ETH-JUP",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: true,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-  {
-    id: "7",
-    symbol: "ETH-JUP",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: true,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-  {
-    id: "8",
-    symbol: "ETH-JUP",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: true,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-  {
-    id: "9",
-    symbol: "ETH-JUP",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: true,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-  {
-    id: "10",
-    symbol: "ETH-JUP",
-    label: "70X",
-    lastPrice: 32000,
-    hr24change: "-0.000396 / -2.14%",
-    changeIncrease: true,
-    funding: "0.012% 00.55.52",
-    volume: 32000,
-    openInterest: 32000,
-  },
-];
 
 //on click of star icon return the filled start else the outlined star
 const FavButton = ({ fav, setFav, id }: TokenPairsInfoTableProps) => {
