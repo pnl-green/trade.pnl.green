@@ -3,7 +3,7 @@ import {
   TradingViewComponent,
   WalletBox,
 } from "@/styles/pnl.styles";
-import React from "react";
+import React, { useMemo } from "react";
 import { AdvancedChart } from "react-tradingview-embed";
 import { Box } from "@mui/material";
 import OrderPlacement from "./order-placement-terminal";
@@ -12,27 +12,35 @@ import PositionsOrdersHistory from "./positions-history-components";
 import ChatComponent from "./chatComponent";
 import OrderBookAndTrades from "./order-book-and-trades";
 import TokenPairInformation from "./token-pair-information";
-import { usePairTokens } from "@/context/pairTokensContext";
+import { usePairTokensContext } from "@/context/pairTokensContext";
 
 const PnlComponent = () => {
-  const { tokenPairs } = usePairTokens();
+  const { tokenPairs } = usePairTokensContext();
+
+  const renderAdvancedChart = tokenPairs.length > 1;
+
   return (
     <PnlWrapper>
       <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
         <TokenPairInformation />
 
         <TradingViewComponent>
-          {tokenPairs.length > 1 && (
-            <AdvancedChart
-              widgetProps={{
-                theme: "dark",
-                locale: "en",
-                autosize: true,
-                enable_publishing: false,
-                symbol: tokenPairs ? `${tokenPairs[0]}${tokenPairs[1]}` : "",
-              }}
-              // widgetPropsAny={{ backgroundColor: "#000" }}
-            />
+          {useMemo(
+            () =>
+              renderAdvancedChart ? (
+                <AdvancedChart
+                  widgetProps={{
+                    theme: "dark",
+                    locale: "en",
+                    autosize: true,
+                    enable_publishing: false,
+                    symbol: tokenPairs
+                      ? `${tokenPairs[0]}${tokenPairs[1]}`
+                      : "",
+                  }}
+                />
+              ) : null,
+            [renderAdvancedChart, tokenPairs]
           )}
         </TradingViewComponent>
 

@@ -8,7 +8,7 @@ import React, { useState } from "react";
 
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import StarIcon from "@mui/icons-material/Star";
-import { pairDataArray } from "@/context/pairDataArray-dummydata";
+import { pairDataArray } from "@/context/tabledummydata";
 
 interface TokenPairsInfoTableProps {
   handleClose?: () => void;

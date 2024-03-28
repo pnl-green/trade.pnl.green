@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavbarContainer } from "@/styles/navbar.styles";
 import { Box } from "@mui/material";
 import { GreenBtn, TextBtn } from "@/styles/common.styles";
+import WalletConnectModal from "./wallet-connect";
 
 const Navbar = () => {
   return (
@@ -18,7 +19,7 @@ const Navbar = () => {
       </Box>
 
       <Box className="user-config">
-        <GreenBtn>Wallet Connect</GreenBtn>
+        <WalletConnectModal />
         <img src="/userIcon.svg" alt="user" className="user-icon" />
         <img src="/settingsIcon.svg" alt="settings" className="settings-icon" />
         <img src="/moreIcon.svg" alt="more" className="more-icon" />

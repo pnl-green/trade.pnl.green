@@ -6,22 +6,16 @@ import {
 } from "@/styles/orderbook.styles";
 import OrderBook from "./orderBook";
 import Trades from "./trades";
-import { usePairTokens } from "@/context/pairTokensContext";
+import { usePairTokensContext } from "@/context/pairTokensContext";
 
 const OrderBookAndTrades = () => {
   const [activeTab, setActiveTab] = useState("Order Book");
   const [spread, setSpread] = useState(1);
-  const { tokenPairs } = usePairTokens();
-  const [pair, setPair] = useState(`${tokenPairs[0]}`);
+  const { pair, setPair } = usePairTokensContext();
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
-
-  //set default pair
-  useEffect(() => {
-    setPair(`${tokenPairs[0]}`);
-  }, [tokenPairs]);
 
   return (
     <OrderBookContainer>
