@@ -3,7 +3,7 @@ import { Box, styled } from "@mui/material";
 interface TablerowsProps {
   type?: string;
   width?: any;
-  changeIncrease?: boolean;
+  side?: string;
   fontSize?: string;
 }
 
@@ -106,7 +106,7 @@ export const Tablerows = styled("tr")<TablerowsProps>((props) => ({
 
 export const TradesRows = styled("tr")<TablerowsProps>((props) => ({
   ".first-column": {
-    color: props.changeIncrease ? "rgb(0, 255, 0)" : "rgb(255, 0, 0)",
+    color: props.side === "A" ? "rgb(0, 255, 0)" : "rgb(255, 0, 0)",
   },
   ".last-column": {},
 

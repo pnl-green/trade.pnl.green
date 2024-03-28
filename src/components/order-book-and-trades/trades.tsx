@@ -1,34 +1,12 @@
 import React from "react";
 import { StyledTable, TradesRows } from "@/styles/orderbook.styles";
 import { Box } from "@mui/material";
+import { useOrderBookTradesContext } from "@/context/orderBookTradesContext";
+import { usePairTokensContext } from "@/context/pairTokensContext";
 
 const Trades = () => {
-  // Dummy data for demonstration
-  const tradeData = [
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: true, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-    { price: 1.8547, priceChangeIncrease: false, size: 12.3, time: "13:42:05" },
-
-    // More trade data...
-  ];
+  const { tradesData } = useOrderBookTradesContext();
+  const { pair } = usePairTokensContext();
 
   const handleDetailsClick = (index: any) => {
     // Implement your logic here
@@ -55,20 +33,16 @@ const Trades = () => {
         >
           <tr>
             <th>Price</th>
-            <th>Size(ETH)</th>
+            <th>Size({pair})</th>
             <th>Time</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {tradeData.map((trade, index) => (
-            <TradesRows
-              key={index}
-              className="first-column"
-              changeIncrease={trade.priceChangeIncrease}
-            >
-              <td className="first-column">{trade.price}</td>
-              <td>{trade.size}</td>
+          {tradesData?.map((trade, index) => (
+            <TradesRows key={index} className="first-column" side={trade.side}>
+              <td className="first-column">{trade.px}</td>
+              <td>{trade.sz}</td>
               <td>{trade.time}</td>
               <td
                 className="details-icon"

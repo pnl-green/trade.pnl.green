@@ -6,7 +6,8 @@ import {
 } from "@/styles/orderbook.styles";
 import { Box } from "@mui/material";
 import HandleSelectItems from "../handleSelectItems";
-import { usePairTokens } from "@/context/pairTokensContext";
+import { usePairTokensContext } from "@/context/pairTokensContext";
+import { useOrderBookTradesContext } from "@/context/orderBookTradesContext";
 
 interface OrderBookProps {
   spread: number;
@@ -15,55 +16,27 @@ interface OrderBookProps {
   setPair: (pair: string) => void;
 }
 
-const bookData = {
-  asks: [
-    [3000, 0.1, 300],
-    [2999, 0.2, 599.8],
-    [2998, 0.5, 1499],
-    [2997, 0.3, 899.1],
-    [2996, 0.5, 2996],
-    [2995, 0.8, 2396],
-    [2994, 0.4, 1197.6],
-    [2993, 0.6, 1795.8],
-    [2992, 0.3, 2094.4],
-    [2991, 0.1, 2691.9],
-    [2991, 0.1, 2691.9],
-    [2991, 0.1, 2691.9],
-  ],
-  bids: [
-    [2990, 0.2, 598],
-    [2989, 0.3, 896.7],
-    [2988, 0.1, 298.8],
-    [2987, 0.6, 1792.2],
-    [2986, 0.4, 1194.4],
-    [2985, 0.8, 2388],
-    [2984, 0.5, 1492],
-    [2983, 0.2, 2088.1],
-    [2982, 0.3, 2683.8],
-    [2981, 0.2, 298.1],
-  ],
-};
-
 const calculateBarWidth = (size: number, max: number) => {
   return (size / max) * 100; // Assuming a percentage-based width
 };
 
-const renderOrderBookTable = (orders: any, type: string) => {
-  const maxOrderSize = Math.max(...orders.map((order: any) => order[1]));
+const renderOrderBookTable = (
+  orders: { px: number; sz: number; n: number }[],
+  type: string
+) => {
+  const maxOrderSize = Math.max(...orders.map((order) => order.sz));
 
   return (
     <tbody>
-      {orders.map((order: any, index: any) => (
+      {orders.map((order, index) => (
         <Tablerows
           key={index}
           type={type}
-          width={calculateBarWidth(order[1], maxOrderSize)}
+          width={calculateBarWidth(order.sz, maxOrderSize)}
         >
-          {order.map((data: any, idx: any) => (
-            <td key={idx} className={idx === 0 ? "first-column" : ""}>
-              {data}
-            </td>
-          ))}
+          <td className="first-column">{order.px}</td>
+          <td>{order.sz}</td>
+          <td>{order.n}</td>
         </Tablerows>
       ))}
     </tbody>
@@ -71,17 +44,17 @@ const renderOrderBookTable = (orders: any, type: string) => {
 };
 
 const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
-  const { tokenPairs } = usePairTokens();
+  const { tokenPairs } = usePairTokensContext();
+  const { bookData } = useOrderBookTradesContext();
   const [spreadPercentage, setSpreadPercentage] = React.useState(0);
 
   function getBookData() {
     let limit = 10;
-    const asks = bookData.asks.slice(0, limit);
-    const bids = bookData.bids.slice(0, limit);
+    const asks = bookData.asks.slice(0, limit).sort((a, b) => a.px - b.px);
+    const bids = bookData.bids.slice(0, limit).sort((a, b) => a.px - b.px);
+
     return { asks, bids };
   }
-
-  // const
 
   return (
     <Box>

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { PairData, tokenPairs } from "../../types";
-import { pairDataArray } from "./pairDataArray-dummydata";
+import { pairDataArray } from "./tabledummydata";
 
 interface PairTokensProps {
   tokenPairs: tokenPairs[];
@@ -12,14 +12,16 @@ interface PairTokensProps {
     React.SetStateAction<PairData | null>
   >;
   splitTokenPairs: (pair: string) => string[] | undefined;
+  pair: string;
+  setPair: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const PairTokensContext = createContext({} as PairTokensProps);
 
-export const usePairTokens = () => {
+export const usePairTokensContext = () => {
   const context = useContext(PairTokensContext);
   if (!context) {
-    throw new Error("usePairTokens must be used within a PairTokensProvider");
+    throw new Error("usePairTokensContext must be used within a PairTokensProvider");
   }
   return context;
 };
@@ -28,11 +30,11 @@ export const PairTokensProvider = ({ children }: any) => {
   const [selectedPairsTokenData, setSelectPairsTokenData] =
     useState<PairData | null>(pairDataArray[0]);
   const [tokenPairs, setTokenPairs] = useState<tokenPairs | any>({});
+  const [pair, setPair] = useState<string>("");
 
   //split token pairs with - and return both tokens
   const splitTokenPairs = () => {
     try {
-      console.log(selectedPairsTokenData);
       if (selectedPairsTokenData) {
         const splitPairs = selectedPairsTokenData?.symbol.split("-");
         setTokenPairs(splitPairs);
@@ -42,6 +44,10 @@ export const PairTokensProvider = ({ children }: any) => {
       console.error("Error splitting token pairs", error);
     }
   };
+
+  useEffect(() => {
+    setPair(`${tokenPairs[0]}`);
+  }, [tokenPairs]);
 
   useEffect(() => {
     splitTokenPairs();
@@ -54,6 +60,8 @@ export const PairTokensProvider = ({ children }: any) => {
         selectedPairsTokenData,
         setSelectPairsTokenData,
         splitTokenPairs,
+        pair,
+        setPair,
       }}
     >
       {children}

@@ -17,3 +17,18 @@ export interface PairData {
   countDown?: string | any;
   funding?: string | any;
 }
+
+export interface BookDataProps {
+  asks: { px: number; sz: number; n: number }[];
+  bids: { px: number; sz: number; n: number }[];
+}
+
+export interface WsTrades {
+  coin: string;
+  side: string;
+  px: string;
+  sz: string;
+  hash: string;
+  time: number;
+  tid: number; // ID unique across all assets
+}
