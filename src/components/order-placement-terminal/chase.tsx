@@ -187,20 +187,14 @@ const ChaseOrderTerminal = () => {
         </Box>
       )}
 
-      <SelectItemsBox>
-        <RenderInput
-          label="Order Type"
-          placeholder="|"
-          styles={{
-            background: "transparent",
-            ".placeholder_box": {
-              width: "70% !important",
-            },
-            ":hover": {
-              border: "none !important",
-            },
-          }}
-        />
+      <SelectItemsBox
+        sx={{
+          "&:hover": {
+            border: "none !important",
+          },
+        }}
+      >
+        <span>Order Type</span>
         <HandleSelectItems
           selectItem={selectItem}
           setSelectItem={setSelectItem}

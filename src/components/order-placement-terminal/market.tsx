@@ -45,7 +45,10 @@ const MarketComponent = () => {
       <Box
         sx={{ display: "flex", flexDirection: "column", gap: "6px", mt: "6px" }}
       >
-        <RenderInput label={"Current Market Price"} placeholder="input price" />
+        <SelectItemsBox sx={{ "&:hover": { border: "none" }, m: 0 }}>
+          <span>Current Market Price</span>
+          <span>$1000</span>
+        </SelectItemsBox>
 
         <SelectItemsBox sx={{ m: 0 }}>
           <RenderInput
@@ -65,7 +68,10 @@ const MarketComponent = () => {
           />
         </SelectItemsBox>
 
-        <RenderInput label={"Price"} placeholder="input price" />
+        <SelectItemsBox sx={{ "&:hover": { border: "none" }, m: 0 }}>
+          <span> Price</span>
+          <span>$1000</span>
+        </SelectItemsBox>
       </Box>
 
       <Box
