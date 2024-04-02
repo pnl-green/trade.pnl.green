@@ -7,8 +7,10 @@ import React, { useState } from "react";
 import HandleSelectItems from "../handleSelectItems";
 import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
 import { RenderInput } from "./commonInput";
+import { usePairTokensContext } from "@/context/pairTokensContext";
 
 const ChaseOrderTerminal = () => {
+  const { tokenPairs } = usePairTokensContext();
   const [selectItem, setSelectItem] = useState("");
   const [radioValue, setRadioValue] = useState("");
 
@@ -71,7 +73,7 @@ const ChaseOrderTerminal = () => {
         <HandleSelectItems
           selectItem={selectItem}
           setSelectItem={setSelectItem}
-          selectDataItems={["ETH", "USD"]}
+          selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
         />
       </SelectItemsBox>
 

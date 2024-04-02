@@ -7,8 +7,10 @@ import { Box } from "@mui/material";
 import HandleSelectItems from "../handleSelectItems";
 import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
 import { RenderInput } from "./commonInput";
+import { usePairTokensContext } from "@/context/pairTokensContext";
 
 const TwapOrderTerminal = () => {
+  const { tokenPairs } = usePairTokensContext();
   const [timeBtwnIntervals, setTimeBtwnIntervals] = useState("");
   const [size, setSize] = useState("");
   const [radioValue, setRadioValue] = useState("");
@@ -86,7 +88,7 @@ const TwapOrderTerminal = () => {
         <HandleSelectItems
           selectItem={size}
           setSelectItem={setSize}
-          selectDataItems={["ETH", "USD"]}
+          selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
         />
       </SelectItemsBox>
 

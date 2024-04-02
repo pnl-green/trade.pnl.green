@@ -7,6 +7,7 @@ import { usePairTokensContext } from "./pairTokensContext";
 interface OrderBookTradesProps {
   bookData: BookDataProps;
   tradesData: WsTrades[];
+  loadingBookData: boolean;
 }
 
 const OrderBookTradesContext = createContext({} as OrderBookTradesProps);
@@ -29,13 +30,14 @@ const OrderBookTradesProvider = ({ children }: any) => {
   });
 
   const [tradesData, setTradesData] = useState<WsTrades | any>({});
+  const [loadingBookData, setLoadingBookData] = useState<boolean>(true);
 
   //Subscribe to trades for a specific coin:
   //{ "method": "subscribe", "subscription": { "type": "trades", "coin": "<coin_symbol>" } }
 
   useEffect(() => {
     // Create a new WebSocket connection
-    const ws = new WebSocket("wss://api.hyperliquid-testnet.xyz/ws");
+    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}`);
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
@@ -91,7 +93,7 @@ const OrderBookTradesProvider = ({ children }: any) => {
 
   useEffect(() => {
     // Create a new WebSocket connection
-    const ws = new WebSocket("wss://api.hyperliquid-testnet.xyz/ws");
+    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}`);
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
@@ -108,6 +110,7 @@ const OrderBookTradesProvider = ({ children }: any) => {
 
     // Listen for messages from the WebSocket server
     ws.onmessage = (event) => {
+      setLoadingBookData(true);
       const message = JSON.parse(event.data);
       const data = message.data.levels;
 
@@ -117,8 +120,10 @@ const OrderBookTradesProvider = ({ children }: any) => {
           const bids: any[] = data[0];
 
           setBookData({ asks, bids });
+          setLoadingBookData(false);
         }
       } else if (message.channel === "error") {
+        setLoadingBookData(false);
         console.error("Error:", message.data);
         setBookData({ asks: [], bids: [] });
       }
@@ -140,6 +145,7 @@ const OrderBookTradesProvider = ({ children }: any) => {
       value={{
         bookData,
         tradesData,
+        loadingBookData,
       }}
     >
       {children}

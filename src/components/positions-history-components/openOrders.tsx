@@ -9,6 +9,8 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { usePositionHistoryContext } from "@/context/positionHistoryContext";
+import { timestampToDateTime } from "../../../utils/toHumanReadableTime";
 
 interface Column {
   id:
@@ -39,9 +41,15 @@ const columns: Column[] = [
   { id: "tpsl", label: "TP/SL", align: "center" },
 ];
 
-const row: any[] = []
+const row: any[] = [];
 
 const OpenOrdersComponentTable = () => {
+  const { webData2, loadingWebData2 } = usePositionHistoryContext();
+
+  console.log(webData2.openOrders);
+
+  const openOrdersData = webData2.openOrders;
+
   return (
     <Paper
       sx={{
@@ -71,7 +79,20 @@ const OpenOrdersComponentTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {row.length === 0 ? (
+            {loadingWebData2 ? (
+              <Box
+                sx={{
+                  color: "#fff",
+                  fontFamily: "Sora",
+                  fontWeight: "400",
+                  fontSize: "13px",
+                  p: "10px",
+                }}
+              >
+                loading...
+              </Box>
+            ) : (!loadingWebData2 && webData2.length === 0) ||
+              openOrdersData.length === 0 ? (
               <Box
                 sx={{
                   color: "#fff",
@@ -85,26 +106,32 @@ const OpenOrdersComponentTable = () => {
               </Box>
             ) : (
               <>
-                {row.map((row, index) => {
+                {openOrdersData.map((row: any, index: any) => {
                   return (
-                    <TableRow key={index}>
-                      {columns.map((column) => {
-                        const value = row[column.id];
-                        return (
-                          <TableCell
-                            key={column.id}
-                            align={column.align}
-                            sx={{
-                              background: "transparent",
-                              color: "white",
-                              padding: "8px",
-                              border: "none",
-                            }}
-                          >
-                            {value}
-                          </TableCell>
-                        );
-                      })}
+                    <TableRow
+                      key={index}
+                      sx={{
+                        td: {
+                          background: "transparent",
+                          color: "white",
+                          padding: "8px",
+                          border: "none",
+                          textAlign: "center",
+                        },
+                      }}
+                    >
+                      <TableCell>
+                        {timestampToDateTime(row.timestamp)}
+                      </TableCell>
+                      <TableCell>{row.orderType}</TableCell>
+                      <TableCell>{row.coin}</TableCell>
+                      <TableCell>{row.side}</TableCell>
+                      <TableCell>{row.sz}</TableCell>
+                      <TableCell>{row.origSz}</TableCell>
+                      <TableCell>{""}</TableCell>
+                      <TableCell>{"row.price"}</TableCell>
+                      <TableCell>{row.triggerCondition}</TableCell>
+                      <TableCell>{"row.tp/sl"}</TableCell>
                     </TableRow>
                   );
                 })}
