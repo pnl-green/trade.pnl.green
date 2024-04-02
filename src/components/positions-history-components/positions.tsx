@@ -86,7 +86,8 @@ const PositionComponentTable = () => {
               >
                 loading...
               </Box>
-            ) : !loadingWebData2 && PositionsData.length === 0 ? (
+            ) : (!loadingWebData2 && webData2.length === 0) ||
+              PositionsData.length === 0 ? (
               <Box
                 sx={{
                   color: "#fff",
@@ -98,7 +99,9 @@ const PositionComponentTable = () => {
               >
                 No open position yet
               </Box>
-            ) : !loadingWebData2 && PositionsData.length !== 0 ? (
+            ) : !loadingWebData2 &&
+              webData2?.length !== 0 &&
+              PositionsData.length !== 0 ? (
               <>
                 {PositionsData?.map((row: any, index: any) => {
                   return (

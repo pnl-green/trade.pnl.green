@@ -36,8 +36,8 @@ const PositionHistoryProvider = ({ children }: any) => {
           method: "subscribe",
           subscription: {
             type: "webData2",
-            // user: "0xcD49bbAc6E85fdEB167EB7cA41A945d2b8758F6F",
-            user: `${address}`,
+            user: "0xcD49bbAc6E85fdEB167EB7cA41A945d2b8758F6F",
+            // user: `${address}`,
           },
         });
         ws.send(message);
@@ -70,6 +70,9 @@ const PositionHistoryProvider = ({ children }: any) => {
       return () => {
         ws.close();
       };
+    } else {
+      setLoadingWebData2(false);
+      setWebData2([]);
     }
   }, [address]);
 

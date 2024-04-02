@@ -91,7 +91,8 @@ const OpenOrdersComponentTable = () => {
               >
                 loading...
               </Box>
-            ) : !loadingWebData2 && openOrdersData.length === 0 ? (
+            ) : (!loadingWebData2 && webData2.length === 0) ||
+              openOrdersData.length === 0 ? (
               <Box
                 sx={{
                   color: "#fff",
