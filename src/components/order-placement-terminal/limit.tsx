@@ -7,10 +7,13 @@ import React, { useState } from "react";
 import HandleSelectItems from "../handleSelectItems";
 import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
 import { RenderInput } from "./commonInput";
+import { usePairTokensContext } from "@/context/pairTokensContext";
 
 const LimitComponent = () => {
+  const { tokenPairs } = usePairTokensContext();
   const [selectSize, setSelectSize] = useState("");
   const [selectOrderType, setSelectOrderType] = useState("");
+
 
   const [radioValue, setRadioValue] = useState("");
 
@@ -58,7 +61,7 @@ const LimitComponent = () => {
         <HandleSelectItems
           selectItem={selectSize}
           setSelectItem={setSelectSize}
-          selectDataItems={["ETH", "USD"]}
+          selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
         />
       </SelectItemsBox>
 

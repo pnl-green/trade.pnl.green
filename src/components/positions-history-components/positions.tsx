@@ -9,6 +9,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { usePositionHistoryContext } from "@/context/positionHistoryContext";
 
 interface Column {
   id:
@@ -39,9 +40,11 @@ const columns: Column[] = [
   { id: "tpsl", label: "TP/SL", align: "center" },
 ];
 
-const row: any[] = [];
-
 const PositionComponentTable = () => {
+  const { webData2, loadingWebData2 } = usePositionHistoryContext();
+
+  const PositionsData = webData2.clearinghouseState?.assetPositions;
+
   return (
     <Paper
       sx={{
@@ -71,7 +74,19 @@ const PositionComponentTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {row.length === 0 ? (
+            {loadingWebData2 ? (
+              <Box
+                sx={{
+                  color: "#fff",
+                  fontFamily: "Sora",
+                  fontWeight: "400",
+                  fontSize: "13px",
+                  p: "10px",
+                }}
+              >
+                loading...
+              </Box>
+            ) : !loadingWebData2 && PositionsData.length === 0 ? (
               <Box
                 sx={{
                   color: "#fff",
@@ -83,33 +98,37 @@ const PositionComponentTable = () => {
               >
                 No open position yet
               </Box>
-            ) : (
+            ) : !loadingWebData2 && PositionsData.length !== 0 ? (
               <>
-                {row.map((row, index) => {
+                {PositionsData?.map((row: any, index: any) => {
                   return (
-                    <TableRow key={index}>
-                      {columns.map((column) => {
-                        const value = row[column.id];
-                        return (
-                          <TableCell
-                            key={column.id}
-                            align={column.align}
-                            sx={{
-                              background: "transparent",
-                              color: "white",
-                              padding: "8px",
-                              border: "none",
-                            }}
-                          >
-                            {value}
-                          </TableCell>
-                        );
-                      })}
+                    <TableRow
+                      key={index}
+                      sx={{
+                        td: {
+                          background: "transparent",
+                          color: "white",
+                          padding: "8px",
+                          border: "none",
+                          textAlign: "center",
+                        },
+                      }}
+                    >
+                      <TableCell>{row.position.coin}</TableCell>
+                      <TableCell>{row.position.szi}</TableCell>
+                      <TableCell>{row.position.positionValue}</TableCell>
+                      <TableCell>{row.position.entryPx}</TableCell>
+                      <TableCell>{row.position.entryPx}</TableCell>
+                      <TableCell>{row.position.unrealizedPnl}</TableCell>
+                      <TableCell>{row.position.liquidationPx}</TableCell>
+                      <TableCell>{row.position.marginUsed}</TableCell>
+                      <TableCell>{row.position.cumFunding.allTime}</TableCell>
+                      <TableCell>tp/sl</TableCell>
                     </TableRow>
                   );
                 })}
               </>
-            )}
+            ) : null}
           </TableBody>
         </Table>
       </TableContainer>

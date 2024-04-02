@@ -45,7 +45,7 @@ const renderOrderBookTable = (
 
 const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
   const { tokenPairs } = usePairTokensContext();
-  const { bookData } = useOrderBookTradesContext();
+  const { bookData, loadingBookData } = useOrderBookTradesContext();
   const [spreadPercentage, setSpreadPercentage] = React.useState(0);
 
   function getBookData() {
@@ -86,15 +86,38 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
               <th>Total({pair})</th>
             </tr>
           </thead>
-          {renderOrderBookTable(getBookData().asks, "asks")}
-          <thead className="spread">
-            <tr>
-              <th>Spread</th>
-              <th>{spread}</th>
-              <th>{spreadPercentage}%</th>
-            </tr>
-          </thead>
-          {renderOrderBookTable(getBookData().bids, "bids")}
+
+          {loadingBookData ? (
+            <span style={{ color: "#fff" }}>loading...</span>
+          ) : !loadingBookData &&
+            bookData.asks.length === 0 &&
+            bookData.bids.length === 0 ? (
+            <tbody>
+              <tr
+                style={{
+                  color: "#fff",
+                  fontSize: "14px",
+                }}
+              >
+                No data Available for {pair}
+              </tr>
+            </tbody>
+          ) : (
+            <>
+              {renderOrderBookTable(getBookData().asks, "asks")}
+              {getBookData().asks.length !== 0 &&
+                getBookData().bids.length !== 0 && (
+                  <thead className="spread">
+                    <tr>
+                      <th>Spread</th>
+                      <th>{spread}</th>
+                      <th>{spreadPercentage}%</th>
+                    </tr>
+                  </thead>
+                )}
+              {renderOrderBookTable(getBookData().bids, "bids")}
+            </>
+          )}
         </StyledTable>
       </div>
     </Box>

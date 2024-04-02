@@ -1,5 +1,6 @@
 import OrderBookTradesProvider from "@/context/orderBookTradesContext";
 import { PairTokensProvider } from "@/context/pairTokensContext";
+import PositionHistoryProvider from "@/context/positionHistoryContext";
 import "@/styles/globals.css";
 import {
   ThirdwebProvider,
@@ -42,7 +43,9 @@ export default function App({ Component, pageProps }: AppProps) {
       >
         <PairTokensProvider>
           <OrderBookTradesProvider>
-            <Component {...pageProps} />
+            <PositionHistoryProvider>
+              <Component {...pageProps} />
+            </PositionHistoryProvider>
           </OrderBookTradesProvider>
         </PairTokensProvider>
       </ThirdwebProvider>
