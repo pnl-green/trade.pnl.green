@@ -198,3 +198,18 @@ export const InputBox = styled(Box)(() => ({
     borderRadius: "8px",
   },
 }));
+
+export const CaptionsBtn = styled(Box)({
+  display: "flex",
+  padding: "5px",
+  background: "#34484D",
+  borderRadius: "5px",
+  fontSize: "14px",
+  fontWeight: "400",
+  fontFamily: "Sora",
+  cursor: "pointer",
+  height: "33px",
+  width: "124px",
+  alignItems: "center",
+  justifyContent: "center",
+});
