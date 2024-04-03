@@ -8,11 +8,19 @@ import HandleSelectItems from "../handleSelectItems";
 import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
 import { RenderInput } from "./commonInput";
 import { usePairTokensContext } from "@/context/pairTokensContext";
+import ConfirmationModal from "./confirmationModals";
 
 const MarketComponent = () => {
   const { tokenPairs } = usePairTokensContext();
   const [selectItem, setSelectItem] = useState("");
   const [radioValue, setRadioValue] = useState("");
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [isBuyOrSell, setIsBuyOrSell] = useState(""); //buy | sell
+
+  const toggleConfirmModal = (button: string) => {
+    setConfirmModalOpen(true);
+    setIsBuyOrSell(button);
+  };
 
   const handleRadioChange = (e: {
     target: { value: React.SetStateAction<string> };
@@ -189,13 +197,39 @@ const MarketComponent = () => {
       )}
 
       <Box sx={{ ...ButtonStyles }}>
-        <BuySellBtn sx={{ width: "112px" }} className="buyBtn">
+        <BuySellBtn
+          sx={{ width: "112px" }}
+          className="buyBtn"
+          onClick={() => toggleConfirmModal("buy")}
+        >
           Buy
         </BuySellBtn>
-        <BuySellBtn sx={{ width: "112px" }} className="sellBtn">
+        <BuySellBtn
+          sx={{ width: "112px" }}
+          className="sellBtn"
+          onClick={() => toggleConfirmModal("sell")}
+        >
           Sell
         </BuySellBtn>
       </Box>
+
+      {confirmModalOpen && (
+        <ConfirmationModal
+          onClose={() => setConfirmModalOpen(false)}
+          onConfirm={function (): void {
+            throw new Error("Function not implemented.");
+          }}
+          isMarket={true}
+          currentMarketPrice={1000}
+          size={"`1 ${pair}`"}
+          isTpSl={radioValue === "2" ? true : false}
+          takeProfitPrice={radioValue === "2" ? 1 : undefined}
+          stopLossPrice={radioValue === "2" ? 1 : undefined}
+          estLiqPrice={radioValue === "2" ? 1 : undefined}
+          fee={radioValue === "2" ? 1 : undefined}
+          isBuyOrSell={isBuyOrSell}
+        />
+      )}
 
       <LiquidationWrapper sx={{ position: "absolute", bottom: 0 }}>
         <Box className="items">
