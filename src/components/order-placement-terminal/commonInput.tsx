@@ -36,6 +36,7 @@ export const RenderInput = ({
     <InputBox
       onMouseEnter={handleHover}
       onMouseLeave={handleMouseLeave}
+      onClick={handleHover}
       sx={styles}
     >
       <Box className="placeholder_box">{label}</Box>

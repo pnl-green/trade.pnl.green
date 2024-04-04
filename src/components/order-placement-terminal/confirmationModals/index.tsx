@@ -284,6 +284,19 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </SelectItemsBox>
           )}
 
+          {isScale && (
+            <SelectItemsBox
+              sx={{
+                "&:hover": { border: "none" },
+                background: "#34484D",
+                mt: 0,
+              }}
+            >
+              <span>Price Range</span>
+              <span>$1000</span>
+            </SelectItemsBox>
+          )}
+
           {isChase && (
             <SelectItemsBox
               sx={{
@@ -318,7 +331,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 }}
               >
                 <span>No.of Orders</span>
-                <span>6</span>
+                <span>{noOfOrders}</span>
               </SelectItemsBox>
             </>
           )}
@@ -333,7 +346,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 }}
               >
                 <span>Skew</span>
-                <span>$1000</span>
+                <span>${skew}</span>
               </SelectItemsBox>
               <SelectItemsBox
                 sx={{
@@ -343,7 +356,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 }}
               >
                 <span>No.of orders</span>
-                <span>$1000</span>
+                <span>{noOfOrders}</span>
               </SelectItemsBox>
             </FlexItems>
           )}

@@ -26,6 +26,7 @@ const TwapOrderTerminal = () => {
   const [stopLossPrice, setStopLossPrice] = useState<number | any>("");
   const [gain, setGain] = useState<number | any>("");
   const [loss, setLoss] = useState<number | any>("");
+  const [totalNoOfOrders, setTotalNoOfOrders] = useState<number | any>("5");
 
   const [estLiqPrice, setEstLiquidationPrice] = useState<number | any>("100");
   const [fee, setFee] = useState<number | any>("100");
@@ -40,6 +41,11 @@ const TwapOrderTerminal = () => {
     target: { value: React.SetStateAction<string> };
   }) => {
     setRadioValue(e.target.value);
+  };
+  const handleRadioClick = (e: any) => {
+    if (radioValue === e.target.value) {
+      setRadioValue("");
+    }
   };
 
   useEffect(() => {
@@ -145,7 +151,9 @@ const TwapOrderTerminal = () => {
               type="radio"
               name="radio"
               value="1"
+              checked={radioValue === "1"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Reduce Only</span>
@@ -157,7 +165,9 @@ const TwapOrderTerminal = () => {
               type="radio"
               name="radio"
               value="2"
+              checked={radioValue === "2"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Take Profit / Stop Loss</span>
@@ -265,6 +275,7 @@ const TwapOrderTerminal = () => {
           isTwap={true}
           size={`${size} ${selectItem}`}
           timeBetweenIntervals={`${theTimeInterval} ${timeBtwnIntervals}`}
+          noOfOrders={totalNoOfOrders}
           isTpSl={radioValue === "2" ? true : false}
           takeProfitPrice={radioValue === "2" ? takeProfitPrice : undefined}
           stopLossPrice={radioValue === "2" ? stopLossPrice : undefined}

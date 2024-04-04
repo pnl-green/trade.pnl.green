@@ -42,6 +42,12 @@ const ChaseOrderTerminal = () => {
     setRadioValue(e.target.value);
   };
 
+  const handleRadioClick = (e: any) => {
+    if (radioValue === e.target.value) {
+      setRadioValue("");
+    }
+  };
+
   useEffect(() => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
@@ -134,6 +140,7 @@ const ChaseOrderTerminal = () => {
               value="1"
               checked={radioValue === "1"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Reduce Only</span>
@@ -147,6 +154,7 @@ const ChaseOrderTerminal = () => {
               value="2"
               checked={radioValue === "2"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Take Profit / Stop Loss</span>

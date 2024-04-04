@@ -12,7 +12,7 @@ import ConfirmationModal from "./confirmationModals";
 
 const MarketComponent = () => {
   const { tokenPairs } = usePairTokensContext();
-  const [radioValue, setRadioValue] = useState("");
+  const [radioValue, setRadioValue] = useState<string | any>("");
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(""); //buy | sell
 
@@ -35,6 +35,11 @@ const MarketComponent = () => {
     target: { value: React.SetStateAction<string> };
   }) => {
     setRadioValue(e.target.value);
+  };
+  const handleRadioClick = (e: any) => {
+    if (radioValue === e.target.value) {
+      setRadioValue("");
+    }
   };
 
   useEffect(() => {
@@ -77,6 +82,7 @@ const MarketComponent = () => {
           <RenderInput
             label={"Size"}
             placeholder="|"
+            type="number"
             value={size}
             onChange={(e: any) => setSize(e.target.value)}
             styles={{
@@ -123,6 +129,7 @@ const MarketComponent = () => {
               value="1"
               checked={radioValue === "1"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Reduce Only</span>
@@ -136,6 +143,7 @@ const MarketComponent = () => {
               value="2"
               checked={radioValue === "2"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Take Profit / Stop Loss</span>
