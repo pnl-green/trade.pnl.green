@@ -3,22 +3,55 @@ import {
   SelectItemsBox,
 } from "@/styles/riskManager.styles";
 import { Box } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import HandleSelectItems from "../handleSelectItems";
 import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
 import { RenderInput } from "./commonInput";
 import { usePairTokensContext } from "@/context/pairTokensContext";
+import ConfirmationModal from "./confirmationModals";
 
 const ChaseOrderTerminal = () => {
   const { tokenPairs } = usePairTokensContext();
-  const [selectItem, setSelectItem] = useState("");
   const [radioValue, setRadioValue] = useState("");
+  const [selectOrderType, setSelectOrderType] = useState("GTC");
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [isBuyOrSell, setIsBuyOrSell] = useState(""); //buy | sell
+  const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
+  const [size, setSize] = useState<number | any>("");
+  const [allowedBeforeMarketPurchase, setAllowedBeforeMarketPurchase] =
+    useState<number | any>("");
+
+  //Take Profit / Stop Loss
+  const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>("");
+  const [stopLossPrice, setStopLossPrice] = useState<number | any>("");
+  const [gain, setGain] = useState<number | any>("");
+  const [loss, setLoss] = useState<number | any>("");
+
+  const [estLiqPrice, setEstLiquidationPrice] = useState<number | any>("100");
+  const [fee, setFee] = useState<number | any>("100");
+
+  const toggleConfirmModal = (button: string) => {
+    setConfirmModalOpen(true);
+
+    setIsBuyOrSell(button);
+  };
 
   const handleRadioChange = (e: {
     target: { value: React.SetStateAction<string> };
   }) => {
     setRadioValue(e.target.value);
   };
+
+  const handleRadioClick = (e: any) => {
+    if (radioValue === e.target.value) {
+      setRadioValue("");
+    }
+  };
+
+  useEffect(() => {
+    setSelectItem(`${tokenPairs[0]}`);
+  }, [tokenPairs]);
+
   return (
     <Box
       sx={{
@@ -47,6 +80,9 @@ const ChaseOrderTerminal = () => {
       <RenderInput
         label="Allowed Before Market Purchase"
         placeholder="5%"
+        type="number"
+        value={allowedBeforeMarketPurchase}
+        onChange={(e: any) => setAllowedBeforeMarketPurchase(e.target.value)}
         styles={{
           marginTop: "10px",
           ".placeholder_box": {
@@ -63,6 +99,9 @@ const ChaseOrderTerminal = () => {
         <RenderInput
           label={"Size"}
           placeholder="|"
+          type="number"
+          value={size}
+          onChange={(e: any) => setSize(e.target.value)}
           styles={{
             background: "transparent",
             ":hover": {
@@ -101,6 +140,7 @@ const ChaseOrderTerminal = () => {
               value="1"
               checked={radioValue === "1"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Reduce Only</span>
@@ -114,6 +154,7 @@ const ChaseOrderTerminal = () => {
               value="2"
               checked={radioValue === "2"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Take Profit / Stop Loss</span>
@@ -134,6 +175,9 @@ const ChaseOrderTerminal = () => {
             <RenderInput
               label="TP Price"
               placeholder="0"
+              type="number"
+              value={takeProfitPrice}
+              onChange={(e: any) => setTakeProfitPrice(e.target.value)}
               styles={{
                 gap: 0,
                 width: "49%",
@@ -162,6 +206,9 @@ const ChaseOrderTerminal = () => {
             <RenderInput
               label="SL Price"
               placeholder="0"
+              type="number"
+              value={stopLossPrice}
+              onChange={(e: any) => setStopLossPrice(e.target.value)}
               styles={{
                 gap: 0,
                 width: "49%",
@@ -198,20 +245,46 @@ const ChaseOrderTerminal = () => {
       >
         <span>Order Type</span>
         <HandleSelectItems
-          selectItem={selectItem}
-          setSelectItem={setSelectItem}
+          selectItem={selectOrderType}
+          setSelectItem={setSelectOrderType}
           selectDataItems={["GTC", "IOC", "ALO"]}
         />
       </SelectItemsBox>
 
       <Box sx={{ ...ButtonStyles }}>
-        <BuySellBtn sx={{ width: "112px" }} className="buyBtn">
+        <BuySellBtn
+          sx={{ width: "112px" }}
+          className="buyBtn"
+          onClick={() => toggleConfirmModal("buy")}
+        >
           Buy
         </BuySellBtn>
-        <BuySellBtn sx={{ width: "112px" }} className="sellBtn">
+        <BuySellBtn
+          sx={{ width: "112px" }}
+          className="sellBtn"
+          onClick={() => toggleConfirmModal("sell")}
+        >
           Sell
         </BuySellBtn>
       </Box>
+
+      {confirmModalOpen && (
+        <ConfirmationModal
+          onClose={() => setConfirmModalOpen(false)}
+          onConfirm={function (): void {
+            throw new Error("Function not implemented.");
+          }}
+          isChase={true}
+          size={`${size} ${selectItem}`}
+          allowanceBeforeMarketPurchase={allowedBeforeMarketPurchase}
+          isTpSl={radioValue === "2" ? true : false}
+          takeProfitPrice={radioValue === "2" ? takeProfitPrice : undefined}
+          stopLossPrice={radioValue === "2" ? stopLossPrice : undefined}
+          estLiqPrice={estLiqPrice}
+          fee={fee}
+          isBuyOrSell={isBuyOrSell}
+        />
+      )}
 
       <LiquidationWrapper sx={{ position: "absolute", bottom: 0 }}>
         <Box className="items">

@@ -48,3 +48,15 @@ input[type="radio"]:checked {
   display: inline-block;
   background-color: #fff;
 }
+
+/* Webkit-based browsers (Chrome, Safari) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  opacity: 0; /* Hide them visually */
+  -webkit-appearance: none; /* Remove default styling */
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield; /* Display as text field */
+}

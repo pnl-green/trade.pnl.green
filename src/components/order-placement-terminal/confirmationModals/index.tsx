@@ -84,12 +84,16 @@ const OuterShell = ({
         transition: "background-color 0.3s, backdrop-filter 0.3s",
         ...commonStyles,
         zIndex: 999,
-        ...(!removeOutSideClick && {
-          backgroundColor: isDragging
-            ? "rgba(0, 0, 0, 0)"
-            : "rgba(0, 0, 0, 0.2)",
-          backdropFilter: isDragging ? "blur(0px)" : "blur(2px)",
-        }),
+        ...(!removeOutSideClick
+          ? {
+              backgroundColor: isDragging
+                ? "rgba(0, 0, 0, 0)"
+                : "rgba(0, 0, 0, 0.2)",
+              backdropFilter: isDragging ? "blur(0px)" : "blur(2px)",
+            }
+          : {
+              cursor: "not-allowed",
+            }),
       }}
     >
       {removeOutSideClick ? (
@@ -196,6 +200,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               : "",
             padding: "10px 12px",
             borderRadius: "4px",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
             gap: "10px",
             cursor: !isDragging ? "initial" : "grabbing",
 
@@ -249,8 +254,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               mt: 0,
             }}
           >
-            <span>Size</span>
-            <span>$1000</span>
+            <span>{isChase || isTwap ? "Total Size" : "Size"}</span>
+            <span>{size}</span>
           </SelectItemsBox>
 
           {isMarket && (
@@ -262,7 +267,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               }}
             >
               <span>Current Market Price</span>
-              <span>$1000</span>
+              <span>${currentMarketPrice}</span>
             </SelectItemsBox>
           )}
 
@@ -279,6 +284,19 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </SelectItemsBox>
           )}
 
+          {isScale && (
+            <SelectItemsBox
+              sx={{
+                "&:hover": { border: "none" },
+                background: "#34484D",
+                mt: 0,
+              }}
+            >
+              <span>Price Range</span>
+              <span>$1000</span>
+            </SelectItemsBox>
+          )}
+
           {isChase && (
             <SelectItemsBox
               sx={{
@@ -288,7 +306,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               }}
             >
               <span id="span">Allowance Before Market Purchase</span>
-              <span>$1000</span>
+              <span>{allowanceBeforeMarketPurchase}%</span>
             </SelectItemsBox>
           )}
 
@@ -302,7 +320,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 }}
               >
                 <span>Time between intervals</span>
-                <span>M</span>
+                <span>{timeBetweenIntervals}</span>
               </SelectItemsBox>
 
               <SelectItemsBox
@@ -313,7 +331,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 }}
               >
                 <span>No.of Orders</span>
-                <span>6</span>
+                <span>{noOfOrders}</span>
               </SelectItemsBox>
             </>
           )}
@@ -328,7 +346,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 }}
               >
                 <span>Skew</span>
-                <span>$1000</span>
+                <span>${skew}</span>
               </SelectItemsBox>
               <SelectItemsBox
                 sx={{
@@ -338,7 +356,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 }}
               >
                 <span>No.of orders</span>
-                <span>$1000</span>
+                <span>{noOfOrders}</span>
               </SelectItemsBox>
             </FlexItems>
           )}
@@ -353,7 +371,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 }}
               >
                 <span>TP Price</span>
-                <span>$1000</span>
+                <span>${takeProfitPrice}</span>
               </SelectItemsBox>
               <SelectItemsBox
                 sx={{
@@ -363,7 +381,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 }}
               >
                 <span>SL Price</span>
-                <span>$1000</span>
+                <span>${stopLossPrice}</span>
               </SelectItemsBox>
             </FlexItems>
           )}
@@ -378,7 +396,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               }}
             >
               <span>Est Liq Price</span>
-              <span>$1000</span>
+              <span>${estLiqPrice}</span>
             </SelectItemsBox>
             <SelectItemsBox
               sx={{
@@ -389,7 +407,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               }}
             >
               <span>Fee</span>
-              <span>$1000</span>
+              <span>${fee}</span>
             </SelectItemsBox>
           </FlexItems>
 

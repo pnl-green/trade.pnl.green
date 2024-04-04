@@ -3,25 +3,51 @@ import {
   SelectItemsBox,
 } from "@/styles/riskManager.styles";
 import { Box } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import HandleSelectItems from "../handleSelectItems";
 import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
 import { RenderInput } from "./commonInput";
 import { usePairTokensContext } from "@/context/pairTokensContext";
+import ConfirmationModal from "./confirmationModals";
 
 const LimitComponent = () => {
   const { tokenPairs } = usePairTokensContext();
-  const [selectSize, setSelectSize] = useState("");
-  const [selectOrderType, setSelectOrderType] = useState("");
-
-
+  const [selectOrderType, setSelectOrderType] = useState("GTC");
   const [radioValue, setRadioValue] = useState("");
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [isBuyOrSell, setIsBuyOrSell] = useState(""); //buy | sell
+  const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
+  const [size, setSize] = useState<number | any>("");
+
+  //Take Profit / Stop Loss
+  const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>("");
+  const [stopLossPrice, setStopLossPrice] = useState<number | any>("");
+  const [gain, setGain] = useState<number | any>("");
+  const [loss, setLoss] = useState<number | any>("");
+
+  const [estLiqPrice, setEstLiquidationPrice] = useState<number | any>("100");
+  const [fee, setFee] = useState<number | any>("100");
+
+  const toggleConfirmModal = (button: string) => {
+    setConfirmModalOpen(true);
+    setIsBuyOrSell(button);
+  };
 
   const handleRadioChange = (e: {
     target: { value: React.SetStateAction<string> };
   }) => {
     setRadioValue(e.target.value);
   };
+
+  const handleRadioClick = (e: any) => {
+    if (radioValue === e.target.value) {
+      setRadioValue("");
+    }
+  };
+
+  useEffect(() => {
+    setSelectItem(`${tokenPairs[0]}`);
+  }, [tokenPairs]);
   return (
     <Box
       sx={{
@@ -51,6 +77,8 @@ const LimitComponent = () => {
         <RenderInput
           label={"Size"}
           placeholder="|"
+          value={size}
+          onChange={(e: any) => setSize(e.target.value)}
           styles={{
             background: "transparent",
             ":hover": {
@@ -59,8 +87,8 @@ const LimitComponent = () => {
           }}
         />
         <HandleSelectItems
-          selectItem={selectSize}
-          setSelectItem={setSelectSize}
+          selectItem={selectItem}
+          setSelectItem={setSelectItem}
           selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
         />
       </SelectItemsBox>
@@ -89,6 +117,7 @@ const LimitComponent = () => {
               value="1"
               checked={radioValue === "1"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Reduce Only</span>
@@ -102,6 +131,7 @@ const LimitComponent = () => {
               value="2"
               checked={radioValue === "2"}
               onChange={handleRadioChange}
+              onClick={handleRadioClick}
             />
           </label>
           <span>Take Profit / Stop Loss</span>
@@ -122,6 +152,8 @@ const LimitComponent = () => {
             <RenderInput
               label="TP Price"
               placeholder="0"
+              value={takeProfitPrice}
+              onChange={(e: any) => setTakeProfitPrice(e.target.value)}
               styles={{
                 gap: 0,
                 width: "49%",
@@ -150,6 +182,8 @@ const LimitComponent = () => {
             <RenderInput
               label="SL Price"
               placeholder="0"
+              value={stopLossPrice}
+              onChange={(e: any) => setStopLossPrice(e.target.value)}
               styles={{
                 gap: 0,
                 width: "49%",
@@ -196,13 +230,38 @@ const LimitComponent = () => {
       </SelectItemsBox>
 
       <Box sx={{ ...ButtonStyles }}>
-        <BuySellBtn sx={{ width: "112px" }} className="buyBtn">
+        <BuySellBtn
+          sx={{ width: "112px" }}
+          className="buyBtn"
+          onClick={() => toggleConfirmModal("buy")}
+        >
           Buy
         </BuySellBtn>
-        <BuySellBtn sx={{ width: "112px" }} className="sellBtn">
+        <BuySellBtn
+          sx={{ width: "112px" }}
+          className="sellBtn"
+          onClick={() => toggleConfirmModal("sell")}
+        >
           Sell
         </BuySellBtn>
       </Box>
+
+      {confirmModalOpen && (
+        <ConfirmationModal
+          onClose={() => setConfirmModalOpen(false)}
+          onConfirm={function (): void {
+            throw new Error("Function not implemented.");
+          }}
+          isLimit={true}
+          size={`${size} ${selectItem}`}
+          isTpSl={radioValue === "2" ? true : false}
+          takeProfitPrice={radioValue === "2" ? takeProfitPrice : undefined}
+          stopLossPrice={radioValue === "2" ? stopLossPrice : undefined}
+          estLiqPrice={estLiqPrice}
+          fee={fee}
+          isBuyOrSell={isBuyOrSell}
+        />
+      )}
 
       <LiquidationWrapper sx={{ position: "absolute", bottom: 0 }}>
         <Box className="items">

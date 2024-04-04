@@ -11,11 +11,13 @@ interface inputProps {
 
 interface inputBoxProps extends inputProps {
   styles?: any;
+  type?: any;
 }
 
 export const RenderInput = ({
   label,
   placeholder,
+  type,
   value,
   onChange,
   styles,
@@ -34,10 +36,12 @@ export const RenderInput = ({
     <InputBox
       onMouseEnter={handleHover}
       onMouseLeave={handleMouseLeave}
+      onClick={handleHover}
       sx={styles}
     >
       <Box className="placeholder_box">{label}</Box>
       <input
+        type={type}
         ref={ref}
         placeholder={placeholder}
         value={value}
