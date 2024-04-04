@@ -254,7 +254,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               mt: 0,
             }}
           >
-            <span>{isChase || isTwap ? "Total Size" : "Size"}</span>
+            <span>{isScale || isTwap ? "Total Size" : "Size"}</span>
             <span>{size}</span>
           </SelectItemsBox>
 
@@ -280,7 +280,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               }}
             >
               <span>Price</span>
-              <span>$1000</span>
+              <span>${price}</span>
             </SelectItemsBox>
           )}
 
