@@ -12,7 +12,7 @@ import ConfirmationModal from "./confirmationModals";
 
 const LimitComponent = () => {
   const { tokenPairs } = usePairTokensContext();
-  const [selectOrderType, setSelectOrderType] = useState("");
+  const [selectOrderType, setSelectOrderType] = useState("GTC");
   const [radioValue, setRadioValue] = useState("");
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(""); //buy | sell
