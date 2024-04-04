@@ -3,7 +3,7 @@ import {
   SelectItemsBox,
 } from "@/styles/riskManager.styles";
 import { Box } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import HandleSelectItems from "../handleSelectItems";
 import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
 import { RenderInput } from "./commonInput";
@@ -12,10 +12,19 @@ import ConfirmationModal from "./confirmationModals";
 
 const MarketComponent = () => {
   const { tokenPairs } = usePairTokensContext();
-  const [selectItem, setSelectItem] = useState("");
   const [radioValue, setRadioValue] = useState("");
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(""); //buy | sell
+
+  const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
+  const [currentMarketPrice, setCurrentMarketPrice] = useState<number | any>(
+    100
+  );
+  const [size, setSize] = useState<number | any>("");
+  const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>("");
+  const [stopLossPrice, setStopLossPrice] = useState<number | any>("");
+  const [gain, setGain] = useState<number | any>("");
+  const [loss, setLoss] = useState<number | any>("");
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
@@ -27,6 +36,10 @@ const MarketComponent = () => {
   }) => {
     setRadioValue(e.target.value);
   };
+
+  useEffect(() => {
+    setSelectItem(`${tokenPairs[0]}`);
+  }, [tokenPairs]);
   return (
     <Box
       sx={{
@@ -57,13 +70,15 @@ const MarketComponent = () => {
       >
         <SelectItemsBox sx={{ "&:hover": { border: "none" }, m: 0 }}>
           <span>Current Market Price</span>
-          <span>$1000</span>
+          <span>${currentMarketPrice}</span>
         </SelectItemsBox>
 
         <SelectItemsBox sx={{ m: 0 }}>
           <RenderInput
             label={"Size"}
             placeholder="|"
+            value={size}
+            onChange={(e: any) => setSize(e.target.value)}
             styles={{
               background: "transparent",
               ":hover": {
@@ -141,6 +156,8 @@ const MarketComponent = () => {
             <RenderInput
               label="TP Price"
               placeholder="0"
+              value={takeProfitPrice}
+              onChange={(e: any) => setTakeProfitPrice(e.target.value)}
               styles={{
                 gap: 0,
                 width: "49%",
@@ -154,6 +171,8 @@ const MarketComponent = () => {
             <RenderInput
               label="Gain"
               placeholder="$"
+              value={gain}
+              onChange={(e: any) => setGain(e.target.value)}
               styles={{
                 gap: 0,
                 width: "49%",
@@ -169,6 +188,8 @@ const MarketComponent = () => {
             <RenderInput
               label="SL Price"
               placeholder="0"
+              value={stopLossPrice}
+              onChange={(e: any) => setStopLossPrice(e.target.value)}
               styles={{
                 gap: 0,
                 width: "49%",
@@ -183,6 +204,8 @@ const MarketComponent = () => {
             <RenderInput
               label="Loss"
               placeholder="$"
+              value={loss}
+              onChange={(e: any) => setLoss(e.target.value)}
               styles={{
                 gap: 0,
                 width: "49%",
@@ -220,13 +243,13 @@ const MarketComponent = () => {
             throw new Error("Function not implemented.");
           }}
           isMarket={true}
-          currentMarketPrice={1000}
-          size={"`1 ${pair}`"}
+          currentMarketPrice={currentMarketPrice}
+          size={`${size} ${selectItem}`}
           isTpSl={radioValue === "2" ? true : false}
-          takeProfitPrice={radioValue === "2" ? 1 : undefined}
-          stopLossPrice={radioValue === "2" ? 1 : undefined}
-          estLiqPrice={radioValue === "2" ? 1 : undefined}
-          fee={radioValue === "2" ? 1 : undefined}
+          takeProfitPrice={radioValue === "2" ? takeProfitPrice : undefined}
+          stopLossPrice={radioValue === "2" ? stopLossPrice : undefined}
+          estLiqPrice={1}
+          fee={1}
           isBuyOrSell={isBuyOrSell}
         />
       )}
