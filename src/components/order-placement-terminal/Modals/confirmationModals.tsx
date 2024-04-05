@@ -4,6 +4,7 @@ import Draggable from "react-draggable";
 import { CaptionsBtn, SelectItemsBox } from "@/styles/riskManager.styles";
 import { FlexItems, GreenBtn } from "@/styles/common.styles";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import { IconsStyles } from "./styles";
 
 const commonStyles = {
   width: "100vw",
@@ -11,16 +12,6 @@ const commonStyles = {
   position: "fixed",
   top: 0,
   left: 0,
-};
-
-const IconsStyles = {
-  position: "absolute",
-  top: "10px",
-  width: "20px",
-  height: "20px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
 };
 
 interface OrderTypeProps {
@@ -210,7 +201,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           }}
         >
           <Box
-            id="closeIcon"
+            id="dragIcon"
             sx={{
               ...IconsStyles,
               left: "10px",
@@ -224,7 +215,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <DragIndicatorIcon sx={{ fontSize: "small", color: "#fff" }} />
           </Box>
           <Box
-            id="dragIcon"
+            id="closeIcon"
             sx={{
               ...IconsStyles,
               right: "10px",

@@ -21,7 +21,13 @@ const Navbar = () => {
       <Box className="user-config">
         <WalletConnectModal />
         <img src="/userIcon.svg" alt="user" className="user-icon" />
-        <img src="/settingsIcon.svg" alt="settings" className="settings-icon" />
+        <Box sx={{ position: "relative" }}>
+          <img
+            src="/settingsIcon.svg"
+            alt="settings"
+            className="settings-icon"
+          />
+        </Box>
         {/* <img src="/moreIcon.svg" alt="more" className="more-icon" /> */}
       </Box>
     </NavbarContainer>

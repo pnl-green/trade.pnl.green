@@ -37,7 +37,7 @@ export const TabsWrapper = styled(Box)(() => ({
   width: "100%",
   height: "38px",
   paddingBottom: "1px",
-  borderBottom: "1px solid #FFFFFF99",
+  borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
 }));
 
 export const TabsButton = styled("button")(() => ({
@@ -68,12 +68,13 @@ export const TabsButton = styled("button")(() => ({
     transform: "scaleX(0)",
     zindex: 2,
   },
-  "&:hover::after": {
-    transformOrigin: "left top",
-    transform: "scaleX(1)",
-  },
+  // "&:hover::after": {
+  //   transformOrigin: "left top",
+  //   transform: "scaleX(1)",
+  // },
 
   "&.active::after": {
+    transformOrigin: "left top",
     transform: "scaleX(1)",
   },
 }));

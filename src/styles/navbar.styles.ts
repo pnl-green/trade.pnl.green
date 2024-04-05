@@ -46,3 +46,56 @@ export const NavbarContainer = styled(Box)(() => ({
     height: "22px",
   },
 }));
+
+export const SettingsModalWrapper = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "column",
+  padding: "10px",
+  background: "#000",
+  position: "absolute",
+
+  ".innerBox": {
+    display: "flex",
+    flexDirection: "column",
+    border: "1px solid rgba(255,255,255,0.2)",
+    borderRadius: "5px",
+    padding: "10px",
+  },
+
+  ".settingItems": {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottom: "#FFFFFF75",
+  },
+
+  label: {
+    fontFamily: "Sora",
+    fontSize: "13px",
+    color: "#FFFFFF75",
+  },
+
+  span: {
+    color: "#049260",
+    cursor: "pointer",
+  },
+}));
+
+//checkBox
+export const StyledCheckBox = styled(Box)(() => ({
+  '& input[type="checkbox"]': {
+    appearance: "none",
+    "-webkit-appearance": "none",
+    "-moz-appearance": "none",
+    width: "20px",
+    height: "20px",
+    border: "2px solid #ccc",
+    borderRadius: "4px",
+    outline: "none",
+    cursor: "pointer",
+    "&:checked": {
+      backgroundColor: "#007bff",
+    },
+  },
+}));
