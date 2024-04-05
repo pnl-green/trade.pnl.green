@@ -26,7 +26,7 @@ export const NavbarContainer = styled(Box)(() => ({
   ".user-config": {
     display: "flex",
     flexDirection: "row",
-    gap: "20px",
+    gap: "40px",
     alignItems: "center",
     "*": {
       cursor: "pointer",

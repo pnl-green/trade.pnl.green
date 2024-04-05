@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavbarContainer } from "@/styles/navbar.styles";
 import { Box } from "@mui/material";
 import { GreenBtn, TextBtn } from "@/styles/common.styles";
-import WalletConnectModal from "./wallet-connect";
+import WalletConnectModal from "../wallet-connect";
 
 const Navbar = () => {
   return (
@@ -22,7 +22,7 @@ const Navbar = () => {
         <WalletConnectModal />
         <img src="/userIcon.svg" alt="user" className="user-icon" />
         <img src="/settingsIcon.svg" alt="settings" className="settings-icon" />
-        <img src="/moreIcon.svg" alt="more" className="more-icon" />
+        {/* <img src="/moreIcon.svg" alt="more" className="more-icon" /> */}
       </Box>
     </NavbarContainer>
   );
