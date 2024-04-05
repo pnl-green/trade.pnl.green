@@ -3,8 +3,13 @@ import { NavbarContainer } from "@/styles/navbar.styles";
 import { Box } from "@mui/material";
 import { GreenBtn, TextBtn } from "@/styles/common.styles";
 import WalletConnectModal from "../wallet-connect";
+import SettingsModal from "./settingsModal";
 
 const Navbar = () => {
+  const [settingsModal, setSettingsModal] = useState(false);
+
+  const toggleSettingsModal = () => setSettingsModal((prev) => !prev);
+
   return (
     <NavbarContainer>
       <Box className="logo">
@@ -26,7 +31,11 @@ const Navbar = () => {
             src="/settingsIcon.svg"
             alt="settings"
             className="settings-icon"
+            onClick={toggleSettingsModal}
           />
+          {settingsModal && (
+            <SettingsModal onClose={() => setSettingsModal(false)} />
+          )}
         </Box>
         {/* <img src="/moreIcon.svg" alt="more" className="more-icon" /> */}
       </Box>

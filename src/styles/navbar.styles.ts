@@ -50,16 +50,24 @@ export const NavbarContainer = styled(Box)(() => ({
 export const SettingsModalWrapper = styled(Box)(() => ({
   display: "flex",
   flexDirection: "column",
-  padding: "10px",
-  background: "#000",
+  padding: "0px",
   position: "absolute",
+  top: "calc(100% + 15px)",
+  right: "0",
+  width: "290px",
+  zIndex: 10,
+  // boxShadow: "0 0 4px rgba(255, 255, 255, 0.5)",
+  cursor: "default !important",
 
   ".innerBox": {
     display: "flex",
     flexDirection: "column",
     border: "1px solid rgba(255,255,255,0.2)",
     borderRadius: "5px",
-    padding: "10px",
+    padding: "20px",
+    gap: "10px",
+    cursor: "default !important",
+    background: "#000",
   },
 
   ".settingItems": {
@@ -67,13 +75,18 @@ export const SettingsModalWrapper = styled(Box)(() => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderBottom: "#FFFFFF75",
+
+    ":nth-last-child(2)": {
+      paddingBottom: "10px",
+      borderBottom: "1px solid #FFFFFF75",
+    },
   },
 
   label: {
     fontFamily: "Sora",
     fontSize: "13px",
     color: "#FFFFFF75",
+    cursor: "default !important",
   },
 
   span: {
@@ -88,14 +101,19 @@ export const StyledCheckBox = styled(Box)(() => ({
     appearance: "none",
     "-webkit-appearance": "none",
     "-moz-appearance": "none",
-    width: "20px",
-    height: "20px",
-    border: "2px solid #ccc",
-    borderRadius: "4px",
-    outline: "none",
+    width: "12px",
+    height: "12px",
+    border: "none",
+    borderRadius: "1px",
+    outline: "1px solid #ccc",
     cursor: "pointer",
+    outlineOffset: "2px",
+    paddingTop: "2px",
+
     "&:checked": {
-      backgroundColor: "#007bff",
+      backgroundColor: "#049260",
+      outline: "1px solid #049260",
+      border: "none",
     },
   },
 }));
