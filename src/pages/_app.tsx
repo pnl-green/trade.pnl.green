@@ -10,12 +10,22 @@ import {
   embeddedWallet,
   en,
 } from "@thirdweb-dev/react";
+import { NextPage } from "next";
 import type { AppProps } from "next/app";
-import { useEffect, useState } from "react";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
 import NoSSR from "react-no-ssr";
 
-export default function App({ Component, pageProps }: AppProps) {
+export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+};
+
+export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const [isRendered, setIsRendered] = useState(false);
+  const getLayout = Component.getLayout ?? ((page) => page);
 
   useEffect(() => {
     setIsRendered(true);
@@ -44,7 +54,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <PairTokensProvider>
           <OrderBookTradesProvider>
             <PositionHistoryProvider>
-              <Component {...pageProps} />
+              {getLayout(<Component {...pageProps} />)}
             </PositionHistoryProvider>
           </OrderBookTradesProvider>
         </PairTokensProvider>

@@ -41,3 +41,27 @@ export const MarginTabs = styled(Box)(() => ({
   flexDirection: "row",
   borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
 }));
+
+export const InputBox = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "column",
+  background: "transparent",
+
+  label: {
+    fontFamily: "Sora",
+    fontSize: "14px",
+    color: "#9AA3A4",
+  },
+
+  input: {
+    marginTop: "8px",
+    width: "100%",
+    height: "35px",
+    outline: "none",
+    border: "1px solid #9AA3A4",
+    padding: "0 15px",
+    background: "transparent",
+    borderRadius: "5px",
+    color: "#fff",
+  },
+}));

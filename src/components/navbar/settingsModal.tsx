@@ -33,8 +33,6 @@ const SettingsModal: React.FC<settingsProps> = ({ onClose }) => {
     returnDefault: false,
   });
 
-  console.log(settings);
-
   const handleSettingChange =
     (settingId: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
       setSettings((prevSettings) => ({
@@ -53,7 +51,7 @@ const SettingsModal: React.FC<settingsProps> = ({ onClose }) => {
       displayVerboseErrors: false,
       displayNotification: false,
       showWarnings: false,
-      returnDefault: false,
+      returnDefault: true,
     });
   };
 
