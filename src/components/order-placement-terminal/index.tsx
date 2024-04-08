@@ -10,9 +10,9 @@ import LimitComponent from "./limit";
 import TwapOrderTerminal from "./twap";
 import ChaseOrderTerminal from "./chase";
 import ScaleOrderTerminal from "./scale";
-import RiskManagerModal from "./Modals/riskManagerModal";
-import LeverageModal from "./Modals/leverageModal";
-import MarginTypeModal from "./Modals/marginTypeModal";
+import RiskManagerModal from "../Modals/riskManagerModal";
+import LeverageModal from "../Modals/leverageModal";
+import MarginTypeModal from "../Modals/marginTypeModal";
 
 const OrderPlacementTerminal = () => {
   const [activeTab, setActiveTab] = useState("Market");

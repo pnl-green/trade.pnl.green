@@ -34,6 +34,18 @@ export const GreenBtn = styled(Button)(() => ({
   },
 }));
 
+export const OutlinedBtn = styled(Button)(() => ({
+  color: "#049260",
+  backgroundColor: "transparent",
+  textTransform: "none",
+  fontFamily: "Montserrat",
+  border: "1px solid #049260",
+
+  "&:hover": {
+    backgroundColor: "transparent",
+  },
+}));
+
 export const ButtonStyles = {
   display: "flex",
   flexDirection: "row",

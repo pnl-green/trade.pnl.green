@@ -4,16 +4,18 @@ import { Box } from "@mui/material";
 import { GreenBtn, TextBtn } from "@/styles/common.styles";
 import WalletConnectModal from "../wallet-connect";
 import SettingsModal from "./settingsModal";
+import { useRouter } from "next/router";
 
 const Navbar = () => {
+  const router = useRouter();
   const [settingsModal, setSettingsModal] = useState(false);
 
   const toggleSettingsModal = () => setSettingsModal((prev) => !prev);
 
   return (
     <NavbarContainer>
-      <Box className="logo">
-        <img src="PNL.GREEN.svg" alt="PNL.GREEN" />
+      <Box className="logo" onClick={() => router.push("/")}>
+        <img src="/PNL.GREEN.svg" alt="PNL.GREEN" />
       </Box>
 
       <Box className="external-links">
@@ -25,7 +27,12 @@ const Navbar = () => {
 
       <Box className="user-config">
         <WalletConnectModal />
-        <img src="/userIcon.svg" alt="user" className="user-icon" />
+        <img
+          src="/userIcon.svg"
+          alt="user"
+          className="user-icon"
+          onClick={() => router.push("/sub-accounts")}
+        />
         <Box sx={{ position: "relative" }}>
           <img
             src="/settingsIcon.svg"

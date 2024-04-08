@@ -8,7 +8,7 @@ import HandleSelectItems from "../handleSelectItems";
 import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
 import { RenderInput } from "./commonInput";
 import { usePairTokensContext } from "@/context/pairTokensContext";
-import ConfirmationModal from "./Modals/confirmationModals";
+import ConfirmationModal from "../Modals/confirmationModals";
 
 const LimitComponent = () => {
   const { tokenPairs } = usePairTokensContext();

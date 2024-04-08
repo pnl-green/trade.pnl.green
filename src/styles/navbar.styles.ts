@@ -8,9 +8,11 @@ export const NavbarContainer = styled(Box)(() => ({
   width: "100vw",
   // height: "70px",
   backgroundColor: "#000",
+  position: "sticky",
   zIndex: 100,
 
   ".logo": {
+    cursor: "pointer",
     img: {
       width: "120px",
       height: "27px",
