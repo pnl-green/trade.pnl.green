@@ -1,5 +1,6 @@
 import CreateSubAcc from "@/components/Modals/createSubAcc";
 import RenameSubAccModal from "@/components/Modals/renameSubAcc";
+import TransferFunds from "@/components/Modals/transferFunds";
 import Layout from "@/components/layout";
 import WalletConnectModal from "@/components/wallet-connect";
 import { GreenBtn } from "@/styles/common.styles";
@@ -48,6 +49,7 @@ const SubAccounts = () => {
   const [createSubAccModal, setcreateSubAccModal] = useState(false);
   const [createNewAcc, setCreateNewAcc] = useState("");
   const [isTransferModalOpen, setTransferModalOpen] = useState(false);
+  const [amount, setAmount] = useState("");
 
   const toggleRenameSubAccModal = () => {
     setRenameSubAccModalOpen((prev) => !prev);
@@ -55,6 +57,10 @@ const SubAccounts = () => {
 
   const toggleCreateSubAccModal = () => {
     setcreateSubAccModal((prev) => !prev);
+  };
+  //toggleTransferModal
+  const toggleTransferModal = () => {
+    setTransferModalOpen((prev) => !prev);
   };
 
   //establish connection
@@ -167,7 +173,7 @@ const SubAccounts = () => {
 
               <tbody>
                 {subAccountsData.map((subAccounts, index) => (
-                  <tr>
+                  <tr key={index}>
                     <td>
                       <span className="actions">
                         {subAccounts.name}&nbsp;&nbsp;
@@ -195,7 +201,9 @@ const SubAccounts = () => {
                     <td>{subAccounts.equity}</td>
                     <td className="with-actionBtn">
                       <span className="actions">
-                        <ActionBtn>Transfer</ActionBtn>
+                        <ActionBtn onClick={toggleTransferModal}>
+                          Transfer
+                        </ActionBtn>
                         <ActionBtn>Trade</ActionBtn>
                       </span>
                     </td>
@@ -229,14 +237,14 @@ const SubAccounts = () => {
         />
       )}
 
-      {createSubAccModal && (
+      {isTransferModalOpen && (
         <TransferFunds
-          onClose={() => setcreateSubAccModal(false)}
-          createNewAcc={createNewAcc}
-          setCreateNewAcc={setCreateNewAcc}
+          onClose={() => setTransferModalOpen(false)}
           onConfirm={function (): void {
             throw new Error("Function not implemented.");
           }}
+          amount={amount}
+          setAmount={setAmount}
         />
       )}
     </>
