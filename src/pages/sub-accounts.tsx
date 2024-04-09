@@ -16,6 +16,12 @@ import { Box } from "@mui/material";
 import { useAddress } from "@thirdweb-dev/react";
 import React, { ReactElement, useState } from "react";
 
+export interface AccountProps {
+  name: string | any;
+  address: string | any;
+  equity: number | any;
+}
+
 const bgImages = [
   {
     image: "/Ellipse1.svg",
@@ -51,6 +57,17 @@ const SubAccounts = () => {
   const [isTransferModalOpen, setTransferModalOpen] = useState(false);
   const [amount, setAmount] = useState("");
 
+  const [masterAccount, setMasterAccount] = useState<AccountProps>({
+    name: "Master Account",
+    address: address,
+    equity: "100",
+  });
+  const [subAccount, setSubAccount] = useState<AccountProps>({
+    name: "",
+    address: "",
+    equity: "",
+  });
+
   const toggleRenameSubAccModal = () => {
     setRenameSubAccModalOpen((prev) => !prev);
   };
@@ -59,8 +76,20 @@ const SubAccounts = () => {
     setcreateSubAccModal((prev) => !prev);
   };
   //toggleTransferModal
-  const toggleTransferModal = () => {
+  const toggleTransferModal = (data: AccountProps) => {
     setTransferModalOpen((prev) => !prev);
+    setSubAccount({
+      name: data.name,
+      address: data.address,
+      equity: data.equity,
+    });
+  };
+
+  const closeTransferModal = () => {
+    if (isTransferModalOpen) {
+      setAmount("");
+      setTransferModalOpen(false);
+    }
   };
 
   //establish connection
@@ -129,7 +158,7 @@ const SubAccounts = () => {
 
               <tbody>
                 <tr>
-                  <td>Master Account</td>
+                  <td>{masterAccount.name}</td>
                   <td>
                     <span className="master_actions">
                       {address}
@@ -141,7 +170,7 @@ const SubAccounts = () => {
                     </span>
                   </td>
                   <td className="center-row"></td>
-                  <td>Account Equity</td>
+                  <td>{masterAccount.equity}</td>
                   <td className="with-actionBtn paddingRight">
                     {address ? (
                       <ActionBtn>Trade</ActionBtn>
@@ -201,7 +230,9 @@ const SubAccounts = () => {
                     <td>{subAccounts.equity}</td>
                     <td className="with-actionBtn">
                       <span className="actions">
-                        <ActionBtn onClick={toggleTransferModal}>
+                        <ActionBtn
+                          onClick={() => toggleTransferModal(subAccounts)}
+                        >
                           Transfer
                         </ActionBtn>
                         <ActionBtn>Trade</ActionBtn>
@@ -239,12 +270,14 @@ const SubAccounts = () => {
 
       {isTransferModalOpen && (
         <TransferFunds
-          onClose={() => setTransferModalOpen(false)}
+          onClose={closeTransferModal}
           onConfirm={function (): void {
             throw new Error("Function not implemented.");
           }}
           amount={amount}
           setAmount={setAmount}
+          masterAccount={masterAccount}
+          subAccount={subAccount}
         />
       )}
     </>
@@ -262,12 +295,12 @@ const subAccountsData = [
     id: 1,
     name: "Subway",
     address: "0xAbcdef1234567890Abcdef1234567890Abcdef12",
-    equity: "$1000",
+    equity: "1000",
   },
   {
     id: 2,
     name: "Acc 2",
     address: "0x1234567890Abcdef1234567890Abcdef12345678",
-    equity: "$2000",
+    equity: "2000",
   },
 ];
