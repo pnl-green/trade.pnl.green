@@ -145,103 +145,131 @@ const SubAccounts = () => {
 
           <Accounts>
             <h2>Master Account</h2>
-            <StyledAccTable>
-              <thead>
-                <tr>
-                  <td>Name</td>
-                  <td>Address</td>
-                  <td className="center-row" />
-                  <td>Account Equity</td>
-                  <td className="with-actionBtn paddingRight">Action</td>
-                </tr>
-              </thead>
+            <Box
+              sx={{
+                width: "100%",
+                "@media (max-width: 730px)": {
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  cursor: "move",
+                  "&::-webkit-scrollbar": {
+                    display: "none",
+                  },
+                },
+              }}
+            >
+              <StyledAccTable>
+                <thead>
+                  <tr>
+                    <td>Name</td>
+                    <td>Address</td>
+                    <td className="center-row" />
+                    <td>Account Equity</td>
+                    <td className="with-actionBtn paddingRight">Action</td>
+                  </tr>
+                </thead>
 
-              <tbody>
-                <tr>
-                  <td>{masterAccount.name}</td>
-                  <td>
-                    <span className="master_actions">
-                      {address}
-                      &nbsp;&nbsp;
-                      <img
-                        src="/CopyIcon.png"
-                        onClick={() => copyAddress(address, "master")}
-                      />
-                    </span>
-                  </td>
-                  <td className="center-row"></td>
-                  <td>{masterAccount.equity}</td>
-                  <td className="with-actionBtn paddingRight">
-                    {address ? (
-                      <ActionBtn>Trade</ActionBtn>
-                    ) : (
-                      <WalletConnectModal
-                        bgColor="transparent"
-                        textColor="green"
-                        btnTitle="connect"
-                      />
-                    )}
-                  </td>
-                </tr>
-              </tbody>
-            </StyledAccTable>
+                <tbody>
+                  <tr>
+                    <td>{masterAccount.name}</td>
+                    <td>
+                      <span className="master_actions">
+                        {address}
+                        &nbsp;&nbsp;
+                        <img
+                          src="/CopyIcon.png"
+                          onClick={() => copyAddress(address, "master")}
+                        />
+                      </span>
+                    </td>
+                    <td className="center-row"></td>
+                    <td>{masterAccount.equity}</td>
+                    <td className="with-actionBtn paddingRight">
+                      {address ? (
+                        <ActionBtn>Trade</ActionBtn>
+                      ) : (
+                        <WalletConnectModal
+                          bgColor="transparent"
+                          textColor="green"
+                          btnTitle="connect"
+                        />
+                      )}
+                    </td>
+                  </tr>
+                </tbody>
+              </StyledAccTable>
+            </Box>
           </Accounts>
 
           <Accounts sx={{ mt: "80px" }}>
             <h2>Sub-Accounts</h2>
-            <StyledAccTable>
-              <thead>
-                <tr>
-                  <td>Name</td>
-                  <td>Address</td>
-                  <td className="center-row" />
-                  <td>Account Equity</td>
-                  <td className="with-actionBtn paddingRight">Action</td>
-                </tr>
-              </thead>
-
-              <tbody>
-                {subAccountsData.map((subAccounts, index) => (
-                  <tr key={index}>
-                    <td>
-                      <span className="actions">
-                        {subAccounts.name}&nbsp;&nbsp;
-                        <img
-                          src="/EditIcon.png"
-                          onClick={toggleRenameSubAccModal}
-                        />
-                      </span>
-                    </td>
-                    <td>
-                      <span className="actions">
-                        {subAccounts.address?.slice(0, 4) +
-                          "..." +
-                          subAccounts.address?.slice(-4)}
-                        &nbsp;&nbsp;
-                        <img
-                          src="/CopyIcon.png"
-                          onClick={() =>
-                            copyAddress(subAccounts.address, "sub-acc")
-                          }
-                        />
-                      </span>
-                    </td>
+            <Box
+              sx={{
+                width: "100%",
+                "@media (max-width: 730px)": {
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  cursor: "move",
+                  "&::-webkit-scrollbar": {
+                    display: "none",
+                  },
+                },
+              }}
+            >
+              <StyledAccTable>
+                <thead>
+                  <tr>
+                    <td>Name</td>
+                    <td>Address</td>
                     <td className="center-row" />
-                    <td>{subAccounts.equity}</td>
-                    <td className="with-actionBtn">
-                      <span className="actions">
-                        <ActionBtn
-                          onClick={() => toggleTransferModal(subAccounts)}
-                        >
-                          Transfer
-                        </ActionBtn>
-                        <ActionBtn>Trade</ActionBtn>
-                      </span>
-                    </td>
+                    <td>Account Equity</td>
+                    <td className="with-actionBtn paddingRight">Action</td>
                   </tr>
-                ))}
-              </tbody>
-            </StyledAccTable>
+                </thead>
+
+                <tbody>
+                  {subAccountsData.map((subAccounts, index) => (
+                    <tr key={index}>
+                      <td>
+                        <span className="actions">
+                          {subAccounts.name}&nbsp;&nbsp;
+                          <img
+                            src="/EditIcon.png"
+                            onClick={toggleRenameSubAccModal}
+                          />
+                        </span>
+                      </td>
+                      <td>
+                        <span className="actions">
+                          {subAccounts.address?.slice(0, 4) +
+                            "..." +
+                            subAccounts.address?.slice(-4)}
+                          &nbsp;&nbsp;
+                          <img
+                            src="/CopyIcon.png"
+                            onClick={() =>
+                              copyAddress(subAccounts.address, "sub-acc")
+                            }
+                          />
+                        </span>
+                      </td>
+                      <td className="center-row" />
+                      <td>{subAccounts.equity}</td>
+                      <td className="with-actionBtn">
+                        <span className="actions">
+                          <ActionBtn
+                            onClick={() => toggleTransferModal(subAccounts)}
+                          >
+                            Transfer
+                          </ActionBtn>
+                          <ActionBtn>Trade</ActionBtn>
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </StyledAccTable>
+            </Box>
           </Accounts>
         </SubAccountsInnerBox>
       </SubAccWrapper>

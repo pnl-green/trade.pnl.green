@@ -3,12 +3,12 @@ import { Box, Button, styled } from "@mui/material";
 export const PnlWrapper = styled(Box)(() => ({
   display: "flex",
   flexDirection: "row",
-  justifyContent: "center",
   gap: "5px",
   backgroundColor: "#000",
   width: "100vw",
   minHeight: "calc(100vh - 70px)",
   height: "auto",
+  justifyContent: "center",
   padding: "10px 20px",
 
   "@media (max-width: 1535px)": {
@@ -17,6 +17,9 @@ export const PnlWrapper = styled(Box)(() => ({
 
   // justifyContent: "space-between",
   // alignContent: "flex-start",
+  "@media (max-width: 899px)": {
+    padding: "5px !important",
+  },
 }));
 
 export const TradingViewComponent = styled(Box)(() => ({
@@ -25,13 +28,15 @@ export const TradingViewComponent = styled(Box)(() => ({
   height: "550px",
   borderRadius: "5px",
   backgroundColor: "#171b26",
+  justifyContent: "center",
 
   "@media (max-width: 1535px)": {
     width: "calc(100vw - 400px)",
   },
 
   "@media (max-width: 899px)": {
-    width: "calc(100vw - 70px)",
+    width: "calc(100vw - 20px)",
+    marginLeft: "-8px",
   },
 
   div: {
@@ -54,6 +59,11 @@ export const WalletBox = styled(Box)(() => ({
 
   "& .green": {
     color: "#049160",
+  },
+
+  "@media (max-width: 650px)": {
+    width: "calc(100vw - 20px)",
+    marginLeft: "-8px",
   },
 }));
 
@@ -171,6 +181,12 @@ export const ChatBox = styled(Box)(() => ({
     margin: "5px auto 5px 0",
     lineHeight: "1.5",
     position: "relative",
+  },
+
+  "@media (max-width: 650px)": {
+    width: "calc(100vw - 20px)",
+    marginLeft: "-8px",
+    height: "400px",
   },
 }));
 

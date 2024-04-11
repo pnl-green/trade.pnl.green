@@ -11,6 +11,9 @@ export const SubAccWrapper = styled(Box)(() => ({
   //   padding:"100px 100px",
   alignItems: "center",
   justifyContent: "center",
+  "@media (max-width: 1235px)": {
+    padding: "0 20px",
+  },
 }));
 
 interface linearBgProps {
@@ -50,12 +53,25 @@ export const SubAccountsInnerBox = styled(Box)(() => ({
   ".tabs": {
     display: "flex",
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
     alignItems: "center",
     position: "absolute",
     bottom: "calc(100% + 60px)",
     width: "100%",
     left: "0px",
+    gap: "5px",
+  },
+
+  "@media (max-width: 1235px)": {
+    width: "100%",
+  },
+  "@media (max-width: 899px)": {
+    padding: "20px 10px",
+
+    h1: {
+      fontSize: "18px",
+    },
   },
 }));
 
@@ -67,6 +83,12 @@ export const Accounts = styled(Box)(() => ({
     fontFamily: "Sora",
     fontWeight: "600",
     fontSize: "18px",
+  },
+
+  "@media (max-width: 899px)": {
+    h2: {
+      fontSize: "16px",
+    },
   },
 }));
 
@@ -142,6 +164,34 @@ export const StyledAccTable = styled("table")(() => ({
         justifyContents: "center",
         width: "max-content",
       },
+    },
+  },
+  "@media (max-width: 1235px)": {
+    ".center-row": {
+      width: "10px !important",
+    },
+    td: {
+      minWidth: "max-content !important",
+    },
+  },
+  "@media (max-width: 899px)": {
+    tr: {
+      fontSize: "14px",
+    },
+    tbody: {
+      tr: {
+        td: {
+          fontSize: "13px",
+        },
+      },
+    },
+  },
+  "@media (max-width: 730px)": {
+    td: {
+      minWidth: "150px !important",
+    },
+    ".center-row": {
+      minWidth: "10px !important",
     },
   },
 }));
