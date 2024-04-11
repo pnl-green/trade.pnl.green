@@ -32,6 +32,10 @@ export const RiskManagerWrapper = styled(Box)(() => ({
       backgroundColor: "#049260",
     },
   },
+  "@media (max-width: 650px)": {
+    width: "calc(100vw - 20px)",
+    marginLeft: "-8px",
+  },
 }));
 
 export const TabsWrapper = styled(Box)(() => ({

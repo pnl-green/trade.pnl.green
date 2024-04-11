@@ -15,6 +15,11 @@ export const OrderBookContainer = styled(Box)(() => ({
   borderRadius: "5px",
   border: "2px solid rgba(255, 255, 255, 0.1)",
   backgroundColor: "#13121296",
+
+  "@media (max-width: 650px)": {
+    width: "calc(100vw - 20px)",
+    marginLeft: "-8px",
+  },
 }));
 
 export const OrderBookTabsWrapper = styled(Box)(() => ({

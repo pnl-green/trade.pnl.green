@@ -10,7 +10,7 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
   justifyContent: "flex-start",
   padding: "0 10px",
   width: "calc(100vw - 720px)",
-  height: "55px",
+  minHeight: "55px",
   borderRadius: "5px",
   backgroundColor: "#13121296",
   gap: "25px",
@@ -69,10 +69,22 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
 
   "@media (max-width: 1535px)": {
     width: "calc(100vw - 400px)",
+    overflowX: "auto",
+    overflowY: "hidden",
+    cursor: "move",
+
+    //webkit scroll height 5px
+    "&::-webkit-scrollbar": {
+      height: "5px",
+    },
   },
 
   "@media (max-width: 899px)": {
-    width: "calc(100vw - 70px)",
+    width: "calc(100vw - 20px)",
+    marginLeft: "-8px",
+
+    alignItems: "center",
+    justifyContent: "center",
   },
 }));
 
@@ -85,7 +97,7 @@ export const TokenPairsInfoTableWrapper = styled(Box)(() => ({
   borderRadius: "5px",
   border: "1px solid #D9D9D947",
   position: "absolute",
-  zIndex: 1,
+  zIndex: 10,
   top: "calc(100% + 2px)",
   left: "2px",
   padding: "5px",
@@ -109,6 +121,11 @@ export const TokenPairsInfoTableWrapper = styled(Box)(() => ({
       color: "#fff",
     },
   },
+
+  "@media (max-width: 899px)": {
+    width: "calc(100vw - 20px)",
+    marginLeft: "-8px",
+  },
 }));
 
 export const TokenTableTabsWrapper = styled(Box)(() => ({
@@ -116,8 +133,11 @@ export const TokenTableTabsWrapper = styled(Box)(() => ({
   flexDirection: "row",
   gap: "20px",
   width: "100%",
-  height: "30px",
+  minHeight: "30px",
   paddingBottom: "1px",
+
+  overflowX: "auto",
+  overflowY: "hidden",
 
   button: {
     border: "none",
@@ -125,6 +145,7 @@ export const TokenTableTabsWrapper = styled(Box)(() => ({
     color: "#FFFFFF9C",
     cursor: "pointer",
     fontWeight: "600",
+    minWidth: "fit-content",
 
     "&:hover": {
       color: "#049260",
@@ -132,6 +153,14 @@ export const TokenTableTabsWrapper = styled(Box)(() => ({
 
     "&.active": {
       color: "#049260",
+    },
+  },
+  "@media (max-width: 599px)": {
+    cursor: "auto",
+    //webkit scroll height 5px
+    "&::-webkit-scrollbar": {
+      // height: "5px",
+      display: "none",
     },
   },
 }));
@@ -187,5 +216,9 @@ export const PairTableContainer = styled("table")(() => ({
     padding: "1px",
     borderRadius: "4px",
     marginLeft: "5px",
+  },
+
+  "@media (max-Width: 694px)": {
+    width: "690px",
   },
 }));

@@ -16,7 +16,8 @@ export const PositionsOrdersHistoryWrapper = styled(Box)(() => ({
   },
 
   "@media (max-width: 899px)": {
-    width: "calc(100vw - 70px)",
+    width: "calc(100vw - 20px)",
+    marginLeft: "-8px",
   },
 }));
 
@@ -29,4 +30,11 @@ export const PositionTabsButtonsWrapper = styled(Box)(() => ({
   gap: "10px",
   // paddingBottom: "1px",
   // borderBottom: "1px solid #FFFFFF99",
+  overflowX: "auto",
+  overflowY: "hidden",
+
+  //webkit scroll height 5px
+  "&::-webkit-scrollbar": {
+    height: "5px",
+  },
 }));

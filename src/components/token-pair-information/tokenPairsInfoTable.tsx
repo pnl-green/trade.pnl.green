@@ -121,10 +121,16 @@ const TokenPairsInfoTable = ({
         </TokenTableTabsWrapper>
 
         <Box
-          style={{
+          sx={{
             maxHeight: "100%",
             overflowY: "auto",
-            overflowX: "hidden",
+            overflowX: "auto",
+
+            "@media (max-width :599px)": {
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+            },
           }}
         >
           <PairTableContainer>
