@@ -25,7 +25,11 @@ export const RiskManagerWrapper = styled(Box)(() => ({
     cursor: "pointer",
 
     "&:hover": {
-      background: "#0F1A1F",
+      background: "#049260",
+    },
+
+    "&.active": {
+      backgroundColor: "#049260",
     },
   },
 }));

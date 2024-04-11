@@ -73,6 +73,7 @@ export const Accounts = styled(Box)(() => ({
 export const ActionBtn = styled(TextBtn)(() => ({
   color: "#049260",
   padding: "0",
+  background: "transparent",
 }));
 
 //styled table
