@@ -1,9 +1,9 @@
-import CreateSubAcc from "@/components/Modals/createSubAcc";
-import RenameSubAccModal from "@/components/Modals/renameSubAcc";
-import TransferFunds from "@/components/Modals/transferFunds";
-import Layout from "@/components/layout";
-import WalletConnectModal from "@/components/wallet-connect";
-import { GreenBtn } from "@/styles/common.styles";
+import CreateSubAcc from '@/components/Modals/createSubAcc';
+import RenameSubAccModal from '@/components/Modals/renameSubAcc';
+import TransferFunds from '@/components/Modals/transferFunds';
+import Layout from '@/components/layout';
+import WalletConnectModal from '@/components/wallet-connect';
+import { GreenBtn } from '@/styles/common.styles';
 import {
   Accounts,
   ActionBtn,
@@ -11,33 +11,35 @@ import {
   StyledAccTable,
   SubAccWrapper,
   SubAccountsInnerBox,
-} from "@/styles/subAccounts.styles";
-import { Box } from "@mui/material";
-import { useAddress } from "@thirdweb-dev/react";
-import React, { ReactElement, useState } from "react";
+} from '@/styles/subAccounts.styles';
+import { Box } from '@mui/material';
+import { useAddress } from '@thirdweb-dev/react';
+import { BrowserProvider } from 'ethers';
+import React, { ReactElement, useState } from 'react';
+import { nonce, sign_l1_action } from '../../utils';
 
 const bgImages = [
   {
-    image: "/Ellipse1.svg",
-    styles: { top: "0", left: "0px", width: "928px", height: "928px" },
+    image: '/Ellipse1.svg',
+    styles: { top: '0', left: '0px', width: '928px', height: '928px' },
   },
   {
-    image: "/Ellipse2.png",
+    image: '/Ellipse2.png',
     styles: {
-      top: "-100px",
-      left: "0px",
-      width: "1000px",
-      height: "1000px",
+      top: '-100px',
+      left: '0px',
+      width: '1000px',
+      height: '1000px',
       opacity: 0.3,
     },
   },
   {
-    image: "/Ellipse3.png",
-    styles: { top: "0px", right: "0px", width: "400px", height: "400px" },
+    image: '/Ellipse3.png',
+    styles: { top: '0px', right: '0px', width: '400px', height: '400px' },
   },
   {
-    image: "/Ellipse4.svg",
-    styles: { bottom: "0px", right: "0px", width: "400px", height: "400px" },
+    image: '/Ellipse4.svg',
+    styles: { bottom: '0px', right: '0px', width: '400px', height: '400px' },
   },
 ];
 
@@ -45,11 +47,11 @@ const SubAccounts = () => {
   const address = useAddress();
   const [establishedConnection, setEstablishedConnection] = useState(false);
   const [isRenameSubAccModalOpen, setRenameSubAccModalOpen] = useState(false);
-  const [renameAcc, setRenameAcc] = useState("");
+  const [renameAcc, setRenameAcc] = useState('');
   const [createSubAccModal, setcreateSubAccModal] = useState(false);
-  const [createNewAcc, setCreateNewAcc] = useState("");
+  const [createNewAcc, setCreateNewAcc] = useState('');
   const [isTransferModalOpen, setTransferModalOpen] = useState(false);
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState('');
 
   const toggleRenameSubAccModal = () => {
     setRenameSubAccModalOpen((prev) => !prev);
@@ -69,21 +71,44 @@ const SubAccounts = () => {
   }
 
   //create a SubAcc
-  function CreateSubAccount() {}
+  const createSubAccountHandler = async () => {
+    // Arrange
+    let signer = await new BrowserProvider(window.ethereum).getSigner();
+    let action = {
+      name: createNewAcc,
+      type: 'createSubAccount',
+    };
+    let vault_adress = null;
+    let nonce_ = nonce();
+    let is_mainnet = false;
+
+    console.log({ action, vault_adress, nonce_, is_mainnet });
+
+    // Act
+    let signature = await sign_l1_action(
+      signer,
+      action,
+      vault_adress,
+      nonce_,
+      is_mainnet
+    );
+
+    console.log({ signature });
+  };
 
   // Copy address to clipboard
-  function copyAddress(address: any, from?: string | "master" | "sub-acc") {
+  function copyAddress(address: any, from?: string | 'master' | 'sub-acc') {
     if (address) {
       navigator.clipboard.writeText(address);
-      if (from === "master") {
-        console.log("copied to clipboard");
-      } else if (from === "sub-acc") {
+      if (from === 'master') {
+        console.log('copied to clipboard');
+      } else if (from === 'sub-acc') {
         console.log(
-          "Warning: You are copying an address that is generated on the Pnl.Green. Do not send funds directly to this address, or your funds will be lost."
+          'Warning: You are copying an address that is generated on the Pnl.Green. Do not send funds directly to this address, or your funds will be lost.'
         );
       }
     } else {
-      console.log("connect wallet");
+      console.log('connect wallet');
     }
   }
 
@@ -136,7 +161,7 @@ const SubAccounts = () => {
                       &nbsp;&nbsp;
                       <img
                         src="/CopyIcon.png"
-                        onClick={() => copyAddress(address, "master")}
+                        onClick={() => copyAddress(address, 'master')}
                       />
                     </span>
                   </td>
@@ -158,7 +183,7 @@ const SubAccounts = () => {
             </StyledAccTable>
           </Accounts>
 
-          <Accounts sx={{ mt: "80px" }}>
+          <Accounts sx={{ mt: '80px' }}>
             <h2>Sub-Accounts</h2>
             <StyledAccTable>
               <thead>
@@ -186,13 +211,13 @@ const SubAccounts = () => {
                     <td>
                       <span className="actions">
                         {subAccounts.address?.slice(0, 4) +
-                          "..." +
+                          '...' +
                           subAccounts.address?.slice(-4)}
                         &nbsp;&nbsp;
                         <img
                           src="/CopyIcon.png"
                           onClick={() =>
-                            copyAddress(subAccounts.address, "sub-acc")
+                            copyAddress(subAccounts.address, 'sub-acc')
                           }
                         />
                       </span>
@@ -221,7 +246,7 @@ const SubAccounts = () => {
           renameAcc={renameAcc}
           setRenameAcc={setRenameAcc}
           onConfirm={function (): void {
-            throw new Error("Function not implemented.");
+            throw new Error('Function not implemented.');
           }}
         />
       )}
@@ -231,9 +256,7 @@ const SubAccounts = () => {
           onClose={() => setcreateSubAccModal(false)}
           createNewAcc={createNewAcc}
           setCreateNewAcc={setCreateNewAcc}
-          onConfirm={function (): void {
-            throw new Error("Function not implemented.");
-          }}
+          onConfirm={createSubAccountHandler}
         />
       )}
 
@@ -241,7 +264,7 @@ const SubAccounts = () => {
         <TransferFunds
           onClose={() => setTransferModalOpen(false)}
           onConfirm={function (): void {
-            throw new Error("Function not implemented.");
+            throw new Error('Function not implemented.');
           }}
           amount={amount}
           setAmount={setAmount}
@@ -260,14 +283,14 @@ SubAccounts.getLayout = function getLayout(page: ReactElement) {
 const subAccountsData = [
   {
     id: 1,
-    name: "Subway",
-    address: "0xAbcdef1234567890Abcdef1234567890Abcdef12",
-    equity: "$1000",
+    name: 'Subway',
+    address: '0xAbcdef1234567890Abcdef1234567890Abcdef12',
+    equity: '$1000',
   },
   {
     id: 2,
-    name: "Acc 2",
-    address: "0x1234567890Abcdef1234567890Abcdef12345678",
-    equity: "$2000",
+    name: 'Acc 2',
+    address: '0x1234567890Abcdef1234567890Abcdef12345678',
+    equity: '$2000',
   },
 ];

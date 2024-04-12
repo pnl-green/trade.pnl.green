@@ -1,34 +1,34 @@
-import { Box } from "@mui/material";
-import React, { useState } from "react";
+import { Box } from '@mui/material';
+import React, { useState } from 'react';
 import {
   RiskManagerWrapper,
   TabsButton,
   TabsWrapper,
-} from "@/styles/riskManager.styles";
-import MarketComponent from "./market";
-import LimitComponent from "./limit";
-import TwapOrderTerminal from "./twap";
-import ChaseOrderTerminal from "./chase";
-import ScaleOrderTerminal from "./scale";
-import RiskManagerModal from "../Modals/riskManagerModal";
-import LeverageModal from "../Modals/leverageModal";
-import MarginTypeModal from "../Modals/marginTypeModal";
+} from '@/styles/riskManager.styles';
+import MarketComponent from './market';
+import LimitComponent from './limit';
+import TwapOrderTerminal from './twap';
+import ChaseOrderTerminal from './chase';
+import ScaleOrderTerminal from './scale';
+import RiskManagerModal from '../Modals/riskManagerModal';
+import LeverageModal from '../Modals/leverageModal';
+import MarginTypeModal from '../Modals/marginTypeModal';
 
 const OrderPlacementTerminal = () => {
-  const [activeTab, setActiveTab] = useState("Market");
+  const [activeTab, setActiveTab] = useState('Market');
   const [riskManagerModal, setRiskManagerModal] = useState(false);
   const [leverageModal, setLeverageModal] = useState(false);
   const [marginTypeModal, setMarginTypeModal] = useState(false);
 
   const toggleModals = (modalType: string) => {
     switch (modalType) {
-      case "riskManager":
+      case 'riskManager':
         setRiskManagerModal(!riskManagerModal);
         break;
-      case "leverage":
+      case 'leverage':
         setLeverageModal(!leverageModal);
         break;
-      case "marginType":
+      case 'marginType':
         setMarginTypeModal(!marginTypeModal);
         break;
       default:
@@ -44,18 +44,18 @@ const OrderPlacementTerminal = () => {
     <RiskManagerWrapper id="order-placement-terminal">
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
         }}
       >
-        <div className="captions" onClick={() => toggleModals("riskManager")}>
+        <div className="captions" onClick={() => toggleModals('riskManager')}>
           Risk Manager
         </div>
-        <div className="captions" onClick={() => toggleModals("leverage")}>
+        <div className="captions" onClick={() => toggleModals('leverage')}>
           Leverage
         </div>
-        <div className="captions" onClick={() => toggleModals("marginType")}>
+        <div className="captions" onClick={() => toggleModals('marginType')}>
           Margin Type
         </div>
       </Box>
@@ -69,10 +69,10 @@ const OrderPlacementTerminal = () => {
       ) : null}
 
       <TabsWrapper>
-        {["Market", "Limit", "TWAP", "Chase", "Scale"].map((tabName) => (
+        {['Market', 'Limit', 'TWAP', 'Chase', 'Scale'].map((tabName) => (
           <TabsButton
             key={tabName}
-            className={activeTab === tabName ? "active" : ""}
+            className={activeTab === tabName ? 'active' : ''}
             onClick={() => handleTabChange(tabName)}
           >
             {tabName}
@@ -81,11 +81,11 @@ const OrderPlacementTerminal = () => {
       </TabsWrapper>
 
       {/* Conditionally render components based on active tab */}
-      {activeTab === "Market" && <MarketComponent />}
-      {activeTab === "Limit" && <LimitComponent />}
-      {activeTab === "TWAP" && <TwapOrderTerminal />}
-      {activeTab === "Chase" && <ChaseOrderTerminal />}
-      {activeTab === "Scale" && <ScaleOrderTerminal />}
+      {activeTab === 'Market' && <MarketComponent />}
+      {activeTab === 'Limit' && <LimitComponent />}
+      {activeTab === 'TWAP' && <TwapOrderTerminal />}
+      {activeTab === 'Chase' && <ChaseOrderTerminal />}
+      {activeTab === 'Scale' && <ScaleOrderTerminal />}
     </RiskManagerWrapper>
   );
 };
