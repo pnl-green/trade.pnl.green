@@ -2,7 +2,7 @@ import { Box, styled } from "@mui/material";
 
 export const ModalWrapper = styled(Box)(() => ({
   position: "fixed",
-  zIndex: 9999,
+  zIndex: 100,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

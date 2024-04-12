@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, ClickAwayListener, styled } from "@mui/material";
 import { IconsStyles, InnerBox, ModalWrapper } from "./styles";
 import { GreenBtn, TextBtn } from "@/styles/common.styles";
 import BigNumber from "bignumber.js";
 import { AccountProps } from "@/pages/sub-accounts";
+import HandleSelectItems from "../handleSelectItems";
 
 interface ModalProps {
   onClose: () => void;
@@ -12,6 +13,7 @@ interface ModalProps {
   setAmount?: React.Dispatch<React.SetStateAction<number | any>>;
   masterAccount?: AccountProps;
   subAccount?: AccountProps;
+  allAccountsData?: any;
 }
 
 const TransferFunds: React.FC<ModalProps> = ({
@@ -21,33 +23,39 @@ const TransferFunds: React.FC<ModalProps> = ({
   setAmount,
   masterAccount,
   subAccount,
+  allAccountsData,
 }) => {
-  const [isSwitched, setIsSwitched] = useState(false); // state to manage switch status
+  const [selectFromAcc, setSelectFromAcc] = useState<string | any>(
+    `${masterAccount?.name}`
+  );
+  const [selectToAcc, setSelectToAcc] = useState<string | any>(
+    `${subAccount?.name}`
+  );
+  const [activeFromAccData, setActiveFromAccData] = useState<
+    AccountProps | any
+  >({});
+  const [activeToAccData, setActiveToAccData] = useState<AccountProps | any>(
+    {}
+  );
 
-  const switchAccounts = () => {
-    setIsSwitched(!isSwitched);
-  };
-
-  const switchAccData = () => {
-    const fromAccount = isSwitched ? subAccount?.name : masterAccount?.name;
-    const toAccount = isSwitched ? masterAccount?.name : subAccount?.name;
-    const availableBalance =
-      fromAccount === subAccount?.name
-        ? subAccount?.equity
-        : masterAccount?.equity || 0;
-
-    return { fromAccount, toAccount, availableBalance };
+  const getActiveAccountData = (accountName: string) => {
+    return allAccountsData.find((acc: any) => acc.name === accountName);
   };
 
   const isInputAmountGreaterThanBalance = new BigNumber(
     amount || 0
-  ).isGreaterThan(new BigNumber(switchAccData().availableBalance));
+  ).isGreaterThan(new BigNumber(activeFromAccData?.equity));
 
   function handleMaxClick() {
-    if (Number(switchAccData().availableBalance) > 0) {
-      setAmount?.(switchAccData().availableBalance);
+    if (Number(activeFromAccData.equity) > 0) {
+      setAmount?.(activeFromAccData.equity);
     }
   }
+
+  useEffect(() => {
+    setActiveFromAccData(getActiveAccountData(selectFromAcc));
+    setActiveToAccData(getActiveAccountData(selectToAcc));
+  }, [selectFromAcc, selectToAcc]);
 
   return (
     <ModalWrapper>
@@ -62,16 +70,32 @@ const TransferFunds: React.FC<ModalProps> = ({
             <Box className="switcher_box">
               <Box className="from_to">
                 <label>From</label>
-                <Box className="acc_name">{switchAccData().fromAccount}</Box>
+                <HandleSelectItems
+                  selectItem={selectFromAcc}
+                  setSelectItem={setSelectFromAcc}
+                  selectDataItems={allAccountsData.map(
+                    (item: any) => item.name
+                  )}
+                  className="acc_name"
+                  styles={{
+                    border: "none",
+                  }}
+                />
               </Box>
-              <img
-                src="/SwitchIcon.png"
-                alt="switch"
-                onClick={switchAccounts}
-              />
+              <img src="/SwitchIcon.png" alt="switch" />
               <Box className="from_to">
                 <label>To</label>
-                <Box className="acc_name">{switchAccData().toAccount}</Box>
+                <HandleSelectItems
+                  selectItem={selectToAcc}
+                  setSelectItem={setSelectToAcc}
+                  selectDataItems={allAccountsData.map(
+                    (item: any) => item.name
+                  )}
+                  className="acc_name"
+                  styles={{
+                    border: "none",
+                  }}
+                />
               </Box>
             </Box>
             <Box className="amount_box">
@@ -87,7 +111,7 @@ const TransferFunds: React.FC<ModalProps> = ({
             </Box>
             <AvailableBalanceStyles>
               <span>Available to transfer</span>
-              <span>{Number(switchAccData().availableBalance).toFixed(2)}</span>
+              <span>{Number(activeFromAccData?.equity).toFixed(2)}</span>
             </AvailableBalanceStyles>
           </ContentBox>
           <ActionBox>

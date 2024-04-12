@@ -3,6 +3,7 @@ import RenameSubAccModal from "@/components/Modals/renameSubAcc";
 import TransferFunds from "@/components/Modals/transferFunds";
 import Layout from "@/components/layout";
 import WalletConnectModal from "@/components/wallet-connect";
+import { useSubAccountsContext } from "@/context/subAccountsContext";
 import { GreenBtn } from "@/styles/common.styles";
 import {
   Accounts,
@@ -14,7 +15,7 @@ import {
 } from "@/styles/subAccounts.styles";
 import { Box } from "@mui/material";
 import { useAddress } from "@thirdweb-dev/react";
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 
 export interface AccountProps {
   name: string | any;
@@ -49,6 +50,10 @@ const bgImages = [
 
 const SubAccounts = () => {
   const address = useAddress();
+  const { subAccInfo } = useSubAccountsContext();
+
+  console.log(subAccInfo);
+
   const [establishedConnection, setEstablishedConnection] = useState(false);
   const [isRenameSubAccModalOpen, setRenameSubAccModalOpen] = useState(false);
   const [renameAcc, setRenameAcc] = useState("");
@@ -56,6 +61,16 @@ const SubAccounts = () => {
   const [createNewAcc, setCreateNewAcc] = useState("");
   const [isTransferModalOpen, setTransferModalOpen] = useState(false);
   const [amount, setAmount] = useState("");
+  let [allAccountsData, setAllAccountsData] = useState<any>([]);
+
+  allAccountsData = [
+    {
+      name: "Master Account",
+      address: address,
+      equity: "100",
+    },
+    ...subAccountsData,
+  ];
 
   const [masterAccount, setMasterAccount] = useState<AccountProps>({
     name: "Master Account",
@@ -306,6 +321,7 @@ const SubAccounts = () => {
           setAmount={setAmount}
           masterAccount={masterAccount}
           subAccount={subAccount}
+          allAccountsData={allAccountsData}
         />
       )}
     </>

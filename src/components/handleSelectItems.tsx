@@ -6,6 +6,7 @@ export interface HandleSelectProps {
   setSelectItem: any;
   selectDataItems: string[];
   styles?: React.CSSProperties;
+  className?: string;
 }
 
 const HandleSelectItems = ({
@@ -13,12 +14,14 @@ const HandleSelectItems = ({
   setSelectItem,
   selectDataItems,
   styles,
+  className,
 }: HandleSelectProps) => {
   return (
     <ItemsSelect
       sx={styles}
       value={selectItem}
       onChange={(e) => setSelectItem(e.target.value)}
+      className={className}
     >
       {selectDataItems?.map((value, index) => (
         <option key={index} value={value}>

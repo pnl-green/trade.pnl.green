@@ -51,7 +51,6 @@ const PositionHistoryProvider = ({ children }: any) => {
 
         if (message.channel === "webData2") {
           if (data) {
-            console.log("webData2", data);
             setWebData2(data);
             setLoadingWebData2(false);
           }

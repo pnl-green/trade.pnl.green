@@ -1,6 +1,8 @@
 import OrderBookTradesProvider from "@/context/orderBookTradesContext";
 import { PairTokensProvider } from "@/context/pairTokensContext";
 import PositionHistoryProvider from "@/context/positionHistoryContext";
+import SUbAccountsProvider from "@/context/subAccountsContext";
+// import SUbAccountsProvider from "@/context/subAccountsContext";
 import "@/styles/globals.css";
 import {
   ThirdwebProvider,
@@ -54,7 +56,9 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
         <PairTokensProvider>
           <OrderBookTradesProvider>
             <PositionHistoryProvider>
-              {getLayout(<Component {...pageProps} />)}
+              <SUbAccountsProvider>
+                {getLayout(<Component {...pageProps} />)}
+              </SUbAccountsProvider>
             </PositionHistoryProvider>
           </OrderBookTradesProvider>
         </PairTokensProvider>
