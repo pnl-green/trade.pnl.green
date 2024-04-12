@@ -81,8 +81,8 @@ export const FlexItems = styled(Box)(() => ({
 }));
 
 export const TabsButtons = styled(Button)(() => ({
-  width: "fit-content",
-  height: "33px",
+  minWidth: "fit-content",
+  minHeight: "33px",
   borderRadius: "7px",
   backgroundColor: "#0F1A1F",
   textTransform: "none",

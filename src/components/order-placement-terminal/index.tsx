@@ -14,28 +14,50 @@ import RiskManagerModal from '../Modals/riskManagerModal';
 import LeverageModal from '../Modals/leverageModal';
 import MarginTypeModal from '../Modals/marginTypeModal';
 
-const OrderPlacementTerminal = () => {
-  const [activeTab, setActiveTab] = useState('Market');
-  const [riskManagerModal, setRiskManagerModal] = useState(false);
-  const [leverageModal, setLeverageModal] = useState(false);
-  const [marginTypeModal, setMarginTypeModal] = useState(false);
+// Interface to define the shape of the modals state
+interface optionsProps {
+  [key: string]: any;
+  riskManager: boolean;
+  leverage: boolean;
+  marginType: boolean;
+}
 
-  const toggleModals = (modalType: string) => {
-    switch (modalType) {
-      case 'riskManager':
-        setRiskManagerModal(!riskManagerModal);
-        break;
-      case 'leverage':
-        setLeverageModal(!leverageModal);
-        break;
-      case 'marginType':
-        setMarginTypeModal(!marginTypeModal);
-        break;
-      default:
-        break;
-    }
+// Array to hold the types and labels for various modal options
+const options = [
+  { type: 'riskManager', label: 'Risk Manager' },
+  { type: 'leverage', label: 'Leverage' },
+  { type: 'marginType', label: 'Margin Type' },
+];
+
+const OrderPlacementTerminal = () => {
+  const [activeTab, setActiveTab] = useState('Market'); // Track the active tab
+  const [activeButton, setActiveButton] = useState<string | null>(null); // Track the active modal button
+  const [modals, setModals] = useState<optionsProps>({
+    riskManager: false,
+    leverage: false,
+    marginType: false,
+  });
+  // Manage modal visibility
+
+  // Toggle the visibility of a modal and set the active button
+  const toggleModal = (modalType: string) => {
+    setModals({
+      ...modals,
+      [modalType]: !modals[modalType],
+    });
+    setActiveButton(modalType);
   };
 
+  // Close a specific modal and reset the active button
+  const closeModal = (modalType: string) => {
+    setModals({
+      ...modals,
+      [modalType]: false,
+    });
+    setActiveButton(null);
+  };
+
+  // Set the active tab based on the clicked tab nam
   const handleTabChange = (tabName: string) => {
     setActiveTab(tabName);
   };
@@ -49,24 +71,27 @@ const OrderPlacementTerminal = () => {
           justifyContent: 'space-between',
         }}
       >
-        <div className="captions" onClick={() => toggleModals('riskManager')}>
-          Risk Manager
-        </div>
-        <div className="captions" onClick={() => toggleModals('leverage')}>
-          Leverage
-        </div>
-        <div className="captions" onClick={() => toggleModals('marginType')}>
-          Margin Type
-        </div>
+        {options.map(({ type, label }) => (
+          <div
+            key={type}
+            className={`captions ${activeButton === type ? 'active' : ''}`}
+            onClick={() => toggleModal(type)}
+          >
+            {label}
+          </div>
+        ))}
       </Box>
 
-      {riskManagerModal ? (
-        <RiskManagerModal onClose={() => setRiskManagerModal(false)} />
-      ) : leverageModal ? (
-        <LeverageModal onClose={() => setLeverageModal(false)} />
-      ) : marginTypeModal ? (
-        <MarginTypeModal onClose={() => setMarginTypeModal(false)} />
-      ) : null}
+      {/* Render modals based on the modals state */}
+      {modals.riskManager && (
+        <RiskManagerModal onClose={() => closeModal('riskManager')} />
+      )}
+      {modals.leverage && (
+        <LeverageModal onClose={() => closeModal('leverage')} />
+      )}
+      {modals.marginType && (
+        <MarginTypeModal onClose={() => closeModal('marginType')} />
+      )}
 
       <TabsWrapper>
         {['Market', 'Limit', 'TWAP', 'Chase', 'Scale'].map((tabName) => (

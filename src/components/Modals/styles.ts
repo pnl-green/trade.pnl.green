@@ -22,6 +22,10 @@ export const InnerBox = styled(Box)(() => ({
   borderRadius: "5px",
   background: "#000",
   border: "1px solid rgba(255, 255, 255, 0.2)",
+
+  "@media (max-width: 899px)": {
+    width: "90% !important",
+  },
 }));
 
 export const IconsStyles = {
