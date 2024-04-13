@@ -1,8 +1,8 @@
 //get data from websocket and pass it to the context
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { BookDataProps, WsTrades } from "../../types";
-import { usePairTokensContext } from "./pairTokensContext";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { BookDataProps, WsTrades } from '@/types/hyperliquid';
+import { usePairTokensContext } from './pairTokensContext';
 
 interface OrderBookTradesProps {
   bookData: BookDataProps;
@@ -16,7 +16,7 @@ export const useOrderBookTradesContext = () => {
   const context = useContext(OrderBookTradesContext);
   if (!context) {
     throw new Error(
-      "useOrderBookTrades must be used within a OrderBookTradesProvider"
+      'useOrderBookTrades must be used within a OrderBookTradesProvider'
     );
   }
   return context;
@@ -42,9 +42,9 @@ const OrderBookTradesProvider = ({ children }: any) => {
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
       const message = JSON.stringify({
-        method: "subscribe",
+        method: 'subscribe',
         subscription: {
-          type: "trades",
+          type: 'trades',
           coin: `${pair}`,
         },
       });
@@ -56,14 +56,14 @@ const OrderBookTradesProvider = ({ children }: any) => {
       const message = JSON.parse(event.data);
       const data = message.data;
 
-      if (message.channel === "trades") {
+      if (message.channel === 'trades') {
         if (data) {
           // Format the time to HH:MM:SS
           const tradesData = data.map((trade: WsTrades) => {
             const date = new Date(trade.time);
-            const hours = String(date.getHours()).padStart(2, "0");
-            const minutes = String(date.getMinutes()).padStart(2, "0");
-            const seconds = String(date.getSeconds()).padStart(2, "0");
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
             const newTime = `${hours}:${minutes}:${seconds}`;
 
             return {
@@ -74,15 +74,15 @@ const OrderBookTradesProvider = ({ children }: any) => {
 
           setTradesData(tradesData);
         }
-      } else if (message.channel === "error") {
-        console.error("Error:", message.data);
+      } else if (message.channel === 'error') {
+        console.error('Error:', message.data);
         setTradesData(null);
       }
     };
 
     // Handle WebSocket errors
     ws.onerror = (error) => {
-      console.error("WebSocket Error:", error);
+      console.error('WebSocket Error:', error);
     };
 
     // Clean up the WebSocket connection when the component unmounts
@@ -98,9 +98,9 @@ const OrderBookTradesProvider = ({ children }: any) => {
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
       const message = JSON.stringify({
-        method: "subscribe",
+        method: 'subscribe',
         subscription: {
-          type: "l2Book",
+          type: 'l2Book',
           coin: `${pair}`,
           nSigFigs: 5,
         },
@@ -114,7 +114,7 @@ const OrderBookTradesProvider = ({ children }: any) => {
       const message = JSON.parse(event.data);
       const data = message.data.levels;
 
-      if (message.channel === "l2Book") {
+      if (message.channel === 'l2Book') {
         if (data) {
           const asks: any[] = data[1];
           const bids: any[] = data[0];
@@ -122,16 +122,16 @@ const OrderBookTradesProvider = ({ children }: any) => {
           setBookData({ asks, bids });
           setLoadingBookData(false);
         }
-      } else if (message.channel === "error") {
+      } else if (message.channel === 'error') {
         setLoadingBookData(false);
-        console.error("Error:", message.data);
+        console.error('Error:', message.data);
         setBookData({ asks: [], bids: [] });
       }
     };
 
     // Handle WebSocket errors
     ws.onerror = (error) => {
-      console.error("WebSocket Error:", error);
+      console.error('WebSocket Error:', error);
     };
 
     // Clean up the WebSocket connection when the component unmounts

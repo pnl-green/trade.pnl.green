@@ -13,10 +13,11 @@ import {
   SubAccountsInnerBox,
 } from '@/styles/subAccounts.styles';
 import { Box } from '@mui/material';
-import { useAddress } from '@thirdweb-dev/react';
-import { BrowserProvider } from 'ethers';
-import React, { ReactElement, useState } from 'react';
-import { nonce, sign_l1_action } from '../../utils';
+import { useAddress, useChainId } from '@thirdweb-dev/react';
+import React, { ReactElement, useEffect, useState } from 'react';
+import { Hyperliquid } from '../../utils';
+import { Wallet, providers, utils } from 'ethers';
+import { Chain, SubAccount } from '@/types/hyperliquid';
 
 export interface AccountProps {
   name: string | any;
@@ -49,26 +50,49 @@ const bgImages = [
   },
 ];
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
+
+const SESSION_STORAGE_PREFIX = 'pnl.green';
+
+const DEFAULT_AGENT = {
+  privateKey: '',
+  userAddress: '',
+};
+
 const SubAccounts = () => {
-  const address = useAddress();
+  // ------------------ Thirdweb Hooks ------------------
+  const userAddress = useAddress();
+  const chainId = useChainId();
+
+  // ------------------ Local State ------------------
   const [establishedConnection, setEstablishedConnection] = useState(false);
+  const [agent, setAgent] = useState(DEFAULT_AGENT);
+
   const [isRenameSubAccModalOpen, setRenameSubAccModalOpen] = useState(false);
   const [renameAcc, setRenameAcc] = useState('');
+  const [relaodSubAccounts, setReloadSubAccounts] = useState(false);
+
   const [createSubAccModal, setcreateSubAccModal] = useState(false);
   const [createNewAcc, setCreateNewAcc] = useState('');
+
   const [isTransferModalOpen, setTransferModalOpen] = useState(false);
   const [amount, setAmount] = useState('');
 
+  const [hyperliquid, setHyperliquid] = useState(new Hyperliquid(BASE_URL));
+
   const [masterAccount, setMasterAccount] = useState<AccountProps>({
     name: 'Master Account',
-    address: address,
+    address: userAddress,
     equity: '100',
   });
+
   const [subAccount, setSubAccount] = useState<AccountProps>({
     name: '',
     address: '',
     equity: '',
   });
+
+  const [subaccounts, setSubAccounts] = useState<SubAccount[]>([]);
 
   const toggleRenameSubAccModal = () => {
     setRenameSubAccModalOpen((prev) => !prev);
@@ -78,12 +102,12 @@ const SubAccounts = () => {
     setcreateSubAccModal((prev) => !prev);
   };
   //toggleTransferModal
-  const toggleTransferModal = (data: AccountProps) => {
+  const toggleTransferModal = (subaccount: SubAccount) => {
     setTransferModalOpen((prev) => !prev);
     setSubAccount({
-      name: data.name,
-      address: data.address,
-      equity: data.equity,
+      name: subaccount.name,
+      address: subaccount.subAccountUser,
+      equity: subaccount.clearinghouseState.withdrawable,
     });
   };
 
@@ -95,34 +119,76 @@ const SubAccounts = () => {
   };
 
   //establish connection
-  function handleEstablishedConnection() {
+  const handleEstablishConnection = async () => {
+    // hyperliquid.pending_agent
+    sessionStorage.setItem(`${SESSION_STORAGE_PREFIX}.pending_agent`, '');
+
+    // Create and connect agent
+    let agent = Wallet.createRandom();
+
+    let signer = new providers.Web3Provider(window.ethereum).getSigner();
+
+    await hyperliquid.connect(signer, agent);
+
+    // set agent to session storage
+    let address = (userAddress || '').toLowerCase();
+
+    sessionStorage.setItem(
+      `${SESSION_STORAGE_PREFIX}.agent.${address}`,
+      JSON.stringify({
+        privateKey: agent.privateKey,
+        userAddress: address,
+      })
+    );
+
+    setAgent({
+      privateKey: agent.privateKey,
+      userAddress: address,
+    });
+
     setEstablishedConnection(true);
-  }
+  };
 
   //create a SubAcc
   const createSubAccountHandler = async () => {
-    // Arrange
-    let signer = await new BrowserProvider(window.ethereum).getSigner();
-    let action = {
-      name: createNewAcc,
-      type: 'createSubAccount',
-    };
-    let vault_adress = null;
-    let nonce_ = nonce();
-    let is_mainnet = false;
+    let signer = new Wallet(agent.privateKey);
 
-    console.log({ action, vault_adress, nonce_, is_mainnet });
-
-    // Act
-    let signature = await sign_l1_action(
+    let { success, data, error_type, msg } = await hyperliquid.createSubAccount(
       signer,
-      action,
-      vault_adress,
-      nonce_,
-      is_mainnet
+      createNewAcc
     );
 
-    console.log({ signature });
+    if (success) {
+      // TODO: toast success message
+      console.log('Sub-account created successfully');
+      setReloadSubAccounts((prev) => !prev);
+    } else {
+      // TODO: toast error message
+    }
+
+    console.log({ success, data, error_type, msg });
+  };
+
+  const handleSubAccountModify = async (subAccountUser: String) => {
+    let signer = new Wallet(agent.privateKey);
+
+    let { success, data, error_type, msg } = await hyperliquid.subAccountModify(
+      signer,
+      renameAcc,
+      subAccountUser
+    );
+
+    if (success) {
+      // TODO: toast success message
+      console.log('Sub-account renamed successfully');
+
+      // reload sub-accounts
+      setReloadSubAccounts((prev) => !prev);
+    } else {
+      // TODO: toast error message
+    }
+
+    console.log({ success, data, error_type, msg });
   };
 
   // Copy address to clipboard
@@ -141,6 +207,42 @@ const SubAccounts = () => {
     }
   }
 
+  useEffect(() => {
+    // if unable to get agent from session storage, set establishedConnection to false
+    let agent = sessionStorage.getItem(
+      `pnl.green.agent.${(userAddress || '').toLowerCase()}`
+    );
+
+    // set agent to state if it exists
+    if (agent) {
+      setEstablishedConnection(true);
+      setAgent(JSON.parse(agent));
+    } else {
+      setEstablishedConnection(false);
+      setAgent(DEFAULT_AGENT);
+    }
+  }, [userAddress]);
+
+  useEffect(() => {
+    userAddress &&
+      hyperliquid
+        .subAccounts(userAddress)
+        .then(({ data, success, error_type, msg }) => {
+          success && data && setSubAccounts(data as SubAccount[]);
+
+          if (!success) {
+            // TODO: toast error message ???
+            console.error({ error_type, msg });
+          }
+        });
+  }, [hyperliquid, relaodSubAccounts, userAddress]);
+
+  useEffect(() => {
+    let chain = chainId === 42161 ? Chain.Arbitrum : Chain.ArbitrumTestnet;
+
+    setHyperliquid(new Hyperliquid(BASE_URL, chain));
+  }, [chainId]);
+
   return (
     <>
       <SubAccWrapper>
@@ -151,12 +253,12 @@ const SubAccounts = () => {
         <SubAccountsInnerBox>
           <Box className="tabs">
             <h1>Sub-Accounts</h1>
-            {!address ? (
+            {!userAddress ? (
               <WalletConnectModal />
             ) : (
               <>
                 {!establishedConnection ? (
-                  <GreenBtn onClick={handleEstablishedConnection}>
+                  <GreenBtn onClick={handleEstablishConnection}>
                     Establish Connection
                   </GreenBtn>
                 ) : (
@@ -199,18 +301,18 @@ const SubAccounts = () => {
                     <td>{masterAccount.name}</td>
                     <td>
                       <span className="master_actions">
-                        {address}
+                        {userAddress}
                         &nbsp;&nbsp;
                         <img
                           src="/CopyIcon.png"
-                          onClick={() => copyAddress(address, 'master')}
+                          onClick={() => copyAddress(userAddress, 'master')}
                         />
                       </span>
                     </td>
                     <td className="center-row"></td>
                     <td>{masterAccount.equity}</td>
                     <td className="with-actionBtn paddingRight">
-                      {address ? (
+                      {userAddress ? (
                         <ActionBtn>Trade</ActionBtn>
                       ) : (
                         <WalletConnectModal
@@ -253,45 +355,50 @@ const SubAccounts = () => {
                 </thead>
 
                 <tbody>
-                  {subAccountsData.map((subAccounts, index) => (
-                    <tr key={index}>
-                      <td>
-                        <span className="actions">
-                          {subAccounts.name}&nbsp;&nbsp;
-                          <img
-                            src="/EditIcon.png"
-                            onClick={toggleRenameSubAccModal}
-                          />
-                        </span>
-                      </td>
-                      <td>
-                        <span className="actions">
-                          {subAccounts.address?.slice(0, 4) +
-                            '...' +
-                            subAccounts.address?.slice(-4)}
-                          &nbsp;&nbsp;
-                          <img
-                            src="/CopyIcon.png"
-                            onClick={() =>
-                              copyAddress(subAccounts.address, 'sub-acc')
-                            }
-                          />
-                        </span>
-                      </td>
-                      <td className="center-row" />
-                      <td>{subAccounts.equity}</td>
-                      <td className="with-actionBtn">
-                        <span className="actions">
-                          <ActionBtn
-                            onClick={() => toggleTransferModal(subAccounts)}
-                          >
-                            Transfer
-                          </ActionBtn>
-                          <ActionBtn>Trade</ActionBtn>
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {subaccounts
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((subAccount, index) => (
+                      <tr key={index}>
+                        <td>
+                          <span className="actions">
+                            {subAccount.name}&nbsp;&nbsp;
+                            <img
+                              src="/EditIcon.png"
+                              onClick={toggleRenameSubAccModal}
+                            />
+                          </span>
+                        </td>
+                        <td>
+                          <span className="actions">
+                            {subAccount.subAccountUser?.slice(0, 4) +
+                              '...' +
+                              subAccount.subAccountUser?.slice(-4)}
+                            &nbsp;&nbsp;
+                            <img
+                              src="/CopyIcon.png"
+                              onClick={() =>
+                                copyAddress(
+                                  subAccount.subAccountUser,
+                                  'sub-acc'
+                                )
+                              }
+                            />
+                          </span>
+                        </td>
+                        <td className="center-row" />
+                        <td>{subAccount.clearinghouseState.withdrawable}</td>
+                        <td className="with-actionBtn">
+                          <span className="actions">
+                            <ActionBtn
+                              onClick={() => toggleTransferModal(subAccount)}
+                            >
+                              Transfer
+                            </ActionBtn>
+                            <ActionBtn>Trade</ActionBtn>
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </StyledAccTable>
             </Box>
@@ -304,9 +411,10 @@ const SubAccounts = () => {
           onClose={() => setRenameSubAccModalOpen(false)}
           renameAcc={renameAcc}
           setRenameAcc={setRenameAcc}
-          onConfirm={function (): void {
-            throw new Error('Function not implemented.');
-          }}
+          onConfirm={() =>
+            // TODO make subAccountUser dynamic
+            handleSubAccountModify('0x37dcf254c08c68e85e0b5f97fe99aa991133d941')
+          }
         />
       )}
 
@@ -340,18 +448,3 @@ export default SubAccounts;
 SubAccounts.getLayout = function getLayout(page: ReactElement) {
   return <Layout pageTitle="Pnl.Green | Sub-Accounts">{page}</Layout>;
 };
-
-const subAccountsData = [
-  {
-    id: 1,
-    name: 'Subway',
-    address: '0xAbcdef1234567890Abcdef1234567890Abcdef12',
-    equity: '1000',
-  },
-  {
-    id: 2,
-    name: 'Acc 2',
-    address: '0x1234567890Abcdef1234567890Abcdef12345678',
-    equity: '2000',
-  },
-];
