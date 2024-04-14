@@ -1,18 +1,18 @@
-import { Box } from "@mui/material";
-import React, { useState } from "react";
+import { Box } from '@mui/material';
+import React, { useState } from 'react';
 import {
   RiskManagerWrapper,
   TabsButton,
   TabsWrapper,
-} from "@/styles/riskManager.styles";
-import MarketComponent from "./market";
-import LimitComponent from "./limit";
-import TwapOrderTerminal from "./twap";
-import ChaseOrderTerminal from "./chase";
-import ScaleOrderTerminal from "./scale";
-import RiskManagerModal from "../Modals/riskManagerModal";
-import LeverageModal from "../Modals/leverageModal";
-import MarginTypeModal from "../Modals/marginTypeModal";
+} from '@/styles/riskManager.styles';
+import MarketComponent from './market';
+import LimitComponent from './limit';
+import TwapOrderTerminal from './twap';
+import ChaseOrderTerminal from './chase';
+import ScaleOrderTerminal from './scale';
+import RiskManagerModal from '../Modals/riskManagerModal';
+import LeverageModal from '../Modals/leverageModal';
+import MarginTypeModal from '../Modals/marginTypeModal';
 
 // Interface to define the shape of the modals state
 interface optionsProps {
@@ -24,13 +24,13 @@ interface optionsProps {
 
 // Array to hold the types and labels for various modal options
 const options = [
-  { type: "riskManager", label: "Risk Manager" },
-  { type: "leverage", label: "Leverage" },
-  { type: "marginType", label: "Margin Type" },
+  { type: 'riskManager', label: 'Risk Manager' },
+  { type: 'leverage', label: 'Leverage' },
+  { type: 'marginType', label: 'Margin Type' },
 ];
 
 const OrderPlacementTerminal = () => {
-  const [activeTab, setActiveTab] = useState("Market"); // Track the active tab
+  const [activeTab, setActiveTab] = useState('Market'); // Track the active tab
   const [activeButton, setActiveButton] = useState<string | null>(null); // Track the active modal button
   const [modals, setModals] = useState<optionsProps>({
     riskManager: false,
@@ -66,15 +66,15 @@ const OrderPlacementTerminal = () => {
     <RiskManagerWrapper id="order-placement-terminal">
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
         }}
       >
         {options.map(({ type, label }) => (
           <div
             key={type}
-            className={`captions ${activeButton === type ? "active" : ""}`}
+            className={`captions ${activeButton === type ? 'active' : ''}`}
             onClick={() => toggleModal(type)}
           >
             {label}
@@ -84,20 +84,20 @@ const OrderPlacementTerminal = () => {
 
       {/* Render modals based on the modals state */}
       {modals.riskManager && (
-        <RiskManagerModal onClose={() => closeModal("riskManager")} />
+        <RiskManagerModal onClose={() => closeModal('riskManager')} />
       )}
       {modals.leverage && (
-        <LeverageModal onClose={() => closeModal("leverage")} />
+        <LeverageModal onClose={() => closeModal('leverage')} />
       )}
       {modals.marginType && (
-        <MarginTypeModal onClose={() => closeModal("marginType")} />
+        <MarginTypeModal onClose={() => closeModal('marginType')} />
       )}
 
       <TabsWrapper>
-        {["Market", "Limit", "TWAP", "Chase", "Scale"].map((tabName) => (
+        {['Market', 'Limit', 'TWAP', 'Chase', 'Scale'].map((tabName) => (
           <TabsButton
             key={tabName}
-            className={activeTab === tabName ? "active" : ""}
+            className={activeTab === tabName ? 'active' : ''}
             onClick={() => handleTabChange(tabName)}
           >
             {tabName}
@@ -106,11 +106,11 @@ const OrderPlacementTerminal = () => {
       </TabsWrapper>
 
       {/* Conditionally render components based on active tab */}
-      {activeTab === "Market" && <MarketComponent />}
-      {activeTab === "Limit" && <LimitComponent />}
-      {activeTab === "TWAP" && <TwapOrderTerminal />}
-      {activeTab === "Chase" && <ChaseOrderTerminal />}
-      {activeTab === "Scale" && <ScaleOrderTerminal />}
+      {activeTab === 'Market' && <MarketComponent />}
+      {activeTab === 'Limit' && <LimitComponent />}
+      {activeTab === 'TWAP' && <TwapOrderTerminal />}
+      {activeTab === 'Chase' && <ChaseOrderTerminal />}
+      {activeTab === 'Scale' && <ScaleOrderTerminal />}
     </RiskManagerWrapper>
   );
 };

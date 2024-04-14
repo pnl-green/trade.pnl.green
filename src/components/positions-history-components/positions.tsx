@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Box,
   Paper,
@@ -8,36 +8,36 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from "@mui/material";
-import { usePositionHistoryContext } from "@/context/positionHistoryContext";
+} from '@mui/material';
+import { usePositionHistoryContext } from '@/context/positionHistoryContext';
 
 interface Column {
   id:
-    | "coin"
-    | "size"
-    | "positionValue"
-    | "entryPrice"
-    | "markPrice"
-    | "pnl"
-    | "liqPrice"
-    | "margin"
-    | "funding"
-    | "tpsl";
+    | 'coin'
+    | 'size'
+    | 'positionValue'
+    | 'entryPrice'
+    | 'markPrice'
+    | 'pnl'
+    | 'liqPrice'
+    | 'margin'
+    | 'funding'
+    | 'tpsl';
   label: string;
-  align?: "right" | "center" | "left";
+  align?: 'right' | 'center' | 'left';
 }
 
 const columns: Column[] = [
-  { id: "coin", label: "Coin", align: "center" },
-  { id: "size", label: "Size", align: "center" },
-  { id: "positionValue", label: "Position Value", align: "center" },
-  { id: "entryPrice", label: "Entry Price", align: "center" },
-  { id: "markPrice", label: "Mark Price", align: "center" },
-  { id: "pnl", label: "PNL(ROE%)", align: "center" },
-  { id: "liqPrice", label: "Liq Price", align: "center" },
-  { id: "margin", label: "Margin", align: "center" },
-  { id: "funding", label: "Funding", align: "center" },
-  { id: "tpsl", label: "TP/SL", align: "center" },
+  { id: 'coin', label: 'Coin', align: 'center' },
+  { id: 'size', label: 'Size', align: 'center' },
+  { id: 'positionValue', label: 'Position Value', align: 'center' },
+  { id: 'entryPrice', label: 'Entry Price', align: 'center' },
+  { id: 'markPrice', label: 'Mark Price', align: 'center' },
+  { id: 'pnl', label: 'PNL(ROE%)', align: 'center' },
+  { id: 'liqPrice', label: 'Liq Price', align: 'center' },
+  { id: 'margin', label: 'Margin', align: 'center' },
+  { id: 'funding', label: 'Funding', align: 'center' },
+  { id: 'tpsl', label: 'TP/SL', align: 'center' },
 ];
 
 const PositionComponentTable = () => {
@@ -48,12 +48,12 @@ const PositionComponentTable = () => {
   return (
     <Paper
       sx={{
-        width: "100%",
-        overflow: "hidden",
-        background: "transparent",
+        width: '100%',
+        overflow: 'hidden',
+        background: 'transparent',
       }}
     >
-      <TableContainer sx={{ maxHeight: 300, paddingBottom: "60px" }}>
+      <TableContainer sx={{ maxHeight: 300, paddingBottom: '60px' }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -62,10 +62,10 @@ const PositionComponentTable = () => {
                   key={column.id}
                   align={column.align}
                   sx={{
-                    background: "#100e0e",
-                    color: "white",
-                    padding: "10px",
-                    borderBottom: "2px solid rgba(255, 255, 255, 0.1)",
+                    background: '#100e0e',
+                    color: 'white',
+                    padding: '10px',
+                    borderBottom: '2px solid rgba(255, 255, 255, 0.1)',
                   }}
                 >
                   {column.label}
@@ -77,11 +77,11 @@ const PositionComponentTable = () => {
             {loadingWebData2 ? (
               <Box
                 sx={{
-                  color: "#fff",
-                  fontFamily: "Sora",
-                  fontWeight: "400",
-                  fontSize: "13px",
-                  p: "10px",
+                  color: '#fff',
+                  fontFamily: 'Sora',
+                  fontWeight: '400',
+                  fontSize: '13px',
+                  p: '10px',
                 }}
               >
                 loading...
@@ -90,11 +90,11 @@ const PositionComponentTable = () => {
               PositionsData.length === 0 ? (
               <Box
                 sx={{
-                  color: "#fff",
-                  fontFamily: "Sora",
-                  fontWeight: "400",
-                  fontSize: "13px",
-                  p: "10px",
+                  color: '#fff',
+                  fontFamily: 'Sora',
+                  fontWeight: '400',
+                  fontSize: '13px',
+                  p: '10px',
                 }}
               >
                 No open position yet
@@ -109,11 +109,11 @@ const PositionComponentTable = () => {
                       key={index}
                       sx={{
                         td: {
-                          background: "transparent",
-                          color: "white",
-                          padding: "8px",
-                          border: "none",
-                          textAlign: "center",
+                          background: 'transparent',
+                          color: 'white',
+                          padding: '8px',
+                          border: 'none',
+                          textAlign: 'center',
                         },
                       }}
                     >
