@@ -1,7 +1,7 @@
 //
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { AllWebData2 } from "../../types";
-import { useAddress } from "@thirdweb-dev/react";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { AllWebData2 } from '../../types/hyperliquid';
+import { useAddress } from '@thirdweb-dev/react';
 
 interface PositionHistoryProps {
   webData2: AllWebData2 | any;
@@ -14,7 +14,7 @@ export const usePositionHistoryContext = () => {
   const context = useContext(PositionHistoryContext);
   if (!context) {
     throw new Error(
-      "usePositionHistory must be used within a PositionHistoryProvider"
+      'usePositionHistory must be used within a PositionHistoryProvider'
     );
   }
   return context;
@@ -33,11 +33,10 @@ const PositionHistoryProvider = ({ children }: any) => {
       // When the WebSocket connection is open, send the subscribe message
       ws.onopen = () => {
         const message = JSON.stringify({
-          method: "subscribe",
+          method: 'subscribe',
           subscription: {
-            type: "webData2",
-            // user: "0xcD49bbAc6E85fdEB167EB7cA41A945d2b8758F6F",
-            user: `${address}`,
+            type: 'webData2',
+            user: address,
           },
         });
         ws.send(message);
@@ -49,20 +48,24 @@ const PositionHistoryProvider = ({ children }: any) => {
         const message = JSON.parse(event.data);
         const data = message.data;
 
-        if (message.channel === "webData2") {
+        if (message.channel === 'webData2') {
           if (data) {
+<<<<<<< HEAD
+=======
+            console.log('webData2', data);
+>>>>>>> 9eb754c350da2d2a694ccb60fb1f6d1630e2c21d
             setWebData2(data);
             setLoadingWebData2(false);
           }
-        } else if (message.channel === "error") {
+        } else if (message.channel === 'error') {
           setLoadingWebData2(false);
-          console.error("Error:", message.data);
+          console.error('Error:', message.data);
         }
       };
 
       // Handle WebSocket errors
       ws.onerror = (error) => {
-        console.error("WebSocket Error:", error);
+        console.error('WebSocket Error:', error);
       };
 
       // Clean up the WebSocket connection when the component unmounts

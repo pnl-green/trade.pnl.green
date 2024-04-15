@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { TokenPairsWrapper } from "@/styles/tokenPairs.styles";
-import { Box } from "@mui/material";
-import { PairData } from "../../../types";
+import React, { useState } from 'react';
+import { TokenPairsWrapper } from '@/styles/tokenPairs.styles';
+import { Box } from '@mui/material';
+import { PairData } from '../../../types/hyperliquid';
 
 interface SingleTokenPairInfoProps {
   tableISOpen: boolean;
@@ -12,7 +12,7 @@ interface SingleTokenPairInfoProps {
 const PairDetail = ({ label, value, isRed }: any) => (
   <Box className="pairDetails">
     <span>{label}</span>
-    <span className={isRed ? "value toRed" : "value"}>{value}</span>
+    <span className={isRed ? 'value toRed' : 'value'}>{value}</span>
   </Box>
 );
 
