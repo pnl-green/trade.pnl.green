@@ -1,13 +1,15 @@
-import React from "react";
-import { IconsStyles, InnerBox, InputBox, ModalWrapper } from "./styles";
-import { Box, ClickAwayListener } from "@mui/material";
-import { GreenBtn, OutlinedBtn } from "@/styles/common.styles";
+import React from 'react';
+import { IconsStyles, InnerBox, InputBox, ModalWrapper } from './styles';
+import { Box, ClickAwayListener } from '@mui/material';
+import { GreenBtn, OutlinedBtn } from '@/styles/common.styles';
+import Loader from '../loaderSpinner';
 
 interface ModalProps {
   onClose: () => void;
   onConfirm?: () => void;
   createNewAcc?: string | any;
   setCreateNewAcc?: any;
+  isLoading?: boolean;
 }
 
 const CreateSubAcc: React.FC<ModalProps> = ({
@@ -15,19 +17,20 @@ const CreateSubAcc: React.FC<ModalProps> = ({
   onConfirm,
   createNewAcc,
   setCreateNewAcc,
+  isLoading,
 }) => {
   return (
     <ModalWrapper>
       <ClickAwayListener onClickAway={onClose}>
         <InnerBox
           sx={{
-            padding: "20px",
-            width: "500px",
+            padding: '20px',
+            width: '500px',
             h1: {
-              fontSize: "16px",
-              fontFamily: "Sora",
-              fontWeight: "500",
-              color: "#fff",
+              fontSize: '16px',
+              fontFamily: 'Sora',
+              fontWeight: '500',
+              color: '#fff',
             },
           }}
         >
@@ -35,7 +38,7 @@ const CreateSubAcc: React.FC<ModalProps> = ({
             <img src="/closeIcon.svg" alt="X" />
           </Box>
           <h1>Create Sub-Account</h1>
-          <InputBox sx={{ mt: "20px" }}>
+          <InputBox sx={{ mt: '20px' }}>
             <label>Name</label>
             <input
               type="text"
@@ -45,25 +48,25 @@ const CreateSubAcc: React.FC<ModalProps> = ({
           </InputBox>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "row",
-              width: "100%",
-              justifyContent: "space-between",
-              marginTop: "20px",
+              display: 'flex',
+              flexDirection: 'row',
+              width: '100%',
+              justifyContent: 'space-between',
+              marginTop: '20px',
             }}
           >
-            <OutlinedBtn sx={{ width: "48%" }} onClick={onClose}>
+            <OutlinedBtn sx={{ width: '48%' }} onClick={onClose}>
               Cancel
             </OutlinedBtn>
             <GreenBtn
               sx={{
-                width: "48%",
-                background: createNewAcc?.trim() !== "" ? "" : "#037855",
+                width: '48%',
+                background: createNewAcc?.trim() !== '' ? '' : '#037855',
               }}
-              disabled={createNewAcc?.trim() === ""}
+              disabled={createNewAcc?.trim() === ''}
               onClick={onConfirm}
             >
-              Confirm
+              {isLoading ? <Loader /> : 'Confirm'}
             </GreenBtn>
           </Box>
         </InnerBox>

@@ -23,10 +23,10 @@ export const usePositionHistoryContext = () => {
 const PositionHistoryProvider = ({ children }: any) => {
   const [webData2, setWebData2] = useState<any>([]);
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
-  const address = useAddress();
+  const userAddress = useAddress();
 
   useEffect(() => {
-    if (address) {
+    if (userAddress) {
       // Create a new WebSocket connection
       const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}`);
 
@@ -36,7 +36,7 @@ const PositionHistoryProvider = ({ children }: any) => {
           method: 'subscribe',
           subscription: {
             type: 'webData2',
-            user: address,
+            user: userAddress,
           },
         });
         ws.send(message);
@@ -50,10 +50,6 @@ const PositionHistoryProvider = ({ children }: any) => {
 
         if (message.channel === 'webData2') {
           if (data) {
-<<<<<<< HEAD
-=======
-            console.log('webData2', data);
->>>>>>> 9eb754c350da2d2a694ccb60fb1f6d1630e2c21d
             setWebData2(data);
             setLoadingWebData2(false);
           }
@@ -76,7 +72,7 @@ const PositionHistoryProvider = ({ children }: any) => {
       setLoadingWebData2(false);
       setWebData2([]);
     }
-  }, [address]);
+  }, [userAddress]);
 
   return (
     <PositionHistoryContext.Provider
