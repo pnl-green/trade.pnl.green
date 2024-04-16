@@ -171,7 +171,7 @@ export class Hyperliquid {
       isDeposit,
       subAccountUser,
       type: 'subAccountTransfer',
-      usd: utils.parseUnits(usd.toString(), 6),
+      usd: utils.parseUnits(usd.toString(), 6).toString(),
     };
 
     let signature = await signL1Action(
