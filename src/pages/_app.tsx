@@ -17,6 +17,8 @@ import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import NoSSR from 'react-no-ssr';
 import SUbAccountsProvider from '@/context/subAccountsContext';
 import { Toaster } from 'react-hot-toast';
+import TradeHistoryProvider from '@/context/tradeHistoryContext';
+import FundingHistoryProvider from '@/context/fundingHistoryContext';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -59,21 +61,24 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
           <OrderBookTradesProvider>
             <PositionHistoryProvider>
               <SUbAccountsProvider>
-                <Toaster
-                  position="bottom-right"
-                  toastOptions={{
-                    style: {
-                      background: '#000',
-                      borderRadius: '4px',
-                      border: '1px solid rgba(255, 255, 255, 0.5)',
-                      fontFamily: 'Sora',
-                      fontSize: '14px',
-                      color: '#fff',
-                      width: 'fit-content !important',
-                    },
-                  }}
-                />
-                {getLayout(<Component {...pageProps} />)}
+                <TradeHistoryProvider>
+                  <FundingHistoryProvider>
+                    <Toaster
+                      position="bottom-right"
+                      toastOptions={{
+                        style: {
+                          background: '#000',
+                          borderRadius: '4px',
+                          border: '1px solid rgba(255, 255, 255, 0.5)',
+                          fontFamily: 'Sora',
+                          fontSize: '14px',
+                          color: '#fff',
+                        },
+                      }}
+                    />
+                    {getLayout(<Component {...pageProps} />)}
+                  </FundingHistoryProvider>
+                </TradeHistoryProvider>
               </SUbAccountsProvider>
             </PositionHistoryProvider>
           </OrderBookTradesProvider>
