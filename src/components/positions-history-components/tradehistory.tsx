@@ -113,9 +113,7 @@ const TradeHistoryComponentTable = () => {
                     >
                       <TableCell>{timestampToDateTime(row.time)}</TableCell>
                       <TableCell>{row.coin}</TableCell>
-                      <TableCell>
-                        {row.side === 'B' ? 'Long' : 'Short'}
-                      </TableCell>
+                      <TableCell>{row.dir}</TableCell>
                       <TableCell>{row.px}</TableCell>
                       <TableCell>{row.sz}</TableCell>
                       <TableCell>{row.tradeValue ? '' : '- -'}</TableCell>

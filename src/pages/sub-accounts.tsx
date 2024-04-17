@@ -213,7 +213,6 @@ const SubAccounts = () => {
   };
 
   const handleSubAccountModify = async (subAccountUser: String) => {
-    console.log(subAccountUser);
     try {
       setIsLoading(true);
       let signer = new Wallet(agent.privateKey);
@@ -227,6 +226,13 @@ const SubAccounts = () => {
 
         // reload sub-accounts
         setReloadSubAccounts((prev) => !prev);
+
+        setRenameSubAccModalOpen(false);
+        setIsLoading(false);
+        setRenameAcc('');
+      } else if (!success && error_type === 'Exchange Error') {
+        // TODO: toast error message
+        toast.error(msg);
         setIsLoading(false);
       } else {
         setIsLoading(false);

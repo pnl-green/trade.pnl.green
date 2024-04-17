@@ -106,12 +106,29 @@ const FundingHistoryComponentTable = () => {
                     >
                       <TableCell>{timestampToDateTime(row.time)}</TableCell>
                       <TableCell>{row.coin}</TableCell>
-                      <TableCell>{'- - '}</TableCell>
                       <TableCell>
-                        {row.side === 'B' ? 'Long' : 'Short'}
+                        {row.szi}&nbsp;{row.coin}
                       </TableCell>
-                      <TableCell>{'- -'}</TableCell>
-                      <TableCell>{row.fundingRate}</TableCell>
+                      <TableCell>
+                        {row.side === 'B'
+                          ? 'Long'
+                          : row.side === 'A'
+                          ? 'Short'
+                          : '- -'}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color:
+                            Number(row.usdc) < 0
+                              ? '#E10000 !important'
+                              : 'green !important',
+                        }}
+                      >
+                        {`${row.usdc < 0 ? '-' : ''}$${Math.abs(
+                          row.usdc
+                        ).toFixed(4)}`}
+                      </TableCell>
+                      <TableCell>{Number(row.fundingRate) + '%'}</TableCell>
                     </TableRow>
                   );
                 })}

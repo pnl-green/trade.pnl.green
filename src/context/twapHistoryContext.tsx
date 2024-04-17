@@ -4,25 +4,23 @@ import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress } from '@thirdweb-dev/react';
 
 interface OrderHistoryProps {
-  orderHistoryData: AllWebData2 | any;
-  loadingOrderHistory: boolean;
+  twapHistoryData: AllWebData2 | any;
+  loadingTwapData: boolean;
 }
 
-const OrderHistoryContext = createContext({} as OrderHistoryProps);
+const TwapHistoryContext = createContext({} as OrderHistoryProps);
 
-export const useOrderHistoryContext = () => {
-  const context = useContext(OrderHistoryContext);
+export const useTwapHistoryContext = () => {
+  const context = useContext(TwapHistoryContext);
   if (!context) {
-    throw new Error(
-      'context must be used within a OrderHistoryProvider'
-    );
+    throw new Error('context must be used within a TwapHistoryProvider');
   }
   return context;
 };
 
-const OrderHistoryProvider = ({ children }: any) => {
-  const [orderHistoryData, setOrderHistoryData] = useState<any>([]);
-  const [loadingOrderHistory, setLoadingOrderHistory] = useState<boolean>(true);
+const TwapHistoryProvider = ({ children }: any) => {
+  const [twapHistoryData, setTwapHistoryData] = useState<any>([]);
+  const [loadingTwapData, setLoadingTwapData] = useState<boolean>(true);
   const userAddress = useAddress();
 
   useEffect(() => {
@@ -35,7 +33,7 @@ const OrderHistoryProvider = ({ children }: any) => {
         const message = JSON.stringify({
           method: 'subscribe',
           subscription: {
-            type: 'userHistoricalOrders',
+            type: 'userTwapHistory',
             user: userAddress,
           },
         });
@@ -44,17 +42,17 @@ const OrderHistoryProvider = ({ children }: any) => {
 
       // Listen for messages from the WebSocket server
       ws.onmessage = (event) => {
-        setLoadingOrderHistory(true);
+        setLoadingTwapData(true);
         const message = JSON.parse(event.data);
         const data = message.data;
 
-        if (message.channel === 'userHistoricalOrders') {
+        if (message.channel === 'userTwapHistory') {
           if (data) {
-            setOrderHistoryData(data);
-            setLoadingOrderHistory(false);
+            setTwapHistoryData(data);
+            setLoadingTwapData(false);
           }
         } else if (message.channel === 'error') {
-          setLoadingOrderHistory(false);
+          setLoadingTwapData(false);
           console.error('Error:', message.data);
         }
       };
@@ -69,21 +67,21 @@ const OrderHistoryProvider = ({ children }: any) => {
         ws.close();
       };
     } else {
-      setLoadingOrderHistory(false);
-      setOrderHistoryData([]);
+      setLoadingTwapData(false);
+      setTwapHistoryData([]);
     }
   }, [userAddress]);
 
   return (
-    <OrderHistoryContext.Provider
+    <TwapHistoryContext.Provider
       value={{
-        orderHistoryData,
-        loadingOrderHistory,
+        twapHistoryData,
+        loadingTwapData,
       }}
     >
       {children}
-    </OrderHistoryContext.Provider>
+    </TwapHistoryContext.Provider>
   );
 };
 
-export default OrderHistoryProvider;
+export default TwapHistoryProvider;
