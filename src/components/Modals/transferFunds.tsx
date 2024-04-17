@@ -17,7 +17,12 @@ interface ModalProps {
   allAccountsData?: any;
   isLoading?: boolean;
   setIsDeposit: React.Dispatch<React.SetStateAction<boolean>>;
-  setActiveToAccData: React.Dispatch<React.SetStateAction<AccountProps | any>>;
+  setActiveToAccData: React.Dispatch<React.SetStateAction<AccountProps | any>>; // State to hold active data for the selected "To" account
+  activeFromAccData: AccountProps; // State to hold active data for the selected "From" account
+  setActiveFromAccData: React.Dispatch<
+    React.SetStateAction<AccountProps | any> // State to hold active data for the selected "From" account
+  >;
+  isDeposit: boolean;
 }
 
 const TransferFunds: React.FC<ModalProps> = ({
@@ -31,6 +36,9 @@ const TransferFunds: React.FC<ModalProps> = ({
   isLoading,
   setIsDeposit,
   setActiveToAccData,
+  activeFromAccData,
+  setActiveFromAccData,
+  isDeposit,
 }) => {
   // State to manage the selected "From" account
   const [selectFromAcc, setSelectFromAcc] = useState<string | any>(
@@ -41,11 +49,6 @@ const TransferFunds: React.FC<ModalProps> = ({
   const [selectToAcc, setSelectToAcc] = useState<string | any>(
     `${subAccount?.name}`
   );
-
-  // State to hold active data for the selected "From" account
-  const [activeFromAccData, setActiveFromAccData] = useState<
-    AccountProps | any
-  >({});
 
   // Function to get active account data by account name
   const getActiveAccountData = (accountName: string) => {
@@ -80,8 +83,6 @@ const TransferFunds: React.FC<ModalProps> = ({
   useEffect(() => {
     setIsDeposit(selectFromAcc === 'Master Account');
   }, [selectFromAcc]);
-
-  console.log(activeFromAccData)
 
   return (
     <ModalWrapper>
@@ -146,7 +147,7 @@ const TransferFunds: React.FC<ModalProps> = ({
           </ContentBox>
           <ActionBox>
             <GreenBtn
-              disabled={isInputAmountGreaterThanBalance || amount.trim() === ''}
+              disabled={isInputAmountGreaterThanBalance || amount.trim() === '' || !isDeposit}
               onClick={onConfirm}
             >
               {isLoading ? <Loader /> : 'Confirm'}

@@ -22,6 +22,7 @@ import toast from 'react-hot-toast';
 import { usePositionHistoryContext } from '@/context/positionHistoryContext';
 import Loader from '@/components/loaderSpinner';
 import { useSubAccountsContext } from '@/context/subAccountsContext';
+import { act } from 'react-dom/test-utils';
 
 const bgImages = [
   {
@@ -212,6 +213,7 @@ const SubAccounts = () => {
   };
 
   const handleSubAccountModify = async (subAccountUser: String) => {
+    console.log(subAccountUser);
     try {
       setIsLoading(true);
       let signer = new Wallet(agent.privateKey);
@@ -244,6 +246,10 @@ const SubAccounts = () => {
   const [activeToAccData, setActiveToAccData] = useState<AccountProps | any>(
     {}
   );
+  // State to hold active data for the selected "From" account
+  const [activeFromAccData, setActiveFromAccData] = useState<
+    AccountProps | any
+  >({});
 
   //deposit to subaccount
   const subAccountTransfer = async () => {
@@ -251,7 +257,10 @@ const SubAccounts = () => {
     try {
       setIsLoading(true);
       let signer = new Wallet(agent.privateKey);
-      let subAccountUser = activeToAccData.address;
+      let subAccountUser = isDeposit
+        ? activeToAccData.address
+        : activeFromAccData.address;
+
       let usd = amount;
 
       let { success, data, error_type, msg } =
@@ -267,7 +276,10 @@ const SubAccounts = () => {
         console.log('data', data);
         console.log('msg', msg);
         toast.success('successfully transfered');
+        setReloadSubAccounts((prev) => !prev);
+        setTransferModalOpen((prev) => !prev);
       } else {
+        setIsLoading(false);
         toast.error('error ocured please try again');
         console.log({
           error_type,
@@ -471,7 +483,13 @@ const SubAccounts = () => {
                             {subAccount.name}&nbsp;&nbsp;
                             <img
                               src="/EditIcon.png"
-                              onClick={()=>toggleRenameSubAccModal(subAccount)}
+                              onClick={() => {
+                                if (!establishedConnection) {
+                                  toast.error('Establish connection first');
+                                } else {
+                                  toggleRenameSubAccModal(subAccount);
+                                }
+                              }}
                             />
                           </span>
                         </td>
@@ -564,6 +582,9 @@ const SubAccounts = () => {
           allAccountsData={allAccountsData}
           setIsDeposit={setIsDeposit}
           setActiveToAccData={setActiveToAccData}
+          activeFromAccData={activeFromAccData}
+          setActiveFromAccData={setActiveFromAccData}
+          isDeposit={isDeposit}
         />
       )}
     </>
