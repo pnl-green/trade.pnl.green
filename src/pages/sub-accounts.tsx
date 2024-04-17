@@ -297,7 +297,6 @@ const SubAccounts = () => {
     let agent = sessionStorage.getItem(
       `pnl.green.agent.${(userAddress || '').toLowerCase()}`
     );
-    console.log(agent);
 
     // set agent to state if it exists
     if (agent) {
@@ -340,6 +339,17 @@ const SubAccounts = () => {
 
     setHyperliquid(new Hyperliquid(BASE_URL, chain));
   }, [chainId]);
+
+  // useEffect(() => {
+  //   let signer = new Wallet(
+  //     '0x06cc0c1d4f486b10a95c26169089d98bac31cc1b099fadc9601aba874003b469'
+  //   );
+  //   let isDeposit = false;
+  //   let subAccountUser = '0xde94602ae58029fbd5547003a4ffa3295a48c63d';
+  //   let usd = 2;
+
+  //   hyperliquid.subAccountTransfer(signer, isDeposit, subAccountUser, usd);
+  // }, []);
 
   return (
     <>

@@ -168,10 +168,10 @@ export class Hyperliquid {
     let nonce = timestamp();
 
     let action = {
-      isDeposit,
-      subAccountUser,
       type: 'subAccountTransfer',
-      usd: utils.parseUnits(usd.toString(), 6).toString(),
+      subAccountUser,
+      isDeposit,
+      usd: utils.parseUnits(usd.toString(), 6).toNumber(),
     };
 
     let signature = await signL1Action(
