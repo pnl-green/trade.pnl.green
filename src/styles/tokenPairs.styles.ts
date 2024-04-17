@@ -8,6 +8,7 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
   display: "flex",
   flexDirection: "row",
   justifyContent: "flex-start",
+  alignItems: "center",
   padding: "0 10px",
   width: "calc(100vw - 720px)",
   minHeight: "55px",

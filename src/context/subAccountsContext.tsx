@@ -1,11 +1,16 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAddress } from '@thirdweb-dev/react';
 import { SubAccount } from '@/types/hyperliquid';
+import { Hyperliquid } from '@/utils/hyperliquid';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface SubAccountsProps {
-  subAccInfo: SubAccount |any;
+  subaccounts: SubAccount | any;
+  relaodSubAccounts: boolean;
+  setReloadSubAccounts: React.Dispatch<React.SetStateAction<boolean>>;
+  hyperliquid: any;
+  setHyperliquid: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const SubAccountsContext = createContext({} as SubAccountsProps);
@@ -20,41 +25,47 @@ export const useSubAccountsContext = () => {
   return context;
 };
 
-const SUbAccountsProvider = ({ children }: any) => {
-  const address = useAddress();
-  const [subAccInfo, setSubAccInfo] = useState([]);
+const SubAccountsProvider = ({ children }: any) => {
+  //-------Hooks------
+  const userAddress = useAddress();
 
-  const getSubAccInfo = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/info`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          exchange: 'hyperliquid',
-          type: 'subAccounts',
-          user: address,
-        }),
-      });
-      const data = await res.json();
-      setSubAccInfo(data.data);
-      return data.data;
-    } catch (error) {
-      console.log(error);
-      // return error;
-    }
-  };
+  //------Local State------
+  const [subaccounts, setSubAccounts] = useState<SubAccount[]>([]);
+  const [relaodSubAccounts, setReloadSubAccounts] = useState(false);
+
+  //------Hyperliquid------
+  const [hyperliquid, setHyperliquid] = useState(
+    new Hyperliquid(`${BASE_URL}`)
+  );
 
   useEffect(() => {
-    getSubAccInfo();
-  }, [address]);
+    if (userAddress) {
+      hyperliquid
+        .subAccounts(userAddress)
+        .then(({ data, success, error_type, msg }) => {
+          success && data && setSubAccounts(data as SubAccount[]);
+
+          if (!success) {
+            // TODO: toast error message ???
+            console.error({ error_type, msg });
+          }
+        });
+    }
+  }, [hyperliquid, relaodSubAccounts, userAddress]);
 
   return (
-    <SubAccountsContext.Provider value={{ subAccInfo }}>
+    <SubAccountsContext.Provider
+      value={{
+        subaccounts,
+        relaodSubAccounts,
+        setReloadSubAccounts,
+        hyperliquid,
+        setHyperliquid,
+      }}
+    >
       {children}
     </SubAccountsContext.Provider>
   );
 };
 
-export default SUbAccountsProvider;
+export default SubAccountsProvider;

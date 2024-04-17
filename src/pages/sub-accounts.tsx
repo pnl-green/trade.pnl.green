@@ -21,6 +21,7 @@ import { AccountProps, Chain, SubAccount } from '@/types/hyperliquid';
 import toast from 'react-hot-toast';
 import { usePositionHistoryContext } from '@/context/positionHistoryContext';
 import Loader from '@/components/loaderSpinner';
+import { useSubAccountsContext } from '@/context/subAccountsContext';
 
 const bgImages = [
   {
@@ -59,6 +60,8 @@ const DEFAULT_AGENT = {
 const SubAccounts = () => {
   //--------------------useContext hooks------------------
   const { webData2, loadingWebData2 } = usePositionHistoryContext();
+  const { subaccounts, hyperliquid, setReloadSubAccounts, setHyperliquid } =
+    useSubAccountsContext();
 
   // ------------------ Thirdweb Hooks ------------------
   const userAddress = useAddress();
@@ -70,7 +73,6 @@ const SubAccounts = () => {
 
   const [isRenameSubAccModalOpen, setRenameSubAccModalOpen] = useState(false);
   const [renameAcc, setRenameAcc] = useState('');
-  const [relaodSubAccounts, setReloadSubAccounts] = useState(false);
 
   const [createSubAccModal, setcreateSubAccModal] = useState(false);
   const [createNewAcc, setCreateNewAcc] = useState('');
@@ -78,14 +80,12 @@ const SubAccounts = () => {
   const [isTransferModalOpen, setTransferModalOpen] = useState(false);
   const [amount, setAmount] = useState('');
 
-  const [hyperliquid, setHyperliquid] = useState(new Hyperliquid(BASE_URL));
-
   const [isLoading, setIsLoading] = useState(false);
 
   const masterAccount: AccountProps = {
     name: 'Master Account',
     address: userAddress,
-    equity: webData2.clearinghouseState?.crossMarginSummary.accountValue,
+    equity: webData2.clearinghouseState?.marginSummary.accountValue,
   };
 
   const [subAccount, setSubAccount] = useState<AccountProps>({
@@ -94,11 +94,15 @@ const SubAccounts = () => {
     equity: '',
   });
 
-  const [subaccounts, setSubAccounts] = useState<SubAccount[]>([]);
   const [allAccountsData, setAllAccountsData] = useState<any>([]);
 
-  const toggleRenameSubAccModal = () => {
+  const toggleRenameSubAccModal = (subaccount: SubAccount) => {
     setRenameSubAccModalOpen((prev) => !prev);
+    setSubAccount({
+      name: subaccount.name,
+      address: subaccount.subAccountUser,
+      equity: subaccount.clearinghouseState.marginSummary.accountValue,
+    });
   };
 
   const toggleCreateSubAccModal = () => {
@@ -111,7 +115,7 @@ const SubAccounts = () => {
       setSubAccount({
         name: subaccount.name,
         address: subaccount.subAccountUser,
-        equity: subaccount.clearinghouseState.crossMarginSummary.accountValue,
+        equity: subaccount.clearinghouseState.marginSummary.accountValue,
       });
     }
   };
@@ -297,7 +301,6 @@ const SubAccounts = () => {
     let agent = sessionStorage.getItem(
       `pnl.green.agent.${(userAddress || '').toLowerCase()}`
     );
-    console.log(agent);
 
     // set agent to state if it exists
     if (agent) {
@@ -310,30 +313,17 @@ const SubAccounts = () => {
   }, [userAddress]);
 
   useEffect(() => {
-    userAddress &&
-      hyperliquid
-        .subAccounts(userAddress)
-        .then(({ data, success, error_type, msg }) => {
-          success && data && setSubAccounts(data as SubAccount[]);
+    // Combine the fetched data with the previous allAccountsData and the master account
+    if (Array.isArray(subaccounts)) {
+      const restructuredAccounts = subaccounts.map((account) => ({
+        name: account.name,
+        address: account.subAccountUser,
+        equity: account.clearinghouseState.marginSummary.accountValue,
+      }));
 
-          // Combine the fetched data with the previous allAccountsData and the master account
-          if (Array.isArray(data)) {
-            const restructuredAccounts = data.map((account) => ({
-              name: account.name,
-              address: account.subAccountUser,
-              equity:
-                account.clearinghouseState.crossMarginSummary.accountValue,
-            }));
-
-            setAllAccountsData([...restructuredAccounts, masterAccount]);
-          }
-
-          if (!success) {
-            // TODO: toast error message ???
-            console.error({ error_type, msg });
-          }
-        });
-  }, [hyperliquid, relaodSubAccounts, userAddress, webData2]);
+      setAllAccountsData([...restructuredAccounts, masterAccount]);
+    }
+  }, [subaccounts]);
 
   useEffect(() => {
     let chain = chainId === 42161 ? Chain.Arbitrum : Chain.ArbitrumTestnet;
@@ -462,15 +452,15 @@ const SubAccounts = () => {
 
                 <tbody>
                   {subaccounts
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((subAccount, index) => (
+                    .sort((a: any, b: any) => a.name.localeCompare(b.name))
+                    .map((subAccount: any, index: any) => (
                       <tr key={index}>
                         <td>
                           <span className="actions">
                             {subAccount.name}&nbsp;&nbsp;
                             <img
                               src="/EditIcon.png"
-                              onClick={toggleRenameSubAccModal}
+                              onClick={()=>toggleRenameSubAccModal(subAccount)}
                             />
                           </span>
                         </td>
@@ -494,7 +484,7 @@ const SubAccounts = () => {
                         <td className="center-row" />
                         <td>
                           {
-                            subAccount.clearinghouseState.crossMarginSummary
+                            subAccount.clearinghouseState.marginSummary
                               .accountValue
                           }
                         </td>
@@ -532,10 +522,7 @@ const SubAccounts = () => {
           }}
           renameAcc={renameAcc}
           setRenameAcc={setRenameAcc}
-          onConfirm={() =>
-            // TODO make subAccountUser dynamic
-            handleSubAccountModify('0x37dcf254c08c68e85e0b5f97fe99aa991133d941')
-          }
+          onConfirm={() => handleSubAccountModify(subAccount.address)}
           isLoading={isLoading}
         />
       )}

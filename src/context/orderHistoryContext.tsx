@@ -3,27 +3,26 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress } from '@thirdweb-dev/react';
 
-interface FundingHistoryProps {
-  fundingHistoryData: AllWebData2 | any;
-  loadingFundingHistoryData: boolean;
+interface OrderHistoryProps {
+  orderHistoryData: AllWebData2 | any;
+  loadingOrderHistory: boolean;
 }
 
-const FundingHistoryContext = createContext({} as FundingHistoryProps);
+const OrderHistoryContext = createContext({} as OrderHistoryProps);
 
-export const useFundingHistoryContext = () => {
-  const context = useContext(FundingHistoryContext);
+export const useOrderHistoryContext = () => {
+  const context = useContext(OrderHistoryContext);
   if (!context) {
     throw new Error(
-      'context must be used within a FundingHistoryProvider'
+      'context must be used within a OrderHistoryProvider'
     );
   }
   return context;
 };
 
-const FundingHistoryProvider = ({ children }: any) => {
-  const [fundingHistoryData, setFundingHistoryData] = useState<any>([]);
-  const [loadingFundingHistoryData, setLoadingFundingHistoryData] =
-    useState<boolean>(true);
+const OrderHistoryProvider = ({ children }: any) => {
+  const [orderHistoryData, setOrderHistoryData] = useState<any>([]);
+  const [loadingOrderHistory, setLoadingOrderHistory] = useState<boolean>(true);
   const userAddress = useAddress();
 
   useEffect(() => {
@@ -36,7 +35,7 @@ const FundingHistoryProvider = ({ children }: any) => {
         const message = JSON.stringify({
           method: 'subscribe',
           subscription: {
-            type: 'userFundings',
+            type: 'orderHistory',
             user: userAddress,
           },
         });
@@ -45,17 +44,17 @@ const FundingHistoryProvider = ({ children }: any) => {
 
       // Listen for messages from the WebSocket server
       ws.onmessage = (event) => {
-        setLoadingFundingHistoryData(true);
+        setLoadingOrderHistory(true);
         const message = JSON.parse(event.data);
         const data = message.data;
 
-        if (message.channel === 'userFundings') {
+        if (message.channel === 'userHistoricalOrders') {
           if (data) {
-            setFundingHistoryData(data);
-            setLoadingFundingHistoryData(false);
+            setOrderHistoryData(data);
+            setLoadingOrderHistory(false);
           }
         } else if (message.channel === 'error') {
-          setLoadingFundingHistoryData(false);
+          setLoadingOrderHistory(false);
           console.error('Error:', message.data);
         }
       };
@@ -70,21 +69,21 @@ const FundingHistoryProvider = ({ children }: any) => {
         ws.close();
       };
     } else {
-      setLoadingFundingHistoryData(false);
-      setFundingHistoryData([]);
+      setLoadingOrderHistory(false);
+      setOrderHistoryData([]);
     }
   }, [userAddress]);
 
   return (
-    <FundingHistoryContext.Provider
+    <OrderHistoryContext.Provider
       value={{
-        fundingHistoryData,
-        loadingFundingHistoryData,
+        orderHistoryData,
+        loadingOrderHistory,
       }}
     >
       {children}
-    </FundingHistoryContext.Provider>
+    </OrderHistoryContext.Provider>
   );
 };
 
-export default FundingHistoryProvider;
+export default OrderHistoryProvider;

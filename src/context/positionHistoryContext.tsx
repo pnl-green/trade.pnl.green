@@ -14,7 +14,7 @@ export const usePositionHistoryContext = () => {
   const context = useContext(PositionHistoryContext);
   if (!context) {
     throw new Error(
-      'usePositionHistory must be used within a PositionHistoryProvider'
+      'context must be used within a PositionHistoryProvider'
     );
   }
   return context;

@@ -14,7 +14,7 @@ export const useTradeHistoryContext = () => {
   const context = useContext(TradeHistoryContext);
   if (!context) {
     throw new Error(
-      'usePositionHistory must be used within a TradeHistoryProvider'
+      'context must be used within a TradeHistoryProvider'
     );
   }
   return context;
