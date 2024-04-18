@@ -3,26 +3,27 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress } from '@thirdweb-dev/react';
 
-interface PositionHistoryProps {
-  webData2: AllWebData2 | any;
-  loadingWebData2: boolean;
+interface FundingHistoryProps {
+  fundingHistoryData: AllWebData2 | any;
+  loadingFundingHistoryData: boolean;
 }
 
-const PositionHistoryContext = createContext({} as PositionHistoryProps);
+const FundingHistoryContext = createContext({} as FundingHistoryProps);
 
-export const usePositionHistoryContext = () => {
-  const context = useContext(PositionHistoryContext);
+export const useFundingHistoryContext = () => {
+  const context = useContext(FundingHistoryContext);
   if (!context) {
     throw new Error(
-      'context must be used within a PositionHistoryProvider'
+      'context must be used within a FundingHistoryProvider'
     );
   }
   return context;
 };
 
-const PositionHistoryProvider = ({ children }: any) => {
-  const [webData2, setWebData2] = useState<any>([]);
-  const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
+const FundingHistoryProvider = ({ children }: any) => {
+  const [fundingHistoryData, setFundingHistoryData] = useState<any>([]);
+  const [loadingFundingHistoryData, setLoadingFundingHistoryData] =
+    useState<boolean>(true);
   const userAddress = useAddress();
 
   useEffect(() => {
@@ -35,7 +36,7 @@ const PositionHistoryProvider = ({ children }: any) => {
         const message = JSON.stringify({
           method: 'subscribe',
           subscription: {
-            type: 'webData2',
+            type: 'userFundings',
             user: userAddress,
           },
         });
@@ -44,17 +45,17 @@ const PositionHistoryProvider = ({ children }: any) => {
 
       // Listen for messages from the WebSocket server
       ws.onmessage = (event) => {
-        setLoadingWebData2(true);
+        setLoadingFundingHistoryData(true);
         const message = JSON.parse(event.data);
         const data = message.data;
 
-        if (message.channel === 'webData2') {
+        if (message.channel === 'userFundings') {
           if (data) {
-            setWebData2(data);
-            setLoadingWebData2(false);
+            setFundingHistoryData(data);
+            setLoadingFundingHistoryData(false);
           }
         } else if (message.channel === 'error') {
-          setLoadingWebData2(false);
+          setLoadingFundingHistoryData(false);
           console.error('Error:', message.data);
         }
       };
@@ -69,21 +70,21 @@ const PositionHistoryProvider = ({ children }: any) => {
         ws.close();
       };
     } else {
-      setLoadingWebData2(false);
-      setWebData2([]);
+      setLoadingFundingHistoryData(false);
+      setFundingHistoryData([]);
     }
   }, [userAddress]);
 
   return (
-    <PositionHistoryContext.Provider
+    <FundingHistoryContext.Provider
       value={{
-        webData2,
-        loadingWebData2,
+        fundingHistoryData,
+        loadingFundingHistoryData,
       }}
     >
       {children}
-    </PositionHistoryContext.Provider>
+    </FundingHistoryContext.Provider>
   );
 };
 
-export default PositionHistoryProvider;
+export default FundingHistoryProvider;

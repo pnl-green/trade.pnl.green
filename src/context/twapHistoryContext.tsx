@@ -3,26 +3,24 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress } from '@thirdweb-dev/react';
 
-interface PositionHistoryProps {
-  webData2: AllWebData2 | any;
-  loadingWebData2: boolean;
+interface OrderHistoryProps {
+  twapHistoryData: AllWebData2 | any;
+  loadingTwapData: boolean;
 }
 
-const PositionHistoryContext = createContext({} as PositionHistoryProps);
+const TwapHistoryContext = createContext({} as OrderHistoryProps);
 
-export const usePositionHistoryContext = () => {
-  const context = useContext(PositionHistoryContext);
+export const useTwapHistoryContext = () => {
+  const context = useContext(TwapHistoryContext);
   if (!context) {
-    throw new Error(
-      'context must be used within a PositionHistoryProvider'
-    );
+    throw new Error('context must be used within a TwapHistoryProvider');
   }
   return context;
 };
 
-const PositionHistoryProvider = ({ children }: any) => {
-  const [webData2, setWebData2] = useState<any>([]);
-  const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
+const TwapHistoryProvider = ({ children }: any) => {
+  const [twapHistoryData, setTwapHistoryData] = useState<any>([]);
+  const [loadingTwapData, setLoadingTwapData] = useState<boolean>(true);
   const userAddress = useAddress();
 
   useEffect(() => {
@@ -35,7 +33,7 @@ const PositionHistoryProvider = ({ children }: any) => {
         const message = JSON.stringify({
           method: 'subscribe',
           subscription: {
-            type: 'webData2',
+            type: 'userTwapHistory',
             user: userAddress,
           },
         });
@@ -44,17 +42,17 @@ const PositionHistoryProvider = ({ children }: any) => {
 
       // Listen for messages from the WebSocket server
       ws.onmessage = (event) => {
-        setLoadingWebData2(true);
+        setLoadingTwapData(true);
         const message = JSON.parse(event.data);
         const data = message.data;
 
-        if (message.channel === 'webData2') {
+        if (message.channel === 'userTwapHistory') {
           if (data) {
-            setWebData2(data);
-            setLoadingWebData2(false);
+            setTwapHistoryData(data);
+            setLoadingTwapData(false);
           }
         } else if (message.channel === 'error') {
-          setLoadingWebData2(false);
+          setLoadingTwapData(false);
           console.error('Error:', message.data);
         }
       };
@@ -69,21 +67,21 @@ const PositionHistoryProvider = ({ children }: any) => {
         ws.close();
       };
     } else {
-      setLoadingWebData2(false);
-      setWebData2([]);
+      setLoadingTwapData(false);
+      setTwapHistoryData([]);
     }
   }, [userAddress]);
 
   return (
-    <PositionHistoryContext.Provider
+    <TwapHistoryContext.Provider
       value={{
-        webData2,
-        loadingWebData2,
+        twapHistoryData,
+        loadingTwapData,
       }}
     >
       {children}
-    </PositionHistoryContext.Provider>
+    </TwapHistoryContext.Provider>
   );
 };
 
-export default PositionHistoryProvider;
+export default TwapHistoryProvider;

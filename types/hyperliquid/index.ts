@@ -18,6 +18,12 @@ export type OrderType = {
 
 // ------------------- Info -------------------
 
+export interface AccountProps {
+  name: string;
+  address: string | any;
+  equity: number | any;
+}
+
 export interface SubAccount {
   clearinghouseState: ClearinghouseState;
   master: String;

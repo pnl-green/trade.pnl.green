@@ -3,26 +3,26 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress } from '@thirdweb-dev/react';
 
-interface PositionHistoryProps {
-  webData2: AllWebData2 | any;
-  loadingWebData2: boolean;
+interface OrderHistoryProps {
+  orderHistoryData: AllWebData2 | any;
+  loadingOrderHistory: boolean;
 }
 
-const PositionHistoryContext = createContext({} as PositionHistoryProps);
+const OrderHistoryContext = createContext({} as OrderHistoryProps);
 
-export const usePositionHistoryContext = () => {
-  const context = useContext(PositionHistoryContext);
+export const useOrderHistoryContext = () => {
+  const context = useContext(OrderHistoryContext);
   if (!context) {
     throw new Error(
-      'context must be used within a PositionHistoryProvider'
+      'context must be used within a OrderHistoryProvider'
     );
   }
   return context;
 };
 
-const PositionHistoryProvider = ({ children }: any) => {
-  const [webData2, setWebData2] = useState<any>([]);
-  const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
+const OrderHistoryProvider = ({ children }: any) => {
+  const [orderHistoryData, setOrderHistoryData] = useState<any>([]);
+  const [loadingOrderHistory, setLoadingOrderHistory] = useState<boolean>(true);
   const userAddress = useAddress();
 
   useEffect(() => {
@@ -35,7 +35,7 @@ const PositionHistoryProvider = ({ children }: any) => {
         const message = JSON.stringify({
           method: 'subscribe',
           subscription: {
-            type: 'webData2',
+            type: 'userHistoricalOrders',
             user: userAddress,
           },
         });
@@ -44,17 +44,17 @@ const PositionHistoryProvider = ({ children }: any) => {
 
       // Listen for messages from the WebSocket server
       ws.onmessage = (event) => {
-        setLoadingWebData2(true);
+        setLoadingOrderHistory(true);
         const message = JSON.parse(event.data);
         const data = message.data;
 
-        if (message.channel === 'webData2') {
+        if (message.channel === 'userHistoricalOrders') {
           if (data) {
-            setWebData2(data);
-            setLoadingWebData2(false);
+            setOrderHistoryData(data);
+            setLoadingOrderHistory(false);
           }
         } else if (message.channel === 'error') {
-          setLoadingWebData2(false);
+          setLoadingOrderHistory(false);
           console.error('Error:', message.data);
         }
       };
@@ -69,21 +69,21 @@ const PositionHistoryProvider = ({ children }: any) => {
         ws.close();
       };
     } else {
-      setLoadingWebData2(false);
-      setWebData2([]);
+      setLoadingOrderHistory(false);
+      setOrderHistoryData([]);
     }
   }, [userAddress]);
 
   return (
-    <PositionHistoryContext.Provider
+    <OrderHistoryContext.Provider
       value={{
-        webData2,
-        loadingWebData2,
+        orderHistoryData,
+        loadingOrderHistory,
       }}
     >
       {children}
-    </PositionHistoryContext.Provider>
+    </OrderHistoryContext.Provider>
   );
 };
 
-export default PositionHistoryProvider;
+export default OrderHistoryProvider;

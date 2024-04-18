@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Box,
   Paper,
@@ -8,37 +8,37 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from "@mui/material";
-import { usePositionHistoryContext } from "@/context/positionHistoryContext";
-import { timestampToDateTime } from "../../../utils/toHumanReadableTime";
+} from '@mui/material';
+import { usePositionHistoryContext } from '@/context/positionHistoryContext';
+import { timestampToDateTime } from '../../../utils/toHumanReadableTime';
 
 interface Column {
   id:
-    | "time"
-    | "type"
-    | "coin"
-    | "direction"
-    | "size"
-    | "originalPrice"
-    | "orderValue"
-    | "price"
-    | "triggerCondition"
-    | "tpsl";
+    | 'time'
+    | 'type'
+    | 'coin'
+    | 'direction'
+    | 'size'
+    | 'originalPrice'
+    | 'orderValue'
+    | 'price'
+    | 'triggerCondition'
+    | 'tpsl';
   label: string;
-  align?: "right" | "center" | "left";
+  align?: 'right' | 'center' | 'left';
 }
 
 const columns: Column[] = [
-  { id: "time", label: "Time", align: "center" },
-  { id: "type", label: "Type", align: "center" },
-  { id: "coin", label: "Coin", align: "center" },
-  { id: "direction", label: "Direction", align: "center" },
-  { id: "size", label: "Size", align: "center" },
-  { id: "originalPrice", label: "Original Price", align: "center" },
-  { id: "orderValue", label: "Order Value", align: "center" },
-  { id: "price", label: "Price", align: "center" },
-  { id: "triggerCondition", label: "Trigger Condition", align: "center" },
-  { id: "tpsl", label: "TP/SL", align: "center" },
+  { id: 'time', label: 'Time', align: 'center' },
+  { id: 'type', label: 'Type', align: 'center' },
+  { id: 'coin', label: 'Coin', align: 'center' },
+  { id: 'direction', label: 'Direction', align: 'center' },
+  { id: 'size', label: 'Size', align: 'center' },
+  { id: 'originalPrice', label: 'Original Price', align: 'center' },
+  { id: 'orderValue', label: 'Order Value', align: 'center' },
+  { id: 'price', label: 'Price', align: 'center' },
+  { id: 'triggerCondition', label: 'Trigger Condition', align: 'center' },
+  { id: 'tpsl', label: 'TP/SL', align: 'center' },
 ];
 
 const row: any[] = [];
@@ -46,19 +46,17 @@ const row: any[] = [];
 const OpenOrdersComponentTable = () => {
   const { webData2, loadingWebData2 } = usePositionHistoryContext();
 
-  console.log(webData2.openOrders);
-
   const openOrdersData = webData2.openOrders;
 
   return (
     <Paper
       sx={{
-        width: "100%",
-        overflow: "hidden",
-        background: "transparent",
+        width: '100%',
+        overflow: 'hidden',
+        background: 'transparent',
       }}
     >
-      <TableContainer sx={{ maxHeight: 300, paddingBottom: "60px" }}>
+      <TableContainer sx={{ maxHeight: 300, paddingBottom: '60px' }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -67,10 +65,10 @@ const OpenOrdersComponentTable = () => {
                   key={column.id}
                   align={column.align}
                   sx={{
-                    background: "#100e0e",
-                    color: "white",
-                    padding: "10px",
-                    borderBottom: "2px solid rgba(255, 255, 255, 0.1)",
+                    background: '#100e0e',
+                    color: 'white',
+                    padding: '10px',
+                    borderBottom: '2px solid rgba(255, 255, 255, 0.1)',
                   }}
                 >
                   {column.label}
@@ -82,11 +80,11 @@ const OpenOrdersComponentTable = () => {
             {loadingWebData2 ? (
               <Box
                 sx={{
-                  color: "#fff",
-                  fontFamily: "Sora",
-                  fontWeight: "400",
-                  fontSize: "13px",
-                  p: "10px",
+                  color: '#fff',
+                  fontFamily: 'Sora',
+                  fontWeight: '400',
+                  fontSize: '13px',
+                  p: '10px',
                 }}
               >
                 loading...
@@ -95,11 +93,11 @@ const OpenOrdersComponentTable = () => {
               openOrdersData.length === 0 ? (
               <Box
                 sx={{
-                  color: "#fff",
-                  fontFamily: "Sora",
-                  fontWeight: "400",
-                  fontSize: "13px",
-                  p: "10px",
+                  color: '#fff',
+                  fontFamily: 'Sora',
+                  fontWeight: '400',
+                  fontSize: '13px',
+                  p: '10px',
                 }}
               >
                 No open orders yet
@@ -112,11 +110,11 @@ const OpenOrdersComponentTable = () => {
                       key={index}
                       sx={{
                         td: {
-                          background: "transparent",
-                          color: "white",
-                          padding: "8px",
-                          border: "none",
-                          textAlign: "center",
+                          background: 'transparent',
+                          color: 'white',
+                          padding: '8px',
+                          border: 'none',
+                          textAlign: 'center',
                         },
                       }}
                     >
@@ -128,10 +126,10 @@ const OpenOrdersComponentTable = () => {
                       <TableCell>{row.side}</TableCell>
                       <TableCell>{row.sz}</TableCell>
                       <TableCell>{row.origSz}</TableCell>
-                      <TableCell>{""}</TableCell>
-                      <TableCell>{"row.price"}</TableCell>
+                      <TableCell>{''}</TableCell>
+                      <TableCell>{'row.price'}</TableCell>
                       <TableCell>{row.triggerCondition}</TableCell>
-                      <TableCell>{"row.tp/sl"}</TableCell>
+                      <TableCell>{'row.tp/sl'}</TableCell>
                     </TableRow>
                   );
                 })}
