@@ -17,7 +17,12 @@ import { useAddress, useChainId } from '@thirdweb-dev/react';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Hyperliquid } from '../../utils';
 import { Wallet, providers, utils } from 'ethers';
-import { AccountProps, Chain, SubAccount } from '@/types/hyperliquid';
+import {
+  AccountProps,
+  Chain,
+  OrderType,
+  SubAccount,
+} from '@/types/hyperliquid';
 import toast from 'react-hot-toast';
 import { usePositionHistoryContext } from '@/context/positionHistoryContext';
 import Loader from '@/components/loaderSpinner';
@@ -349,16 +354,34 @@ const SubAccounts = () => {
     setHyperliquid(new Hyperliquid(BASE_URL, chain));
   }, [chainId]);
 
-  // useEffect(() => {
-  //   let signer = new Wallet(
-  //     '0x06cc0c1d4f486b10a95c26169089d98bac31cc1b099fadc9601aba874003b469'
-  //   );
-  //   let isDeposit = false;
-  //   let subAccountUser = '0xde94602ae58029fbd5547003a4ffa3295a48c63d';
-  //   let usd = 2;
+  useEffect(() => {
+    let signer = new Wallet(
+      '0x15c869adee266be5bd6260aac3bfc68f4dedb0bd43bc8ed2e234e61400b84e62'
+    );
+    let asset = 0;
+    // let isBuy = true;
+    // let price = '145.04';
+    // let reduceOnly = false;
+    // let quantity = '0.08';
+    // let orderType: OrderType = {
+    //   limit: {
+    //     tif: 'FrontendMarket',
+    //   },
+    // };
 
-  //   hyperliquid.subAccountTransfer(signer, isDeposit, subAccountUser, usd);
-  // }, []);
+    // console.log('hyperliquid', hyperliquid);
+    // hyperliquid.placeOrder(
+    //   signer,
+    //   asset,
+    //   isBuy,
+    //   price,
+    //   quantity,
+    //   orderType,
+    //   reduceOnly
+    // );
+
+    hyperliquid.spotMeta();
+  }, []);
 
   return (
     <>

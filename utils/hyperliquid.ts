@@ -1,5 +1,12 @@
 import { Wallet, providers, utils, constants } from 'ethers';
-import { Chain, ChainId, OrderType, SubAccount } from '@/types/hyperliquid';
+import {
+  Cancel,
+  CandleSnapshot,
+  Chain,
+  ChainId,
+  OrderType,
+  SubAccount,
+} from '@/types/hyperliquid';
 import { timestamp } from './timestamp';
 import { signInner, signL1Action } from './signing';
 
@@ -43,14 +50,17 @@ export class Hyperliquid {
 
   placeOrder = async (
     signer: Wallet,
-    assetId: number,
+    asset: number,
     isBuy: boolean,
     price: number | string,
     quantity: number | string,
     orderType: OrderType,
-    reduce_only = false,
-    vaultAdress = null
+    reduceOnly = false,
+    cloid: string | null = null,
+    vaultAdress: string | null = null
   ) => {
+    // FIXME: functionality not tested
+
     let nonce = timestamp();
 
     // TODO: parse price and quantity
@@ -59,15 +69,210 @@ export class Hyperliquid {
       grouping: 'na',
       orders: [
         {
-          a: assetId,
+          a: asset,
           b: isBuy,
           p: price,
-          r: reduce_only,
-          s: quantity,
+          s: quantity.toString(),
+          r: reduceOnly,
           t: orderType,
         },
       ],
       type: 'order',
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      exchange: this.exchange,
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(this.EXCHANGE_URL, request);
+  };
+
+  cancelOrder = async (
+    signer: Wallet,
+    cancels: Cancel[],
+    vaultAdress: string | null = null
+  ) => {
+    let nonce = timestamp();
+
+    let action = {
+      type: 'cancel',
+      cancels: cancels.map((cancel) => ({
+        a: cancel.asset,
+        o: cancel.orderID,
+      })),
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      exchange: this.exchange,
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(this.EXCHANGE_URL, request);
+  };
+
+  normalTpSl = async (signer: Wallet, asset: number) => {
+    // TODO: Implement normalTpSl
+  };
+
+  updateLeverage = async (
+    signer: Wallet,
+    asset: number,
+    isCross: boolean,
+    leverage: number,
+    vaultAdress: string | null = null
+  ) => {
+    let nonce = timestamp();
+
+    let action = {
+      type: 'updateLeverage',
+      asset,
+      isCross,
+      leverage,
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      exchange: this.exchange,
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(this.EXCHANGE_URL, request);
+  };
+
+  updateIsolatedMargin = async (
+    signer: Wallet,
+    asset: number,
+    isBuy: boolean,
+    ntli: number,
+    vaultAdress: string | null = null
+  ) => {
+    let nonce = timestamp();
+
+    let action = {
+      type: 'updateIsolatedMargin',
+      asset,
+      isBuy,
+      ntli: utils.parseUnits(ntli.toString(), 6).toNumber(),
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      exchange: this.exchange,
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(this.EXCHANGE_URL, request);
+  };
+
+  // ----------------- EXCHANGE => TWAP <= -----------------
+  placeTwapOrder = async (
+    signer: Wallet,
+    asset: number,
+    isBuy: boolean,
+    minutes: number,
+    reduceOnly: boolean,
+    quantity: number | string,
+    randomize: boolean,
+    vaultAdress: string | null = null
+  ) => {
+    // FIXME: functionality not tested
+    let nonce = timestamp();
+
+    let action = {
+      type: 'twapOrder',
+      a: asset,
+      b: isBuy,
+      m: minutes,
+      r: reduceOnly,
+      s: quantity.toString(),
+      t: randomize,
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      exchange: this.exchange,
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(this.EXCHANGE_URL, request);
+  };
+
+  // ----------------- EXCHANGE => SCALE ORDER <= -----------------
+  placeScaleOrder = async (
+    signer: Wallet,
+    asset: number,
+    isBuy: boolean,
+    quantity: number | string,
+    scale: number,
+    vaultAdress: string | null = null
+  ) => {
+    // FIXME: functionality not tested
+    let nonce = timestamp();
+
+    let orders = [{ a: asset, b: isBuy, s: quantity.toString(), c: scale }];
+
+    let action = {
+      grouping: 'na',
+      type: 'order',
+      orders,
     };
 
     let signature = await signL1Action(
@@ -261,6 +466,45 @@ export class Hyperliquid {
       exchange: this.exchange,
       type: 'subAccounts',
       user,
+    };
+
+    return this.#post(this.INFO_URL, request);
+  };
+
+  historicalOrders = async (user: String) => {
+    let request = {
+      exchange: this.exchange,
+      type: 'historicalOrders',
+      user,
+    };
+
+    return this.#post(this.INFO_URL, request);
+  };
+
+  userFees = async (user: String) => {
+    let request = {
+      exchange: this.exchange,
+      type: 'userFees',
+      user,
+    };
+
+    return this.#post(this.INFO_URL, request);
+  };
+
+  spotMeta = async () => {
+    let request = {
+      exchange: this.exchange,
+      type: 'spotMeta',
+    };
+
+    return this.#post(this.INFO_URL, request);
+  };
+
+  candleSnapshot = async (req: CandleSnapshot) => {
+    let request = {
+      exchange: this.exchange,
+      type: 'candleSnapshot',
+      req,
     };
 
     return this.#post(this.INFO_URL, request);

@@ -6,11 +6,11 @@ import { Hyperliquid } from '@/utils/hyperliquid';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface SubAccountsProps {
-  subaccounts: SubAccount | any;
+  subaccounts: SubAccount[];
   relaodSubAccounts: boolean;
   setReloadSubAccounts: React.Dispatch<React.SetStateAction<boolean>>;
-  hyperliquid: any;
-  setHyperliquid: React.Dispatch<React.SetStateAction<any>>;
+  hyperliquid: Hyperliquid;
+  setHyperliquid: React.Dispatch<React.SetStateAction<Hyperliquid>>;
 }
 
 const SubAccountsContext = createContext({} as SubAccountsProps);
