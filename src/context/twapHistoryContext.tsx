@@ -18,7 +18,7 @@ export const useTwapHistoryContext = () => {
   return context;
 };
 
-const TwapHistoryProvider = ({ children }: any) => {
+const TwapHistoryProvider = ({ children }: { children: React.ReactNode }) => {
   const [twapHistoryData, setTwapHistoryData] = useState<any>([]);
   const [loadingTwapData, setLoadingTwapData] = useState<boolean>(true);
   const userAddress = useAddress();

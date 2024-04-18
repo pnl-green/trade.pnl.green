@@ -8,7 +8,7 @@ interface ModalProps {
   onClose: () => void;
   onConfirm?: () => void;
   createNewAcc?: string | any;
-  setCreateNewAcc?: any;
+  setCreateNewAcc: React.Dispatch<React.SetStateAction<string | any>>;
   isLoading?: boolean;
 }
 

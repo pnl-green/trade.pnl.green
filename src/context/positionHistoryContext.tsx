@@ -13,14 +13,16 @@ const PositionHistoryContext = createContext({} as PositionHistoryProps);
 export const usePositionHistoryContext = () => {
   const context = useContext(PositionHistoryContext);
   if (!context) {
-    throw new Error(
-      'context must be used within a PositionHistoryProvider'
-    );
+    throw new Error('context must be used within a PositionHistoryProvider');
   }
   return context;
 };
 
-const PositionHistoryProvider = ({ children }: any) => {
+const PositionHistoryProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [webData2, setWebData2] = useState<any>([]);
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
   const userAddress = useAddress();

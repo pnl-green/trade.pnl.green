@@ -2,7 +2,7 @@ import React from "react";
 import HeadMetaData from "../headMetadata";
 import Navbar from "../navbar";
 interface LayoutProps {
-  children: any;
+  children: React.ReactNode;
   pageTitle?: string | any;
 }
 

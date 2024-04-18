@@ -5,13 +5,13 @@ import React, { useRef } from "react";
 interface inputProps {
   placeholder?: string | "";
   value?: string;
-  onChange?: any;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   label: string;
 }
 
 interface inputBoxProps extends inputProps {
-  styles?: any;
-  type?: any;
+  styles?: React.CSSProperties;
+  type?: string;
 }
 
 export const RenderInput = ({

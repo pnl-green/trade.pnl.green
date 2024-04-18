@@ -22,7 +22,7 @@ import toast from 'react-hot-toast';
 import { usePositionHistoryContext } from '@/context/positionHistoryContext';
 import Loader from '@/components/loaderSpinner';
 import { useSubAccountsContext } from '@/context/subAccountsContext';
-import { act } from 'react-dom/test-utils';
+import EstablishConnectionModal from '@/components/Modals/establishConnectionModal';
 
 const bgImages = [
   {
@@ -82,6 +82,8 @@ const SubAccounts = () => {
   const [amount, setAmount] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [establishConnModal, setEstablishedConnModal] = useState(false);
 
   const masterAccount: AccountProps = {
     name: 'Master Account',
@@ -163,6 +165,7 @@ const SubAccounts = () => {
         });
         toast.success('Connection established successfully!');
         setEstablishedConnection(true);
+        setEstablishedConnModal(false);
       } else if (
         connectionPromise.msg?.includes(
           'Must deposit before performing actions.'
@@ -230,14 +233,10 @@ const SubAccounts = () => {
         setRenameSubAccModalOpen(false);
         setIsLoading(false);
         setRenameAcc('');
-      } else if (!success && error_type === 'Exchange Error') {
-        // TODO: toast error message
-        toast.error(msg);
-        setIsLoading(false);
       } else {
         setIsLoading(false);
-
         // TODO: toast error message
+        toast.error(msg);
       }
       console.log({ success, data, error_type, msg });
     } catch (error) {
@@ -434,16 +433,24 @@ const SubAccounts = () => {
                     <td>
                       {webData2.length === 0
                         ? '- -'
-                        : `${masterAccount.equity}`}
+                        : `$${Number(masterAccount.equity).toFixed(2)}`}
                     </td>
                     <td className="with-actionBtn paddingRight">
                       {userAddress ? (
-                        <ActionBtn>Trade</ActionBtn>
+                        establishedConnection ? (
+                          <ActionBtn>Trade</ActionBtn>
+                        ) : (
+                          <ActionBtn
+                            onClick={() => setEstablishedConnModal(true)}
+                          >
+                            connect
+                          </ActionBtn>
+                        )
                       ) : (
                         <WalletConnectModal
                           bgColor="transparent"
                           textColor="green"
-                          btnTitle="connect"
+                          btnTitle="Wallet connect"
                         />
                       )}
                     </td>
@@ -518,25 +525,42 @@ const SubAccounts = () => {
                         </td>
                         <td className="center-row" />
                         <td>
-                          {
+                          $
+                          {Number(
                             subAccount.clearinghouseState.marginSummary
                               .accountValue
-                          }
+                          ).toFixed(2)}
                         </td>
-                        <td className="with-actionBtn">
+                        <td
+                          className={
+                            establishedConnection
+                              ? 'with-actionBtn'
+                              : 'with-actionBtn paddingRight'
+                          }
+                        >
                           <span className="actions">
-                            <ActionBtn
-                              onClick={() => {
-                                if (!establishedConnection) {
-                                  toast.error('Establish connection first');
-                                } else {
-                                  toggleTransferModal(subAccount);
-                                }
-                              }}
-                            >
-                              Transfer
-                            </ActionBtn>
-                            <ActionBtn>Trade</ActionBtn>
+                            {establishedConnection ? (
+                              <>
+                                <ActionBtn
+                                  onClick={() => {
+                                    if (!establishedConnection) {
+                                      toast.error('Establish connection first');
+                                    } else {
+                                      toggleTransferModal(subAccount);
+                                    }
+                                  }}
+                                >
+                                  Transfer
+                                </ActionBtn>
+                                <ActionBtn>Trade</ActionBtn>
+                              </>
+                            ) : (
+                              <ActionBtn
+                                onClick={() => setEstablishedConnModal(true)}
+                              >
+                                connect
+                              </ActionBtn>
+                            )}
                           </span>
                         </td>
                       </tr>
@@ -591,6 +615,14 @@ const SubAccounts = () => {
           activeFromAccData={activeFromAccData}
           setActiveFromAccData={setActiveFromAccData}
           isDeposit={isDeposit}
+        />
+      )}
+
+      {establishConnModal && (
+        <EstablishConnectionModal
+          onClose={() => setEstablishedConnModal(false)}
+          onEstablishConnection={handleEstablishConnection}
+          isLoading={isLoading}
         />
       )}
     </>

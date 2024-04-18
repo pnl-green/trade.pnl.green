@@ -13,14 +13,16 @@ const FundingHistoryContext = createContext({} as FundingHistoryProps);
 export const useFundingHistoryContext = () => {
   const context = useContext(FundingHistoryContext);
   if (!context) {
-    throw new Error(
-      'context must be used within a FundingHistoryProvider'
-    );
+    throw new Error('context must be used within a FundingHistoryProvider');
   }
   return context;
 };
 
-const FundingHistoryProvider = ({ children }: any) => {
+const FundingHistoryProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [fundingHistoryData, setFundingHistoryData] = useState<any>([]);
   const [loadingFundingHistoryData, setLoadingFundingHistoryData] =
     useState<boolean>(true);

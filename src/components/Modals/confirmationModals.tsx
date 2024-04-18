@@ -60,10 +60,10 @@ const OuterShell = ({
   onClose,
   removeOutSideClick,
 }: {
-  onClose: any;
-  isDragging: any;
-  children?: any;
-  removeOutSideClick?: any;
+  onClose: () => void;
+  isDragging: boolean;
+  children?: React.ReactNode;
+  removeOutSideClick?: boolean;
 }) => {
   return (
     <Box

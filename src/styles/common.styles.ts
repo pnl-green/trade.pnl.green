@@ -90,9 +90,10 @@ export const TabsButtons = styled(Button)(() => ({
   fontSize: '15px',
   fontWeight: '600',
   fontFamily: 'Sora',
+  transition: 'all 0.3s ease-in-out',
 
   '&:hover': {
-    backgroundColor: '#049260',
+    backgroundColor: '#063021',
   },
   '&.active': {
     backgroundColor: '#049260',

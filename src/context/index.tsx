@@ -8,7 +8,7 @@ import FundingHistoryProvider from './fundingHistoryContext';
 import OrderHistoryProvider from './orderHistoryContext';
 import TwapHistoryProvider from './twapHistoryContext';
 
-const ContextProviders = ({ children }: { children: any }) => {
+const ContextProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <PairTokensProvider>
       <OrderBookTradesProvider>

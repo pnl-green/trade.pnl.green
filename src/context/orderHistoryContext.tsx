@@ -13,14 +13,12 @@ const OrderHistoryContext = createContext({} as OrderHistoryProps);
 export const useOrderHistoryContext = () => {
   const context = useContext(OrderHistoryContext);
   if (!context) {
-    throw new Error(
-      'context must be used within a OrderHistoryProvider'
-    );
+    throw new Error('context must be used within a OrderHistoryProvider');
   }
   return context;
 };
 
-const OrderHistoryProvider = ({ children }: any) => {
+const OrderHistoryProvider = ({ children }: { children: React.ReactNode }) => {
   const [orderHistoryData, setOrderHistoryData] = useState<any>([]);
   const [loadingOrderHistory, setLoadingOrderHistory] = useState<boolean>(true);
   const userAddress = useAddress();

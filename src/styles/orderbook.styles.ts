@@ -2,7 +2,7 @@ import { Box, styled } from "@mui/material";
 
 interface TablerowsProps {
   type?: string;
-  width?: any;
+  width?: string | number;
   side?: string;
   fontSize?: string;
 }

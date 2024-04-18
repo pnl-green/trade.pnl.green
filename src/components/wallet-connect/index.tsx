@@ -1,5 +1,10 @@
-import { Box } from "@mui/material";
-import { ConnectWallet, darkTheme, useDisconnect } from "@thirdweb-dev/react";
+import { Box } from '@mui/material';
+import {
+  ConnectWallet,
+  darkTheme,
+  useDisconnect,
+  useSwitchChain,
+} from '@thirdweb-dev/react';
 
 interface WalletConnProps {
   bgColor?: string;
@@ -14,36 +19,36 @@ export default function WalletConnectModal({
   return (
     <Box
       sx={{
-        height: "40px",
+        height: '40px',
         img: {
-          width: "20px",
-          height: "20px",
+          width: '20px',
+          height: '20px',
         },
       }}
     >
       <ConnectWallet
-        modalSize={"compact"}
+        modalSize={'compact'}
         showThirdwebBranding={false}
         hideSendButton={true}
         hideReceiveButton={true}
         hideSwitchToPersonalWallet={true}
         hideTestnetFaucet={true}
-        btnTitle={btnTitle ? btnTitle : "wallet connect"}
-        modalTitleIconUrl={""}
+        btnTitle={btnTitle ? btnTitle : 'wallet connect'}
+        modalTitleIconUrl={''}
         style={{
-          width: "100%",
-          height: "100%",
-          color: "#fff",
+          width: '100%',
+          height: '100%',
+          color: '#fff',
         }}
         theme={darkTheme({
           colors: {
-            primaryButtonBg: bgColor ? bgColor : "#049260",
-            primaryButtonText: textColor ? textColor : "#fff",
-            skeletonBg: "#049260",
-            accentButtonBg: "#049260",
-            accentText: "#049260",
+            primaryButtonBg: bgColor ? bgColor : '#049260',
+            primaryButtonText: textColor ? textColor : '#fff',
+            skeletonBg: '#049260',
+            accentButtonBg: '#049260',
+            accentText: '#049260',
           },
-          fontFamily: "Sora",
+          fontFamily: 'Sora',
         })}
       />
     </Box>

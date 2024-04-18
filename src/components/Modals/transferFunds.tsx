@@ -6,6 +6,7 @@ import BigNumber from 'bignumber.js';
 import HandleSelectItems from '../handleSelectItems';
 import Loader from '../loaderSpinner';
 import { AccountProps } from '@/types/hyperliquid';
+import toast from 'react-hot-toast';
 
 interface ModalProps {
   onClose: () => void;
@@ -84,6 +85,8 @@ const TransferFunds: React.FC<ModalProps> = ({
     setIsDeposit(selectFromAcc === 'Master Account');
   }, [selectFromAcc]);
 
+  //TODO: Check the isDeposit, selectFromAcc, selectToAcc and disable button
+
   return (
     <ModalWrapper>
       <ClickAwayListener onClickAway={onClose}>
@@ -147,7 +150,7 @@ const TransferFunds: React.FC<ModalProps> = ({
           </ContentBox>
           <ActionBox>
             <GreenBtn
-              disabled={isInputAmountGreaterThanBalance || amount.trim() === '' || !isDeposit}
+              disabled={isInputAmountGreaterThanBalance || amount.trim() === ''}
               onClick={onConfirm}
             >
               {isLoading ? <Loader /> : 'Confirm'}
