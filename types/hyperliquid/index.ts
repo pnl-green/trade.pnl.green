@@ -10,10 +10,32 @@ export enum ChainId {
   Arbitrum = 42161,
 }
 
-export type OrderType = {
-  limit: {
-    tif: 'Gtc' | 'Ioc' | 'Fok';
-  };
+export type OrderType =
+  | {
+      limit: {
+        tif: 'Gtc' | 'Ioc' | 'Alo' | 'FrontendMarket';
+      };
+    }
+  | {
+      trigger: {
+        triggerPx: number;
+        isMarket: boolean;
+        tpsl: 'tp' | 'sl';
+      };
+    };
+
+export type Cancel = {
+  orderID: number;
+  asset: number;
+};
+
+export type Interval = '1m' | '5m' | '15m' | '1h' | '4h' | '1d';
+
+export type CandleSnapshot = {
+  coin: string;
+  endTime: number;
+  interval: Interval;
+  startTime: number;
 };
 
 // ------------------- Info -------------------

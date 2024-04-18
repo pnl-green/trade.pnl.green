@@ -1,14 +1,17 @@
 import { Wallet, providers, utils, constants } from 'ethers';
-import { Chain, ChainId, OrderType, SubAccount } from '@/types/hyperliquid';
+import {
+  Cancel,
+  CandleSnapshot,
+  Chain,
+  ChainId,
+  OrderType,
+  SubAccount,
+} from '@/types/hyperliquid';
 import { timestamp } from './timestamp';
 import { signInner, signL1Action } from './signing';
 
 export class Hyperliquid {
   // ----------------- PRIVATE -----------------
-  private exchange = 'hyperliquid';
-  private EXCHANGE_URL = '/exchange';
-  private INFO_URL = '/info';
-
   private chain: Chain;
   private base_url: string;
 
@@ -20,7 +23,6 @@ export class Hyperliquid {
 
   // ----------------- PROTECTED -----------------
   #post = async (
-    endpoint: string,
     request: Record<string, any>
   ): Promise<{
     success: boolean;
@@ -28,9 +30,7 @@ export class Hyperliquid {
     msg: String | null;
     error_type: String | null;
   }> => {
-    let url = `${this.base_url}${endpoint}`;
-
-    return fetch(url, {
+    return fetch(this.base_url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -43,14 +43,17 @@ export class Hyperliquid {
 
   placeOrder = async (
     signer: Wallet,
-    assetId: number,
+    asset: number,
     isBuy: boolean,
     price: number | string,
     quantity: number | string,
     orderType: OrderType,
-    reduce_only = false,
-    vaultAdress = null
+    reduceOnly = false,
+    cloid: string | null = null,
+    vaultAdress: string | null = null
   ) => {
+    // FIXME: functionality not tested
+
     let nonce = timestamp();
 
     // TODO: parse price and quantity
@@ -59,11 +62,11 @@ export class Hyperliquid {
       grouping: 'na',
       orders: [
         {
-          a: assetId,
+          a: asset,
           b: isBuy,
           p: price,
-          r: reduce_only,
-          s: quantity,
+          s: quantity.toString(),
+          r: reduceOnly,
           t: orderType,
         },
       ],
@@ -79,7 +82,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -87,7 +90,202 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
+  };
+
+  cancelOrder = async (
+    signer: Wallet,
+    cancels: Cancel[],
+    vaultAdress: string | null = null
+  ) => {
+    let nonce = timestamp();
+
+    let action = {
+      type: 'cancel',
+      cancels: cancels.map((cancel) => ({
+        a: cancel.asset,
+        o: cancel.orderID,
+      })),
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      endpoint: 'exchange',
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(request);
+  };
+
+  normalTpSl = async (signer: Wallet, asset: number) => {
+    // TODO: Implement normalTpSl
+  };
+
+  updateLeverage = async (
+    signer: Wallet,
+    asset: number,
+    isCross: boolean,
+    leverage: number,
+    vaultAdress: string | null = null
+  ) => {
+    let nonce = timestamp();
+
+    let action = {
+      type: 'updateLeverage',
+      asset,
+      isCross,
+      leverage,
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      endpoint: 'exchange',
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(request);
+  };
+
+  updateIsolatedMargin = async (
+    signer: Wallet,
+    asset: number,
+    isBuy: boolean,
+    ntli: number,
+    vaultAdress: string | null = null
+  ) => {
+    let nonce = timestamp();
+
+    let action = {
+      type: 'updateIsolatedMargin',
+      asset,
+      isBuy,
+      ntli: utils.parseUnits(ntli.toString(), 6).toNumber(),
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      endpoint: 'exchange',
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(request);
+  };
+
+  // ----------------- EXCHANGE => TWAP <= -----------------
+  placeTwapOrder = async (
+    signer: Wallet,
+    asset: number,
+    isBuy: boolean,
+    minutes: number,
+    reduceOnly: boolean,
+    quantity: number | string,
+    randomize: boolean,
+    vaultAdress: string | null = null
+  ) => {
+    // FIXME: functionality not tested
+    let nonce = timestamp();
+
+    let action = {
+      type: 'twapOrder',
+      a: asset,
+      b: isBuy,
+      m: minutes,
+      r: reduceOnly,
+      s: quantity.toString(),
+      t: randomize,
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      endpoint: 'exchange',
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(request);
+  };
+
+  // ----------------- EXCHANGE => SCALE ORDER <= -----------------
+  placeScaleOrder = async (
+    signer: Wallet,
+    asset: number,
+    isBuy: boolean,
+    quantity: number | string,
+    scale: number,
+    vaultAdress: string | null = null
+  ) => {
+    // FIXME: functionality not tested
+    let nonce = timestamp();
+
+    let orders = [{ a: asset, b: isBuy, s: quantity.toString(), c: scale }];
+
+    let action = {
+      grouping: 'na',
+      type: 'order',
+      orders,
+    };
+
+    let signature = await signL1Action(
+      signer,
+      action,
+      nonce,
+      this.chain,
+      vaultAdress
+    );
+
+    let request = {
+      endpoint: 'exchange',
+      action,
+      isFrontend: true,
+      nonce,
+      signature,
+      vaultAdress,
+    };
+
+    return this.#post(request);
   };
 
   // ----------------- EXCHANGE => SUB ACCOUNTS <= -----------------
@@ -113,7 +311,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -121,7 +319,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   subAccountModify = async (
@@ -147,7 +345,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -155,7 +353,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   subAccountTransfer = async (
@@ -183,7 +381,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -191,7 +389,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   connect = async (
@@ -243,7 +441,7 @@ export class Hyperliquid {
     let signature = await signInner(signer, domain, types, action.agent);
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -251,18 +449,57 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   // ----------------- INFO => SUB ACCOUNTS <= -----------------
 
   subAccounts = async (user: String) => {
     let request = {
-      exchange: this.exchange,
+      endpoint: 'info',
       type: 'subAccounts',
       user,
     };
 
-    return this.#post(this.INFO_URL, request);
+    return this.#post(request);
+  };
+
+  historicalOrders = async (user: String) => {
+    let request = {
+      endpoint: 'info',
+      type: 'historicalOrders',
+      user,
+    };
+
+    return this.#post(request);
+  };
+
+  userFees = async (user: String) => {
+    let request = {
+      endpoint: 'info',
+      type: 'userFees',
+      user,
+    };
+
+    return this.#post(request);
+  };
+
+  spotMeta = async () => {
+    let request = {
+      endpoint: 'info',
+      type: 'spotMeta',
+    };
+
+    return this.#post(request);
+  };
+
+  candleSnapshot = async (req: CandleSnapshot) => {
+    let request = {
+      endpoint: 'info',
+      type: 'candleSnapshot',
+      req,
+    };
+
+    return this.#post(request);
   };
 }
