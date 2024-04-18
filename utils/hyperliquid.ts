@@ -12,10 +12,6 @@ import { signInner, signL1Action } from './signing';
 
 export class Hyperliquid {
   // ----------------- PRIVATE -----------------
-  private exchange = 'hyperliquid';
-  private EXCHANGE_URL = '/exchange';
-  private INFO_URL = '/info';
-
   private chain: Chain;
   private base_url: string;
 
@@ -27,7 +23,6 @@ export class Hyperliquid {
 
   // ----------------- PROTECTED -----------------
   #post = async (
-    endpoint: string,
     request: Record<string, any>
   ): Promise<{
     success: boolean;
@@ -35,9 +30,7 @@ export class Hyperliquid {
     msg: String | null;
     error_type: String | null;
   }> => {
-    let url = `${this.base_url}${endpoint}`;
-
-    return fetch(url, {
+    return fetch(this.base_url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -89,7 +82,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -97,7 +90,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   cancelOrder = async (
@@ -124,7 +117,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -132,7 +125,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   normalTpSl = async (signer: Wallet, asset: number) => {
@@ -164,7 +157,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -172,7 +165,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   updateIsolatedMargin = async (
@@ -200,7 +193,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -208,7 +201,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   // ----------------- EXCHANGE => TWAP <= -----------------
@@ -244,7 +237,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -252,7 +245,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   // ----------------- EXCHANGE => SCALE ORDER <= -----------------
@@ -284,7 +277,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -292,7 +285,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   // ----------------- EXCHANGE => SUB ACCOUNTS <= -----------------
@@ -318,7 +311,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -326,7 +319,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   subAccountModify = async (
@@ -352,7 +345,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -360,7 +353,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   subAccountTransfer = async (
@@ -388,7 +381,7 @@ export class Hyperliquid {
     );
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -396,7 +389,7 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   connect = async (
@@ -448,7 +441,7 @@ export class Hyperliquid {
     let signature = await signInner(signer, domain, types, action.agent);
 
     let request = {
-      exchange: this.exchange,
+      endpoint: 'exchange',
       action,
       isFrontend: true,
       nonce,
@@ -456,57 +449,57 @@ export class Hyperliquid {
       vaultAdress,
     };
 
-    return this.#post(this.EXCHANGE_URL, request);
+    return this.#post(request);
   };
 
   // ----------------- INFO => SUB ACCOUNTS <= -----------------
 
   subAccounts = async (user: String) => {
     let request = {
-      exchange: this.exchange,
+      endpoint: 'info',
       type: 'subAccounts',
       user,
     };
 
-    return this.#post(this.INFO_URL, request);
+    return this.#post(request);
   };
 
   historicalOrders = async (user: String) => {
     let request = {
-      exchange: this.exchange,
+      endpoint: 'info',
       type: 'historicalOrders',
       user,
     };
 
-    return this.#post(this.INFO_URL, request);
+    return this.#post(request);
   };
 
   userFees = async (user: String) => {
     let request = {
-      exchange: this.exchange,
+      endpoint: 'info',
       type: 'userFees',
       user,
     };
 
-    return this.#post(this.INFO_URL, request);
+    return this.#post(request);
   };
 
   spotMeta = async () => {
     let request = {
-      exchange: this.exchange,
+      endpoint: 'info',
       type: 'spotMeta',
     };
 
-    return this.#post(this.INFO_URL, request);
+    return this.#post(request);
   };
 
   candleSnapshot = async (req: CandleSnapshot) => {
     let request = {
-      exchange: this.exchange,
+      endpoint: 'info',
       type: 'candleSnapshot',
       req,
     };
 
-    return this.#post(this.INFO_URL, request);
+    return this.#post(request);
   };
 }
