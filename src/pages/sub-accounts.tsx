@@ -24,10 +24,12 @@ import {
   SubAccount,
 } from '@/types/hyperliquid';
 import toast from 'react-hot-toast';
-import { usePositionHistoryContext } from '@/context/positionHistoryContext';
+import { useWebDataContext } from '@/context/webDataContext';
 import Loader from '@/components/loaderSpinner';
 import { useSubAccountsContext } from '@/context/subAccountsContext';
 import EstablishConnectionModal from '@/components/Modals/establishConnectionModal';
+import { useSwitchTradingAccount } from '@/context/switchTradingAccContext';
+import { useRouter } from 'next/router';
 
 const bgImages = [
   {
@@ -64,10 +66,13 @@ const DEFAULT_AGENT = {
 };
 
 const SubAccounts = () => {
+  const router = useRouter();
+
   //--------------------useContext hooks------------------
-  const { webData2, loadingWebData2 } = usePositionHistoryContext();
+  const { webData2, loadingWebData2 } = useWebDataContext();
   const { subaccounts, hyperliquid, setReloadSubAccounts, setHyperliquid } =
     useSubAccountsContext();
+  const { switchAccountHandler } = useSwitchTradingAccount();
 
   // ------------------ Thirdweb Hooks ------------------
   const userAddress = useAddress();
@@ -241,7 +246,7 @@ const SubAccounts = () => {
       } else {
         setIsLoading(false);
         // TODO: toast error message
-        toast.error(msg);
+        toast.error(`${msg}`);
       }
       console.log({ success, data, error_type, msg });
     } catch (error) {
@@ -303,11 +308,14 @@ const SubAccounts = () => {
   };
 
   // Copy address to clipboard
-  const copyAddress = (address: any, from?: string | 'master' | 'sub-acc') => {
+  const copyAddress = (
+    address: string | undefined,
+    from?: 'master' | 'sub-acc'
+  ) => {
     if (address) {
       navigator.clipboard.writeText(address);
       if (from === 'master') {
-        toast.success('copied to clipboard');
+        toast.success('Copied to clipboard');
       } else if (from === 'sub-acc') {
         toast.error(
           'Warning: You are copying an address that is generated on the Pnl.Green. Do not send funds directly to this address, or your funds will be lost.'
@@ -461,7 +469,14 @@ const SubAccounts = () => {
                     <td className="with-actionBtn paddingRight">
                       {userAddress ? (
                         establishedConnection ? (
-                          <ActionBtn>Trade</ActionBtn>
+                          <ActionBtn
+                            onClick={() => {
+                              switchAccountHandler(userAddress, 'Master');
+                              router.push('/');
+                            }}
+                          >
+                            Trade
+                          </ActionBtn>
                         ) : (
                           <ActionBtn
                             onClick={() => setEstablishedConnModal(true)}
@@ -575,7 +590,17 @@ const SubAccounts = () => {
                                 >
                                   Transfer
                                 </ActionBtn>
-                                <ActionBtn>Trade</ActionBtn>
+                                <ActionBtn
+                                  onClick={() => {
+                                    switchAccountHandler(
+                                      subAccount.subAccountUser,
+                                      subAccount.name
+                                    );
+                                    router.push('/');
+                                  }}
+                                >
+                                  Trade
+                                </ActionBtn>
                               </>
                             ) : (
                               <ActionBtn

@@ -2,26 +2,31 @@ import {
   PnlWrapper,
   TradingViewComponent,
   WalletBox,
-} from "@/styles/pnl.styles";
-import React, { useMemo } from "react";
-import { AdvancedChart } from "react-tradingview-embed";
-import { Box } from "@mui/material";
-import OrderPlacement from "./order-placement-terminal";
-import { FlexItems } from "@/styles/common.styles";
-import PositionsOrdersHistory from "./positions-history-components";
-import ChatComponent from "./chatComponent";
-import OrderBookAndTrades from "./order-book-and-trades";
-import TokenPairInformation from "./token-pair-information";
-import { usePairTokensContext } from "@/context/pairTokensContext";
+} from '@/styles/pnl.styles';
+import React, { useMemo } from 'react';
+import { AdvancedChart } from 'react-tradingview-embed';
+import { Box } from '@mui/material';
+import OrderPlacement from './order-placement-terminal';
+import { FlexItems } from '@/styles/common.styles';
+import PositionsOrdersHistory from './positions-history-components';
+import ChatComponent from './chatComponent';
+import OrderBookAndTrades from './order-book-and-trades';
+import TokenPairInformation from './token-pair-information';
+import { usePairTokensContext } from '@/context/pairTokensContext';
+import { useWebDataContext } from '@/context/webDataContext';
 
 const PnlComponent = () => {
+  //------Context------
   const { tokenPairs } = usePairTokensContext();
+  const { webData2 } = useWebDataContext();
 
-  const renderAdvancedChart = tokenPairs.length > 1;
+  const balance = webData2.clearinghouseState?.marginSummary.accountValue;
+
+  const renderAdvancedChart = tokenPairs.length > 1; //render chart only when token pairs are selected
 
   return (
     <PnlWrapper>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
         <TokenPairInformation />
 
         <TradingViewComponent>
@@ -30,13 +35,13 @@ const PnlComponent = () => {
               renderAdvancedChart ? (
                 <AdvancedChart
                   widgetProps={{
-                    theme: "dark",
-                    locale: "en",
+                    theme: 'dark',
+                    locale: 'en',
                     autosize: true,
                     enable_publishing: false,
                     symbol: tokenPairs
                       ? `${tokenPairs[0]}${tokenPairs[1]}`
-                      : "",
+                      : '',
                   }}
                 />
               ) : null,
@@ -47,32 +52,32 @@ const PnlComponent = () => {
         <PositionsOrdersHistory />
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
         <OrderBookAndTrades />
         <ChatComponent />
       </Box>
 
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "5px",
-          "@media (max-width: 1535px)": {
-            flexDirection: "row",
-            flexWrap: "wrap",
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px',
+          '@media (max-width: 1535px)': {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
           },
-          "@media (max-width: 899px)": {
-            flexDirection: "column",
-            flexWrap: "nowrap",
+          '@media (max-width: 899px)': {
+            flexDirection: 'column',
+            flexWrap: 'nowrap',
           },
         }}
       >
         <OrderPlacement />
 
-        <WalletBox sx={{ span: { fontSize: "15px" } }} id="wallet-component">
+        <WalletBox sx={{ span: { fontSize: '15px' } }} id="wallet-component">
           <FlexItems>
             <span>Balance</span>
-            <span>$0.00</span>
+            <span>{balance ? `$${Number(balance).toFixed(2)}` : '$0.00'}</span>
           </FlexItems>
           <FlexItems>
             <span>uPNL</span>

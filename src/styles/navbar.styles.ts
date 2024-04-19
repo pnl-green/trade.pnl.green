@@ -141,7 +141,7 @@ export const TradingAccSwitcherBtn = styled(Button)<SwitchTradingAccProps>(
       display: 'flex',
       justfyContent: 'center',
       alignItems: 'center',
-      transform: props.tradingAccModal ? 'rotate(180deg)' : 'rotate(0deg)',
+      transform: props.tradingAccModal ? 'rotate(0)' : 'rotate(180deg)',
       transition: 'transform 0.3s ease-in-out',
     },
 
@@ -156,7 +156,7 @@ export const SwitchTradingAccWrapper = styled(Box)(() => ({
   flexDirection: 'column',
   padding: '10px',
   position: 'absolute',
-  top: 'calc(100% + 15px)',
+  top: 'calc(100% + 2px)',
   right: '0',
   width: '216px',
   zIndex: 10,
@@ -176,23 +176,33 @@ export const SwitchTradingAccWrapper = styled(Box)(() => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     cursor: 'pointer',
+    padding: '8px 10px',
 
     ':hover': {
       backgroundColor: 'rgb(41, 41, 41)',
     },
 
     ':nth-last-of-type(2)': {
-      // paddingBottom: '10px',
-      borderBottom: '1px solid #FFFFFF75',
+      borderBottom: '1px solid rgba(255,255,255,0.2)',
     },
   },
 
-  label: {
-    cursor: 'default !important',
-    padding:"8px 10px",
+  '.master': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    img: {
+      display: 'flex',
+      width: '15px',
+      height: '15px',
+    },
   },
+
+  label: {},
   span: {
+    display: 'flex',
     color: '#049260',
     cursor: 'pointer',
+    padding: '5px 10px',
   },
 }));

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavbarContainer, TradingAccSwitcherBtn } from '@/styles/navbar.styles';
 import { Box } from '@mui/material';
 import { TextBtn } from '@/styles/common.styles';
@@ -8,10 +8,12 @@ import { useRouter } from 'next/router';
 import { useAddress } from '@thirdweb-dev/react';
 import UpDownIcon from '../../../public/upDownIcon';
 import SwitchTradingAccountModal from '../Modals/switchTradingAccountModal';
+import { useSwitchTradingAccount } from '@/context/switchTradingAccContext';
 
 const Navbar = () => {
-  //------Third Web Hook------
+  //------Hooks------
   const userAddress = useAddress();
+  const { currentAccount, switchAccountHandler } = useSwitchTradingAccount();
 
   //------Router------
   const router = useRouter();
@@ -23,6 +25,12 @@ const Navbar = () => {
   const toggleSettingsModal = () => setSettingsModal((prev) => !prev);
 
   const toggleTradingAccModal = () => setTradingAccModal((prev) => !prev);
+
+  useEffect(() => {
+    if (!userAddress) {
+      setTradingAccModal(false);
+    }
+  }, [userAddress]);
 
   return (
     <NavbarContainer>
@@ -44,14 +52,16 @@ const Navbar = () => {
               tradingAccModal={tradingAccModal}
               onClick={toggleTradingAccModal}
             >
-              {userAddress.slice(0, 6) + '...' + userAddress.slice(-4)}
+              {currentAccount.address === userAddress
+                ? userAddress.slice(0, 6) + '...' + userAddress.slice(-4)
+                : `Sub: ${currentAccount.name}`}
               <Box className="icon">
                 <UpDownIcon color="#fff" width="10" />
               </Box>
             </TradingAccSwitcherBtn>
             {tradingAccModal && (
               <SwitchTradingAccountModal
-                onClose={toggleTradingAccModal}
+                onClose={() => setTradingAccModal(false)}
               />
             )}
           </Box>

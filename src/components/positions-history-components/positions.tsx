@@ -9,7 +9,7 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import { usePositionHistoryContext } from '@/context/positionHistoryContext';
+import { useWebDataContext } from '@/context/webDataContext';
 
 interface Column {
   id:
@@ -41,7 +41,7 @@ const columns: Column[] = [
 ];
 
 const PositionComponentTable = () => {
-  const { webData2, loadingWebData2 } = usePositionHistoryContext();
+  const { webData2, loadingWebData2 } = useWebDataContext();
 
   const PositionsData = webData2.clearinghouseState?.assetPositions;
 

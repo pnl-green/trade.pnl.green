@@ -3,7 +3,7 @@ import HeadMetaData from "../headMetadata";
 import Navbar from "../navbar";
 interface LayoutProps {
   children: React.ReactNode;
-  pageTitle?: string | any;
+  pageTitle?: string | undefined;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, pageTitle }) => {

@@ -1,15 +1,15 @@
-import React, { useRef, useState } from "react";
-import { Box, ClickAwayListener } from "@mui/material";
-import Draggable from "react-draggable";
-import { CaptionsBtn, SelectItemsBox } from "@/styles/riskManager.styles";
-import { FlexItems, GreenBtn } from "@/styles/common.styles";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import { IconsStyles } from "./styles";
+import React, { useRef, useState } from 'react';
+import { Box, ClickAwayListener } from '@mui/material';
+import Draggable from 'react-draggable';
+import { CaptionsBtn, SelectItemsBox } from '@/styles/riskManager.styles';
+import { FlexItems, GreenBtn } from '@/styles/common.styles';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { IconsStyles } from './styles';
 
 const commonStyles = {
-  width: "100vw",
-  height: "100vh",
-  position: "fixed",
+  width: '100vw',
+  height: '100vh',
+  position: 'fixed',
   top: 0,
   left: 0,
 };
@@ -68,22 +68,22 @@ const OuterShell = ({
   return (
     <Box
       sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
 
-        transition: "background-color 0.3s, backdrop-filter 0.3s",
+        transition: 'background-color 0.3s, backdrop-filter 0.3s',
         ...commonStyles,
         zIndex: 999,
         ...(!removeOutSideClick
           ? {
               backgroundColor: isDragging
-                ? "rgba(0, 0, 0, 0)"
-                : "rgba(0, 0, 0, 0.2)",
-              backdropFilter: isDragging ? "blur(0px)" : "blur(2px)",
+                ? 'rgba(0, 0, 0, 0)'
+                : 'rgba(0, 0, 0, 0.2)',
+              backdropFilter: isDragging ? 'blur(0px)' : 'blur(2px)',
             }
           : {
-              cursor: "not-allowed",
+              cursor: 'not-allowed',
             }),
       }}
     >
@@ -179,24 +179,24 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <Box
           id="isdraggable"
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            width: "279px",
-            height: "auto",
-            minHeight: "300px",
-            backgroundColor: "#080808",
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'relative',
+            width: '279px',
+            height: 'auto',
+            minHeight: '300px',
+            backgroundColor: '#080808',
             boxShadow: xyPositionChange
-              ? "0 0 10px rgba(255, 255, 255, 0.5)"
-              : "",
-            padding: "10px 12px",
-            borderRadius: "4px",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
-            gap: "10px",
-            cursor: !isDragging ? "initial" : "grabbing",
+              ? '0 0 10px rgba(255, 255, 255, 0.5)'
+              : '',
+            padding: '10px 12px',
+            borderRadius: '4px',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            gap: '10px',
+            cursor: !isDragging ? 'initial' : 'grabbing',
 
-            "#span": {
-              fontSize: "10px",
+            '#span': {
+              fontSize: '10px',
             },
           }}
         >
@@ -204,22 +204,22 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             id="dragIcon"
             sx={{
               ...IconsStyles,
-              left: "10px",
-              cursor: isDragging ? "grab" : "grabbing",
+              left: '10px',
+              cursor: isDragging ? 'grab' : 'grabbing',
             }}
             onMouseOver={handleMouseOver}
             onMouseLeave={() => {
               setIsDragging(false);
             }}
           >
-            <DragIndicatorIcon sx={{ fontSize: "small", color: "#fff" }} />
+            <DragIndicatorIcon sx={{ fontSize: 'small', color: '#fff' }} />
           </Box>
           <Box
             id="closeIcon"
             sx={{
               ...IconsStyles,
-              right: "10px",
-              cursor: "pointer",
+              right: '10px',
+              cursor: 'pointer',
             }}
             onClick={onClose}
           >
@@ -228,9 +228,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
               mt: 8,
             }}
           >
@@ -240,20 +240,20 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
           <SelectItemsBox
             sx={{
-              "&:hover": { border: "none" },
-              background: "#34484D",
+              '&:hover': { border: 'none' },
+              background: '#34484D',
               mt: 0,
             }}
           >
-            <span>{isScale || isTwap ? "Total Size" : "Size"}</span>
+            <span>{isScale || isTwap ? 'Total Size' : 'Size'}</span>
             <span>{size}</span>
           </SelectItemsBox>
 
           {isMarket && (
             <SelectItemsBox
               sx={{
-                "&:hover": { border: "none" },
-                background: "#34484D",
+                '&:hover': { border: 'none' },
+                background: '#34484D',
                 mt: 0,
               }}
             >
@@ -265,8 +265,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           {isLimit && (
             <SelectItemsBox
               sx={{
-                "&:hover": { border: "none" },
-                background: "#34484D",
+                '&:hover': { border: 'none' },
+                background: '#34484D',
                 mt: 0,
               }}
             >
@@ -278,8 +278,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           {isScale && (
             <SelectItemsBox
               sx={{
-                "&:hover": { border: "none" },
-                background: "#34484D",
+                '&:hover': { border: 'none' },
+                background: '#34484D',
                 mt: 0,
               }}
             >
@@ -291,8 +291,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           {isChase && (
             <SelectItemsBox
               sx={{
-                "&:hover": { border: "none" },
-                background: "#34484D",
+                '&:hover': { border: 'none' },
+                background: '#34484D',
                 mt: 0,
               }}
             >
@@ -305,8 +305,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <>
               <SelectItemsBox
                 sx={{
-                  "&:hover": { border: "none" },
-                  background: "#34484D",
+                  '&:hover': { border: 'none' },
+                  background: '#34484D',
                   mt: 0,
                 }}
               >
@@ -316,8 +316,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
               <SelectItemsBox
                 sx={{
-                  "&:hover": { border: "none" },
-                  background: "#34484D",
+                  '&:hover': { border: 'none' },
+                  background: '#34484D',
                   mt: 0,
                 }}
               >
@@ -327,13 +327,13 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </>
           )}
           {isScale && (
-            <FlexItems sx={{ gap: "5px" }}>
+            <FlexItems sx={{ gap: '5px' }}>
               <SelectItemsBox
                 sx={{
-                  "&:hover": { border: "none" },
-                  background: "#34484D",
+                  '&:hover': { border: 'none' },
+                  background: '#34484D',
                   mt: 0,
-                  width: "50%",
+                  width: '50%',
                 }}
               >
                 <span>Skew</span>
@@ -341,8 +341,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               </SelectItemsBox>
               <SelectItemsBox
                 sx={{
-                  "&:hover": { border: "none" },
-                  background: "#34484D",
+                  '&:hover': { border: 'none' },
+                  background: '#34484D',
                   mt: 0,
                 }}
               >
@@ -353,11 +353,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           )}
 
           {isTpSl && (
-            <FlexItems sx={{ gap: "5px" }}>
+            <FlexItems sx={{ gap: '5px' }}>
               <SelectItemsBox
                 sx={{
-                  "&:hover": { border: "none" },
-                  background: "#34484D",
+                  '&:hover': { border: 'none' },
+                  background: '#34484D',
                   mt: 0,
                 }}
               >
@@ -366,8 +366,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               </SelectItemsBox>
               <SelectItemsBox
                 sx={{
-                  "&:hover": { border: "none" },
-                  background: "#34484D",
+                  '&:hover': { border: 'none' },
+                  background: '#34484D',
                   mt: 0,
                 }}
               >
@@ -378,11 +378,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           )}
 
           {/*Liquidation & Fee prices */}
-          <FlexItems sx={{ gap: "5px" }}>
+          <FlexItems sx={{ gap: '5px' }}>
             <SelectItemsBox
               sx={{
-                "&:hover": { border: "none" },
-                background: "#34484D",
+                '&:hover': { border: 'none' },
+                background: '#34484D',
                 mt: 0,
               }}
             >
@@ -391,10 +391,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </SelectItemsBox>
             <SelectItemsBox
               sx={{
-                "&:hover": { border: "none" },
-                background: "#34484D",
+                '&:hover': { border: 'none' },
+                background: '#34484D',
                 mt: 0,
-                width: "50%",
+                width: '50%',
               }}
             >
               <span>Fee</span>
@@ -405,9 +405,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <GreenBtn
             onClick={onConfirm}
             sx={{
-              background: isBuyOrSell === "sell" ? "#B04747" : "",
-              ":hover": {
-                background: isBuyOrSell === "sell" ? "#B04747" : "",
+              background: isBuyOrSell === 'sell' ? '#B04747' : '',
+              ':hover': {
+                background: isBuyOrSell === 'sell' ? '#B04747' : '',
               },
             }}
           >

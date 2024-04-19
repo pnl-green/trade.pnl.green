@@ -9,7 +9,7 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import { usePositionHistoryContext } from '@/context/positionHistoryContext';
+import { useWebDataContext } from '@/context/webDataContext';
 import { timestampToDateTime } from '../../../utils/toHumanReadableTime';
 
 interface Column {
@@ -41,10 +41,8 @@ const columns: Column[] = [
   { id: 'tpsl', label: 'TP/SL', align: 'center' },
 ];
 
-const row: any[] = [];
-
 const OpenOrdersComponentTable = () => {
-  const { webData2, loadingWebData2 } = usePositionHistoryContext();
+  const { webData2, loadingWebData2 } = useWebDataContext();
 
   const openOrdersData = webData2.openOrders;
 

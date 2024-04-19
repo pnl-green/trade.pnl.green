@@ -1,9 +1,9 @@
-import { InputBox } from "@/styles/riskManager.styles";
-import { Box } from "@mui/material";
-import React, { useRef } from "react";
+import { InputBox } from '@/styles/riskManager.styles';
+import { Box } from '@mui/material';
+import React, { useRef } from 'react';
 
 interface inputProps {
-  placeholder?: string | "";
+  placeholder?: string | '';
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   label: string;
