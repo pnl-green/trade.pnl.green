@@ -10,7 +10,7 @@ interface inputProps {
 }
 
 interface inputBoxProps extends inputProps {
-  styles?: React.CSSProperties;
+  styles?: React.CSSProperties | any;
   type?: string;
 }
 
