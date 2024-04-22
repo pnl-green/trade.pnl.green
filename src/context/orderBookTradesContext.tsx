@@ -22,7 +22,11 @@ export const useOrderBookTradesContext = () => {
   return context;
 };
 
-const OrderBookTradesProvider = ({ children }: any) => {
+const OrderBookTradesProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const { pair } = usePairTokensContext();
   const [bookData, setBookData] = useState<BookDataProps>({
     asks: [],

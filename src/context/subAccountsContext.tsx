@@ -6,11 +6,11 @@ import { Hyperliquid } from '@/utils/hyperliquid';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 interface SubAccountsProps {
-  subaccounts: SubAccount | any;
+  subaccounts: SubAccount[];
   relaodSubAccounts: boolean;
   setReloadSubAccounts: React.Dispatch<React.SetStateAction<boolean>>;
-  hyperliquid: any;
-  setHyperliquid: React.Dispatch<React.SetStateAction<any>>;
+  hyperliquid: Hyperliquid;
+  setHyperliquid: React.Dispatch<React.SetStateAction<Hyperliquid>>;
 }
 
 const SubAccountsContext = createContext({} as SubAccountsProps);
@@ -18,14 +18,12 @@ const SubAccountsContext = createContext({} as SubAccountsProps);
 export const useSubAccountsContext = () => {
   const context = useContext(SubAccountsContext);
   if (!context) {
-    throw new Error(
-      'useOrderBookTrades must be used within a OrderBookTradesProvider'
-    );
+    throw new Error('context must be used within a SubAccountsProvider');
   }
   return context;
 };
 
-const SubAccountsProvider = ({ children }: any) => {
+const SubAccountsProvider = ({ children }: { children: React.ReactNode }) => {
   //-------Hooks------
   const userAddress = useAddress();
 

@@ -8,7 +8,7 @@ interface ModalProps {
   onClose: () => void;
   onConfirm?: () => void;
   renameAcc?: string | any;
-  setRenameAcc?: any;
+  setRenameAcc: React.Dispatch<React.SetStateAction<string | any>>;
   isLoading?: boolean;
 }
 

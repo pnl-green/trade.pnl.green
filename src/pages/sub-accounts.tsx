@@ -17,12 +17,19 @@ import { useAddress, useChainId } from '@thirdweb-dev/react';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Hyperliquid } from '../../utils';
 import { Wallet, providers, utils } from 'ethers';
-import { AccountProps, Chain, SubAccount } from '@/types/hyperliquid';
+import {
+  AccountProps,
+  Chain,
+  OrderType,
+  SubAccount,
+} from '@/types/hyperliquid';
 import toast from 'react-hot-toast';
-import { usePositionHistoryContext } from '@/context/positionHistoryContext';
+import { useWebDataContext } from '@/context/webDataContext';
 import Loader from '@/components/loaderSpinner';
 import { useSubAccountsContext } from '@/context/subAccountsContext';
-import { act } from 'react-dom/test-utils';
+import EstablishConnectionModal from '@/components/Modals/establishConnectionModal';
+import { useSwitchTradingAccount } from '@/context/switchTradingAccContext';
+import { useRouter } from 'next/router';
 
 const bgImages = [
   {
@@ -59,10 +66,13 @@ const DEFAULT_AGENT = {
 };
 
 const SubAccounts = () => {
+  const router = useRouter();
+
   //--------------------useContext hooks------------------
-  const { webData2, loadingWebData2 } = usePositionHistoryContext();
+  const { webData2, loadingWebData2 } = useWebDataContext();
   const { subaccounts, hyperliquid, setReloadSubAccounts, setHyperliquid } =
     useSubAccountsContext();
+  const { switchAccountHandler } = useSwitchTradingAccount();
 
   // ------------------ Thirdweb Hooks ------------------
   const userAddress = useAddress();
@@ -82,6 +92,8 @@ const SubAccounts = () => {
   const [amount, setAmount] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [establishConnModal, setEstablishedConnModal] = useState(false);
 
   const masterAccount: AccountProps = {
     name: 'Master Account',
@@ -163,6 +175,7 @@ const SubAccounts = () => {
         });
         toast.success('Connection established successfully!');
         setEstablishedConnection(true);
+        setEstablishedConnModal(false);
       } else if (
         connectionPromise.msg?.includes(
           'Must deposit before performing actions.'
@@ -230,14 +243,10 @@ const SubAccounts = () => {
         setRenameSubAccModalOpen(false);
         setIsLoading(false);
         setRenameAcc('');
-      } else if (!success && error_type === 'Exchange Error') {
-        // TODO: toast error message
-        toast.error(msg);
-        setIsLoading(false);
       } else {
         setIsLoading(false);
-
         // TODO: toast error message
+        toast.error(`${msg}`);
       }
       console.log({ success, data, error_type, msg });
     } catch (error) {
@@ -299,11 +308,14 @@ const SubAccounts = () => {
   };
 
   // Copy address to clipboard
-  const copyAddress = (address: any, from?: string | 'master' | 'sub-acc') => {
+  const copyAddress = (
+    address: string | undefined,
+    from?: 'master' | 'sub-acc'
+  ) => {
     if (address) {
       navigator.clipboard.writeText(address);
       if (from === 'master') {
-        toast.success('copied to clipboard');
+        toast.success('Copied to clipboard');
       } else if (from === 'sub-acc') {
         toast.error(
           'Warning: You are copying an address that is generated on the Pnl.Green. Do not send funds directly to this address, or your funds will be lost.'
@@ -349,16 +361,34 @@ const SubAccounts = () => {
     setHyperliquid(new Hyperliquid(BASE_URL, chain));
   }, [chainId]);
 
-  // useEffect(() => {
-  //   let signer = new Wallet(
-  //     '0x06cc0c1d4f486b10a95c26169089d98bac31cc1b099fadc9601aba874003b469'
-  //   );
-  //   let isDeposit = false;
-  //   let subAccountUser = '0xde94602ae58029fbd5547003a4ffa3295a48c63d';
-  //   let usd = 2;
+  useEffect(() => {
+    let signer = new Wallet(
+      '0x15c869adee266be5bd6260aac3bfc68f4dedb0bd43bc8ed2e234e61400b84e62'
+    );
+    let asset = 0;
+    // let isBuy = true;
+    // let price = '145.04';
+    // let reduceOnly = false;
+    // let quantity = '0.08';
+    // let orderType: OrderType = {
+    //   limit: {
+    //     tif: 'FrontendMarket',
+    //   },
+    // };
 
-  //   hyperliquid.subAccountTransfer(signer, isDeposit, subAccountUser, usd);
-  // }, []);
+    // console.log('hyperliquid', hyperliquid);
+    // hyperliquid.placeOrder(
+    //   signer,
+    //   asset,
+    //   isBuy,
+    //   price,
+    //   quantity,
+    //   orderType,
+    //   reduceOnly
+    // );
+
+    hyperliquid.spotMeta();
+  }, []);
 
   return (
     <>
@@ -434,16 +464,31 @@ const SubAccounts = () => {
                     <td>
                       {webData2.length === 0
                         ? '- -'
-                        : `${masterAccount.equity}`}
+                        : `$${Number(masterAccount.equity).toFixed(2)}`}
                     </td>
                     <td className="with-actionBtn paddingRight">
                       {userAddress ? (
-                        <ActionBtn>Trade</ActionBtn>
+                        establishedConnection ? (
+                          <ActionBtn
+                            onClick={() => {
+                              switchAccountHandler(userAddress, 'Master');
+                              router.push('/');
+                            }}
+                          >
+                            Trade
+                          </ActionBtn>
+                        ) : (
+                          <ActionBtn
+                            onClick={() => setEstablishedConnModal(true)}
+                          >
+                            connect
+                          </ActionBtn>
+                        )
                       ) : (
                         <WalletConnectModal
                           bgColor="transparent"
                           textColor="green"
-                          btnTitle="connect"
+                          btnTitle="Wallet connect"
                         />
                       )}
                     </td>
@@ -518,25 +563,52 @@ const SubAccounts = () => {
                         </td>
                         <td className="center-row" />
                         <td>
-                          {
+                          $
+                          {Number(
                             subAccount.clearinghouseState.marginSummary
                               .accountValue
-                          }
+                          ).toFixed(2)}
                         </td>
-                        <td className="with-actionBtn">
+                        <td
+                          className={
+                            establishedConnection
+                              ? 'with-actionBtn'
+                              : 'with-actionBtn paddingRight'
+                          }
+                        >
                           <span className="actions">
-                            <ActionBtn
-                              onClick={() => {
-                                if (!establishedConnection) {
-                                  toast.error('Establish connection first');
-                                } else {
-                                  toggleTransferModal(subAccount);
-                                }
-                              }}
-                            >
-                              Transfer
-                            </ActionBtn>
-                            <ActionBtn>Trade</ActionBtn>
+                            {establishedConnection ? (
+                              <>
+                                <ActionBtn
+                                  onClick={() => {
+                                    if (!establishedConnection) {
+                                      toast.error('Establish connection first');
+                                    } else {
+                                      toggleTransferModal(subAccount);
+                                    }
+                                  }}
+                                >
+                                  Transfer
+                                </ActionBtn>
+                                <ActionBtn
+                                  onClick={() => {
+                                    switchAccountHandler(
+                                      subAccount.subAccountUser,
+                                      subAccount.name
+                                    );
+                                    router.push('/');
+                                  }}
+                                >
+                                  Trade
+                                </ActionBtn>
+                              </>
+                            ) : (
+                              <ActionBtn
+                                onClick={() => setEstablishedConnModal(true)}
+                              >
+                                connect
+                              </ActionBtn>
+                            )}
                           </span>
                         </td>
                       </tr>
@@ -591,6 +663,14 @@ const SubAccounts = () => {
           activeFromAccData={activeFromAccData}
           setActiveFromAccData={setActiveFromAccData}
           isDeposit={isDeposit}
+        />
+      )}
+
+      {establishConnModal && (
+        <EstablishConnectionModal
+          onClose={() => setEstablishedConnModal(false)}
+          onEstablishConnection={handleEstablishConnection}
+          isLoading={isLoading}
         />
       )}
     </>

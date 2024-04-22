@@ -1,6 +1,6 @@
-import { SettingsModalWrapper, StyledCheckBox } from "@/styles/navbar.styles";
-import { Box, ClickAwayListener } from "@mui/material";
-import React, { useState } from "react";
+import { SettingsModalWrapper, StyledCheckBox } from '@/styles/navbar.styles';
+import { Box, ClickAwayListener } from '@mui/material';
+import React, { useState } from 'react';
 
 interface settingsProps {
   onClose: () => void;
@@ -11,14 +11,14 @@ type SettingsState = {
 };
 
 const settingsOptions = [
-  { id: "skipOrderOpen", label: "Skip Order Open Confirmation" },
-  { id: "skipOrderClose", label: "Skip Order Close Confirmation" },
-  { id: "persistentConnection", label: "Persistent Trading Connection" },
-  { id: "customizeLayout", label: "Customize Layout" },
-  { id: "orderbookSetSize", label: "Orderbook Set Size on Click" },
-  { id: "displayVerboseErrors", label: "Display Verbose Errors" },
-  { id: "displayNotification", label: "Display Notification" },
-  { id: "showWarnings", label: "Show Warnings" },
+  { id: 'skipOrderOpen', label: 'Skip Order Open Confirmation' },
+  { id: 'skipOrderClose', label: 'Skip Order Close Confirmation' },
+  { id: 'persistentConnection', label: 'Persistent Trading Connection' },
+  { id: 'customizeLayout', label: 'Customize Layout' },
+  { id: 'orderbookSetSize', label: 'Orderbook Set Size on Click' },
+  { id: 'displayVerboseErrors', label: 'Display Verbose Errors' },
+  { id: 'displayNotification', label: 'Display Notification' },
+  { id: 'showWarnings', label: 'Show Warnings' },
 ];
 const SettingsModal: React.FC<settingsProps> = ({ onClose }) => {
   const [settings, setSettings] = useState<SettingsState>({
@@ -80,7 +80,7 @@ const SettingsModal: React.FC<settingsProps> = ({ onClose }) => {
               onChange={handleSettingChange(option.id)}
             />
           ))}
-          <Box sx={{ padding: "2px 0" }} onClick={resetToDefault}>
+          <Box sx={{ padding: '2px 0' }} onClick={resetToDefault}>
             <label>
               <span>Return to Default Layout</span>
             </label>

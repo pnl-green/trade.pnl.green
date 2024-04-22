@@ -34,7 +34,7 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    transform: props.tableISOpen ? "rotate(180deg)" : "rotate(0deg)",
+    transform: props.tableISOpen ? "rotate(0)" : "rotate(180deg)",
     transition: "transform 0.3s ease-in-out",
     img: {
       width: "12px",

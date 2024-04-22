@@ -3,24 +3,22 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress } from '@thirdweb-dev/react';
 
-interface PositionHistoryProps {
+interface WebDataProps {
   webData2: AllWebData2 | any;
   loadingWebData2: boolean;
 }
 
-const PositionHistoryContext = createContext({} as PositionHistoryProps);
+const WebDataContext = createContext({} as WebDataProps);
 
-export const usePositionHistoryContext = () => {
-  const context = useContext(PositionHistoryContext);
+export const useWebDataContext = () => {
+  const context = useContext(WebDataContext);
   if (!context) {
-    throw new Error(
-      'context must be used within a PositionHistoryProvider'
-    );
+    throw new Error('context must be used within a WebDataProvider');
   }
   return context;
 };
 
-const PositionHistoryProvider = ({ children }: any) => {
+const WebDataProvider = ({ children }: { children: React.ReactNode }) => {
   const [webData2, setWebData2] = useState<any>([]);
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
   const userAddress = useAddress();
@@ -75,15 +73,15 @@ const PositionHistoryProvider = ({ children }: any) => {
   }, [userAddress]);
 
   return (
-    <PositionHistoryContext.Provider
+    <WebDataContext.Provider
       value={{
         webData2,
         loadingWebData2,
       }}
     >
       {children}
-    </PositionHistoryContext.Provider>
+    </WebDataContext.Provider>
   );
 };
 
-export default PositionHistoryProvider;
+export default WebDataProvider;

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TokenPairsWrapper } from '@/styles/tokenPairs.styles';
 import { Box } from '@mui/material';
 import { PairData } from '../../../types/hyperliquid';
+import UpDownIcon from '../../../public/upDownIcon';
 
 interface SingleTokenPairInfoProps {
   tableISOpen: boolean;
@@ -26,7 +27,7 @@ const SingleTokenPairInfo = ({
       <Box className="pair_tokens" onClick={toggleTablePairs}>
         <span>{selectPairsToken?.symbol}</span>
         <div className="upDownIcon">
-          <img src="/upDownIcon.svg" alt="" />
+          <UpDownIcon />
         </div>
       </Box>
 

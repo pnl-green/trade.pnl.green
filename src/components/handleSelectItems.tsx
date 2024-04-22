@@ -3,7 +3,7 @@ import { ItemsSelect } from "@/styles/common.styles";
 
 export interface HandleSelectProps {
   selectItem: any;
-  setSelectItem: any;
+  setSelectItem: React.Dispatch<React.SetStateAction<any>>;
   selectDataItems: string[];
   styles?: React.CSSProperties;
   className?: string;

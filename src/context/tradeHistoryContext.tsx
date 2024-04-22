@@ -13,14 +13,12 @@ const TradeHistoryContext = createContext({} as TradeHistoryProps);
 export const useTradeHistoryContext = () => {
   const context = useContext(TradeHistoryContext);
   if (!context) {
-    throw new Error(
-      'context must be used within a TradeHistoryProvider'
-    );
+    throw new Error('context must be used within a TradeHistoryProvider');
   }
   return context;
 };
 
-const TradeHistoryProvider = ({ children }: any) => {
+const TradeHistoryProvider = ({ children }: { children: React.ReactNode }) => {
   const [tradeHistoryData, setTradeHistoryData] = useState<any>([]);
   const [loadingTradeHistoryData, setLoadingTradeHistoryData] =
     useState<boolean>(true);

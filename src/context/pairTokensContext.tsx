@@ -28,7 +28,7 @@ export const usePairTokensContext = () => {
   return context;
 };
 
-export const PairTokensProvider = ({ children }: any) => {
+const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedPairsTokenData, setSelectPairsTokenData] =
     useState<PairData | null>(pairDataArray[0]);
   const [tokenPairs, setTokenPairs] = useState<tokenPairs | any>({});
@@ -70,3 +70,5 @@ export const PairTokensProvider = ({ children }: any) => {
     </PairTokensContext.Provider>
   );
 };
+
+export default PairTokensProvider;

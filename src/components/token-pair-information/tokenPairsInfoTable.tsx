@@ -13,10 +13,10 @@ import { pairDataArray } from "@/context/tabledummydata";
 interface TokenPairsInfoTableProps {
   handleClose?: () => void;
   fav?: any;
-  setFav?: any;
+  setFav?: React.Dispatch<React.SetStateAction<any>>;
   id?: any;
   selectPairsToken?: any;
-  setSelectPairsToken?: any;
+  setSelectPairsToken?: React.Dispatch<React.SetStateAction<any>>;
 }
 
 //on click of star icon return the filled start else the outlined star
@@ -26,11 +26,11 @@ const FavButton = ({ fav, setFav, id }: TokenPairsInfoTableProps) => {
     const indexExists = newFav.indexOf(id) !== -1; //check if the id is already selected
     if (indexExists) {
       // Deselect the row
-      setFav(newFav.filter((favIndex) => favIndex !== id));
+      setFav?.(newFav.filter((favIndex) => favIndex !== id));
     } else {
       // Select the row
       newFav.push(id);
-      setFav(newFav);
+      setFav?.(newFav);
     }
   };
 
@@ -72,7 +72,7 @@ const TokenPairsInfoTable = ({
   const handleSelectPairs = (data: any, event: any) => {
     if (event.target.tagName === "svg" || event.target.tagName === "path")
       return;
-    setSelectPairsToken(data);
+    setSelectPairsToken?.(data);
   };
 
   // Sort the data based on the fav array

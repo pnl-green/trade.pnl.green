@@ -32,12 +32,16 @@ const options = [
 const OrderPlacementTerminal = () => {
   const [activeTab, setActiveTab] = useState('Market'); // Track the active tab
   const [activeButton, setActiveButton] = useState<string | null>(null); // Track the active modal button
+  // ------Modal Visibility states------
   const [modals, setModals] = useState<optionsProps>({
     riskManager: false,
     leverage: false,
     marginType: false,
   });
-  // Manage modal visibility
+
+  //------Risk Manager States------
+  const [portfolioValue, setPortfolioValue] = useState<string | number>('');
+  const [AmountValue, setAmountValue] = useState<string | number>('');
 
   // Toggle the visibility of a modal and set the active button
   const toggleModal = (modalType: string) => {
@@ -84,10 +88,22 @@ const OrderPlacementTerminal = () => {
 
       {/* Render modals based on the modals state */}
       {modals.riskManager && (
-        <RiskManagerModal onClose={() => closeModal('riskManager')} />
+        <RiskManagerModal
+          onClose={() => closeModal('riskManager')}
+          portfolioValue={portfolioValue}
+          setPortfolioValue={setPortfolioValue}
+          AmountValue={AmountValue}
+          setAmountValue={setAmountValue}
+        />
       )}
       {modals.leverage && (
-        <LeverageModal onClose={() => closeModal('leverage')} />
+        <LeverageModal
+          onClose={() => {
+            closeModal('leverage');
+            setPortfolioValue('');
+            setAmountValue('');
+          }}
+        />
       )}
       {modals.marginType && (
         <MarginTypeModal onClose={() => closeModal('marginType')} />
