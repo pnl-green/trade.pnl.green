@@ -182,7 +182,7 @@ const SubAccounts = () => {
 
         // set agent to session storage
         sessionStorage.setItem(
-          `${SESSION_STORAGE_PREFIX}.agent.${userAddress}`,
+          `${SESSION_STORAGE_PREFIX}.agent.${userAddress.toLowerCase()}`,
           JSON.stringify({
             agentAddress,
             userAddress,
@@ -257,7 +257,7 @@ const SubAccounts = () => {
         setRenameAcc('');
       } else {
         setIsLoading(false);
-        toast.error(`${msg}`);
+        toast.error((msg || 'Error ocured please try again').toString());
       }
       console.log({ success, data, msg });
     } catch (error) {
@@ -306,7 +306,7 @@ const SubAccounts = () => {
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-      toast.error('error ocured please try again');
+      toast.error('Error occured please try again');
     }
   };
 

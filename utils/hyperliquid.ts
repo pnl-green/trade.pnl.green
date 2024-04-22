@@ -1,9 +1,11 @@
 import { providers, utils, constants } from 'ethers';
 import {
+  AssetCtx,
   Cancel,
   CandleSnapshot,
   Chain,
   ChainId,
+  Meta,
   OrderType,
   SubAccount,
 } from '@/types/hyperliquid';
@@ -43,25 +45,26 @@ export class Hyperliquid {
   placeOrder = async (
     asset: number,
     isBuy: boolean,
-    price: number | string,
-    quantity: number | string,
+    limitPx: number | string,
+    sz: number | string,
     orderType: OrderType,
     reduceOnly = false,
     cloid: string | null = null,
     vaultAdress: string | null = null
   ) => {
-    // TODO: parse price and quantity
+    // TODO: parse limitPx and sz
 
     let action = {
       grouping: 'na',
       orders: [
         {
-          a: asset,
-          b: isBuy,
-          p: price,
-          s: quantity.toString(),
-          r: reduceOnly,
-          t: orderType,
+          asset,
+          isBuy,
+          limitPx,
+          sz,
+          reduceOnly,
+          orderType,
+          cloid,
         },
       ],
       type: 'order',
@@ -375,5 +378,13 @@ export class Hyperliquid {
     };
 
     return this.#post(request);
+  };
+
+  metaAndAssetCtxs = async (meta: Meta, assetCtxs: AssetCtx[]) => {
+    return meta.universe.map((universe, assetId) => ({
+      assetId,
+      universe,
+      assetCtx: assetCtxs[assetId],
+    }));
   };
 }

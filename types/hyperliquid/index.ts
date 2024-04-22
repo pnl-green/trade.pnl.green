@@ -38,6 +38,29 @@ export type CandleSnapshot = {
   startTime: number;
 };
 
+export interface Meta {
+  universe: Universe[];
+}
+
+export interface Universe {
+  szDecimals: number;
+  name: string;
+  maxLeverage: number;
+  onlyIsolated: boolean;
+}
+
+export interface AssetCtx {
+  funding: string;
+  openInterest: string;
+  prevDayPx: string;
+  dayNtlVlm: string;
+  premium: string;
+  oraclePx: string;
+  markPx: string;
+  midPx: string;
+  impactPxs: string[];
+}
+
 // ------------------- Info -------------------
 
 export interface AccountProps {
