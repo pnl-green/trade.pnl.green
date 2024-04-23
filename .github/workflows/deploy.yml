@@ -1,0 +1,54 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build backend
+        working-directory: ./backend
+        run: |
+
+          echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env    
+          echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env    
+
+          echo "LEVEL=${{ secrets.LEVEL }}" >> .env    
+
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env    
+
+          echo "COOKIE_KEY=${{ secrets.COOKIE_KEY }}" >> .env
+
+      - name:
+        uses: rust-build/rust-build.action@v1.4.5
+        with:
+          RUSTTARGET: x86_64-unknown-linux-musl
+          UPLOAD_MODE: none
+          SRC_DIR: backend
+
+      - name: Deploy to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_SERVER_HOST }}
+          username: ${{ secrets.EC2_SERVER_USERNAME }}
+          key: ${{ secrets.EC2_SERVER_KEY }}
+          source: "{{ steps.compile.outputs.BUILT_ARCHIVE }},./backend/.env"
+          target: ${{ secrets.EC2_SERVER_TARGET }}
+
+      - name: Restart server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_SERVER_HOST }}
+          username: ${{ secrets.EC2_SERVER_USERNAME }}
+          key: ${{ secrets.EC2_SERVER_KEY }}
+          script: |
+            cd ${{ secrets.EC2_SERVER_TARGET }}
+            cd backend
+            pm2 restart all
