@@ -33,7 +33,7 @@ jobs:
           RUSTTARGET: x86_64-unknown-linux-musl
           UPLOAD_MODE: none
           SRC_DIR: backend
-          EXTRA_FILES: ".env"
+          # EXTRA_FILES: ".env"
 
       - name: Deploy to EC2
         uses: appleboy/scp-action@v0.1.4
