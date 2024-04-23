@@ -17,8 +17,8 @@ import { useWebDataContext } from '@/context/webDataContext';
 
 const PnlComponent = () => {
   //------Context------
-  const { tokenPairs } = usePairTokensContext();
   const { webData2 } = useWebDataContext();
+  const { tokenPairs } = usePairTokensContext();
 
   const balance = webData2.clearinghouseState?.marginSummary.accountValue;
 

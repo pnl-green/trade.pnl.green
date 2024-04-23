@@ -38,16 +38,13 @@ const SubAccountsProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (userAddress) {
-      hyperliquid
-        .subAccounts(userAddress)
-        .then(({ data, success, error_type, msg }) => {
-          success && data && setSubAccounts(data as SubAccount[]);
+      hyperliquid.subAccounts(userAddress).then(({ data, success, msg }) => {
+        success && data && setSubAccounts(data as SubAccount[]);
 
-          if (!success) {
-            // TODO: toast error message ???
-            console.error({ error_type, msg });
-          }
-        });
+        if (!success) {
+          console.error({ msg });
+        }
+      });
     }
   }, [hyperliquid, relaodSubAccounts, userAddress]);
 

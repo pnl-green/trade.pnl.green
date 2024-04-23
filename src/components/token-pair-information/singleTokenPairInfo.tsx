@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TokenPairsWrapper } from '@/styles/tokenPairs.styles';
 import { Box } from '@mui/material';
-import { PairData } from '../../../types/hyperliquid';
 import UpDownIcon from '../../../public/upDownIcon';
+import { usePairTokensContext } from '@/context/pairTokensContext';
 
 interface SingleTokenPairInfoProps {
   tableISOpen: boolean;
   toggleTablePairs: () => void;
-  selectPairsToken?: PairData | null;
 }
 
 const PairDetail = ({ label, value, isRed }: any) => (
@@ -20,36 +19,55 @@ const PairDetail = ({ label, value, isRed }: any) => (
 const SingleTokenPairInfo = ({
   tableISOpen,
   toggleTablePairs,
-  selectPairsToken,
 }: SingleTokenPairInfoProps) => {
+  const { tokenPairData, assetId } = usePairTokensContext();
+
   return (
     <TokenPairsWrapper tableISOpen={tableISOpen}>
       <Box className="pair_tokens" onClick={toggleTablePairs}>
-        <span>{selectPairsToken?.symbol}</span>
+        <span>{tokenPairData[assetId]?.pairs}</span>
         <div className="upDownIcon">
           <UpDownIcon />
         </div>
       </Box>
 
-      <PairDetail label="Mark Price" value={selectPairsToken?.markPrice} />
-      <PairDetail label="Oracle Price" value={selectPairsToken?.oraclePrice} />
+      <PairDetail
+        label="Mark Price"
+        value={tokenPairData[assetId]?.assetCtx?.markPx}
+      />
+      <PairDetail
+        label="Oracle Price"
+        value={tokenPairData[assetId]?.assetCtx?.oraclePx}
+      />
       <Box className="pairDetails">
         <span>
           24hr change(<span id="toRed">in % </span>and <span id="toRed">$</span>
           )
         </span>
         <span className="value" id="toRed">
-          {selectPairsToken?.hr24change}
+          {tokenPairData[assetId]?.hr24change
+            ? tokenPairData[assetId]?.hr24change
+            : '--'}
         </span>
       </Box>
-      <PairDetail label="24hr Volume" value={selectPairsToken?.volume} />
-      <PairDetail label="OI" value="32000" />
+      <PairDetail
+        label="24hr Volume"
+        value={
+          tokenPairData[assetId]?.volume ? tokenPairData[assetId]?.volume : '--'
+        }
+      />
+      <PairDetail
+        label="OI"
+        value={tokenPairData[assetId]?.assetCtx?.openInterest}
+      />
       <Box className="pairDetails">
         <span>Funding/Funding Countdown</span>
         <span className="value">
-          <span id="toGreen">{selectPairsToken?.funding}&nbsp;&nbsp; </span>
+          <span id="toGreen">
+            {tokenPairData[assetId]?.funding}&nbsp;&nbsp;{' '}
+          </span>
           &nbsp;&nbsp;
-          {selectPairsToken?.countDown}
+          {tokenPairData[assetId]?.countDown}
         </span>
       </Box>
     </TokenPairsWrapper>
