@@ -13,7 +13,7 @@ import {
   SubAccountsInnerBox,
 } from '@/styles/subAccounts.styles';
 import { Box } from '@mui/material';
-import { useAddress, useChainId } from '@thirdweb-dev/react';
+import { useAddress } from '@thirdweb-dev/react';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Hyperliquid } from '../../utils';
 import { providers } from 'ethers';
@@ -51,8 +51,6 @@ const bgImages = [
   },
 ];
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
-
 const SESSION_STORAGE_PREFIX = 'pnl.green';
 
 const DEFAULT_AGENT = {
@@ -65,13 +63,12 @@ const SubAccounts = () => {
 
   //--------------------useContext hooks------------------
   const { webData2, loadingWebData2 } = useWebDataContext();
-  const { subaccounts, hyperliquid, setReloadSubAccounts, setHyperliquid } =
+  const { subaccounts, hyperliquid, setReloadSubAccounts } =
     useSubAccountsContext();
   const { switchAccountHandler } = useSwitchTradingAccount();
 
   // ------------------ Thirdweb Hooks ------------------
   const userAddress = useAddress();
-  const chainId = useChainId();
 
   // ------------------ Local State ------------------
   const [establishedConnection, setEstablishedConnection] = useState(false);
@@ -357,12 +354,6 @@ const SubAccounts = () => {
       setAllAccountsData([...restructuredAccounts, masterAccount]);
     }
   }, [subaccounts]);
-
-  useEffect(() => {
-    let chain = chainId === 42161 ? Chain.Arbitrum : Chain.ArbitrumTestnet;
-
-    setHyperliquid(new Hyperliquid(BASE_URL, chain));
-  }, [chainId]);
 
   return (
     <>

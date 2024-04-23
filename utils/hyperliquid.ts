@@ -67,11 +67,11 @@ export class Hyperliquid {
           cloid,
         },
       ],
-      type: 'order',
     };
 
     let request = {
       endpoint: 'exchange',
+      type: 'order',
       action,
       vaultAdress,
     };
@@ -84,7 +84,6 @@ export class Hyperliquid {
     vaultAdress: string | null = null
   ) => {
     let action = {
-      type: 'cancel',
       cancels: cancels.map((cancel) => ({
         a: cancel.asset,
         o: cancel.orderID,
@@ -93,6 +92,7 @@ export class Hyperliquid {
 
     let request = {
       endpoint: 'exchange',
+      type: 'cancel',
       action,
       vaultAdress,
     };
