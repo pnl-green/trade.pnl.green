@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useAddress } from '@thirdweb-dev/react';
-import { SubAccount } from '@/types/hyperliquid';
+import { useAddress, useChainId } from '@thirdweb-dev/react';
+import { Chain, SubAccount } from '@/types/hyperliquid';
 import { Hyperliquid } from '@/utils/hyperliquid';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
 
 interface SubAccountsProps {
   subaccounts: SubAccount[];
@@ -26,6 +26,7 @@ export const useSubAccountsContext = () => {
 const SubAccountsProvider = ({ children }: { children: React.ReactNode }) => {
   //-------Hooks------
   const userAddress = useAddress();
+  const chainId = useChainId();
 
   //------Local State------
   const [subaccounts, setSubAccounts] = useState<SubAccount[]>([]);
@@ -38,18 +39,22 @@ const SubAccountsProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (userAddress) {
-      hyperliquid
-        .subAccounts(userAddress)
-        .then(({ data, success, error_type, msg }) => {
-          success && data && setSubAccounts(data as SubAccount[]);
+      hyperliquid.subAccounts(userAddress).then(({ data, success, msg }) => {
+        success && data && setSubAccounts(data as SubAccount[]);
 
-          if (!success) {
-            // TODO: toast error message ???
-            console.error({ error_type, msg });
-          }
-        });
+        if (!success) {
+          // TODO: toast error message ???
+          console.error({ msg });
+        }
+      });
     }
   }, [hyperliquid, relaodSubAccounts, userAddress]);
+
+  useEffect(() => {
+    let chain = chainId === 42161 ? Chain.Arbitrum : Chain.ArbitrumTestnet;
+
+    setHyperliquid(new Hyperliquid(BASE_URL, chain));
+  }, [chainId]);
 
   return (
     <SubAccountsContext.Provider

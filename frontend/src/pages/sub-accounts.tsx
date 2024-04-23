@@ -13,16 +13,11 @@ import {
   SubAccountsInnerBox,
 } from '@/styles/subAccounts.styles';
 import { Box } from '@mui/material';
-import { useAddress, useChainId } from '@thirdweb-dev/react';
+import { useAddress } from '@thirdweb-dev/react';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Hyperliquid } from '../../utils';
-import { Wallet, providers, utils } from 'ethers';
-import {
-  AccountProps,
-  Chain,
-  OrderType,
-  SubAccount,
-} from '@/types/hyperliquid';
+import { providers } from 'ethers';
+import { AccountProps, Chain, SubAccount } from '@/types/hyperliquid';
 import toast from 'react-hot-toast';
 import { useWebDataContext } from '@/context/webDataContext';
 import Loader from '@/components/loaderSpinner';
@@ -56,12 +51,10 @@ const bgImages = [
   },
 ];
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
-
 const SESSION_STORAGE_PREFIX = 'pnl.green';
 
 const DEFAULT_AGENT = {
-  privateKey: '',
+  agentAddress: '',
   userAddress: '',
 };
 
@@ -70,13 +63,12 @@ const SubAccounts = () => {
 
   //--------------------useContext hooks------------------
   const { webData2, loadingWebData2 } = useWebDataContext();
-  const { subaccounts, hyperliquid, setReloadSubAccounts, setHyperliquid } =
+  const { subaccounts, hyperliquid, setReloadSubAccounts } =
     useSubAccountsContext();
   const { switchAccountHandler } = useSwitchTradingAccount();
 
   // ------------------ Thirdweb Hooks ------------------
   const userAddress = useAddress();
-  const chainId = useChainId();
 
   // ------------------ Local State ------------------
   const [establishedConnection, setEstablishedConnection] = useState(false);
@@ -145,48 +137,65 @@ const SubAccounts = () => {
   const handleEstablishConnection = async () => {
     try {
       setIsLoading(true);
-      // hyperliquid.pending_agent
-      sessionStorage.setItem(`${SESSION_STORAGE_PREFIX}.pending_agent`, '');
-
-      // Create and connect agent
-      let agent = Wallet.createRandom();
 
       let signer = new providers.Web3Provider(window.ethereum).getSigner();
 
-      const connectionPromise = await hyperliquid.connect(signer, agent);
+      {
+        let userAddress = await signer.getAddress();
+        let {
+          data: agentAddress,
+          success,
+          msg,
+        } = await hyperliquid.connect(userAddress);
 
-      if (connectionPromise.success) {
+        agentAddress = agentAddress as string;
+
+        if (!success) {
+          toast.error(
+            (msg || 'Failed to establish connection: try again!').toString()
+          );
+          setIsLoading(false);
+          return;
+        }
+
+        {
+          // scope to avoid variable name conflict
+
+          let { success, msg } = await hyperliquid.connectAgent(
+            signer,
+            agentAddress
+          );
+
+          if (!success) {
+            toast.error(
+              (msg || 'Failed to establish connection: try again!').toString()
+            );
+            setIsLoading(false);
+            return;
+          }
+        }
+
         setIsLoading(false);
 
         // set agent to session storage
-        let address = (userAddress || '').toLowerCase();
-
         sessionStorage.setItem(
-          `${SESSION_STORAGE_PREFIX}.agent.${address}`,
+          `${SESSION_STORAGE_PREFIX}.agent.${userAddress.toLowerCase()}`,
           JSON.stringify({
-            privateKey: agent.privateKey,
-            userAddress: address,
+            agentAddress,
+            userAddress,
           })
         );
 
         setAgent({
-          privateKey: agent.privateKey,
-          userAddress: address,
+          agentAddress,
+          userAddress,
         });
-        toast.success('Connection established successfully!');
-        setEstablishedConnection(true);
-        setEstablishedConnModal(false);
-      } else if (
-        connectionPromise.msg?.includes(
-          'Must deposit before performing actions.'
-        )
-      ) {
-        toast.error('Deposit your account before performing actions.');
-        setIsLoading(false);
-      } else {
-        toast.error('Failed to establish connection: try again!');
-        setIsLoading(false);
       }
+
+      toast.success('Connection established successfully!');
+
+      setEstablishedConnection(true);
+      setEstablishedConnModal(false);
     } catch (error) {
       console.log('error', error);
       toast.error('Failed to establish connection: try again!');
@@ -198,10 +207,10 @@ const SubAccounts = () => {
   const createSubAccountHandler = async () => {
     try {
       setIsLoading(true);
-      let signer = new Wallet(agent.privateKey);
 
-      let { success, data, error_type, msg } =
-        await hyperliquid.createSubAccount(signer, createNewAcc);
+      let { success, data, msg } = await hyperliquid.createSubAccount(
+        createNewAcc
+      );
 
       if (success) {
         // TODO: toast success message
@@ -218,7 +227,7 @@ const SubAccounts = () => {
           setIsLoading(false);
         }
       }
-      console.log({ success, data, error_type, msg });
+      console.log({ success, data, msg });
     } catch (error) {
       console.log(error);
       setIsLoading(false);
@@ -228,13 +237,13 @@ const SubAccounts = () => {
   const handleSubAccountModify = async (subAccountUser: String) => {
     try {
       setIsLoading(true);
-      let signer = new Wallet(agent.privateKey);
 
-      let { success, data, error_type, msg } =
-        await hyperliquid.subAccountModify(signer, renameAcc, subAccountUser);
+      let { success, data, msg } = await hyperliquid.subAccountModify(
+        renameAcc,
+        subAccountUser
+      );
 
       if (success) {
-        // TODO: toast success message
         toast.success('Sub-account renamed successfully');
 
         // reload sub-accounts
@@ -245,10 +254,9 @@ const SubAccounts = () => {
         setRenameAcc('');
       } else {
         setIsLoading(false);
-        // TODO: toast error message
-        toast.error(`${msg}`);
+        toast.error((msg || 'Error ocured please try again').toString());
       }
-      console.log({ success, data, error_type, msg });
+      console.log({ success, data, msg });
     } catch (error) {
       console.log(error);
       setIsLoading(false);
@@ -271,39 +279,31 @@ const SubAccounts = () => {
     // subAccountTransfer
     try {
       setIsLoading(true);
-      let signer = new Wallet(agent.privateKey);
       let subAccountUser = isDeposit
         ? activeToAccData.address
         : activeFromAccData.address;
 
       let usd = amount;
 
-      let { success, data, error_type, msg } =
-        await hyperliquid.subAccountTransfer(
-          signer,
-          isDeposit,
-          subAccountUser,
-          usd
-        );
+      let { success, data, msg } = await hyperliquid.subAccountTransfer(
+        isDeposit,
+        subAccountUser,
+        usd
+      );
 
       if (success) {
         setIsLoading(false);
-        console.log('data', data);
-        console.log('msg', msg);
-        toast.success('successfully transfered');
+        toast.success('Successfully transfered');
         setReloadSubAccounts((prev) => !prev);
         setTransferModalOpen((prev) => !prev);
       } else {
         setIsLoading(false);
-        toast.error('error ocured please try again');
-        console.log({
-          error_type,
-        });
+        toast.error((msg || 'Error ocured please try again').toString());
       }
     } catch (error) {
       console.log(error);
       setIsLoading(false);
-      toast.error('error ocured please try again');
+      toast.error('Error occured please try again');
     }
   };
 
@@ -354,41 +354,6 @@ const SubAccounts = () => {
       setAllAccountsData([...restructuredAccounts, masterAccount]);
     }
   }, [subaccounts]);
-
-  useEffect(() => {
-    let chain = chainId === 42161 ? Chain.Arbitrum : Chain.ArbitrumTestnet;
-
-    setHyperliquid(new Hyperliquid(BASE_URL, chain));
-  }, [chainId]);
-
-  useEffect(() => {
-    let signer = new Wallet(
-      '0x15c869adee266be5bd6260aac3bfc68f4dedb0bd43bc8ed2e234e61400b84e62'
-    );
-    let asset = 0;
-    // let isBuy = true;
-    // let price = '145.04';
-    // let reduceOnly = false;
-    // let quantity = '0.08';
-    // let orderType: OrderType = {
-    //   limit: {
-    //     tif: 'FrontendMarket',
-    //   },
-    // };
-
-    // console.log('hyperliquid', hyperliquid);
-    // hyperliquid.placeOrder(
-    //   signer,
-    //   asset,
-    //   isBuy,
-    //   price,
-    //   quantity,
-    //   orderType,
-    //   reduceOnly
-    // );
-
-    hyperliquid.spotMeta();
-  }, []);
 
   return (
     <>
