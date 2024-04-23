@@ -26,12 +26,14 @@ jobs:
 
           echo "COOKIE_KEY=${{ secrets.COOKIE_KEY }}" >> .env
 
-      - name:
+      - name: Compile
+        id: compile
         uses: rust-build/rust-build.action@v1.4.5
         with:
           RUSTTARGET: x86_64-unknown-linux-musl
           UPLOAD_MODE: none
           SRC_DIR: backend
+          EXTRA_FILES: ".env"
 
       - name: Deploy to EC2
         uses: appleboy/scp-action@v0.1.4
@@ -39,7 +41,7 @@ jobs:
           host: ${{ secrets.EC2_SERVER_HOST }}
           username: ${{ secrets.EC2_SERVER_USERNAME }}
           key: ${{ secrets.EC2_SERVER_KEY }}
-          source: "{{ steps.compile.outputs.BUILT_ARCHIVE }},./backend/.env"
+          source: ${{ steps.compile.outputs.BUILT_ARCHIVE }}
           target: ${{ secrets.EC2_SERVER_TARGET }}
 
       - name: Restart server
