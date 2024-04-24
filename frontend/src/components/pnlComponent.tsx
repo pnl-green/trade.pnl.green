@@ -3,7 +3,7 @@ import {
   TradingViewComponent,
   WalletBox,
 } from '@/styles/pnl.styles';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { AdvancedChart } from 'react-tradingview-embed';
 import { Box } from '@mui/material';
 import OrderPlacement from './order-placement-terminal';
@@ -15,10 +15,19 @@ import TokenPairInformation from './token-pair-information';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import { useWebDataContext } from '@/context/webDataContext';
 
+//------Memoized Component to ------
+const AdvancedChartMemoized = memo(function AdvancedChartMemoized(props: any) {
+  return (
+    <TradingViewComponent>
+      <AdvancedChart {...props} />
+    </TradingViewComponent>
+  );
+});
+
 const PnlComponent = () => {
   //------Context------
-  const { tokenPairs } = usePairTokensContext();
   const { webData2 } = useWebDataContext();
+  const { tokenPairs } = usePairTokensContext();
 
   const balance = webData2.clearinghouseState?.marginSummary.accountValue;
 
@@ -29,25 +38,21 @@ const PnlComponent = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
         <TokenPairInformation />
 
-        <TradingViewComponent>
-          {useMemo(
-            () =>
-              renderAdvancedChart ? (
-                <AdvancedChart
-                  widgetProps={{
-                    theme: 'dark',
-                    locale: 'en',
-                    autosize: true,
-                    enable_publishing: false,
-                    symbol: tokenPairs
-                      ? `${tokenPairs[0]}${tokenPairs[1]}`
-                      : '',
-                  }}
-                />
-              ) : null,
-            [renderAdvancedChart, tokenPairs]
-          )}
-        </TradingViewComponent>
+        {useMemo(
+          () =>
+            renderAdvancedChart ? (
+              <AdvancedChartMemoized
+                widgetProps={{
+                  theme: 'dark',
+                  locale: 'en',
+                  autosize: true,
+                  enable_publishing: false,
+                  symbol: tokenPairs ? `${tokenPairs[0]}${tokenPairs[1]}` : '',
+                }}
+              />
+            ) : null,
+          [renderAdvancedChart, tokenPairs]
+        )}
 
         <PositionsOrdersHistory />
       </Box>

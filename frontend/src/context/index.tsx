@@ -11,10 +11,10 @@ import SwitchAccountProvider from './switchTradingAccContext';
 
 const ContextProviders = ({ children }: { children: React.ReactNode }) => {
   return (
-    <PairTokensProvider>
-      <OrderBookTradesProvider>
-        <WebDataProvider>
-          <SubAccountsProvider>
+    <WebDataProvider>
+      <SubAccountsProvider>
+        <PairTokensProvider>
+          <OrderBookTradesProvider>
             <TradeHistoryProvider>
               <FundingHistoryProvider>
                 <OrderHistoryProvider>
@@ -26,10 +26,10 @@ const ContextProviders = ({ children }: { children: React.ReactNode }) => {
                 </OrderHistoryProvider>
               </FundingHistoryProvider>
             </TradeHistoryProvider>
-          </SubAccountsProvider>
-        </WebDataProvider>
-      </OrderBookTradesProvider>
-    </PairTokensProvider>
+          </OrderBookTradesProvider>
+        </PairTokensProvider>
+      </SubAccountsProvider>
+    </WebDataProvider>
   );
 };
 

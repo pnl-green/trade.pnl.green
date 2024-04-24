@@ -2,7 +2,7 @@ import React from 'react';
 import { useSubAccountsContext } from '@/context/subAccountsContext';
 import { SwitchTradingAccWrapper } from '@/styles/navbar.styles';
 import { Box, ClickAwayListener } from '@mui/material';
-import { useDisconnect } from '@thirdweb-dev/react';
+import { useAddress, useDisconnect } from '@thirdweb-dev/react';
 import toast from 'react-hot-toast';
 import { useSwitchTradingAccount } from '@/context/switchTradingAccContext';
 
@@ -15,6 +15,7 @@ const SwitchTradingAccountModal: React.FC<SwitchTradingAccountModalProps> = ({
 }) => {
   //------Third Web Hooks------
   const disconnect = useDisconnect();
+  const userAddress = useAddress();
 
   //------context Hooks------
   const { subaccounts } = useSubAccountsContext();
@@ -34,15 +35,11 @@ const SwitchTradingAccountModal: React.FC<SwitchTradingAccountModalProps> = ({
   //switch trading account to master or sub account
   const handleSwitchTradingAcc = (
     event: React.MouseEvent<HTMLImageElement>,
-    address: string | undefined,
-    name: string | undefined
+    address: string | any,
+    name: string | any
   ) => {
     try {
-      if (
-        (event.target as HTMLImageElement).tagName !== 'IMG' &&
-        address &&
-        name
-      ) {
+      if ((event.target as HTMLImageElement).tagName !== 'IMG') {
         //switch account
         switchAccountHandler(address, name);
 
@@ -60,11 +57,7 @@ const SwitchTradingAccountModal: React.FC<SwitchTradingAccountModalProps> = ({
         <Box
           className="tradingAccItems"
           onClick={(event: React.MouseEvent<HTMLImageElement>) => {
-            handleSwitchTradingAcc(
-              event,
-              currentAccount.address,
-              currentAccount.name
-            );
+            handleSwitchTradingAcc(event, userAddress, 'Master');
           }}
         >
           <label>Master</label>

@@ -1,8 +1,8 @@
-import React from "react";
-import { StyledTable, TradesRows } from "@/styles/orderbook.styles";
-import { Box } from "@mui/material";
-import { useOrderBookTradesContext } from "@/context/orderBookTradesContext";
-import { usePairTokensContext } from "@/context/pairTokensContext";
+import React from 'react';
+import { StyledTable, TradesRows } from '@/styles/orderbook.styles';
+import { Box } from '@mui/material';
+import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
+import { usePairTokensContext } from '@/context/pairTokensContext';
 
 const Trades = () => {
   const { tradesData } = useOrderBookTradesContext();
@@ -10,25 +10,25 @@ const Trades = () => {
 
   const handleDetailsClick = (index: any) => {
     // Implement your logic here
-    console.log("Clicked on details for index:", index);
+    console.log('Clicked on details for index:', index);
   };
 
   return (
     <Box
       style={{
-        marginTop: "10px",
-        maxHeight: "100%",
-        overflowY: "auto",
-        overflowX: "hidden",
+        marginTop: '10px',
+        maxHeight: '100%',
+        overflowY: 'auto',
+        overflowX: 'hidden',
       }}
     >
       <StyledTable fontSize="13px">
         <thead
           style={{
-            position: "sticky",
-            top: "0",
-            zIndex: "1",
-            backgroundColor: "#131212",
+            position: 'sticky',
+            top: '0',
+            zIndex: '1',
+            backgroundColor: '#131212',
           }}
         >
           <tr>
@@ -39,19 +39,24 @@ const Trades = () => {
           </tr>
         </thead>
         <tbody>
-          {tradesData?.map((trade, index) => (
-            <TradesRows key={index} className="first-column" side={trade.side}>
-              <td className="first-column">{trade.px}</td>
-              <td>{trade.sz}</td>
-              <td>{trade.time}</td>
-              <td
-                className="details-icon"
-                onClick={() => handleDetailsClick(index)}
+          {Array.isArray(tradesData) &&
+            tradesData.map((trade, index) => (
+              <TradesRows
+                key={index}
+                className="first-column"
+                side={trade.side}
               >
-                <img src="/linkIcon.svg" alt="link" />
-              </td>
-            </TradesRows>
-          ))}
+                <td className="first-column">{trade.px}</td>
+                <td>{trade.sz}</td>
+                <td>{trade.time}</td>
+                <td
+                  className="details-icon"
+                  onClick={() => handleDetailsClick(index)}
+                >
+                  <img src="/linkIcon.svg" alt="link" />
+                </td>
+              </TradesRows>
+            ))}
         </tbody>
       </StyledTable>
     </Box>

@@ -2,18 +2,44 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { PairData, tokenPairs } from '../../types/hyperliquid';
-import { pairDataArray } from './tabledummydata';
+import { useSubAccountsContext } from './subAccountsContext';
+
+//default dummy token data
+const defaultDummyTokenData: PairData | any = {
+  pairs: 'SOL-USD',
+  assetId: '--',
+  universe: {
+    maxLeverage: '--',
+    name: '--',
+    onlyIsolated: '--',
+    szDecimals: '--',
+  },
+  assetCtx: {
+    dayNtlVlm: '--',
+    funding: '--',
+    impactPxs: ['--', '--'],
+    markPx: '--',
+    midPx: '--',
+    openInterest: '--',
+    oraclePx: '--',
+    premium: '--',
+    prevDayPx: '--',
+  },
+};
 
 interface PairTokensProps {
   tokenPairs: tokenPairs[];
-  setTokenPairs?: React.Dispatch<React.SetStateAction<tokenPairs[]>>;
-  selectedPairsTokenData: PairData | null;
+  selectedPairsTokenData: PairData | any;
   setSelectPairsTokenData: React.Dispatch<
     React.SetStateAction<PairData | null>
   >;
-  splitTokenPairs: (pair: string) => string[] | undefined;
   pair: string;
   setPair: React.Dispatch<React.SetStateAction<string>>;
+
+  tokenPairData: any;
+
+  assetId: string | number;
+  setAssetId: React.Dispatch<React.SetStateAction<string | number>>;
 }
 
 export const PairTokensContext = createContext({} as PairTokensProps);
@@ -29,17 +55,32 @@ export const usePairTokensContext = () => {
 };
 
 const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
+  //------Hooks------
+  const { hyperliquid } = useSubAccountsContext();
+
+  const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
+  const [tokenPairData, setTokenPairData] = useState([]); //all token pair data
   const [selectedPairsTokenData, setSelectPairsTokenData] =
-    useState<PairData | null>(pairDataArray[0]);
-  const [tokenPairs, setTokenPairs] = useState<tokenPairs | any>({});
-  const [pair, setPair] = useState<string>('');
+    useState<PairData | null>(defaultDummyTokenData);
+  //single token pair data
+  const [tokenPairs, setTokenPairs] = useState<tokenPairs | any>({}); //token pairs eg [BTC,USD]
+  const [pair, setPair] = useState<string>(''); //token pair eg BTC-USD
+  const [assetId, setAssetId] = useState<string | number>(0); //asset id
+
+  //------Local storage items------
+  const savedAssetId = sessionStorage.getItem('assetId');
+  const savedSelectPairsTokenData = sessionStorage.getItem(
+    'selectPairsTokenData'
+  );
 
   //split token pairs with - and return both tokens
   const splitTokenPairs = () => {
     try {
       if (selectedPairsTokenData) {
-        const splitPairs = selectedPairsTokenData?.symbol.split('-');
+        const splitPairs = selectedPairsTokenData?.pairs.split('-');
         setTokenPairs(splitPairs);
+        console.log('splitPairs', splitPairs);
+
         return splitPairs;
       }
     } catch (error) {
@@ -55,15 +96,95 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
     splitTokenPairs();
   }, [selectedPairsTokenData]);
 
+  useEffect(() => {
+    // Create a new WebSocket connection
+    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}`);
+
+    // When the WebSocket connection is open, send the subscribe message
+    ws.onopen = () => {
+      const message = JSON.stringify({
+        method: 'subscribe',
+        subscription: {
+          type: 'webData2',
+          user: '0x0000000000000000000000000000000000000000',
+        },
+      });
+      ws.send(message);
+    };
+
+    // Listen for messages from the WebSocket server
+    ws.onmessage = (event) => {
+      setLoadingWebData2(true);
+      const message = JSON.parse(event.data);
+      const data = message.data;
+
+      if (message.channel === 'webData2') {
+        if (data) {
+          setLoadingWebData2(false);
+
+          hyperliquid
+            .metaAndAssetCtxs(data.meta, data.assetCtxs)
+            .then((result) => {
+              const newData = result.map((res: any) => {
+                return {
+                  pairs: `${res.universe.name}-USD`,
+                  ...res,
+                };
+              });
+              setTokenPairData(newData as any);
+            });
+        }
+      } else if (message.channel === 'error') {
+        setLoadingWebData2(false);
+        console.error('Error:', message.data);
+      }
+    };
+
+    // Handle WebSocket errors
+    ws.onerror = (error) => {
+      console.error('WebSocket Error:', error);
+    };
+
+    // Clean up the WebSocket connection when the component unmounts
+    return () => {
+      ws.close();
+    };
+  }, [hyperliquid]);
+
+  // set data from local storage
+  useEffect(() => {
+    if (savedAssetId && savedSelectPairsTokenData) {
+      setAssetId(savedAssetId);
+      setSelectPairsTokenData(JSON.parse(savedSelectPairsTokenData));
+    }
+  }, [savedAssetId, savedSelectPairsTokenData]);
+
+  // Set default token pair data on first load
+  useEffect(() => {
+    if (!loadingWebData2 && (!savedAssetId || !savedSelectPairsTokenData)) {
+      // setSelectPairsTokenData(tokenPairData[0]); // Single token pair data
+      // setAssetId(0); // Asset id
+
+      //store to local storage on first load
+      sessionStorage.setItem('assetId', JSON.stringify(0));
+      sessionStorage.setItem(
+        'selectPairsTokenData',
+        JSON.stringify(tokenPairData[0])
+      );
+    }
+  }, [loadingWebData2, savedAssetId, savedSelectPairsTokenData]);
+
   return (
     <PairTokensContext.Provider
       value={{
         tokenPairs,
         selectedPairsTokenData,
         setSelectPairsTokenData,
-        splitTokenPairs,
         pair,
         setPair,
+        tokenPairData,
+        assetId,
+        setAssetId,
       }}
     >
       {children}
