@@ -16,7 +16,12 @@ const TokenPairInformation = () => {
         tableISOpen={tableISOpen}
         toggleTablePairs={toggleTablePairs}
       />
-      {tableISOpen && <TokenPairsInfoTable handleClose={toggleTablePairs} tableISOpen={tableISOpen}/>}
+      {tableISOpen && (
+        <TokenPairsInfoTable
+          handleClose={toggleTablePairs}
+          tableISOpen={tableISOpen}
+        />
+      )}
     </Box>
   );
 };
