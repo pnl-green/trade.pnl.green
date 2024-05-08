@@ -80,10 +80,10 @@ const MarketComponent = () => {
 
       if (success) {
         console.log('data', data);
-        //Toast success 
+        //Toast success msg
       } else {
         console.log('msg', msg);
-        //Toast error
+        //Toast error msg
       }
     } catch (error) {
       console.log('error', error);
