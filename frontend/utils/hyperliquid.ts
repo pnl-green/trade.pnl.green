@@ -413,8 +413,8 @@ export const parsePrice = (px: number) => {
   return positive(pxCleaned);
 };
 
-export const parseSize = (sz: number, szDecimals: number) => {
-  let szFormatted = sz.toFixed(szDecimals);
+export const parseSize = (sz: number | string, szDecimals: number) => {
+  let szFormatted = parseFloat(sz.toString()).toFixed(szDecimals);
 
   let px = removeTrailingZeros(szFormatted);
 

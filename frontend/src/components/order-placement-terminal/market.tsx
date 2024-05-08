@@ -11,6 +11,7 @@ import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
 import { OrderType } from '@/types/hyperliquid';
 import { useSubAccountsContext } from '@/context/subAccountsContext';
+import { parsePrice, parseSize } from '@/utils/hyperliquid';
 
 const MarketComponent = () => {
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
@@ -21,7 +22,7 @@ const MarketComponent = () => {
 
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
-  const [size, setSize] = useState<number | any>('');
+  const [size, setSize] = useState<number>(0.0);
   const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>('');
   const [stopLossPrice, setStopLossPrice] = useState<number | any>('');
   const [gain, setGain] = useState<number | any>('');
@@ -49,7 +50,6 @@ const MarketComponent = () => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
 
-
   //
   const handlePlaceOrder = async () => {
     try {
@@ -69,11 +69,13 @@ const MarketComponent = () => {
       console.log('LimitPx', limitPx, 0, isBuy, size, orderType, reduceOnly);
       console.log(tokenPairData[assetId].assetCtx.markPx);
 
+      let { szDecimals } = tokenPairData[assetId].universe;
+
       const { success, data, msg } = await hyperliquid.placeOrder(
         Number(assetId),
         isBuy,
-        String(limitPx),
-        size,
+        parsePrice(limitPx),
+        parseSize(size, szDecimals),
         orderType,
         reduceOnly
       );
@@ -128,7 +130,7 @@ const MarketComponent = () => {
             label={'Size'}
             placeholder="|"
             type="number"
-            value={size}
+            value={size.toString()}
             onChange={(e: any) => setSize(e.target.value)}
             styles={{
               background: 'transparent',
