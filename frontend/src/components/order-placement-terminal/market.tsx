@@ -9,20 +9,18 @@ import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
-import { Wallet } from 'ethers';
 import { OrderType } from '@/types/hyperliquid';
 import { useSubAccountsContext } from '@/context/subAccountsContext';
 
 const MarketComponent = () => {
-  const { tokenPairs } = usePairTokensContext();
+  const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
+
   const [radioValue, setRadioValue] = useState<string | any>('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
 
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
-  const [currentMarketPrice, setCurrentMarketPrice] = useState<number | any>(
-    100
-  );
+  const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   const [size, setSize] = useState<number | any>('');
   const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>('');
   const [stopLossPrice, setStopLossPrice] = useState<number | any>('');
@@ -51,27 +49,46 @@ const MarketComponent = () => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
 
-  useEffect(() => {
-    let asset = 0;
-    let isBuy = true;
-    let price = '157.04';
-    let reduceOnly = false;
-    let quantity = '0.08';
-    let orderType: OrderType = {
-      limit: {
-        tif: 'FrontendMarket',
-      },
-    };
 
-    // hyperliquid.placeOrder(
-    //   asset,
-    //   isBuy,
-    //   price,
-    //   quantity,
-    //   orderType,
-    //   reduceOnly
-    // );
-  }, []);
+  //
+  const handlePlaceOrder = async () => {
+    try {
+      let isBuy = isBuyOrSell === 'buy';
+      let orderType: OrderType = {
+        limit: {
+          tif: 'FrontendMarket',
+        },
+      };
+      let reduceOnly = radioValue === '1';
+
+      // Calculate limit price based on buy or sell
+      let limitPx = isBuy
+        ? Number(currentMarketPrice) * 1.03
+        : Number(currentMarketPrice) * 0.97;
+
+      console.log('LimitPx', limitPx, 0, isBuy, size, orderType, reduceOnly);
+      console.log(tokenPairData[assetId].assetCtx.markPx);
+
+      const { success, data, msg } = await hyperliquid.placeOrder(
+        Number(assetId),
+        isBuy,
+        String(limitPx),
+        size,
+        orderType,
+        reduceOnly
+      );
+
+      if (success) {
+        console.log('data', data);
+        //Toast success 
+      } else {
+        console.log('msg', msg);
+        //Toast error
+      }
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
 
   return (
     <Box
@@ -275,9 +292,7 @@ const MarketComponent = () => {
       {confirmModalOpen && (
         <ConfirmationModal
           onClose={() => setConfirmModalOpen(false)}
-          onConfirm={function (): void {
-            throw new Error('Function not implemented.');
-          }}
+          onConfirm={handlePlaceOrder}
           isMarket={true}
           currentMarketPrice={currentMarketPrice}
           size={`${size} ${selectItem}`}
