@@ -57,7 +57,7 @@ export interface AssetCtx {
   premium: string;
   oraclePx: string;
   markPx: string;
-  midPx: string
+  midPx: string;
   impactPxs: string[];
 }
 
@@ -98,8 +98,11 @@ export interface tokenPairs {
   token2: string;
 }
 
-export interface PairData extends AssetCtx, Meta {
-  pairs?: string | any;
+export interface PairData  {
+  pairs?: string;
+  assetId?: string | number;
+  assetctxs: AssetCtx;
+  universe: Universe;
 }
 
 export interface BookDataProps {

@@ -7,8 +7,8 @@ import Loader from '../loaderSpinner';
 interface ModalProps {
   onClose: () => void;
   onConfirm?: () => void;
-  createNewAcc?: string | any;
-  setCreateNewAcc: React.Dispatch<React.SetStateAction<string | any>>;
+  createNewAcc?: string;
+  setCreateNewAcc: React.Dispatch<React.SetStateAction<string>>;
   isLoading?: boolean;
 }
 

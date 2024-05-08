@@ -1,5 +1,4 @@
 import { Box, Button, styled } from '@mui/material';
-import { transform } from 'next/dist/build/swc';
 
 export const NavbarContainer = styled(Box)(() => ({
   display: 'flex',
@@ -7,7 +6,7 @@ export const NavbarContainer = styled(Box)(() => ({
   alignItems: 'center',
   padding: '10px 30px',
   width: '100vw',
-  // height: "70px",
+  height: '58px',
   backgroundColor: '#000',
   position: 'sticky',
   zIndex: 100,

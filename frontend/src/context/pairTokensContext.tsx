@@ -77,7 +77,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   const splitTokenPairs = () => {
     try {
       if (selectedPairsTokenData) {
-        const splitPairs = selectedPairsTokenData?.pairs.split('-');
+        const splitPairs = selectedPairsTokenData?.pairs?.split('-');
         setTokenPairs(splitPairs);
         console.log('splitPairs', splitPairs);
 
