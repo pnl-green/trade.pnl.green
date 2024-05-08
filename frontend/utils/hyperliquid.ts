@@ -388,3 +388,50 @@ export class Hyperliquid {
     }));
   };
 }
+
+export const parsePrice = (px: number) => {
+  let pxFormatted = px.toFixed(6);
+
+  let pxAdjusted: string;
+  if (pxFormatted.startsWith('0.')) {
+    pxAdjusted = pxFormatted;
+  } else {
+    let pxSplit = pxFormatted.split('.');
+    let whole = pxSplit[0];
+    let decimals = pxSplit[1];
+
+    let diff = 5 - whole.length; // 0
+    let sep = diff > 0 ? '.' : '';
+
+    pxAdjusted = `${whole}${sep}${decimals}`.match(
+      new RegExp(`^-?\\d+(?:\\.\\d{0,${diff}})?`, 'g')
+    )![0];
+  }
+
+  let pxCleaned = removeTrailingZeros(pxAdjusted);
+
+  return positive(pxCleaned);
+};
+
+export const parseSize = (sz: number, szDecimals: number) => {
+  let szFormatted = sz.toFixed(szDecimals);
+
+  let px = removeTrailingZeros(szFormatted);
+
+  return positive(px);
+};
+
+const removeTrailingZeros = (s: string) => {
+  let result = s;
+  while (result.endsWith('0')) {
+    result = result.slice(0, -1);
+  }
+  if (result.endsWith('.')) {
+    result = result.slice(0, -1);
+  }
+  return result;
+};
+
+const positive = (value: string) => {
+  return value.startsWith('-') ? '0' : value;
+};
