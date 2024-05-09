@@ -403,9 +403,12 @@ export const parsePrice = (px: number) => {
     let diff = 5 - whole.length; // 0
     let sep = diff > 0 ? '.' : '';
 
-    pxAdjusted = `${whole}${sep}${decimals}`.match(
-      new RegExp(`^-?\\d+(?:\\.\\d{0,${diff}})?`, 'g')
-    )![0];
+    pxAdjusted =
+      sep === ''
+        ? `${whole}`
+        : `${whole}${sep}${decimals}`.match(
+            new RegExp(`^-?\\d+(?:\\.\\d{0,${diff}})?`, 'g')
+          )![0];
   }
 
   let pxCleaned = removeTrailingZeros(pxAdjusted);
