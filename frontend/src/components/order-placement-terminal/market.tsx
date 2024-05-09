@@ -338,8 +338,8 @@ const MarketComponent = () => {
           isTpSl={radioValue === '2' ? true : false}
           takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
           stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
-          estLiqPrice={1}
-          fee={1}
+          estLiqPrice={""}
+          fee={""}
           isBuyOrSell={isBuyOrSell}
           loading={isLoading}
           setLoading={setIsLoading}

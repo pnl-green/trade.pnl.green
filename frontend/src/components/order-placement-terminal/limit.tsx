@@ -12,19 +12,23 @@ import { useSubAccountsContext } from '@/context/subAccountsContext';
 import { parsePrice, parseSize } from '@/utils/hyperliquid';
 import toast from 'react-hot-toast';
 import { OrderType } from '@/types/hyperliquid';
+import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
 
 const LimitComponent = () => {
   const { webData2 } = useWebDataContext();
   const { hyperliquid, setHyperliquid } = useSubAccountsContext();
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
 
-  const [selectOrderType, setSelectOrderType] = useState('GTC');
+  const [selectOrderType, setSelectOrderType] = useState<
+    'Gtc' | 'Ioc' | 'Alo' | 'FrontendMarket'
+  >('Gtc');
   const [radioValue, setRadioValue] = useState('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
   const [size, setSize] = useState<number>(0.0);
   const [isLoading, setIsLoading] = useState(false);
+  const [limitPx, setLimitPx] = useState<number>(0.0);
 
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   let szDecimals = tokenPairData[assetId]?.universe.szDecimals;
@@ -34,9 +38,9 @@ const LimitComponent = () => {
   const [stopLossPrice, setStopLossPrice] = useState('');
   const [gain, setGain] = useState('');
   const [loss, setLoss] = useState('');
-
-  const [estLiqPrice, setEstLiquidationPrice] = useState('100');
-  const [fee, setFee] = useState('100');
+1
+  const [estLiqPrice, setEstLiquidationPrice] = useState('');
+  const [fee, setFee] = useState('');
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
@@ -59,6 +63,21 @@ const LimitComponent = () => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
 
+  //setting the equivalent size in the selected token
+  let TokenSize = getUsdSizeEquivalents({
+    size: Number(size),
+    currentMarkPrice: Number(currentMarketPrice),
+    token: selectItem,
+  });
+
+  //maintain the size equivalent state of the  token
+  useEffect(() => {
+    if (TokenSize) {
+      let newSize = Number(TokenSize.toFixed(szDecimals));
+      setSize(newSize);
+    }
+  }, [selectItem]);
+
   //get the size equivalent in USD
   let sz =
     selectItem.toUpperCase() === 'USD'
@@ -71,20 +90,15 @@ const LimitComponent = () => {
       let isBuy = isBuyOrSell === 'buy';
       let orderType: OrderType = {
         limit: {
-          tif: 'FrontendMarket',
+          tif: selectOrderType,
         },
       };
       let reduceOnly = radioValue === '1';
 
-      // Calculate limit price based on buy or sell
-      let limitPx = isBuy
-        ? Number(currentMarketPrice) * 1.03
-        : Number(currentMarketPrice) * 0.97;
-
       const { success, data, msg } = await hyperliquid.placeOrder(
         Number(assetId),
         isBuy,
-        parsePrice(limitPx),
+        parsePrice(Number(limitPx)),
         parseSize(sz, szDecimals),
         orderType,
         reduceOnly
@@ -155,6 +169,23 @@ const LimitComponent = () => {
           selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
         />
       </SelectItemsBox>
+
+      <RenderInput
+        label="Price"
+        placeholder="0"
+        type="number"
+        value={limitPx.toString()}
+        onChange={(e: any) => setLimitPx(e.target.value)}
+        styles={{
+          marginTop: '4px',
+          gap: 0,
+          width: '100%',
+          '.placeholder_box': {
+            fontSize: '12px',
+          },
+          input: { width: '30%', padding: '0' },
+        }}
+      />
 
       <Box
         sx={{
@@ -285,7 +316,7 @@ const LimitComponent = () => {
         <HandleSelectItems
           selectItem={selectOrderType}
           setSelectItem={setSelectOrderType}
-          selectDataItems={['GTC', 'IOC', 'ALO']}
+          selectDataItems={['Gtc', 'Ioc', 'Alo']}
           styles={{
             marginTop: radioValue === '2' ? '10px' : '0',
           }}
@@ -315,7 +346,7 @@ const LimitComponent = () => {
           onConfirm={handlePlaceOrder}
           isLimit={true}
           size={`${parseSize(sz, szDecimals)} ${tokenPairs[0]}`}
-          price={100}
+          price={limitPx}
           isTpSl={radioValue === '2' ? true : false}
           takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
           stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}

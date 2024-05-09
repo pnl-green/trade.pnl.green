@@ -25,7 +25,7 @@ const HandleSelectItems = ({
     >
       {selectDataItems?.map((value, index) => (
         <option key={index} value={value}>
-          {value}
+          {value.toUpperCase()}
         </option>
       ))}
     </ItemsSelect>
