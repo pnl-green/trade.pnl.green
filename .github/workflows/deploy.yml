@@ -52,7 +52,6 @@ jobs:
           key: ${{ secrets.EC2_SERVER_KEY }}
           script: |
             cd ${{ secrets.EC2_SERVER_TARGET }}
-            cd output
             unzip ${{ steps.compile.outputs.BUILT_ARCHIVE }}
             rm ${{ steps.compile.outputs.BUILT_ARCHIVE }}
             pm2 restart all
