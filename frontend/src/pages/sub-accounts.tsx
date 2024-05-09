@@ -29,7 +29,13 @@ import { useRouter } from 'next/router';
 const bgImages = [
   {
     image: '/Ellipse1.svg',
-    styles: { top: '0', left: '0px', width: '928px', height: '928px' },
+    styles: {
+      top: '0',
+      left: '0px',
+      width: '928px',
+      height: '928px',
+      '@media screen and (min-width: 1535px)': { height: 'calc(100vh - 70px)' },
+    },
   },
   {
     image: '/Ellipse2.png',
