@@ -50,7 +50,7 @@ const MarketComponent = () => {
   }, [tokenPairs]);
 
 
-  //
+  //market place order
   const handlePlaceOrder = async () => {
     try {
       let isBuy = isBuyOrSell === 'buy';
