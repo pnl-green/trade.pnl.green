@@ -33,7 +33,7 @@ jobs:
           RUSTTARGET: x86_64-unknown-linux-musl
           UPLOAD_MODE: none
           SRC_DIR: backend
-          STATIC_LINKING: false
+          # STATIC_LINKING: false
           # EXTRA_FILES: ".env"
 
       - name: Deploy to EC2
