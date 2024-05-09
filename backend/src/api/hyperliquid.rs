@@ -35,10 +35,13 @@ pub async fn hyperliquid(
 
     Ok(match req {
         Request::Info(req) => {
+            tracing::info!("Request: {:#?}", req);
             let info = Hyperliquid::new(chain);
+            tracing::info!("Info: {:#?}", "info");
 
             match req {
                 Info::SubAccounts { user } => {
+                    tracing::info!("User: {:#?}", user);
                     let data = info::sub_accounts(&info, user)
                         .await
                         .map_err(|msg| BadRequestError(msg.to_string()))?;
