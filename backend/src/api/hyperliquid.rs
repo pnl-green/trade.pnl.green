@@ -12,6 +12,7 @@ use hyperliquid::{
     types::{exchange::response, Chain, API},
     Hyperliquid,
 };
+use tokio::sync::mpsc::Sender;
 
 use crate::{
     error::Error::BadRequestError,
@@ -27,6 +28,7 @@ pub async fn hyperliquid(
     chain: web::Data<Chain>,
     req: web::Json<Request>,
     session: Session,
+    sender: web::Data<Sender<Exchange>>,
 ) -> Result<impl Responder> {
     let req = req.into_inner();
     let chain = **chain;
@@ -87,7 +89,19 @@ pub async fn hyperliquid(
                         data: Some(data),
                         msg: None,
                     })
-                } // Info::SpotMeta => info.spot_meta().await,
+                }
+                Info::SpotMeta => match info.spot_meta().await {
+                    Ok(data) => HttpResponse::Ok().json(Response {
+                        success: true,
+                        data: Some(data),
+                        msg: None,
+                    }),
+                    Err(msg) => HttpResponse::Ok().json(Response {
+                        success: false,
+                        data: None::<String>,
+                        msg: Some(msg.to_string()),
+                    }),
+                },
             }
         }
         Request::Exchange(req) => {
@@ -210,7 +224,7 @@ pub async fn hyperliquid(
                 }
                 Exchange::UpdateIsolatedMargin { action } => {
                     let data = exchange
-                        .update_isolated_margin(agent, action.ntli, action.asset)
+                        .update_isolated_margin(agent, action.asset, action.is_buy, action.ntli)
                         .await
                         .map_err(|msg| BadRequestError(msg.to_string()))?;
 
@@ -227,7 +241,20 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
-                Exchange::TwapOrder { action } => todo!(),
+                Exchange::TwapOrder { action } => {
+                    match sender.send(Exchange::TwapOrder { action }).await {
+                        Ok(_) => HttpResponse::Ok().json(Response {
+                            success: true,
+                            data: None::<String>,
+                            msg: None,
+                        }),
+                        Err(_) => HttpResponse::Ok().json(Response {
+                            success: false,
+                            data: None::<String>,
+                            msg: Some("Failed to send message".to_string()),
+                        }),
+                    }
+                }
                 Exchange::NormalTpsl { action } => todo!(),
                 Exchange::Cancel { action } => todo!(),
                 Exchange::Connect(req) => {
