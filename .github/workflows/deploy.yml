@@ -55,6 +55,6 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             cd ${{ secrets.EC2_SERVER_TARGET }}
-            unzip ${{ steps.compile.outputs.BUILT_ARCHIVE }}
+            unzip -o ${{ steps.compile.outputs.BUILT_ARCHIVE }}
             rm ${{ steps.compile.outputs.BUILT_ARCHIVE }}
             pm2 restart all
