@@ -20,7 +20,7 @@ pub enum Info {
     HistoricalOrders { user: Address },
     UserFees { user: Address },
     CandleSnapshot { req: CandleSnapshotRequest },
-    // SpotMeta,
+    SpotMeta,
 }
 
 #[derive(Debug, Deserialize)]
