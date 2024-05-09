@@ -8,17 +8,26 @@ import ConfirmationModal from '../Modals/confirmationModals';
 import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
 import { usePairTokensContext } from '@/context/pairTokensContext';
+import { useSubAccountsContext } from '@/context/subAccountsContext';
+import { parsePrice, parseSize } from '@/utils/hyperliquid';
+import toast from 'react-hot-toast';
+import { OrderType } from '@/types/hyperliquid';
 
 const LimitComponent = () => {
   const { webData2 } = useWebDataContext();
-  const { tokenPairs } = usePairTokensContext();
+  const { hyperliquid, setHyperliquid } = useSubAccountsContext();
+  const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
 
   const [selectOrderType, setSelectOrderType] = useState('GTC');
   const [radioValue, setRadioValue] = useState('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
-  const [size, setSize] = useState('');
+  const [size, setSize] = useState<number>(0.0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
+  let szDecimals = tokenPairData[assetId]?.universe.szDecimals;
 
   //Take Profit / Stop Loss
   const [takeProfitPrice, setTakeProfitPrice] = useState('');
@@ -49,6 +58,57 @@ const LimitComponent = () => {
   useEffect(() => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
+
+  //get the size equivalent in USD
+  let sz =
+    selectItem.toUpperCase() === 'USD'
+      ? size / Number(currentMarketPrice)
+      : size;
+  //
+  const handlePlaceOrder = async () => {
+    try {
+      setIsLoading(true);
+      let isBuy = isBuyOrSell === 'buy';
+      let orderType: OrderType = {
+        limit: {
+          tif: 'FrontendMarket',
+        },
+      };
+      let reduceOnly = radioValue === '1';
+
+      // Calculate limit price based on buy or sell
+      let limitPx = isBuy
+        ? Number(currentMarketPrice) * 1.03
+        : Number(currentMarketPrice) * 0.97;
+
+      const { success, data, msg } = await hyperliquid.placeOrder(
+        Number(assetId),
+        isBuy,
+        parsePrice(limitPx),
+        parseSize(sz, szDecimals),
+        orderType,
+        reduceOnly
+      );
+
+      if (success) {
+        console.log('data', data);
+        setIsLoading(false);
+        setConfirmModalOpen(false);
+
+        //Toast success msg
+        toast.success('Order placed successfully');
+      } else {
+        console.log('msg', msg);
+        setIsLoading(false);
+
+        //Toast error msg
+        toast.error((msg || 'Error ocured please try again').toString());
+      }
+    } catch (error) {
+      console.log('error', error);
+      setIsLoading(false);
+    }
+  };
   return (
     <Box
       sx={{
@@ -80,7 +140,7 @@ const LimitComponent = () => {
         <RenderInput
           label={'Size'}
           placeholder="|"
-          value={size}
+          value={size.toString()}
           onChange={(e: any) => setSize(e.target.value)}
           styles={{
             background: 'transparent',
@@ -252,11 +312,9 @@ const LimitComponent = () => {
       {confirmModalOpen && (
         <ConfirmationModal
           onClose={() => setConfirmModalOpen(false)}
-          onConfirm={function (): void {
-            throw new Error('Function not implemented.');
-          }}
+          onConfirm={handlePlaceOrder}
           isLimit={true}
-          size={`${size} ${selectItem}`}
+          size={`${parseSize(sz, szDecimals)} ${tokenPairs[0]}`}
           price={100}
           isTpSl={radioValue === '2' ? true : false}
           takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
@@ -264,6 +322,8 @@ const LimitComponent = () => {
           estLiqPrice={estLiqPrice}
           fee={fee}
           isBuyOrSell={isBuyOrSell}
+          loading={isLoading}
+          setLoading={setIsLoading}
         />
       )}
 

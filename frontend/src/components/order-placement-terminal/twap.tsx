@@ -8,6 +8,7 @@ import ConfirmationModal from '../Modals/confirmationModals';
 import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
 import { usePairTokensContext } from '@/context/pairTokensContext';
+import toast from 'react-hot-toast';
 
 const TwapOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
@@ -34,7 +35,6 @@ const TwapOrderTerminal = () => {
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
-
     setIsBuyOrSell(button);
   };
 
@@ -52,6 +52,18 @@ const TwapOrderTerminal = () => {
   useEffect(() => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
+
+  const handlePlaceTwapOrder = () => {
+    try {
+
+      // const {}=hyperli
+      
+    } catch (error) {
+      console.log(error);
+      toast.error('Error placing order, please try again later.');
+    }
+  };
+
   return (
     <Box
       sx={{

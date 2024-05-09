@@ -229,7 +229,7 @@ const SubAccounts = () => {
           toast.error('User or API Wallet does not exist');
           setIsLoading(false);
         } else {
-          toast.error(`${msg}`);
+          toast.error((msg || 'Error ocured please try again').toString());
           setIsLoading(false);
         }
       }
