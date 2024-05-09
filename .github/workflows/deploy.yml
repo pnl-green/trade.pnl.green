@@ -33,7 +33,7 @@ jobs:
           RUSTTARGET: x86_64-unknown-linux-musl
           UPLOAD_MODE: none
           SRC_DIR: backend
-          STATIC_LINKING: false
+          # STATIC_LINKING: false
           # EXTRA_FILES: ".env"
 
       - name: Deploy to EC2
@@ -55,6 +55,6 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             cd ${{ secrets.EC2_SERVER_TARGET }}
-            unzip ${{ steps.compile.outputs.BUILT_ARCHIVE }}
+            unzip -o ${{ steps.compile.outputs.BUILT_ARCHIVE }}
             rm ${{ steps.compile.outputs.BUILT_ARCHIVE }}
             pm2 restart all
