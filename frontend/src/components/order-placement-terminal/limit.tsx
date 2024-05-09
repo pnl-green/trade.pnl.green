@@ -1,32 +1,33 @@
-import {
-  LiquidationWrapper,
-  SelectItemsBox,
-} from "@/styles/riskManager.styles";
-import { Box } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import HandleSelectItems from "../handleSelectItems";
-import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
-import { RenderInput } from "./commonInput";
-import { usePairTokensContext } from "@/context/pairTokensContext";
-import ConfirmationModal from "../Modals/confirmationModals";
+import { SelectItemsBox } from '@/styles/riskManager.styles';
+import { Box } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import HandleSelectItems from '../handleSelectItems';
+import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
+import { RenderInput } from './commonInput';
+import ConfirmationModal from '../Modals/confirmationModals';
+import LiquidationContent from './liquidationContent';
+import { useWebDataContext } from '@/context/webDataContext';
+import { usePairTokensContext } from '@/context/pairTokensContext';
 
 const LimitComponent = () => {
+  const { webData2 } = useWebDataContext();
   const { tokenPairs } = usePairTokensContext();
-  const [selectOrderType, setSelectOrderType] = useState("GTC");
-  const [radioValue, setRadioValue] = useState("");
+
+  const [selectOrderType, setSelectOrderType] = useState('GTC');
+  const [radioValue, setRadioValue] = useState('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [isBuyOrSell, setIsBuyOrSell] = useState(""); //buy | sell
+  const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
-  const [size, setSize] = useState<number | any>("");
+  const [size, setSize] = useState('');
 
   //Take Profit / Stop Loss
-  const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>("");
-  const [stopLossPrice, setStopLossPrice] = useState<number | any>("");
-  const [gain, setGain] = useState<number | any>("");
-  const [loss, setLoss] = useState<number | any>("");
+  const [takeProfitPrice, setTakeProfitPrice] = useState('');
+  const [stopLossPrice, setStopLossPrice] = useState('');
+  const [gain, setGain] = useState('');
+  const [loss, setLoss] = useState('');
 
-  const [estLiqPrice, setEstLiquidationPrice] = useState<number | any>("100");
-  const [fee, setFee] = useState<number | any>("100");
+  const [estLiqPrice, setEstLiquidationPrice] = useState('100');
+  const [fee, setFee] = useState('100');
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
@@ -41,7 +42,7 @@ const LimitComponent = () => {
 
   const handleRadioClick = (e: any) => {
     if (radioValue === e.target.value) {
-      setRadioValue("");
+      setRadioValue('');
     }
   };
 
@@ -51,21 +52,23 @@ const LimitComponent = () => {
   return (
     <Box
       sx={{
-        position: "relative",
-        height: radioValue === "2" ? "calc(100% + 85px)" : "100%",
+        position: 'relative',
+        height: radioValue === '2' ? 'calc(100% + 85px)' : '100%',
       }}
     >
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "5px",
-          mt: "20px",
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px',
+          mt: '20px',
         }}
       >
         <FlexItems>
           <span>Available balance</span>
-          <span>10:00</span>
+          <span>
+            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
+          </span>
         </FlexItems>
         <FlexItems>
           <span>Current position size</span>
@@ -75,14 +78,14 @@ const LimitComponent = () => {
 
       <SelectItemsBox>
         <RenderInput
-          label={"Size"}
+          label={'Size'}
           placeholder="|"
           value={size}
           onChange={(e: any) => setSize(e.target.value)}
           styles={{
-            background: "transparent",
-            ":hover": {
-              border: "none !important",
+            background: 'transparent',
+            ':hover': {
+              border: 'none !important',
             },
           }}
         />
@@ -95,19 +98,19 @@ const LimitComponent = () => {
 
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          mt: "20px",
-          gap: "8px",
+          display: 'flex',
+          flexDirection: 'column',
+          mt: '20px',
+          gap: '8px',
           label: {
-            marginRight: "8px",
-            cursor: "pointer",
+            marginRight: '8px',
+            cursor: 'pointer',
           },
         }}
       >
         <FlexItems
           sx={{
-            justifyContent: "flex-start",
+            justifyContent: 'flex-start',
           }}
         >
           <label>
@@ -115,7 +118,7 @@ const LimitComponent = () => {
               type="radio"
               name="radio"
               value="1"
-              checked={radioValue === "1"}
+              checked={radioValue === '1'}
               onChange={handleRadioChange}
               onClick={handleRadioClick}
             />
@@ -123,13 +126,13 @@ const LimitComponent = () => {
           <span>Reduce Only</span>
         </FlexItems>
 
-        <FlexItems sx={{ justifyContent: "flex-start" }}>
+        <FlexItems sx={{ justifyContent: 'flex-start' }}>
           <label>
             <input
               type="radio"
               name="radio"
               value="2"
-              checked={radioValue === "2"}
+              checked={radioValue === '2'}
               onChange={handleRadioChange}
               onClick={handleRadioClick}
             />
@@ -138,14 +141,14 @@ const LimitComponent = () => {
         </FlexItems>
       </Box>
 
-      {radioValue === "2" && (
+      {radioValue === '2' && (
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            mt: "10px",
-            height: "70px",
-            gap: "2px",
+            display: 'flex',
+            flexDirection: 'column',
+            mt: '10px',
+            height: '70px',
+            gap: '2px',
           }}
         >
           <FlexItems>
@@ -156,11 +159,11 @@ const LimitComponent = () => {
               onChange={(e: any) => setTakeProfitPrice(e.target.value)}
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  fontSize: '12px',
                 },
-                input: { width: "30%", padding: "0" },
+                input: { width: '30%', padding: '0' },
               }}
             />
 
@@ -169,11 +172,11 @@ const LimitComponent = () => {
               placeholder="$"
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  fontSize: '12px',
                 },
-                input: { width: "30%", padding: "0" },
+                input: { width: '30%', padding: '0' },
               }}
             />
           </FlexItems>
@@ -186,12 +189,12 @@ const LimitComponent = () => {
               onChange={(e: any) => setStopLossPrice(e.target.value)}
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  width: "90% !important",
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  width: '90% !important',
+                  fontSize: '12px',
                 },
-                input: { width: "20%", padding: "0" },
+                input: { width: '20%', padding: '0' },
               }}
             />
 
@@ -200,11 +203,11 @@ const LimitComponent = () => {
               placeholder="$"
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  fontSize: '12px',
                 },
-                input: { width: "30%", padding: "0" },
+                input: { width: '30%', padding: '0' },
               }}
             />
           </FlexItems>
@@ -213,8 +216,8 @@ const LimitComponent = () => {
 
       <SelectItemsBox
         sx={{
-          "&:hover": {
-            border: "none !important",
+          '&:hover': {
+            border: 'none !important',
           },
         }}
       >
@@ -222,25 +225,25 @@ const LimitComponent = () => {
         <HandleSelectItems
           selectItem={selectOrderType}
           setSelectItem={setSelectOrderType}
-          selectDataItems={["GTC", "IOC", "ALO"]}
+          selectDataItems={['GTC', 'IOC', 'ALO']}
           styles={{
-            marginTop: radioValue === "2" ? "10px" : "0",
+            marginTop: radioValue === '2' ? '10px' : '0',
           }}
         />
       </SelectItemsBox>
 
       <Box sx={{ ...ButtonStyles }}>
         <BuySellBtn
-          sx={{ width: "112px" }}
+          sx={{ width: '112px' }}
           className="buyBtn"
-          onClick={() => toggleConfirmModal("buy")}
+          onClick={() => toggleConfirmModal('buy')}
         >
           Buy
         </BuySellBtn>
         <BuySellBtn
-          sx={{ width: "112px" }}
+          sx={{ width: '112px' }}
           className="sellBtn"
-          onClick={() => toggleConfirmModal("sell")}
+          onClick={() => toggleConfirmModal('sell')}
         >
           Sell
         </BuySellBtn>
@@ -250,38 +253,28 @@ const LimitComponent = () => {
         <ConfirmationModal
           onClose={() => setConfirmModalOpen(false)}
           onConfirm={function (): void {
-            throw new Error("Function not implemented.");
+            throw new Error('Function not implemented.');
           }}
           isLimit={true}
           size={`${size} ${selectItem}`}
           price={100}
-          isTpSl={radioValue === "2" ? true : false}
-          takeProfitPrice={radioValue === "2" ? takeProfitPrice : undefined}
-          stopLossPrice={radioValue === "2" ? stopLossPrice : undefined}
+          isTpSl={radioValue === '2' ? true : false}
+          takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
+          stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
           estLiqPrice={estLiqPrice}
           fee={fee}
           isBuyOrSell={isBuyOrSell}
         />
       )}
 
-      <LiquidationWrapper sx={{ position: "absolute", bottom: 0 }}>
-        <Box className="items">
-          <span>Liquidation Price</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Order Value</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Margin Required</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Fees</span>
-          <span>N/A</span>
-        </Box>
-      </LiquidationWrapper>
+      <LiquidationContent
+      //TODO: Add props
+
+      // liquidationPrice={10}
+      // orderValue={}
+      // marginRequired={}
+      // fees={}
+      />
     </Box>
   );
 };

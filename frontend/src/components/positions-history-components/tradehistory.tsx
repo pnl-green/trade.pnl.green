@@ -41,7 +41,6 @@ const TradeHistoryComponentTable = () => {
   //------use Context Hooks------
   const { tradeHistoryData, loadingTradeHistoryData } =
     useTradeHistoryContext();
-  console.log({ tradeHistoryData });
   return (
     <Paper
       sx={{

@@ -1,7 +1,4 @@
-import {
-  LiquidationWrapper,
-  SelectItemsBox,
-} from '@/styles/riskManager.styles';
+import { SelectItemsBox } from '@/styles/riskManager.styles';
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
@@ -11,23 +8,28 @@ import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
 import { OrderType } from '@/types/hyperliquid';
 import { useSubAccountsContext } from '@/context/subAccountsContext';
+import { parsePrice, parseSize } from '@/utils/hyperliquid';
+import toast from 'react-hot-toast';
+import LiquidationContent from './liquidationContent';
+import { useWebDataContext } from '@/context/webDataContext';
 
 const MarketComponent = () => {
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
+  const { hyperliquid, setHyperliquid } = useSubAccountsContext();
+  const { webData2 } = useWebDataContext();
 
-  const [radioValue, setRadioValue] = useState<string | any>('');
+  const [radioValue, setRadioValue] = useState<string>('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
-
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
-  const [size, setSize] = useState<number | any>('');
-  const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>('');
-  const [stopLossPrice, setStopLossPrice] = useState<number | any>('');
-  const [gain, setGain] = useState<number | any>('');
-  const [loss, setLoss] = useState<number | any>('');
+  const [size, setSize] = useState<number>(0.0);
+  const [takeProfitPrice, setTakeProfitPrice] = useState('');
+  const [stopLossPrice, setStopLossPrice] = useState('');
+  const [gain, setGain] = useState('');
+  const [loss, setLoss] = useState('');
 
-  const { hyperliquid, setHyperliquid } = useSubAccountsContext();
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
@@ -49,10 +51,10 @@ const MarketComponent = () => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
 
-
-  //market place order
+  //
   const handlePlaceOrder = async () => {
     try {
+      setIsLoading(true);
       let isBuy = isBuyOrSell === 'buy';
       let orderType: OrderType = {
         limit: {
@@ -66,27 +68,35 @@ const MarketComponent = () => {
         ? Number(currentMarketPrice) * 1.03
         : Number(currentMarketPrice) * 0.97;
 
-      console.log('LimitPx', limitPx, 0, isBuy, size, orderType, reduceOnly);
-      console.log(tokenPairData[assetId].assetCtx.markPx);
+      console.log(tokenPairData[assetId].universe);
+
+      let { szDecimals } = tokenPairData[assetId].universe;
 
       const { success, data, msg } = await hyperliquid.placeOrder(
         Number(assetId),
         isBuy,
-        String(limitPx),
-        size,
+        parsePrice(limitPx),
+        parseSize(size, szDecimals),
         orderType,
         reduceOnly
       );
 
       if (success) {
         console.log('data', data);
+        setIsLoading(false);
+
         //Toast success msg
+        toast.success('Order placed successfully');
       } else {
         console.log('msg', msg);
+        setIsLoading(false);
+
         //Toast error msg
+        toast.error((msg || 'Error ocured please try again').toString());
       }
     } catch (error) {
       console.log('error', error);
+      setIsLoading(false);
     }
   };
 
@@ -107,7 +117,7 @@ const MarketComponent = () => {
       >
         <FlexItems>
           <span>Available balance</span>
-          <span>10:00</span>
+          <span>{Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}</span>
         </FlexItems>
         <FlexItems>
           <span>Current position size</span>
@@ -128,7 +138,7 @@ const MarketComponent = () => {
             label={'Size'}
             placeholder="|"
             type="number"
-            value={size}
+            value={size.toString()}
             onChange={(e: any) => setSize(e.target.value)}
             styles={{
               background: 'transparent',
@@ -302,27 +312,19 @@ const MarketComponent = () => {
           estLiqPrice={1}
           fee={1}
           isBuyOrSell={isBuyOrSell}
+          loading={isLoading}
+          setLoading={setIsLoading}
         />
       )}
 
-      <LiquidationWrapper sx={{ position: 'absolute', bottom: 0 }}>
-        <Box className="items">
-          <span>Liquidation Price</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Order Value</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Margin Required</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Fees</span>
-          <span>N/A</span>
-        </Box>
-      </LiquidationWrapper>
+      <LiquidationContent
+      //TODO: Add props
+
+      // liquidationPrice={}
+      // orderValue={}
+      // marginRequired={}
+      // fees={}
+      />
     </Box>
   );
 };
