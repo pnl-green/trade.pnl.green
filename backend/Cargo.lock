@@ -2024,7 +2024,7 @@ dependencies = [
 [[package]]
 name = "hyperliquid"
 version = "0.2.3"
-source = "git+https://github.com/dennohpeter/hyperliquid.git?branch=main#d34220ad00ae400bbe63f32b9bf0e5d32c2e4ce0"
+source = "git+https://github.com/dennohpeter/hyperliquid.git?branch=main#1fc43fd09642fde07aef5e516609e75075142100"
 dependencies = [
  "ethers",
  "futures-util",

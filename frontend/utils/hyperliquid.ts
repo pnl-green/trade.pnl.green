@@ -426,7 +426,7 @@ export const parseSize = (sz: number | string, szDecimals: number) => {
 
 const removeTrailingZeros = (s: string) => {
   let result = s;
-  while (result.endsWith('0')) {
+  while (result.endsWith('0') && result.includes('.')) {
     result = result.slice(0, -1);
   }
   if (result.endsWith('.')) {
