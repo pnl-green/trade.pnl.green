@@ -5,6 +5,7 @@ import { CaptionsBtn, SelectItemsBox } from '@/styles/riskManager.styles';
 import { FlexItems, GreenBtn } from '@/styles/common.styles';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { IconsStyles } from './styles';
+import Loader from '../loaderSpinner';
 
 const commonStyles = {
   width: '100vw',
@@ -52,6 +53,10 @@ interface ConfirmationModalProps extends OrderTypeProps {
   stopLossPrice?: number | string;
   estLiqPrice?: number | string;
   fee?: number | string;
+
+  //loading
+  loading?: boolean;
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const OuterShell = ({
@@ -127,6 +132,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   stopLossPrice,
   estLiqPrice,
   fee,
+
+  //loading
+  loading,
+  setLoading,
 }) => {
   //When it initially pops up, the confirm window should come with the whole screen around it being slightly blurred. However, if the user decides to drag that popup around, the blur will disappear.
   const [isDragging, setIsDragging] = useState(false);
@@ -165,7 +174,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <OuterShell
-      onClose={onClose}
+      onClose={() => {
+        onClose();
+        setLoading?.(false);
+      }}
       isDragging={isDragging}
       removeOutSideClick={xyPositionChange}
     >
@@ -221,7 +233,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               right: '10px',
               cursor: 'pointer',
             }}
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              setLoading?.(false);
+            }}
           >
             <img src="/closeIcon.svg" alt="X" />
           </Box>
@@ -410,8 +425,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 background: isBuyOrSell === 'sell' ? '#B04747' : '',
               },
             }}
+            disabled={loading}
           >
-            Place Order
+            {loading ? <Loader message="loading..." /> : 'Place Order'}
           </GreenBtn>
         </Box>
       </Draggable>

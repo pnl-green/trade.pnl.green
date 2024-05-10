@@ -1,7 +1,4 @@
-import {
-  LiquidationWrapper,
-  SelectItemsBox,
-} from '@/styles/riskManager.styles';
+import { SelectItemsBox } from '@/styles/riskManager.styles';
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
@@ -10,25 +7,56 @@ import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
 import { OrderType } from '@/types/hyperliquid';
-import { useSubAccountsContext } from '@/context/subAccountsContext';
+import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import { parsePrice, parseSize } from '@/utils/hyperliquid';
+import toast from 'react-hot-toast';
+import LiquidationContent from './liquidationContent';
+import { useWebDataContext } from '@/context/webDataContext';
+import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
+import EstablishConnectionModal from '../Modals/establishConnectionModal';
 
 const MarketComponent = () => {
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
+  const { hyperliquid, establishedConnection, handleEstablishConnection } =
+    useHyperLiquidContext();
+  const { webData2 } = useWebDataContext();
 
-  const [radioValue, setRadioValue] = useState<string | any>('');
+  const [radioValue, setRadioValue] = useState<string>('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
-
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
-  const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
+  const [takeProfitPrice, setTakeProfitPrice] = useState('');
+  const [stopLossPrice, setStopLossPrice] = useState('');
+  const [gain, setGain] = useState('');
+  const [loss, setLoss] = useState('');
   const [size, setSize] = useState<number>(0.0);
-  const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>('');
-  const [stopLossPrice, setStopLossPrice] = useState<number | any>('');
-  const [gain, setGain] = useState<number | any>('');
-  const [loss, setLoss] = useState<number | any>('');
+  const [establishConnModal, setEstablishedConnModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { hyperliquid, setHyperliquid } = useSubAccountsContext();
+  const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
+  let szDecimals = tokenPairData[assetId]?.universe.szDecimals;
+
+  const handleSizeInput = (e: {
+    target: { value: React.SetStateAction<number> };
+  }) => {
+    const value = e.target.value;
+    setSize(value);
+  };
+
+  //setting the equivalent size in the selected token
+  let TokenSize = getUsdSizeEquivalents({
+    size: Number(size),
+    currentMarkPrice: Number(currentMarketPrice),
+    token: selectItem,
+  });
+
+  //maintain the size equivalent state of the  token
+  useEffect(() => {
+    if (TokenSize) {
+      let newSize = Number(TokenSize.toFixed(szDecimals));
+      setSize(newSize);
+    }
+  }, [selectItem]);
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
@@ -50,9 +78,15 @@ const MarketComponent = () => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
 
+  //get the size equivalent in USD
+  let sz =
+    selectItem.toUpperCase() === 'USD'
+      ? size / Number(currentMarketPrice)
+      : size;
   //
   const handlePlaceOrder = async () => {
     try {
+      setIsLoading(true);
       let isBuy = isBuyOrSell === 'buy';
       let orderType: OrderType = {
         limit: {
@@ -66,29 +100,51 @@ const MarketComponent = () => {
         ? Number(currentMarketPrice) * 1.03
         : Number(currentMarketPrice) * 0.97;
 
-      console.log('LimitPx', limitPx, 0, isBuy, size, orderType, reduceOnly);
-      console.log(tokenPairData[assetId].assetCtx.markPx);
-
-      let { szDecimals } = tokenPairData[assetId].universe;
-
       const { success, data, msg } = await hyperliquid.placeOrder(
         Number(assetId),
         isBuy,
         parsePrice(limitPx),
-        parseSize(size, szDecimals),
+        parseSize(sz, szDecimals),
         orderType,
         reduceOnly
       );
 
       if (success) {
         console.log('data', data);
-        //Toast success msg
+        setIsLoading(false);
+        setConfirmModalOpen(false);
+
+        // Check if there's an error in statuses[0]
+        if (
+          data &&
+          typeof data === 'object' &&
+          'data' in data &&
+          data.type === 'order' &&
+          data.data &&
+          data.data.statuses &&
+          data.data.statuses.length > 0 &&
+          data.data.statuses[0].error
+        ) {
+          //Toast error message
+          toast.error(
+            (
+              data.data.statuses[0].error || 'Error ocured please try again'
+            ).toString()
+          );
+        } else {
+          //Toast success message if there's no error
+          toast.success('Order placed successfully');
+        }
       } else {
         console.log('msg', msg);
+        setIsLoading(false);
+
         //Toast error msg
+        toast.error((msg || 'Error ocured please try again').toString());
       }
     } catch (error) {
       console.log('error', error);
+      setIsLoading(false);
     }
   };
 
@@ -109,7 +165,9 @@ const MarketComponent = () => {
       >
         <FlexItems>
           <span>Available balance</span>
-          <span>10:00</span>
+          <span>
+            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
+          </span>
         </FlexItems>
         <FlexItems>
           <span>Current position size</span>
@@ -131,7 +189,7 @@ const MarketComponent = () => {
             placeholder="|"
             type="number"
             value={size.toString()}
-            onChange={(e: any) => setSize(e.target.value)}
+            onChange={(e: any) => handleSizeInput(e)}
             styles={{
               background: 'transparent',
               ':hover': {
@@ -148,7 +206,7 @@ const MarketComponent = () => {
 
         <SelectItemsBox sx={{ '&:hover': { border: 'none' }, m: 0 }}>
           <span> Price</span>
-          <span>$1000</span>
+          <span>$</span>
         </SelectItemsBox>
       </Box>
 
@@ -274,22 +332,34 @@ const MarketComponent = () => {
         </Box>
       )}
 
-      <Box sx={{ ...ButtonStyles }}>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="buyBtn"
-          onClick={() => toggleConfirmModal('buy')}
-        >
-          Buy
-        </BuySellBtn>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="sellBtn"
-          onClick={() => toggleConfirmModal('sell')}
-        >
-          Sell
-        </BuySellBtn>
-      </Box>
+      {!establishedConnection ? (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            className="buyBtn"
+            sx={{ width: '100%' }}
+            onClick={() => setEstablishedConnModal(true)}
+          >
+            Enable trading
+          </BuySellBtn>
+        </Box>
+      ) : (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="buyBtn"
+            onClick={() => toggleConfirmModal('buy')}
+          >
+            Buy
+          </BuySellBtn>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="sellBtn"
+            onClick={() => toggleConfirmModal('sell')}
+          >
+            Sell
+          </BuySellBtn>
+        </Box>
+      )}
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -297,34 +367,39 @@ const MarketComponent = () => {
           onConfirm={handlePlaceOrder}
           isMarket={true}
           currentMarketPrice={currentMarketPrice}
-          size={`${size} ${selectItem}`}
+          size={`${parseSize(sz, szDecimals)} ${tokenPairs[0]}`}
           isTpSl={radioValue === '2' ? true : false}
           takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
           stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
-          estLiqPrice={1}
-          fee={1}
+          estLiqPrice={''}
+          fee={''}
           isBuyOrSell={isBuyOrSell}
+          loading={isLoading}
+          setLoading={setIsLoading}
         />
       )}
 
-      <LiquidationWrapper sx={{ position: 'absolute', bottom: 0 }}>
-        <Box className="items">
-          <span>Liquidation Price</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Order Value</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Margin Required</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Fees</span>
-          <span>N/A</span>
-        </Box>
-      </LiquidationWrapper>
+      {establishConnModal && (
+        <EstablishConnectionModal
+          onClose={() => setEstablishedConnModal(false)}
+          onEstablishConnection={() =>
+            handleEstablishConnection({
+              setIsLoading: setIsLoading,
+              setEstablishedConnModal: setEstablishedConnModal,
+            })
+          }
+          isLoading={isLoading}
+        />
+      )}
+
+      <LiquidationContent
+      //TODO: Add props
+
+      // liquidationPrice={}
+      // orderValue={}
+      // marginRequired={}
+      // fees={}
+      />
     </Box>
   );
 };

@@ -1,40 +1,40 @@
-import {
-  LiquidationWrapper,
-  SelectItemsBox,
-} from "@/styles/riskManager.styles";
-import { Box } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import HandleSelectItems from "../handleSelectItems";
-import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
-import { RenderInput } from "./commonInput";
-import { usePairTokensContext } from "@/context/pairTokensContext";
-import ConfirmationModal from "../Modals/confirmationModals";
+import { SelectItemsBox } from '@/styles/riskManager.styles';
+import { Box } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import HandleSelectItems from '../handleSelectItems';
+import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
+import { RenderInput } from './commonInput';
+import { usePairTokensContext } from '@/context/pairTokensContext';
+import ConfirmationModal from '../Modals/confirmationModals';
+import LiquidationContent from './liquidationContent';
+import { useWebDataContext } from '@/context/webDataContext';
 
 const ScaleOrderTerminal = () => {
+  const { webData2 } = useWebDataContext();
   const { tokenPairs } = usePairTokensContext();
-  const [radioValue, setRadioValue] = useState("");
 
-  const [selectOrderType, setSelectOrderType] = useState("GTC");
+  const [radioValue, setRadioValue] = useState('');
+  const [selectOrderType, setSelectOrderType] = useState('GTC');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [isBuyOrSell, setIsBuyOrSell] = useState(""); //buy | sell
+  const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
-  const [size, setSize] = useState<number | any>("");
+  const [size, setSize] = useState('');
   const [allowedBeforeMarketPurchase, setAllowedBeforeMarketPurchase] =
-    useState<number | any>("");
+    useState('');
 
   //Take Profit / Stop Loss
-  const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>("");
-  const [stopLossPrice, setStopLossPrice] = useState<number | any>("");
-  const [gain, setGain] = useState<number | any>("");
-  const [loss, setLoss] = useState<number | any>("");
+  const [takeProfitPrice, setTakeProfitPrice] = useState('');
+  const [stopLossPrice, setStopLossPrice] = useState('');
+  const [gain, setGain] = useState('');
+  const [loss, setLoss] = useState('');
 
-  const [startPrice, setStartPrice] = useState<number | any>("");
-  const [endPrice, setEndPrice] = useState<number | any>("");
-  const [totalNoOfOrders, setTotalNoOfOrders] = useState<number | any>("");
-  const [sizeSkew, setSizeSkew] = useState<number | any>("");
+  const [startPrice, setStartPrice] = useState('');
+  const [endPrice, setEndPrice] = useState('');
+  const [totalNoOfOrders, setTotalNoOfOrders] = useState('');
+  const [sizeSkew, setSizeSkew] = useState('');
 
-  const [estLiqPrice, setEstLiquidationPrice] = useState<number | any>("100");
-  const [fee, setFee] = useState<number | any>("100");
+  const [estLiqPrice, setEstLiquidationPrice] = useState('100');
+  const [fee, setFee] = useState('100');
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
@@ -49,7 +49,7 @@ const ScaleOrderTerminal = () => {
   };
   const handleRadioClick = (e: any) => {
     if (radioValue === e.target.value) {
-      setRadioValue("");
+      setRadioValue('');
     }
   };
 
@@ -59,21 +59,23 @@ const ScaleOrderTerminal = () => {
   return (
     <Box
       sx={{
-        position: "relative",
-        height: radioValue === "2" ? "calc(100% + 85px)" : "100%",
+        position: 'relative',
+        height: radioValue === '2' ? 'calc(100% + 85px)' : '100%',
       }}
     >
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "5px",
-          mt: "20px",
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px',
+          mt: '20px',
         }}
       >
         <FlexItems>
           <span>Available balance</span>
-          <span>10:00</span>
+          <span>
+            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
+          </span>
         </FlexItems>
         <FlexItems>
           <span>Current position size</span>
@@ -81,7 +83,7 @@ const ScaleOrderTerminal = () => {
         </FlexItems>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         <SelectItemsBox>
           <RenderInput
             label="Size"
@@ -90,12 +92,12 @@ const ScaleOrderTerminal = () => {
             value={size}
             onChange={(e: any) => setSize(e.target.value)}
             styles={{
-              background: "transparent",
-              ".placeholder_box": {
-                fontSize: "12px",
+              background: 'transparent',
+              '.placeholder_box': {
+                fontSize: '12px',
               },
-              ":hover": {
-                border: "none !important",
+              ':hover': {
+                border: 'none !important',
               },
             }}
           />
@@ -114,11 +116,11 @@ const ScaleOrderTerminal = () => {
             onChange={(e: any) => setStartPrice(e.target.value)}
             styles={{
               gap: 0,
-              width: "52%",
-              ".placeholder_box": {
-                fontSize: "12px",
+              width: '52%',
+              '.placeholder_box': {
+                fontSize: '12px',
               },
-              input: { width: "30%", padding: "0" },
+              input: { width: '30%', padding: '0' },
             }}
           />
 
@@ -130,11 +132,11 @@ const ScaleOrderTerminal = () => {
             onChange={(e: any) => setEndPrice(e.target.value)}
             styles={{
               gap: 0,
-              width: "45%",
-              ".placeholder_box": {
-                fontSize: "12px",
+              width: '45%',
+              '.placeholder_box': {
+                fontSize: '12px',
               },
-              input: { width: "30%", padding: "0" },
+              input: { width: '30%', padding: '0' },
             }}
           />
         </FlexItems>
@@ -148,12 +150,12 @@ const ScaleOrderTerminal = () => {
             onChange={(e: any) => setTotalNoOfOrders(e.target.value)}
             styles={{
               gap: 0,
-              width: "55%",
-              ".placeholder_box": {
-                width: "90% !important",
-                fontSize: "12px",
+              width: '55%',
+              '.placeholder_box': {
+                width: '90% !important',
+                fontSize: '12px',
               },
-              input: { width: "20%", padding: "0" },
+              input: { width: '20%', padding: '0' },
             }}
           />
 
@@ -165,11 +167,11 @@ const ScaleOrderTerminal = () => {
             onChange={(e: any) => setSizeSkew(e.target.value)}
             styles={{
               gap: 0,
-              width: "40%",
-              ".placeholder_box": {
-                fontSize: "12px",
+              width: '40%',
+              '.placeholder_box': {
+                fontSize: '12px',
               },
-              input: { width: "30%", padding: "0" },
+              input: { width: '30%', padding: '0' },
             }}
           />
         </FlexItems>
@@ -177,19 +179,19 @@ const ScaleOrderTerminal = () => {
 
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          mt: "20px",
-          gap: "8px",
+          display: 'flex',
+          flexDirection: 'column',
+          mt: '20px',
+          gap: '8px',
           label: {
-            marginRight: "8px",
-            cursor: "pointer",
+            marginRight: '8px',
+            cursor: 'pointer',
           },
         }}
       >
         <FlexItems
           sx={{
-            justifyContent: "flex-start",
+            justifyContent: 'flex-start',
           }}
         >
           <label>
@@ -197,7 +199,7 @@ const ScaleOrderTerminal = () => {
               type="radio"
               name="radio"
               value="1"
-              checked={radioValue === "1"}
+              checked={radioValue === '1'}
               onChange={handleRadioChange}
               onClick={handleRadioClick}
             />
@@ -205,13 +207,13 @@ const ScaleOrderTerminal = () => {
           <span>Reduce Only</span>
         </FlexItems>
 
-        <FlexItems sx={{ justifyContent: "flex-start" }}>
+        <FlexItems sx={{ justifyContent: 'flex-start' }}>
           <label>
             <input
               type="radio"
               name="radio"
               value="2"
-              checked={radioValue === "2"}
+              checked={radioValue === '2'}
               onChange={handleRadioChange}
               onClick={handleRadioClick}
             />
@@ -219,14 +221,14 @@ const ScaleOrderTerminal = () => {
           <span>Take Profit / Stop Loss</span>
         </FlexItems>
       </Box>
-      {radioValue === "2" && (
+      {radioValue === '2' && (
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            mt: "10px",
-            height: "70px",
-            gap: "2px",
+            display: 'flex',
+            flexDirection: 'column',
+            mt: '10px',
+            height: '70px',
+            gap: '2px',
           }}
         >
           <FlexItems>
@@ -238,11 +240,11 @@ const ScaleOrderTerminal = () => {
               onChange={(e: any) => setTakeProfitPrice(e.target.value)}
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  fontSize: '12px',
                 },
-                input: { width: "30%", padding: "0" },
+                input: { width: '30%', padding: '0' },
               }}
             />
 
@@ -254,11 +256,11 @@ const ScaleOrderTerminal = () => {
               onChange={(e: any) => setGain(e.target.value)}
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  fontSize: '12px',
                 },
-                input: { width: "30%", padding: "0" },
+                input: { width: '30%', padding: '0' },
               }}
             />
           </FlexItems>
@@ -272,12 +274,12 @@ const ScaleOrderTerminal = () => {
               onChange={(e: any) => setStopLossPrice(e.target.value)}
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  width: "90% !important",
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  width: '90% !important',
+                  fontSize: '12px',
                 },
-                input: { width: "20%", padding: "0" },
+                input: { width: '20%', padding: '0' },
               }}
             />
 
@@ -289,11 +291,11 @@ const ScaleOrderTerminal = () => {
               onChange={(e: any) => setLoss(e.target.value)}
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  fontSize: '12px',
                 },
-                input: { width: "30%", padding: "0" },
+                input: { width: '30%', padding: '0' },
               }}
             />
           </FlexItems>
@@ -302,16 +304,16 @@ const ScaleOrderTerminal = () => {
 
       <Box sx={{ ...ButtonStyles }}>
         <BuySellBtn
-          sx={{ width: "112px" }}
+          sx={{ width: '112px' }}
           className="buyBtn"
-          onClick={() => toggleConfirmModal("buy")}
+          onClick={() => toggleConfirmModal('buy')}
         >
           Buy
         </BuySellBtn>
         <BuySellBtn
-          sx={{ width: "112px" }}
+          sx={{ width: '112px' }}
           className="sellBtn"
-          onClick={() => toggleConfirmModal("sell")}
+          onClick={() => toggleConfirmModal('sell')}
         >
           Sell
         </BuySellBtn>
@@ -321,13 +323,13 @@ const ScaleOrderTerminal = () => {
         <ConfirmationModal
           onClose={() => setConfirmModalOpen(false)}
           onConfirm={function (): void {
-            throw new Error("Function not implemented.");
+            throw new Error('Function not implemented.');
           }}
           isScale={true}
           size={`${size} ${selectItem}`}
-          isTpSl={radioValue === "2" ? true : false}
-          takeProfitPrice={radioValue === "2" ? takeProfitPrice : undefined}
-          stopLossPrice={radioValue === "2" ? stopLossPrice : undefined}
+          isTpSl={radioValue === '2' ? true : false}
+          takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
+          stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
           estLiqPrice={estLiqPrice}
           noOfOrders={totalNoOfOrders}
           skew={sizeSkew}
@@ -336,24 +338,14 @@ const ScaleOrderTerminal = () => {
         />
       )}
 
-      <LiquidationWrapper sx={{ position: "absolute", bottom: 0 }}>
-        <Box className="items">
-          <span>Liquidation Price</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Order Value</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Margin Required</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Fees</span>
-          <span>N/A</span>
-        </Box>
-      </LiquidationWrapper>
+      <LiquidationContent
+      //TODO: Add props
+
+      // liquidationPrice={}
+      // orderValue={}
+      // marginRequired={}
+      // fees={}
+      />
     </Box>
   );
 };

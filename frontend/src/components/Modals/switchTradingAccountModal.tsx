@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSubAccountsContext } from '@/context/subAccountsContext';
+import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import { SwitchTradingAccWrapper } from '@/styles/navbar.styles';
 import { Box, ClickAwayListener } from '@mui/material';
 import { useAddress, useDisconnect } from '@thirdweb-dev/react';
@@ -18,7 +18,7 @@ const SwitchTradingAccountModal: React.FC<SwitchTradingAccountModalProps> = ({
   const userAddress = useAddress();
 
   //------context Hooks------
-  const { subaccounts } = useSubAccountsContext();
+  const { subaccounts } = useHyperLiquidContext();
   const { currentAccount, switchAccountHandler } = useSwitchTradingAccount();
 
   //copy address to clipboard

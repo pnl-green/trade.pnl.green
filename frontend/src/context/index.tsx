@@ -2,7 +2,7 @@ import React from 'react';
 import PairTokensProvider from './pairTokensContext';
 import OrderBookTradesProvider from './orderBookTradesContext';
 import WebDataProvider from './webDataContext';
-import SubAccountsProvider from './subAccountsContext';
+import HyperliquidProvider from './hyperLiquidContext';
 import TradeHistoryProvider from './tradeHistoryContext';
 import FundingHistoryProvider from './fundingHistoryContext';
 import OrderHistoryProvider from './orderHistoryContext';
@@ -12,7 +12,7 @@ import SwitchAccountProvider from './switchTradingAccContext';
 const ContextProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <WebDataProvider>
-      <SubAccountsProvider>
+      <HyperliquidProvider>
         <PairTokensProvider>
           <OrderBookTradesProvider>
             <TradeHistoryProvider>
@@ -28,7 +28,7 @@ const ContextProviders = ({ children }: { children: React.ReactNode }) => {
             </TradeHistoryProvider>
           </OrderBookTradesProvider>
         </PairTokensProvider>
-      </SubAccountsProvider>
+      </HyperliquidProvider>
     </WebDataProvider>
   );
 };
