@@ -7,16 +7,18 @@ import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
 import { OrderType } from '@/types/hyperliquid';
-import { useSubAccountsContext } from '@/context/subAccountsContext';
+import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import { parsePrice, parseSize } from '@/utils/hyperliquid';
 import toast from 'react-hot-toast';
 import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
 import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
+import EstablishConnectionModal from '../Modals/establishConnectionModal';
 
 const MarketComponent = () => {
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
-  const { hyperliquid, setHyperliquid } = useSubAccountsContext();
+  const { hyperliquid, establishedConnection, handleEstablishConnection } =
+    useHyperLiquidContext();
   const { webData2 } = useWebDataContext();
 
   const [radioValue, setRadioValue] = useState<string>('');
@@ -28,7 +30,7 @@ const MarketComponent = () => {
   const [gain, setGain] = useState('');
   const [loss, setLoss] = useState('');
   const [size, setSize] = useState<number>(0.0);
-
+  const [establishConnModal, setEstablishedConnModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
@@ -112,8 +114,27 @@ const MarketComponent = () => {
         setIsLoading(false);
         setConfirmModalOpen(false);
 
-        //Toast success msg
-        toast.success('Order placed successfully');
+        // Check if there's an error in statuses[0]
+        if (
+          data &&
+          typeof data === 'object' &&
+          'data' in data &&
+          data.type === 'order' &&
+          data.data &&
+          data.data.statuses &&
+          data.data.statuses.length > 0 &&
+          data.data.statuses[0].error
+        ) {
+          //Toast error message
+          toast.error(
+            (
+              data.data.statuses[0].error || 'Error ocured please try again'
+            ).toString()
+          );
+        } else {
+          //Toast success message if there's no error
+          toast.success('Order placed successfully');
+        }
       } else {
         console.log('msg', msg);
         setIsLoading(false);
@@ -311,22 +332,34 @@ const MarketComponent = () => {
         </Box>
       )}
 
-      <Box sx={{ ...ButtonStyles }}>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="buyBtn"
-          onClick={() => toggleConfirmModal('buy')}
-        >
-          Buy
-        </BuySellBtn>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="sellBtn"
-          onClick={() => toggleConfirmModal('sell')}
-        >
-          Sell
-        </BuySellBtn>
-      </Box>
+      {!establishedConnection ? (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            className="buyBtn"
+            sx={{ width: '100%' }}
+            onClick={() => setEstablishedConnModal(true)}
+          >
+            Enable trading
+          </BuySellBtn>
+        </Box>
+      ) : (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="buyBtn"
+            onClick={() => toggleConfirmModal('buy')}
+          >
+            Buy
+          </BuySellBtn>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="sellBtn"
+            onClick={() => toggleConfirmModal('sell')}
+          >
+            Sell
+          </BuySellBtn>
+        </Box>
+      )}
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -338,11 +371,24 @@ const MarketComponent = () => {
           isTpSl={radioValue === '2' ? true : false}
           takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
           stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
-          estLiqPrice={""}
-          fee={""}
+          estLiqPrice={''}
+          fee={''}
           isBuyOrSell={isBuyOrSell}
           loading={isLoading}
           setLoading={setIsLoading}
+        />
+      )}
+
+      {establishConnModal && (
+        <EstablishConnectionModal
+          onClose={() => setEstablishedConnModal(false)}
+          onEstablishConnection={() =>
+            handleEstablishConnection({
+              setIsLoading: setIsLoading,
+              setEstablishedConnModal: setEstablishedConnModal,
+            })
+          }
+          isLoading={isLoading}
         />
       )}
 

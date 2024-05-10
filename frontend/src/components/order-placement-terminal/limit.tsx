@@ -8,17 +8,20 @@ import ConfirmationModal from '../Modals/confirmationModals';
 import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
 import { usePairTokensContext } from '@/context/pairTokensContext';
-import { useSubAccountsContext } from '@/context/subAccountsContext';
+import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import { parsePrice, parseSize } from '@/utils/hyperliquid';
 import toast from 'react-hot-toast';
 import { OrderType } from '@/types/hyperliquid';
 import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
+import EstablishConnectionModal from '../Modals/establishConnectionModal';
 
 const LimitComponent = () => {
   const { webData2 } = useWebDataContext();
-  const { hyperliquid, setHyperliquid } = useSubAccountsContext();
+  const { hyperliquid, establishedConnection, handleEstablishConnection } =
+    useHyperLiquidContext();
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
 
+  //------Local State------
   const [selectOrderType, setSelectOrderType] = useState<
     'Gtc' | 'Ioc' | 'Alo' | 'FrontendMarket'
   >('Gtc');
@@ -29,18 +32,17 @@ const LimitComponent = () => {
   const [size, setSize] = useState<number>(0.0);
   const [isLoading, setIsLoading] = useState(false);
   const [limitPx, setLimitPx] = useState<number>(0.0);
-
-  const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
-  let szDecimals = tokenPairData[assetId]?.universe.szDecimals;
-
+  const [establishConnModal, setEstablishedConnModal] = useState(false);
   //Take Profit / Stop Loss
   const [takeProfitPrice, setTakeProfitPrice] = useState('');
   const [stopLossPrice, setStopLossPrice] = useState('');
   const [gain, setGain] = useState('');
   const [loss, setLoss] = useState('');
-1
   const [estLiqPrice, setEstLiquidationPrice] = useState('');
   const [fee, setFee] = useState('');
+
+  const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
+  let szDecimals = tokenPairData[assetId]?.universe.szDecimals;
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
@@ -109,8 +111,27 @@ const LimitComponent = () => {
         setIsLoading(false);
         setConfirmModalOpen(false);
 
-        //Toast success msg
-        toast.success('Order placed successfully');
+        // Check if there's an error in statuses[0]
+        if (
+          data &&
+          typeof data === 'object' &&
+          'data' in data &&
+          data.type === 'order' &&
+          data.data &&
+          data.data.statuses &&
+          data.data.statuses.length > 0 &&
+          data.data.statuses[0].error
+        ) {
+          //Toast error message
+          toast.error(
+            (
+              data.data.statuses[0].error || 'Error ocured please try again'
+            ).toString()
+          );
+        } else {
+          //Toast success message if there's no error
+          toast.success('Order placed successfully');
+        }
       } else {
         console.log('msg', msg);
         setIsLoading(false);
@@ -323,22 +344,34 @@ const LimitComponent = () => {
         />
       </SelectItemsBox>
 
-      <Box sx={{ ...ButtonStyles }}>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="buyBtn"
-          onClick={() => toggleConfirmModal('buy')}
-        >
-          Buy
-        </BuySellBtn>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="sellBtn"
-          onClick={() => toggleConfirmModal('sell')}
-        >
-          Sell
-        </BuySellBtn>
-      </Box>
+      {!establishedConnection ? (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            className="buyBtn"
+            sx={{ width: '100%' }}
+            onClick={() => setEstablishedConnModal(true)}
+          >
+            Enable trading
+          </BuySellBtn>
+        </Box>
+      ) : (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="buyBtn"
+            onClick={() => toggleConfirmModal('buy')}
+          >
+            Buy
+          </BuySellBtn>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="sellBtn"
+            onClick={() => toggleConfirmModal('sell')}
+          >
+            Sell
+          </BuySellBtn>
+        </Box>
+      )}
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -355,6 +388,19 @@ const LimitComponent = () => {
           isBuyOrSell={isBuyOrSell}
           loading={isLoading}
           setLoading={setIsLoading}
+        />
+      )}
+
+      {establishConnModal && (
+        <EstablishConnectionModal
+          onClose={() => setEstablishedConnModal(false)}
+          onEstablishConnection={() =>
+            handleEstablishConnection({
+              setIsLoading: setIsLoading,
+              setEstablishedConnModal: setEstablishedConnModal,
+            })
+          }
+          isLoading={isLoading}
         />
       )}
 

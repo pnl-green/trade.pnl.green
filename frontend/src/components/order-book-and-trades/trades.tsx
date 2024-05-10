@@ -6,7 +6,7 @@ import { usePairTokensContext } from '@/context/pairTokensContext';
 
 const Trades = () => {
   const { tradesData } = useOrderBookTradesContext();
-  const { pair } = usePairTokensContext();
+  const { pair, tokenPairs } = usePairTokensContext();
 
   const handleDetailsClick = (index: any) => {
     // Implement your logic here
@@ -33,7 +33,7 @@ const Trades = () => {
         >
           <tr>
             <th>Price</th>
-            <th>Size({pair})</th>
+            <th>Size({tokenPairs[0].toString()})</th>
             <th>Time</th>
             <th></th>
           </tr>

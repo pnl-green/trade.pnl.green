@@ -15,13 +15,11 @@ import {
 import { Box } from '@mui/material';
 import { useAddress } from '@thirdweb-dev/react';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Hyperliquid } from '../../utils';
-import { providers } from 'ethers';
-import { AccountProps, Chain, SubAccount } from '@/types/hyperliquid';
+import { AccountProps, SubAccount } from '@/types/hyperliquid';
 import toast from 'react-hot-toast';
 import { useWebDataContext } from '@/context/webDataContext';
 import Loader from '@/components/loaderSpinner';
-import { useSubAccountsContext } from '@/context/subAccountsContext';
+import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import EstablishConnectionModal from '@/components/Modals/establishConnectionModal';
 import { useSwitchTradingAccount } from '@/context/switchTradingAccContext';
 import { useRouter } from 'next/router';
@@ -57,56 +55,54 @@ const bgImages = [
   },
 ];
 
-const SESSION_STORAGE_PREFIX = 'pnl.green';
-
-const DEFAULT_AGENT = {
-  agentAddress: '',
-  userAddress: '',
-};
-
 const SubAccounts = () => {
   const router = useRouter();
 
   //--------------------useContext hooks------------------
   const { webData2, loadingWebData2 } = useWebDataContext();
-  const { subaccounts, hyperliquid, setReloadSubAccounts } =
-    useSubAccountsContext();
+  const {
+    subaccounts,
+    hyperliquid,
+    setReloadSubAccounts,
+    establishedConnection,
+    handleEstablishConnection,
+  } = useHyperLiquidContext();
   const { switchAccountHandler } = useSwitchTradingAccount();
 
   // ------------------ Thirdweb Hooks ------------------
   const userAddress = useAddress();
 
   // ------------------ Local State ------------------
-  const [establishedConnection, setEstablishedConnection] = useState(false);
-  const [agent, setAgent] = useState(DEFAULT_AGENT);
-
   const [isRenameSubAccModalOpen, setRenameSubAccModalOpen] = useState(false);
   const [renameAcc, setRenameAcc] = useState('');
-
   const [createSubAccModal, setcreateSubAccModal] = useState(false);
   const [createNewAcc, setCreateNewAcc] = useState('');
-
   const [isTransferModalOpen, setTransferModalOpen] = useState(false);
   const [amount, setAmount] = useState('');
-
   const [isLoading, setIsLoading] = useState(false);
-
   const [establishConnModal, setEstablishedConnModal] = useState(false);
-
+  const [allAccountsData, setAllAccountsData] = useState<any>([]);
   const masterAccount: AccountProps = {
     name: 'Master Account',
     address: userAddress,
     equity: webData2.clearinghouseState?.marginSummary.accountValue,
   };
-
   const [subAccount, setSubAccount] = useState<AccountProps>({
     name: '',
     address: '',
     equity: '',
   });
+  const [isDeposit, setIsDeposit] = useState(true);
+  // State to hold active data for the selected "To" account
+  const [activeToAccData, setActiveToAccData] = useState<AccountProps | any>(
+    {}
+  );
+  // State to hold active data for the selected "From" account
+  const [activeFromAccData, setActiveFromAccData] = useState<
+    AccountProps | any
+  >({});
 
-  const [allAccountsData, setAllAccountsData] = useState<any>([]);
-
+  //toggleRenameSubAccModal
   const toggleRenameSubAccModal = (subaccount: SubAccount) => {
     setRenameSubAccModalOpen((prev) => !prev);
     setSubAccount({
@@ -116,9 +112,11 @@ const SubAccounts = () => {
     });
   };
 
+  //toggleCreateSubAccModal
   const toggleCreateSubAccModal = () => {
     setcreateSubAccModal((prev) => !prev);
   };
+
   //toggleTransferModal
   const toggleTransferModal = (subaccount: SubAccount) => {
     if (!loadingWebData2) {
@@ -131,80 +129,11 @@ const SubAccounts = () => {
     }
   };
 
+  //closeTransferModal
   const closeTransferModal = () => {
     if (isTransferModalOpen) {
       setAmount('');
       setTransferModalOpen(false);
-      setIsLoading(false);
-    }
-  };
-
-  //establish connection
-  const handleEstablishConnection = async () => {
-    try {
-      setIsLoading(true);
-
-      let signer = new providers.Web3Provider(window.ethereum).getSigner();
-
-      {
-        let userAddress = await signer.getAddress();
-        let {
-          data: agentAddress,
-          success,
-          msg,
-        } = await hyperliquid.connect(userAddress);
-
-        agentAddress = agentAddress as string;
-
-        if (!success) {
-          toast.error(
-            (msg || 'Failed to establish connection: try again!').toString()
-          );
-          setIsLoading(false);
-          return;
-        }
-
-        {
-          // scope to avoid variable name conflict
-
-          let { success, msg } = await hyperliquid.connectAgent(
-            signer,
-            agentAddress
-          );
-
-          if (!success) {
-            toast.error(
-              (msg || 'Failed to establish connection: try again!').toString()
-            );
-            setIsLoading(false);
-            return;
-          }
-        }
-
-        setIsLoading(false);
-
-        // set agent to session storage
-        sessionStorage.setItem(
-          `${SESSION_STORAGE_PREFIX}.agent.${userAddress.toLowerCase()}`,
-          JSON.stringify({
-            agentAddress,
-            userAddress,
-          })
-        );
-
-        setAgent({
-          agentAddress,
-          userAddress,
-        });
-      }
-
-      toast.success('Connection established successfully!');
-
-      setEstablishedConnection(true);
-      setEstablishedConnModal(false);
-    } catch (error) {
-      console.log('error', error);
-      toast.error('Failed to establish connection: try again!');
       setIsLoading(false);
     }
   };
@@ -240,6 +169,7 @@ const SubAccounts = () => {
     }
   };
 
+  //rename subaccount
   const handleSubAccountModify = async (subAccountUser: String) => {
     try {
       setIsLoading(true);
@@ -268,17 +198,6 @@ const SubAccounts = () => {
       setIsLoading(false);
     }
   };
-
-  const [isDeposit, setIsDeposit] = useState(true);
-
-  // State to hold active data for the selected "To" account
-  const [activeToAccData, setActiveToAccData] = useState<AccountProps | any>(
-    {}
-  );
-  // State to hold active data for the selected "From" account
-  const [activeFromAccData, setActiveFromAccData] = useState<
-    AccountProps | any
-  >({});
 
   //deposit to subaccount
   const subAccountTransfer = async () => {
@@ -333,22 +252,6 @@ const SubAccounts = () => {
   };
 
   useEffect(() => {
-    // if unable to get agent from session storage, set establishedConnection to false
-    let agent = sessionStorage.getItem(
-      `pnl.green.agent.${(userAddress || '').toLowerCase()}`
-    );
-
-    // set agent to state if it exists
-    if (agent) {
-      setEstablishedConnection(true);
-      setAgent(JSON.parse(agent));
-    } else {
-      setEstablishedConnection(false);
-      setAgent(DEFAULT_AGENT);
-    }
-  }, [userAddress]);
-
-  useEffect(() => {
     // Combine the fetched data with the previous allAccountsData and the master account
     if (Array.isArray(subaccounts)) {
       const restructuredAccounts = subaccounts.map((account) => ({
@@ -376,7 +279,14 @@ const SubAccounts = () => {
             ) : (
               <>
                 {!establishedConnection ? (
-                  <GreenBtn onClick={handleEstablishConnection}>
+                  <GreenBtn
+                    onClick={() =>
+                      handleEstablishConnection({
+                        setIsLoading: setIsLoading,
+                        setEstablishedConnModal: setEstablishedConnModal,
+                      })
+                    }
+                  >
                     {isLoading ? (
                       <Loader message="Establishing..." />
                     ) : (
@@ -640,7 +550,12 @@ const SubAccounts = () => {
       {establishConnModal && (
         <EstablishConnectionModal
           onClose={() => setEstablishedConnModal(false)}
-          onEstablishConnection={handleEstablishConnection}
+          onEstablishConnection={() =>
+            handleEstablishConnection({
+              setIsLoading: setIsLoading,
+              setEstablishedConnModal: setEstablishedConnModal,
+            })
+          }
           isLoading={isLoading}
         />
       )}

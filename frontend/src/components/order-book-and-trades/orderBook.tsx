@@ -1,13 +1,14 @@
-import React from "react";
+import React from 'react';
 import {
   SpreadAndPairSelects,
   StyledTable,
   Tablerows,
-} from "@/styles/orderbook.styles";
-import { Box } from "@mui/material";
-import HandleSelectItems from "../handleSelectItems";
-import { usePairTokensContext } from "@/context/pairTokensContext";
-import { useOrderBookTradesContext } from "@/context/orderBookTradesContext";
+} from '@/styles/orderbook.styles';
+import { Box } from '@mui/material';
+import HandleSelectItems from '../handleSelectItems';
+import { usePairTokensContext } from '@/context/pairTokensContext';
+import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
+import { SizeEquivalentsProps } from '@/utils/usdEquivalents';
 
 interface OrderBookProps {
   spread: number;
@@ -20,9 +21,23 @@ const calculateBarWidth = (size: number, max: number) => {
   return (size / max) * 100; // Assuming a percentage-based width
 };
 
+//only calculate the USD equivalent of a given size of a token pair
+export const getUsdEquivalentOnly = ({
+  size,
+  currentMarkPrice,
+  token,
+}: SizeEquivalentsProps) => {
+  if (token.toUpperCase() === 'USD') {
+    return Math.trunc(size * currentMarkPrice);
+  } else {
+    return size;
+  }
+};
+
 const renderOrderBookTable = (
   orders: { px: number; sz: number; n: number }[],
-  type: string
+  type: string,
+  pair: string
 ) => {
   const maxOrderSize = Math.max(...orders.map((order) => order.sz));
 
@@ -35,7 +50,13 @@ const renderOrderBookTable = (
           width={calculateBarWidth(order.sz, maxOrderSize)}
         >
           <td className="first-column">{order.px}</td>
-          <td>{order.sz}</td>
+          <td>
+            {getUsdEquivalentOnly({
+              size: Number(order.sz),
+              currentMarkPrice: Number(order.px),
+              token: pair,
+            })}
+          </td>
           <td>{order.n}</td>
         </Tablerows>
       ))}
@@ -61,15 +82,15 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
       <SpreadAndPairSelects>
         <div>
           <HandleSelectItems
-            styles={{ background: "#131212" }}
+            styles={{ background: '#131212' }}
             selectItem={spread}
             setSelectItem={setSpread}
-            selectDataItems={["1", "2", "5", "10", "100", "1000"]}
+            selectDataItems={['1', '2', '5', '10', '100', '1000']}
           />
         </div>
         <div>
           <HandleSelectItems
-            styles={{ background: "#131212" }}
+            styles={{ background: '#131212' }}
             selectItem={pair}
             setSelectItem={setPair}
             selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
@@ -88,15 +109,15 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
           </thead>
 
           {loadingBookData ? (
-            <span style={{ color: "#fff" }}>loading...</span>
+            <span style={{ color: '#fff' }}>loading...</span>
           ) : !loadingBookData &&
             bookData.asks.length === 0 &&
             bookData.bids.length === 0 ? (
             <tbody>
               <tr
                 style={{
-                  color: "#fff",
-                  fontSize: "14px",
+                  color: '#fff',
+                  fontSize: '14px',
                 }}
               >
                 No data Available for {pair}
@@ -104,7 +125,7 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
             </tbody>
           ) : (
             <>
-              {renderOrderBookTable(getBookData().asks, "asks")}
+              {renderOrderBookTable(getBookData().asks, 'asks', pair)}
               {getBookData().asks.length !== 0 &&
                 getBookData().bids.length !== 0 && (
                   <thead className="spread">
@@ -115,7 +136,7 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
                     </tr>
                   </thead>
                 )}
-              {renderOrderBookTable(getBookData().bids, "bids")}
+              {renderOrderBookTable(getBookData().bids, 'bids', pair)}
             </>
           )}
         </StyledTable>
