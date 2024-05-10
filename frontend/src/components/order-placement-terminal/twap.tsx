@@ -1,39 +1,40 @@
-import React, { useEffect, useState } from "react";
-import {
-  LiquidationWrapper,
-  SelectItemsBox,
-} from "@/styles/riskManager.styles";
-import { Box } from "@mui/material";
-import HandleSelectItems from "../handleSelectItems";
-import { ButtonStyles, BuySellBtn, FlexItems } from "@/styles/common.styles";
-import { RenderInput } from "./commonInput";
-import { usePairTokensContext } from "@/context/pairTokensContext";
-import ConfirmationModal from "../Modals/confirmationModals";
+import React, { useEffect, useState } from 'react';
+import { SelectItemsBox } from '@/styles/riskManager.styles';
+import { Box } from '@mui/material';
+import HandleSelectItems from '../handleSelectItems';
+import { RenderInput } from './commonInput';
+import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
+import ConfirmationModal from '../Modals/confirmationModals';
+import LiquidationContent from './liquidationContent';
+import { useWebDataContext } from '@/context/webDataContext';
+import { usePairTokensContext } from '@/context/pairTokensContext';
+import toast from 'react-hot-toast';
 
 const TwapOrderTerminal = () => {
+  const { webData2 } = useWebDataContext();
   const { tokenPairs } = usePairTokensContext();
-  const [timeBtwnIntervals, setTimeBtwnIntervals] = useState("");
-  const [theTimeInterval, setTheTimeInterval] = useState("");
-  const [radioValue, setRadioValue] = useState("");
+
+  const [timeBtwnIntervals, setTimeBtwnIntervals] = useState('');
+  const [theTimeInterval, setTheTimeInterval] = useState('');
+  const [radioValue, setRadioValue] = useState('');
 
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [isBuyOrSell, setIsBuyOrSell] = useState(""); //buy | sell
+  const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
-  const [size, setSize] = useState<number | any>("");
+  const [size, setSize] = useState('');
 
   //Take Profit / Stop Loss
-  const [takeProfitPrice, setTakeProfitPrice] = useState<number | any>("");
-  const [stopLossPrice, setStopLossPrice] = useState<number | any>("");
-  const [gain, setGain] = useState<number | any>("");
-  const [loss, setLoss] = useState<number | any>("");
-  const [totalNoOfOrders, setTotalNoOfOrders] = useState<number | any>("5");
+  const [takeProfitPrice, setTakeProfitPrice] = useState('');
+  const [stopLossPrice, setStopLossPrice] = useState('');
+  const [gain, setGain] = useState('');
+  const [loss, setLoss] = useState('');
+  const [totalNoOfOrders, setTotalNoOfOrders] = useState('5');
 
-  const [estLiqPrice, setEstLiquidationPrice] = useState<number | any>("100");
-  const [fee, setFee] = useState<number | any>("100");
+  const [estLiqPrice, setEstLiquidationPrice] = useState('100');
+  const [fee, setFee] = useState('100');
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
-
     setIsBuyOrSell(button);
   };
 
@@ -44,31 +45,45 @@ const TwapOrderTerminal = () => {
   };
   const handleRadioClick = (e: any) => {
     if (radioValue === e.target.value) {
-      setRadioValue("");
+      setRadioValue('');
     }
   };
 
   useEffect(() => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
+
+  const handlePlaceTwapOrder = () => {
+    try {
+
+      // const {}=hyperli
+      
+    } catch (error) {
+      console.log(error);
+      toast.error('Error placing order, please try again later.');
+    }
+  };
+
   return (
     <Box
       sx={{
-        position: "relative",
-        height: radioValue === "2" ? "calc(100% + 20px)" : "100%",
+        position: 'relative',
+        height: radioValue === '2' ? 'calc(100% + 20px)' : '100%',
       }}
     >
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "5px",
-          mt: "20px",
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px',
+          mt: '20px',
         }}
       >
         <FlexItems>
           <span>Available balance</span>
-          <span>10:00</span>
+          <span>
+            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
+          </span>
         </FlexItems>
         <FlexItems>
           <span>Current position size</span>
@@ -84,27 +99,27 @@ const TwapOrderTerminal = () => {
           value={theTimeInterval}
           onChange={(e: any) => setTheTimeInterval(e.target.value)}
           styles={{
-            padding: "0 2px",
-            ".placeholder_box": {
-              width: "70% !important",
-              fontSize: "12px",
+            padding: '0 2px',
+            '.placeholder_box': {
+              width: '70% !important',
+              fontSize: '12px',
             },
-            background: "transparent",
-            ":hover": {
-              border: "none !important",
-              "*": {
-                fontSize: "11px",
+            background: 'transparent',
+            ':hover': {
+              border: 'none !important',
+              '*': {
+                fontSize: '11px',
               },
             },
             input: {
-              width: "30%",
+              width: '30%',
             },
           }}
         />
         <HandleSelectItems
           selectItem={timeBtwnIntervals}
           setSelectItem={setTimeBtwnIntervals}
-          selectDataItems={["S", "M"]}
+          selectDataItems={['S', 'M']}
         />
       </SelectItemsBox>
 
@@ -116,9 +131,9 @@ const TwapOrderTerminal = () => {
           value={size}
           onChange={(e: any) => setSize(e.target.value)}
           styles={{
-            background: "transparent",
-            ":hover": {
-              border: "none !important",
+            background: 'transparent',
+            ':hover': {
+              border: 'none !important',
             },
           }}
         />
@@ -131,19 +146,19 @@ const TwapOrderTerminal = () => {
 
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          mt: "20px",
-          gap: "8px",
+          display: 'flex',
+          flexDirection: 'column',
+          mt: '20px',
+          gap: '8px',
           label: {
-            marginRight: "8px",
-            cursor: "pointer",
+            marginRight: '8px',
+            cursor: 'pointer',
           },
         }}
       >
         <FlexItems
           sx={{
-            justifyContent: "flex-start",
+            justifyContent: 'flex-start',
           }}
         >
           <label>
@@ -151,7 +166,7 @@ const TwapOrderTerminal = () => {
               type="radio"
               name="radio"
               value="1"
-              checked={radioValue === "1"}
+              checked={radioValue === '1'}
               onChange={handleRadioChange}
               onClick={handleRadioClick}
             />
@@ -159,13 +174,13 @@ const TwapOrderTerminal = () => {
           <span>Reduce Only</span>
         </FlexItems>
 
-        <FlexItems sx={{ justifyContent: "flex-start" }}>
+        <FlexItems sx={{ justifyContent: 'flex-start' }}>
           <label>
             <input
               type="radio"
               name="radio"
               value="2"
-              checked={radioValue === "2"}
+              checked={radioValue === '2'}
               onChange={handleRadioChange}
               onClick={handleRadioClick}
             />
@@ -174,14 +189,14 @@ const TwapOrderTerminal = () => {
         </FlexItems>
       </Box>
 
-      {radioValue === "2" && (
+      {radioValue === '2' && (
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            mt: "10px",
-            height: "70px",
-            gap: "2px",
+            display: 'flex',
+            flexDirection: 'column',
+            mt: '10px',
+            height: '70px',
+            gap: '2px',
           }}
         >
           <FlexItems>
@@ -193,11 +208,11 @@ const TwapOrderTerminal = () => {
               onChange={(e: any) => setTakeProfitPrice(e.target.value)}
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  fontSize: '12px',
                 },
-                input: { width: "30%", padding: "0" },
+                input: { width: '30%', padding: '0' },
               }}
             />
 
@@ -206,11 +221,11 @@ const TwapOrderTerminal = () => {
               placeholder="$"
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  fontSize: '12px',
                 },
-                input: { width: "30%", padding: "0" },
+                input: { width: '30%', padding: '0' },
               }}
             />
           </FlexItems>
@@ -224,12 +239,12 @@ const TwapOrderTerminal = () => {
               onChange={(e: any) => setStopLossPrice(e.target.value)}
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  width: "90% !important",
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  width: '90% !important',
+                  fontSize: '12px',
                 },
-                input: { width: "20%", padding: "0" },
+                input: { width: '20%', padding: '0' },
               }}
             />
 
@@ -238,11 +253,11 @@ const TwapOrderTerminal = () => {
               placeholder="$"
               styles={{
                 gap: 0,
-                width: "49%",
-                ".placeholder_box": {
-                  fontSize: "12px",
+                width: '49%',
+                '.placeholder_box': {
+                  fontSize: '12px',
                 },
-                input: { width: "30%", padding: "0" },
+                input: { width: '30%', padding: '0' },
               }}
             />
           </FlexItems>
@@ -251,16 +266,16 @@ const TwapOrderTerminal = () => {
 
       <Box sx={{ ...ButtonStyles }}>
         <BuySellBtn
-          sx={{ width: "112px" }}
+          sx={{ width: '112px' }}
           className="buyBtn"
-          onClick={() => toggleConfirmModal("buy")}
+          onClick={() => toggleConfirmModal('buy')}
         >
           Buy
         </BuySellBtn>
         <BuySellBtn
-          sx={{ width: "112px" }}
+          sx={{ width: '112px' }}
           className="sellBtn"
-          onClick={() => toggleConfirmModal("sell")}
+          onClick={() => toggleConfirmModal('sell')}
         >
           Sell
         </BuySellBtn>
@@ -270,39 +285,29 @@ const TwapOrderTerminal = () => {
         <ConfirmationModal
           onClose={() => setConfirmModalOpen(false)}
           onConfirm={function (): void {
-            throw new Error("Function not implemented.");
+            throw new Error('Function not implemented.');
           }}
           isTwap={true}
           size={`${size} ${selectItem}`}
           timeBetweenIntervals={`${theTimeInterval} ${timeBtwnIntervals}`}
           noOfOrders={totalNoOfOrders}
-          isTpSl={radioValue === "2" ? true : false}
-          takeProfitPrice={radioValue === "2" ? takeProfitPrice : undefined}
-          stopLossPrice={radioValue === "2" ? stopLossPrice : undefined}
+          isTpSl={radioValue === '2' ? true : false}
+          takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
+          stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
           estLiqPrice={estLiqPrice}
           fee={fee}
           isBuyOrSell={isBuyOrSell}
         />
       )}
 
-      <LiquidationWrapper sx={{ position: "absolute", bottom: 0 }}>
-        <Box className="items">
-          <span>Liquidation Price</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Order Value</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Margin Required</span>
-          <span>N/A</span>
-        </Box>
-        <Box className="items">
-          <span>Fees</span>
-          <span>N/A</span>
-        </Box>
-      </LiquidationWrapper>
+      <LiquidationContent
+      //TODO: Add props
+
+      // liquidationPrice={}
+      // orderValue={}
+      // marginRequired={}
+      // fees={}
+      />
     </Box>
   );
 };

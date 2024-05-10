@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { PairData, tokenPairs } from '../../types/hyperliquid';
-import { useSubAccountsContext } from './subAccountsContext';
+import { useHyperLiquidContext } from './hyperLiquidContext';
 
 //default dummy token data
 const defaultDummyTokenData: PairData | any = {
@@ -56,7 +56,7 @@ export const usePairTokensContext = () => {
 
 const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   //------Hooks------
-  const { hyperliquid } = useSubAccountsContext();
+  const { hyperliquid } = useHyperLiquidContext();
 
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
   const [tokenPairData, setTokenPairData] = useState([]); //all token pair data

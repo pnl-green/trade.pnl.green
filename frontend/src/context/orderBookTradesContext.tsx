@@ -27,7 +27,7 @@ const OrderBookTradesProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { pair } = usePairTokensContext();
+  const { pair, tokenPairs } = usePairTokensContext();
   const [bookData, setBookData] = useState<BookDataProps>({
     asks: [],
     bids: [],
@@ -49,7 +49,7 @@ const OrderBookTradesProvider = ({
         method: 'subscribe',
         subscription: {
           type: 'trades',
-          coin: `${pair}`,
+          coin: `${tokenPairs[0]}`,
         },
       });
       ws.send(message);
@@ -93,7 +93,7 @@ const OrderBookTradesProvider = ({
     return () => {
       ws.close();
     };
-  }, [pair]);
+  }, [tokenPairs]);
 
   useEffect(() => {
     // Create a new WebSocket connection
@@ -105,7 +105,7 @@ const OrderBookTradesProvider = ({
         method: 'subscribe',
         subscription: {
           type: 'l2Book',
-          coin: `${pair}`,
+          coin: `${tokenPairs[0]}`,
           nSigFigs: 5,
         },
       });
@@ -142,7 +142,7 @@ const OrderBookTradesProvider = ({
     return () => {
       ws.close();
     };
-  }, [pair]);
+  }, [tokenPairs]);
 
   return (
     <OrderBookTradesContext.Provider
