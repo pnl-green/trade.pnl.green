@@ -4,6 +4,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { PairData, tokenPairs } from '../../types/hyperliquid';
 import { useHyperLiquidContext } from './hyperLiquidContext';
 
+const WSS_URL =
+  process.env.NEXT_PUBLIC_WSS_URL || 'wss://api.hyperliquid-testnet.xyz/ws';
+
 //default dummy token data
 const defaultDummyTokenData: PairData | any = {
   pairs: 'SOL-USD',
@@ -98,7 +101,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Create a new WebSocket connection
-    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}`);
+    const ws = new WebSocket(`${WSS_URL}`);
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {

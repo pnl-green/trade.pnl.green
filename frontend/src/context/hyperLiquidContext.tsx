@@ -157,11 +157,6 @@ const HyperliquidProvider = ({ children }: { children: React.ReactNode }) => {
 
     // if agent address from webdata is different from agent address in session storage, set establishedConnection to false
     if (agentAddressFromWebdata !== parsedAgent?.agentAddress) {
-      console.log(
-        'agentAddressFromWebdata',
-        agentAddressFromWebdata,
-        parsedAgent?.agentAddress
-      );
       setEstablishedConnection(false);
       setAgent(DEFAULT_AGENT);
     } else {

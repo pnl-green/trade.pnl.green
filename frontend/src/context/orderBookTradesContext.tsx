@@ -4,6 +4,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { BookDataProps, WsTrades } from '@/types/hyperliquid';
 import { usePairTokensContext } from './pairTokensContext';
 
+const WSS_URL =
+  process.env.NEXT_PUBLIC_WSS_URL || 'wss://api.hyperliquid-testnet.xyz/ws';
 interface OrderBookTradesProps {
   bookData: BookDataProps;
   tradesData: WsTrades[];
@@ -41,7 +43,7 @@ const OrderBookTradesProvider = ({
 
   useEffect(() => {
     // Create a new WebSocket connection
-    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}`);
+    const ws = new WebSocket(`${WSS_URL}`);
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
@@ -97,7 +99,7 @@ const OrderBookTradesProvider = ({
 
   useEffect(() => {
     // Create a new WebSocket connection
-    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}`);
+    const ws = new WebSocket(`${WSS_URL}`);
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
