@@ -1,6 +1,6 @@
 use ethers::types::{Address, Signature};
 use hyperliquid::types::{
-    exchange::request::{Grouping, OrderRequest},
+    exchange::request::{CancelRequest, OrderRequest},
     info::request::CandleSnapshotRequest,
 };
 use serde::{Deserialize, Serialize};
@@ -26,7 +26,6 @@ pub enum Info {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Order {
-    pub grouping: Grouping,
     pub orders: Vec<OrderRequest>,
 }
 
@@ -69,15 +68,15 @@ pub struct UpdateIsolatedMargin {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TwapOrder {}
+pub struct TwapOrder {
+    action: Order,
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NormalTpsl {}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Cancel {}
+pub struct Cancel {
+    pub cancels: Vec<CancelRequest>,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -116,7 +115,7 @@ pub enum Exchange {
     UpdateLeverage { action: UpdateLeverage },
     UpdateIsolatedMargin { action: UpdateIsolatedMargin },
     TwapOrder { action: TwapOrder },
-    NormalTpsl { action: NormalTpsl },
+    NormalTpsl { action: Order },
     Cancel { action: Cancel },
     Connect(ConnectRequest),
 }

@@ -25,8 +25,8 @@ export type OrderType =
     };
 
 export type Cancel = {
-  orderID: number;
   asset: number;
+  oid: number;
 };
 
 export type OrderRequest = {
