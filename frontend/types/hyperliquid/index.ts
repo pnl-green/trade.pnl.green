@@ -29,6 +29,16 @@ export type Cancel = {
   asset: number;
 };
 
+export type OrderRequest = {
+  asset: number;
+  isBuy: boolean;
+  limitPx: number | string;
+  sz: number | string;
+  reduceOnly: boolean;
+  orderType: OrderType;
+  cloid?: string | null;
+};
+
 export type Interval = '1m' | '5m' | '15m' | '1h' | '4h' | '1d';
 
 export type CandleSnapshot = {
@@ -98,7 +108,7 @@ export interface tokenPairs {
   token2: string;
 }
 
-export interface PairData  {
+export interface PairData {
   pairs?: string;
   assetId?: string | number;
   assetctxs: AssetCtx;

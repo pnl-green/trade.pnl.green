@@ -100,14 +100,14 @@ const MarketComponent = () => {
         ? Number(currentMarketPrice) * 1.03
         : Number(currentMarketPrice) * 0.97;
 
-      const { success, data, msg } = await hyperliquid.placeOrder(
-        Number(assetId),
+      const { success, data, msg } = await hyperliquid.placeOrder({
+        asset: Number(assetId),
         isBuy,
-        parsePrice(limitPx),
-        parseSize(sz, szDecimals),
+        limitPx: parsePrice(limitPx),
+        sz: parseSize(sz, szDecimals),
         orderType,
-        reduceOnly
-      );
+        reduceOnly,
+      });
 
       if (success) {
         console.log('data', data);

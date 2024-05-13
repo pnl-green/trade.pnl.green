@@ -6,6 +6,7 @@ import {
   Chain,
   ChainId,
   Meta,
+  OrderRequest,
   OrderType,
   SubAccount,
 } from '@/types/hyperliquid';
@@ -43,37 +44,33 @@ export class Hyperliquid {
   // ----------------- EXCHANGE => PLACE ORDER <= -----------------
 
   placeOrder = async (
-    asset: number,
-    isBuy: boolean,
-    limitPx: number | string,
-    sz: number | string,
-    orderType: OrderType,
-    reduceOnly = false,
-    cloid: string | null = null,
+    order: OrderRequest,
     vaultAdress: string | null = null
   ) => {
-    // TODO: parse limitPx and sz
+    let orders = [order].reduce((acc: OrderRequest[], order) => {
+      acc.push({
+        asset: order.asset,
+        isBuy: order.isBuy,
+        limitPx: order.limitPx,
+        sz: order.sz,
+        reduceOnly: order.reduceOnly,
+        orderType: order.orderType,
+        ...(order?.cloid && { cloid: order.cloid }),
+      });
+
+      return acc;
+    }, []);
 
     let action = {
       grouping: 'na',
-      orders: [
-        {
-          asset,
-          isBuy,
-          limitPx,
-          sz,
-          reduceOnly,
-          orderType,
-          cloid,
-        },
-      ],
+      orders,
     };
 
     let request = {
       endpoint: 'exchange',
       type: 'order',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -94,14 +91,65 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'cancel',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
   };
 
-  normalTpSl = async (asset: number) => {
-    // TODO: Implement normalTpSl
+  normalTpSl = async (
+    normal: OrderRequest,
+    tp?: OrderRequest,
+    sl?: OrderRequest,
+    vaultAdress: string | null = null
+  ) => {
+    // if no tp and sl,throw an error
+    if (!tp && !sl) {
+      throw new Error('No tp and sl');
+    }
+
+    let orders = [normal, tp, sl].reduce(
+      (
+        acc: {
+          a: number;
+          b: boolean;
+          p: string;
+          r: boolean;
+          s: string;
+          t: OrderType;
+          c?: string;
+        }[],
+        order
+      ) => {
+        if (order) {
+          acc.push({
+            a: order.asset,
+            b: order.isBuy,
+            p: order.limitPx.toString(),
+            r: order.reduceOnly,
+            s: order.sz.toString(),
+            t: order.orderType,
+            ...(order?.cloid && { c: order.cloid }),
+          });
+        }
+        return acc;
+      },
+      []
+    );
+
+    let action = {
+      grouping: 'normalTpsl',
+      orders,
+    };
+
+    let request = {
+      endpoint: 'exchange',
+      type: 'order',
+      action,
+      ...(vaultAdress && { vaultAdress }),
+    };
+
+    return this.#post(request);
   };
 
   updateLeverage = async (
@@ -121,7 +169,7 @@ export class Hyperliquid {
       type: 'updateLeverage',
       action,
       isFrontend: true,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -143,7 +191,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'updateIsolatedMargin',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -172,7 +220,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'twapOrder',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -197,7 +245,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'order',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -205,7 +253,10 @@ export class Hyperliquid {
 
   // ----------------- EXCHANGE => SUB ACCOUNTS <= -----------------
 
-  createSubAccount = async (name: String, vaultAdress = null) => {
+  createSubAccount = async (
+    name: String,
+    vaultAdress: string | null = null
+  ) => {
     let action = {
       name,
     };
@@ -214,7 +265,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'createSubAccount',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -223,7 +274,7 @@ export class Hyperliquid {
   subAccountModify = async (
     name: String,
     subAccountUser: String,
-    vaultAdress = null
+    vaultAdress: string | null = null
   ) => {
     let action = {
       subAccountUser,
@@ -234,7 +285,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'subAccountModify',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -244,7 +295,7 @@ export class Hyperliquid {
     isDeposit: boolean,
     subAccountUser: String,
     usd: number | string,
-    vaultAdress = null
+    vaultAdress: string | null = null
   ) => {
     let action = {
       subAccountUser,
@@ -256,7 +307,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'subAccountTransfer',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -273,7 +324,7 @@ export class Hyperliquid {
     signer: providers.JsonRpcSigner,
     agentAddress: String,
     extra_agent_name: String | null = null,
-    vaultAdress = null
+    vaultAdress: string | null = null
   ) => {
     let nonce = timestamp();
 
@@ -323,7 +374,7 @@ export class Hyperliquid {
       action,
       nonce,
       signature,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
