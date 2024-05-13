@@ -91,7 +91,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'cancel',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -169,7 +169,7 @@ export class Hyperliquid {
       type: 'updateLeverage',
       action,
       isFrontend: true,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -191,7 +191,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'updateIsolatedMargin',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -220,7 +220,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'twapOrder',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -245,7 +245,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'order',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -253,7 +253,10 @@ export class Hyperliquid {
 
   // ----------------- EXCHANGE => SUB ACCOUNTS <= -----------------
 
-  createSubAccount = async (name: String, vaultAdress = null) => {
+  createSubAccount = async (
+    name: String,
+    vaultAdress: string | null = null
+  ) => {
     let action = {
       name,
     };
@@ -262,7 +265,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'createSubAccount',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -271,7 +274,7 @@ export class Hyperliquid {
   subAccountModify = async (
     name: String,
     subAccountUser: String,
-    vaultAdress = null
+    vaultAdress: string | null = null
   ) => {
     let action = {
       subAccountUser,
@@ -282,7 +285,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'subAccountModify',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -292,7 +295,7 @@ export class Hyperliquid {
     isDeposit: boolean,
     subAccountUser: String,
     usd: number | string,
-    vaultAdress = null
+    vaultAdress: string | null = null
   ) => {
     let action = {
       subAccountUser,
@@ -304,7 +307,7 @@ export class Hyperliquid {
       endpoint: 'exchange',
       type: 'subAccountTransfer',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -321,7 +324,7 @@ export class Hyperliquid {
     signer: providers.JsonRpcSigner,
     agentAddress: String,
     extra_agent_name: String | null = null,
-    vaultAdress = null
+    vaultAdress: string | null = null
   ) => {
     let nonce = timestamp();
 
@@ -371,7 +374,7 @@ export class Hyperliquid {
       action,
       nonce,
       signature,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
