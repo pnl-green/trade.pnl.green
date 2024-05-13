@@ -81,10 +81,7 @@ export class Hyperliquid {
     vaultAdress: string | null = null
   ) => {
     let action = {
-      cancels: cancels.map((cancel) => ({
-        a: cancel.asset,
-        o: cancel.orderID,
-      })),
+      cancels,
     };
 
     let request = {
@@ -108,34 +105,20 @@ export class Hyperliquid {
       throw new Error('No tp and sl');
     }
 
-    let orders = [normal, tp, sl].reduce(
-      (
-        acc: {
-          a: number;
-          b: boolean;
-          p: string;
-          r: boolean;
-          s: string;
-          t: OrderType;
-          c?: string;
-        }[],
-        order
-      ) => {
-        if (order) {
-          acc.push({
-            a: order.asset,
-            b: order.isBuy,
-            p: order.limitPx.toString(),
-            r: order.reduceOnly,
-            s: order.sz.toString(),
-            t: order.orderType,
-            ...(order?.cloid && { c: order.cloid }),
-          });
-        }
-        return acc;
-      },
-      []
-    );
+    let orders = [normal, tp, sl].reduce((acc: OrderRequest[], order) => {
+      if (order) {
+        acc.push({
+          asset: order.asset,
+          isBuy: order.isBuy,
+          limitPx: order.limitPx.toString(),
+          reduceOnly: order.reduceOnly,
+          sz: order.sz.toString(),
+          orderType: order.orderType,
+          ...(order?.cloid && { cloid: order.cloid }),
+        });
+      }
+      return acc;
+    }, []);
 
     let action = {
       grouping: 'normalTpsl',

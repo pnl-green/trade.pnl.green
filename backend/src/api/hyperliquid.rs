@@ -35,9 +35,7 @@ pub async fn hyperliquid(
 
     Ok(match req {
         Request::Info(req) => {
-            tracing::info!("Request: {:#?}", req);
             let info = Hyperliquid::new(chain);
-            tracing::info!("Info: {:#?}", "info");
 
             match req {
                 Info::SubAccounts { user } => {
@@ -258,8 +256,45 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
-                Exchange::NormalTpsl { action } => todo!(),
-                Exchange::Cancel { action } => todo!(),
+                Exchange::NormalTpsl { action } => {
+                    let data = exchange
+                        .normal_tpsl(agent, action.orders, vault_address)
+                        .await
+                        .map_err(|msg| BadRequestError(msg.to_string()))?;
+
+                    match data {
+                        response::Response::Ok(data) => HttpResponse::Ok().json(Response {
+                            success: true,
+                            data: Some(data),
+                            msg: None,
+                        }),
+
+                        response::Response::Err(msg) => HttpResponse::Ok().json(Response {
+                            success: false,
+                            data: None::<String>,
+                            msg: Some(msg),
+                        }),
+                    }
+                }
+                Exchange::Cancel { action } => {
+                    let data = exchange
+                        .cancel_order(agent, action.cancels, vault_address)
+                        .await
+                        .map_err(|msg| BadRequestError(msg.to_string()))?;
+
+                    match data {
+                        response::Response::Ok(data) => HttpResponse::Ok().json(Response {
+                            success: true,
+                            data: Some(data),
+                            msg: None,
+                        }),
+                        response::Response::Err(msg) => HttpResponse::Ok().json(Response {
+                            success: false,
+                            data: None::<String>,
+                            msg: Some(msg),
+                        }),
+                    }
+                }
                 Exchange::Connect(req) => {
                     let data = exchange
                         .client
