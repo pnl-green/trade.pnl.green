@@ -93,7 +93,7 @@ const OrderBookTradesProvider = ({
     return () => {
       ws.close();
     };
-  }, [tokenPairs]);
+  }, [pair]);
 
   useEffect(() => {
     // Create a new WebSocket connection
@@ -142,7 +142,7 @@ const OrderBookTradesProvider = ({
     return () => {
       ws.close();
     };
-  }, [tokenPairs]);
+  }, [pair]);
 
   return (
     <OrderBookTradesContext.Provider
