@@ -6,6 +6,7 @@ import {
   Chain,
   ChainId,
   Meta,
+  OrderRequest,
   OrderType,
   SubAccount,
 } from '@/types/hyperliquid';
@@ -43,37 +44,33 @@ export class Hyperliquid {
   // ----------------- EXCHANGE => PLACE ORDER <= -----------------
 
   placeOrder = async (
-    asset: number,
-    isBuy: boolean,
-    limitPx: number | string,
-    sz: number | string,
-    orderType: OrderType,
-    reduceOnly = false,
-    cloid: string | null = null,
+    order: OrderRequest,
     vaultAdress: string | null = null
   ) => {
-    // TODO: parse limitPx and sz
+    let orders = [order].reduce((acc: OrderRequest[], order) => {
+      acc.push({
+        asset: order.asset,
+        isBuy: order.isBuy,
+        limitPx: order.limitPx,
+        sz: order.sz,
+        reduceOnly: order.reduceOnly,
+        orderType: order.orderType,
+        ...(order?.cloid && { cloid: order.cloid }),
+      });
+
+      return acc;
+    }, []);
 
     let action = {
       grouping: 'na',
-      orders: [
-        {
-          asset,
-          isBuy,
-          limitPx,
-          sz,
-          reduceOnly,
-          orderType,
-          cloid,
-        },
-      ],
+      orders,
     };
 
     let request = {
       endpoint: 'exchange',
       type: 'order',
       action,
-      vaultAdress,
+      ...(vaultAdress && { vaultAdress }),
     };
 
     return this.#post(request);
@@ -100,8 +97,59 @@ export class Hyperliquid {
     return this.#post(request);
   };
 
-  normalTpSl = async (asset: number) => {
-    // TODO: Implement normalTpSl
+  normalTpSl = async (
+    normal: OrderRequest,
+    tp?: OrderRequest,
+    sl?: OrderRequest,
+    vaultAdress: string | null = null
+  ) => {
+    // if no tp and sl,throw an error
+    if (!tp && !sl) {
+      throw new Error('No tp and sl');
+    }
+
+    let orders = [normal, tp, sl].reduce(
+      (
+        acc: {
+          a: number;
+          b: boolean;
+          p: string;
+          r: boolean;
+          s: string;
+          t: OrderType;
+          c?: string;
+        }[],
+        order
+      ) => {
+        if (order) {
+          acc.push({
+            a: order.asset,
+            b: order.isBuy,
+            p: order.limitPx.toString(),
+            r: order.reduceOnly,
+            s: order.sz.toString(),
+            t: order.orderType,
+            ...(order?.cloid && { c: order.cloid }),
+          });
+        }
+        return acc;
+      },
+      []
+    );
+
+    let action = {
+      grouping: 'normalTpsl',
+      orders,
+    };
+
+    let request = {
+      endpoint: 'exchange',
+      type: 'order',
+      action,
+      ...(vaultAdress && { vaultAdress }),
+    };
+
+    return this.#post(request);
   };
 
   updateLeverage = async (

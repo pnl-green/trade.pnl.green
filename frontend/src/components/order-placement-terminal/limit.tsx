@@ -97,14 +97,14 @@ const LimitComponent = () => {
       };
       let reduceOnly = radioValue === '1';
 
-      const { success, data, msg } = await hyperliquid.placeOrder(
-        Number(assetId),
+      const { success, data, msg } = await hyperliquid.placeOrder({
+        asset: Number(assetId),
         isBuy,
-        parsePrice(Number(limitPx)),
-        parseSize(sz, szDecimals),
+        limitPx: parsePrice(Number(limitPx)),
+        sz: parseSize(sz, szDecimals),
         orderType,
-        reduceOnly
-      );
+        reduceOnly,
+      });
 
       if (success) {
         console.log('data', data);
