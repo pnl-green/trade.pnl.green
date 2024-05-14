@@ -179,7 +179,7 @@ const MarketComponent = () => {
                 trigger: {
                   isMarket: true,
                   tpsl: 'tp',
-                  triggerPx: Number(takeProfitPrice),
+                  triggerPx: Number(takeProfitPrice), //expects a string here
                 },
               },
               reduceOnly: !reduceOnly,
@@ -195,7 +195,7 @@ const MarketComponent = () => {
                 trigger: {
                   isMarket: true,
                   tpsl: 'sl',
-                  triggerPx: Number(stopLossPrice),
+                  triggerPx: Number(stopLossPrice), //expects a string here
                 },
               },
               reduceOnly: !reduceOnly,
@@ -441,7 +441,6 @@ const MarketComponent = () => {
             sx={{
               width: '112px',
               ':disabled': {
-                color: '#fff',
                 cursor: 'none',
               },
             }}
@@ -455,7 +454,6 @@ const MarketComponent = () => {
             sx={{
               width: '112px',
               ':disabled': {
-                color: '#fff',
                 cursor: 'none',
               },
             }}

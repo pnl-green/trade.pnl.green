@@ -1,5 +1,5 @@
-import React from "react";
-import { ItemsSelect } from "@/styles/common.styles";
+import React from 'react';
+import { ItemsSelect } from '@/styles/common.styles';
 
 export interface HandleSelectProps {
   selectItem: any;
@@ -7,6 +7,7 @@ export interface HandleSelectProps {
   selectDataItems: string[];
   styles?: React.CSSProperties;
   className?: string;
+  toLowerCase?: boolean;
 }
 
 const HandleSelectItems = ({
@@ -15,6 +16,7 @@ const HandleSelectItems = ({
   selectDataItems,
   styles,
   className,
+  toLowerCase,
 }: HandleSelectProps) => {
   return (
     <ItemsSelect
@@ -25,7 +27,7 @@ const HandleSelectItems = ({
     >
       {selectDataItems?.map((value, index) => (
         <option key={index} value={value}>
-          {value.toUpperCase()}
+          {toLowerCase ? value : value.toUpperCase()}
         </option>
       ))}
     </ItemsSelect>

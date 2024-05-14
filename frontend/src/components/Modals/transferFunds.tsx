@@ -6,22 +6,22 @@ import BigNumber from 'bignumber.js';
 import HandleSelectItems from '../handleSelectItems';
 import Loader from '../loaderSpinner';
 import { AccountProps } from '@/types/hyperliquid';
-import toast from 'react-hot-toast';
+import { useWebDataContext } from '@/context/webDataContext';
 
 interface ModalProps {
   onClose: () => void;
   onConfirm?: () => void;
-  amount?: number | any;
-  setAmount?: React.Dispatch<React.SetStateAction<number | any>>;
+  amount?: number;
+  setAmount?: React.Dispatch<React.SetStateAction<number>>;
   masterAccount?: AccountProps;
   subAccount?: AccountProps;
   allAccountsData?: any;
   isLoading?: boolean;
   setIsDeposit: React.Dispatch<React.SetStateAction<boolean>>;
-  setActiveToAccData: React.Dispatch<React.SetStateAction<AccountProps | any>>; // State to hold active data for the selected "To" account
+  setActiveToAccData: React.Dispatch<React.SetStateAction<AccountProps>>; // State to hold active data for the selected "To" account
   activeFromAccData: AccountProps; // State to hold active data for the selected "From" account
   setActiveFromAccData: React.Dispatch<
-    React.SetStateAction<AccountProps | any> // State to hold active data for the selected "From" account
+    React.SetStateAction<AccountProps> // State to hold active data for the selected "From" account
   >;
   isDeposit: boolean;
 }
@@ -41,15 +41,15 @@ const TransferFunds: React.FC<ModalProps> = ({
   setActiveFromAccData,
   isDeposit,
 }) => {
+  const { webData2 } = useWebDataContext();
+
   // State to manage the selected "From" account
-  const [selectFromAcc, setSelectFromAcc] = useState<string | any>(
+  const [selectFromAcc, setSelectFromAcc] = useState<string>(
     `${masterAccount?.name}`
   );
 
   // State to manage the selected "To" account
-  const [selectToAcc, setSelectToAcc] = useState<string | any>(
-    `${subAccount?.name}`
-  );
+  const [selectToAcc, setSelectToAcc] = useState<string>(`${subAccount?.name}`);
 
   // Function to get active account data by account name
   const getActiveAccountData = (accountName: string) => {
@@ -60,12 +60,19 @@ const TransferFunds: React.FC<ModalProps> = ({
   const isInputAmountGreaterThanBalance =
     new BigNumber(amount || 0).isGreaterThan(
       new BigNumber(activeFromAccData?.equity)
-    ) || parseFloat(amount) === 0;
+    ) || parseFloat(String(amount)) === 0;
 
   // Function to set the input amount to the maximum available balance
+  //{Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
+  let withdrawable = Number(webData2.clearinghouseState?.withdrawable);
+
   const handleMaxClick = () => {
-    if (Number(activeFromAccData.equity) > 0) {
-      setAmount?.(activeFromAccData.equity);
+    if (activeFromAccData.name === 'Master Account') {
+      setAmount?.(withdrawable);
+    } else {
+      if (Number(activeFromAccData.equity) > 0) {
+        setAmount?.(activeFromAccData.equity);
+      }
     }
   };
 
@@ -101,6 +108,7 @@ const TransferFunds: React.FC<ModalProps> = ({
               <Box className="from_to">
                 <label>From</label>
                 <HandleSelectItems
+                  toLowerCase={true}
                   selectItem={selectFromAcc}
                   setSelectItem={setSelectFromAcc}
                   selectDataItems={allAccountsData.map(
@@ -120,6 +128,7 @@ const TransferFunds: React.FC<ModalProps> = ({
               <Box className="from_to">
                 <label>To</label>
                 <HandleSelectItems
+                  toLowerCase={true}
                   selectItem={selectToAcc}
                   setSelectItem={setSelectToAcc}
                   selectDataItems={allAccountsData.map(
@@ -137,7 +146,7 @@ const TransferFunds: React.FC<ModalProps> = ({
                 type="number"
                 placeholder="Amount"
                 value={amount}
-                onChange={(e) => setAmount?.(e.target.value)}
+                onChange={(e) => setAmount?.(parseFloat(e.target.value))}
               />
               <TextBtn sx={{ color: '#049260' }} onClick={handleMaxClick}>
                 Max
@@ -145,12 +154,18 @@ const TransferFunds: React.FC<ModalProps> = ({
             </Box>
             <AvailableBalanceStyles>
               <span>Available to transfer</span>
-              <span>{Number(activeFromAccData?.equity).toFixed(2)}</span>
+              <span>
+                {activeFromAccData.name === 'Master Account'
+                  ? withdrawable.toFixed(2)
+                  : Number(activeFromAccData?.equity).toFixed(2)}
+              </span>
             </AvailableBalanceStyles>
           </ContentBox>
           <ActionBox>
             <GreenBtn
-              disabled={isInputAmountGreaterThanBalance || amount.trim() === ''}
+              disabled={
+                isInputAmountGreaterThanBalance || String(amount).trim() === ''
+              }
               onClick={onConfirm}
             >
               {isLoading ? <Loader /> : 'Confirm'}
