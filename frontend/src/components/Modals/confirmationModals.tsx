@@ -427,7 +427,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             }}
             disabled={loading}
           >
-            {loading ? <Loader message="loading..." /> : 'Place Order'}
+            {loading ? <Loader message="placing..." /> : 'Place Order'}
           </GreenBtn>
         </Box>
       </Draggable>

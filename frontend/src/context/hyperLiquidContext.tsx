@@ -42,6 +42,7 @@ export const useHyperLiquidContext = () => {
 const HyperliquidProvider = ({ children }: { children: React.ReactNode }) => {
   //-------Hooks------
   const userAddress = useAddress();
+
   const chainId = useChainId();
   const { webData2 } = useWebDataContext();
 
@@ -70,15 +71,21 @@ const HyperliquidProvider = ({ children }: { children: React.ReactNode }) => {
     setEstablishedConnModal?: React.Dispatch<React.SetStateAction<boolean>>;
   }) => {
     try {
+      //wallet address when connected to metamask
+      if (!userAddress) {
+        toast.error('Please connect your wallet to establish connection');
+        return;
+      }
+
       setIsLoading(true);
       let signer = new providers.Web3Provider(window.ethereum).getSigner();
       {
-        let userAddress = await signer.getAddress();
+        let walletAddress = await signer.getAddress();
         let {
           data: agentAddress,
           success,
           msg,
-        } = await hyperliquid.connect(userAddress);
+        } = await hyperliquid.connect(walletAddress);
 
         agentAddress = agentAddress as string;
 
@@ -157,11 +164,6 @@ const HyperliquidProvider = ({ children }: { children: React.ReactNode }) => {
 
     // if agent address from webdata is different from agent address in session storage, set establishedConnection to false
     if (agentAddressFromWebdata !== parsedAgent?.agentAddress) {
-      console.log(
-        'agentAddressFromWebdata',
-        agentAddressFromWebdata,
-        parsedAgent?.agentAddress
-      );
       setEstablishedConnection(false);
       setAgent(DEFAULT_AGENT);
     } else {

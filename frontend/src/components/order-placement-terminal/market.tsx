@@ -83,27 +83,28 @@ const MarketComponent = () => {
     selectItem.toUpperCase() === 'USD'
       ? size / Number(currentMarketPrice)
       : size;
-  //
+
+  let isBuy = isBuyOrSell === 'buy';
+  let orderType: OrderType = {
+    limit: {
+      tif: 'FrontendMarket',
+    },
+  };
+  let reduceOnly = radioValue === '1';
+
+  // Calculate limit price based on buy or sell
+  let normalLimitPx = isBuy
+    ? Number(currentMarketPrice) * 1.03
+    : Number(currentMarketPrice) * 0.97;
+
+  //place order with no Take Profit/Stop Loss
   const handlePlaceOrder = async () => {
     try {
       setIsLoading(true);
-      let isBuy = isBuyOrSell === 'buy';
-      let orderType: OrderType = {
-        limit: {
-          tif: 'FrontendMarket',
-        },
-      };
-      let reduceOnly = radioValue === '1';
-
-      // Calculate limit price based on buy or sell
-      let limitPx = isBuy
-        ? Number(currentMarketPrice) * 1.03
-        : Number(currentMarketPrice) * 0.97;
-
       const { success, data, msg } = await hyperliquid.placeOrder({
         asset: Number(assetId),
         isBuy,
-        limitPx: parsePrice(limitPx),
+        limitPx: parsePrice(normalLimitPx),
         sz: parseSize(sz, szDecimals),
         orderType,
         reduceOnly,
@@ -145,6 +146,129 @@ const MarketComponent = () => {
     } catch (error) {
       console.log('error', error);
       setIsLoading(false);
+    }
+  };
+
+  //place order with Take Profit/Stop Loss
+  const placeOrderWithTpSl = async () => {
+    try {
+      setIsLoading(true);
+
+      //if takeProfitPrice and stopLossPrice are present, validate it against currentMarketPrice
+      //if one of the two is present validate each against currentMarketPrice
+      if (
+        takeProfitPrice.trim() !== '' &&
+        Number(takeProfitPrice) < Number(currentMarketPrice) &&
+        stopLossPrice.trim() !== '' &&
+        Number(stopLossPrice) > Number(currentMarketPrice)
+      ) {
+        setIsLoading(false);
+        setConfirmModalOpen(false);
+        return toast.error(
+          'TP price should be greater than current market price and SL price should be less than current market price'
+        );
+      } else if (
+        takeProfitPrice.trim() !== '' &&
+        Number(takeProfitPrice) < Number(currentMarketPrice)
+      ) {
+        setIsLoading(false);
+        setConfirmModalOpen(false);
+        return toast.error(
+          'TP price should be greater than current market price'
+        );
+      } else if (
+        stopLossPrice.trim() !== '' &&
+        Number(stopLossPrice) > Number(currentMarketPrice)
+      ) {
+        setIsLoading(false);
+        setConfirmModalOpen(false);
+        return toast.error('SL price should be less than current market price');
+      }
+
+      let tpSlIsBuy = isBuyOrSell !== 'buy'; //tpSl of buy is opposite of normal
+      // Calculate tp/sl limit price based on buy or sell
+      let tpslLimitPx = tpSlIsBuy
+        ? Number(currentMarketPrice) * 1.03
+        : Number(currentMarketPrice) * 0.97;
+
+      const { success, data, msg } = await hyperliquid.normalTpSl(
+        {
+          asset: Number(assetId),
+          isBuy,
+          limitPx: parsePrice(normalLimitPx),
+          sz: parseSize(sz, szDecimals),
+          orderType,
+          reduceOnly,
+        },
+        takeProfitPrice.trim() !== ''
+          ? {
+              asset: Number(assetId),
+              isBuy: tpSlIsBuy,
+              limitPx: parsePrice(tpslLimitPx),
+              sz: parseSize(sz, szDecimals),
+              orderType: {
+                trigger: {
+                  isMarket: true,
+                  tpsl: 'tp',
+                  triggerPx: takeProfitPrice,
+                },
+              },
+              reduceOnly: !reduceOnly,
+            }
+          : undefined,
+        stopLossPrice.trim() !== ''
+          ? {
+              asset: Number(assetId),
+              isBuy: tpSlIsBuy,
+              limitPx: parsePrice(tpslLimitPx),
+              sz: parseSize(sz, szDecimals),
+              orderType: {
+                trigger: {
+                  isMarket: true,
+                  tpsl: 'sl',
+                  triggerPx: stopLossPrice,
+                },
+              },
+              reduceOnly: !reduceOnly,
+            }
+          : undefined
+      );
+
+      if (success) {
+        console.log('data', data);
+        setIsLoading(false);
+        setConfirmModalOpen(false);
+
+        // Check if there's an error in statuses[0]
+        if (
+          data &&
+          typeof data === 'object' &&
+          'data' in data &&
+          data.type === 'order' &&
+          data.data &&
+          data.data.statuses &&
+          data.data.statuses.length > 0 &&
+          data.data.statuses[0].error
+        ) {
+          //Toast error message
+          toast.error(
+            (
+              data.data.statuses[0].error || 'Error ocured please try again'
+            ).toString()
+          );
+        } else {
+          //Toast success message if there's no error
+          toast.success('Order placed successfully');
+        }
+      } else {
+        console.log('msg', msg);
+        setIsLoading(false);
+
+        //Toast error msg
+        toast.error((msg || 'Error ocured please try again').toString());
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -345,16 +469,28 @@ const MarketComponent = () => {
       ) : (
         <Box sx={{ ...ButtonStyles }}>
           <BuySellBtn
-            sx={{ width: '112px' }}
+            sx={{
+              width: '112px',
+              ':disabled': {
+                cursor: 'none',
+              },
+            }}
             className="buyBtn"
             onClick={() => toggleConfirmModal('buy')}
+            disabled={size <= 0}
           >
             Buy
           </BuySellBtn>
           <BuySellBtn
-            sx={{ width: '112px' }}
+            sx={{
+              width: '112px',
+              ':disabled': {
+                cursor: 'none',
+              },
+            }}
             className="sellBtn"
             onClick={() => toggleConfirmModal('sell')}
+            disabled={size <= 0}
           >
             Sell
           </BuySellBtn>
@@ -364,7 +500,7 @@ const MarketComponent = () => {
       {confirmModalOpen && (
         <ConfirmationModal
           onClose={() => setConfirmModalOpen(false)}
-          onConfirm={handlePlaceOrder}
+          onConfirm={radioValue === '2' ? placeOrderWithTpSl : handlePlaceOrder}
           isMarket={true}
           currentMarketPrice={currentMarketPrice}
           size={`${parseSize(sz, szDecimals)} ${tokenPairs[0]}`}

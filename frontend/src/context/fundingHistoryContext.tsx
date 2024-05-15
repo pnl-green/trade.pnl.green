@@ -3,10 +3,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress } from '@thirdweb-dev/react';
 
+const WSS_URL =
+  process.env.NEXT_PUBLIC_WSS_URL || 'wss://api.hyperliquid-testnet.xyz/ws';
 interface FundingHistoryProps {
   fundingHistoryData: AllWebData2 | any;
   loadingFundingHistoryData: boolean;
 }
+
 
 const FundingHistoryContext = createContext({} as FundingHistoryProps);
 
@@ -31,7 +34,7 @@ const FundingHistoryProvider = ({
   useEffect(() => {
     if (userAddress) {
       // Create a new WebSocket connection
-      const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}`);
+      const ws = new WebSocket(`${WSS_URL}`);
 
       // When the WebSocket connection is open, send the subscribe message
       ws.onopen = () => {

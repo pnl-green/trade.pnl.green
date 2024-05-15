@@ -1,8 +1,12 @@
 //usecontext to pass common pair tokens across
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { PairData, tokenPairs } from '../../types/hyperliquid';
+import { ActiveAssetData, PairData, tokenPairs } from '../../types/hyperliquid';
 import { useHyperLiquidContext } from './hyperLiquidContext';
+import { useAddress } from '@thirdweb-dev/react';
+
+const WSS_URL =
+  process.env.NEXT_PUBLIC_WSS_URL || 'wss://api.hyperliquid-testnet.xyz/ws';
 
 //default dummy token data
 const defaultDummyTokenData: PairData | any = {
@@ -40,6 +44,8 @@ interface PairTokensProps {
 
   assetId: string | number;
   setAssetId: React.Dispatch<React.SetStateAction<string | number>>;
+  activeAssetData?: ActiveAssetData;
+  setActiveAssetData?: React.Dispatch<React.SetStateAction<ActiveAssetData>>;
 }
 
 export const PairTokensContext = createContext({} as PairTokensProps);
@@ -56,6 +62,7 @@ export const usePairTokensContext = () => {
 
 const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   //------Hooks------
+  const userAddress = useAddress();
   const { hyperliquid } = useHyperLiquidContext();
 
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
@@ -66,6 +73,8 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   const [tokenPairs, setTokenPairs] = useState<tokenPairs | any>({}); //token pairs eg [BTC,USD]
   const [pair, setPair] = useState<string>(''); //token pair eg BTC-USD
   const [assetId, setAssetId] = useState<string | number>(0); //asset id
+  const [activeAssetData, setActiveAssetData] =
+    useState<ActiveAssetData | null>(null); //active asset data
 
   //------Local storage items------
   const savedAssetId = sessionStorage.getItem('assetId');
@@ -79,7 +88,6 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
       if (selectedPairsTokenData) {
         const splitPairs = selectedPairsTokenData?.pairs?.split('-');
         setTokenPairs(splitPairs);
-        console.log('splitPairs', splitPairs);
 
         return splitPairs;
       }
@@ -98,7 +106,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Create a new WebSocket connection
-    const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WSS_URL}`);
+    const ws = new WebSocket(`${WSS_URL}`);
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
@@ -151,6 +159,51 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [hyperliquid]);
 
+  //get active assetData with current leverage value
+  useEffect(() => {
+    if (!userAddress) return;
+
+    // Create a new WebSocket connection
+    const ws = new WebSocket(`${WSS_URL}`);
+
+    // When the WebSocket connection is open, send the subscribe message
+    ws.onopen = () => {
+      const message = JSON.stringify({
+        method: 'subscribe',
+        subscription: {
+          type: 'activeAssetData',
+          user: userAddress,
+          coin: `${tokenPairs[0]}`,
+        },
+      });
+      ws.send(message);
+    };
+
+    // Listen for messages from the WebSocket server
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      const data = message.data;
+
+      if (message.channel === 'activeAssetData') {
+        if (data) {
+          setActiveAssetData(data);
+        }
+      } else if (message.channel === 'error') {
+        console.error('Error:', message.data);
+      }
+    };
+
+    // Handle WebSocket errors
+    ws.onerror = (error) => {
+      console.error('WebSocket Error:', error);
+    };
+
+    // Clean up the WebSocket connection when the component unmounts
+    return () => {
+      ws.close();
+    };
+  }, [tokenPairData]);
+
   // set data from local storage
   useEffect(() => {
     if (savedAssetId && savedSelectPairsTokenData) {
@@ -185,6 +238,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
         tokenPairData,
         assetId,
         setAssetId,
+        activeAssetData: activeAssetData || undefined, // Update the type to include null
       }}
     >
       {children}
