@@ -221,3 +221,16 @@ export type AllWebData2 =
   | TradeHistory
   | FundingHistory
   | OrderHistory;
+
+export interface Leverage {
+  type: string;
+  value: number;
+}
+
+export interface ActiveAssetData {
+  user: string;
+  coin: string;
+  leverage: Leverage;
+  maxTradeSzs: string[];
+  availableToTrade: string[];
+}

@@ -154,6 +154,37 @@ const MarketComponent = () => {
     try {
       setIsLoading(true);
 
+      //if takeProfitPrice and stopLossPrice are present, validate it against currentMarketPrice
+      //if one of the two is present validate each against currentMarketPrice
+      if (
+        takeProfitPrice.trim() !== '' &&
+        Number(takeProfitPrice) < Number(currentMarketPrice) &&
+        stopLossPrice.trim() !== '' &&
+        Number(stopLossPrice) > Number(currentMarketPrice)
+      ) {
+        setIsLoading(false);
+        setConfirmModalOpen(false);
+        return toast.error(
+          'TP price should be greater than current market price and SL price should be less than current market price'
+        );
+      } else if (
+        takeProfitPrice.trim() !== '' &&
+        Number(takeProfitPrice) < Number(currentMarketPrice)
+      ) {
+        setIsLoading(false);
+        setConfirmModalOpen(false);
+        return toast.error(
+          'TP price should be greater than current market price'
+        );
+      } else if (
+        stopLossPrice.trim() !== '' &&
+        Number(stopLossPrice) > Number(currentMarketPrice)
+      ) {
+        setIsLoading(false);
+        setConfirmModalOpen(false);
+        return toast.error('SL price should be less than current market price');
+      }
+
       let tpSlIsBuy = isBuyOrSell !== 'buy'; //tpSl of buy is opposite of normal
       // Calculate tp/sl limit price based on buy or sell
       let tpslLimitPx = tpSlIsBuy
@@ -179,7 +210,7 @@ const MarketComponent = () => {
                 trigger: {
                   isMarket: true,
                   tpsl: 'tp',
-                  triggerPx: Number(takeProfitPrice), //expects a string here
+                  triggerPx: takeProfitPrice,
                 },
               },
               reduceOnly: !reduceOnly,
@@ -195,7 +226,7 @@ const MarketComponent = () => {
                 trigger: {
                   isMarket: true,
                   tpsl: 'sl',
-                  triggerPx: Number(stopLossPrice), //expects a string here
+                  triggerPx: stopLossPrice,
                 },
               },
               reduceOnly: !reduceOnly,

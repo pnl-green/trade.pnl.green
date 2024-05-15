@@ -78,7 +78,7 @@ const SubAccounts = () => {
   const [createSubAccModal, setcreateSubAccModal] = useState(false);
   const [createNewAcc, setCreateNewAcc] = useState('');
   const [isTransferModalOpen, setTransferModalOpen] = useState(false);
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [establishConnModal, setEstablishedConnModal] = useState(false);
   const [allAccountsData, setAllAccountsData] = useState<any>([]);
@@ -132,7 +132,7 @@ const SubAccounts = () => {
   //closeTransferModal
   const closeTransferModal = () => {
     if (isTransferModalOpen) {
-      setAmount('');
+      setAmount(0);
       setTransferModalOpen(false);
       setIsLoading(false);
     }
@@ -208,7 +208,7 @@ const SubAccounts = () => {
         ? activeToAccData.address
         : activeFromAccData.address;
 
-      let usd = amount;
+      let usd = String(amount);
 
       let { success, data, msg } = await hyperliquid.subAccountTransfer(
         isDeposit,

@@ -18,7 +18,7 @@ const EstablishConnectionModal: React.FC<ModalProps> = ({
   isLoading,
 }) => {
   return (
-    <ModalWrapper>
+    <ModalWrapper sx={{ zIndex: 102 }}>
       <ClickAwayListener onClickAway={onClose}>
         <InnerBox sx={{ alignItems: 'center' }}>
           <Box id="closeIcon" sx={{ ...IconsStyles }} onClick={onClose}>
