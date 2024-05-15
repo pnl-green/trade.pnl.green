@@ -141,7 +141,14 @@ export class Hyperliquid {
     startPx: number,
     endPx: number,
     orderCount: number,
-    skew: number = 1.0
+    skew: number = 1.0,
+    extraArgs?: {
+      asset: number;
+      isBuy: boolean;
+      reduceOnly: boolean;
+      orderType: OrderType;
+      cloid?: string | null;
+    }
   ) => {
     let totalSz = parseFloat(sz.toString());
 
@@ -158,6 +165,7 @@ export class Hyperliquid {
     let orders = Array.from({ length: orderCount }, (_, i) => ({
       limitPx: parsePrice(startPx + priceStep * i),
       sz: parseSize(baseSz + sizeStep * i, szDecimals),
+      ...extraArgs,
     }));
 
     return orders;
@@ -214,23 +222,23 @@ export class Hyperliquid {
     isBuy: boolean,
     minutes: number,
     reduceOnly: boolean,
-    quantity: number | string,
+    sz: number | string,
     randomize: boolean,
+    frequency: number = 30,
     vaultAdress: string | null = null
   ) => {
-    let action = {
-      a: asset,
-      b: isBuy,
-      m: minutes,
-      r: reduceOnly,
-      s: quantity.toString(),
-      t: randomize,
-    };
-
     let request = {
       endpoint: 'exchange',
       type: 'twapOrder',
-      action,
+      action: {
+        asset,
+        isBuy,
+        minutes,
+        reduceOnly,
+        sz: parseFloat(sz.toString()),
+        randomize,
+        frequency,
+      },
       ...(vaultAdress && { vaultAdress }),
     };
 

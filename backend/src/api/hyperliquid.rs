@@ -17,7 +17,7 @@ use tokio::sync::mpsc::Sender;
 use crate::{
     error::Error::BadRequestError,
     model::{
-        hyperliquid::{Agent, Exchange, Info, Request},
+        hyperliquid::{Agent, Exchange, Info, InternalRequest, Request},
         Response,
     },
     prelude::Result,
@@ -28,7 +28,7 @@ pub async fn hyperliquid(
     chain: web::Data<Chain>,
     req: web::Json<Request>,
     session: Session,
-    sender: web::Data<Sender<Exchange>>,
+    sender: web::Data<Sender<InternalRequest>>,
 ) -> Result<impl Responder> {
     let req = req.into_inner();
     let chain = **chain;
@@ -120,10 +120,11 @@ pub async fn hyperliquid(
 
             let exchange: hyperliquid::Exchange = Hyperliquid::new(chain);
 
-            let vault_address = None;
-
             match req {
-                Exchange::Order { action } => {
+                Exchange::Order {
+                    action,
+                    vault_address,
+                } => {
                     let data = exchange
                         .place_order(agent, action.orders, vault_address)
                         .await
@@ -242,7 +243,10 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
-                Exchange::NormalTpsl { action } => {
+                Exchange::NormalTpsl {
+                    action,
+                    vault_address,
+                } => {
                     let data = exchange
                         .normal_tpsl(agent, action.orders, vault_address)
                         .await
@@ -262,7 +266,10 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
-                Exchange::Cancel { action } => {
+                Exchange::Cancel {
+                    action,
+                    vault_address,
+                } => {
                     let data = exchange
                         .cancel_order(agent, action.cancels, vault_address)
                         .await
@@ -301,18 +308,55 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
-                Exchange::TwapOrder { action } => {
-                    match sender.send(Exchange::TwapOrder { action }).await {
-                        Ok(_) => HttpResponse::Ok().json(Response {
-                            success: true,
-                            data: None::<String>,
-                            msg: None,
-                        }),
-                        Err(_) => HttpResponse::Ok().json(Response {
+                Exchange::TwapOrder {
+                    action,
+                    vault_address,
+                } => {
+                    let request = action.twap;
+
+                    // ----------------------------------------------------------------
+                    // ensure that the frequency is between 1 and 180 seconds; 1s to 3min
+                    if request.frequency < 1 || request.frequency > 180 {
+                        return Ok(HttpResponse::BadRequest().json(Response {
                             success: false,
                             data: None::<String>,
-                            msg: Some("Failed to send message".to_string()),
+                            msg: Some("Frequency must be between 1 and 180 seconds".into()),
+                        }));
+                    }
+
+                    // ensure minutes are between 5 and 1440 minutes; 5min to 24hrs
+                    if request.minutes < 5 || request.minutes > 1440 {
+                        return Ok(HttpResponse::BadRequest().json(Response {
+                            success: false,
+                            data: None::<String>,
+                            msg: Some("Running time must be between 5m and 24h".into()),
+                        }));
+                    }
+
+                    // ----------------------------------------------------------------
+
+                    match sender
+                        .send(InternalRequest::TwapOrder {
+                            request,
+                            agent,
+                            vault_address,
+                        })
+                        .await
+                    {
+                        Ok(_) => HttpResponse::Created().json(Response {
+                            success: true,
+                            data: "Created".into(),
+                            msg: None,
                         }),
+                        Err(e) => {
+                            tracing::error!("Failed to send twap order: {:#?}", e);
+
+                            HttpResponse::InternalServerError().json(Response {
+                                success: false,
+                                data: None::<String>,
+                                msg: Some("Failed to send twap order".into()),
+                            })
+                        }
                     }
                 }
             }

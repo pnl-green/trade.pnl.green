@@ -1,4 +1,9 @@
-use ethers::types::{Address, Signature};
+use std::sync::Arc;
+
+use ethers::{
+    signers::LocalWallet,
+    types::{Address, Signature},
+};
 use hyperliquid::types::{
     exchange::request::{CancelRequest, OrderRequest},
     info::request::CandleSnapshotRequest,
@@ -68,8 +73,27 @@ pub struct UpdateIsolatedMargin {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TwapOrder {
-    action: Order,
+pub struct TwapOrderRequest {
+    #[serde(rename = "a", alias = "asset")]
+    pub asset: u32,
+    #[serde(rename = "b", alias = "isBuy")]
+    pub is_buy: bool,
+    #[serde(rename = "m", alias = "minutes")]
+    pub minutes: u32,
+    #[serde(rename = "r", alias = "reduceOnly")]
+    pub reduce_only: bool,
+    #[serde(rename = "s", alias = "sz")]
+    pub sz: f64,
+    #[serde(rename = "t", alias = "randomize")]
+    pub randomize: bool,
+    #[serde(rename = "f", alias = "frequency")]
+    pub frequency: u64,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Twap {
+    pub twap: TwapOrderRequest,
 }
 
 #[derive(Debug, Deserialize)]
@@ -108,18 +132,52 @@ pub struct ConnectRequest {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "type")]
 pub enum Exchange {
-    Order { action: Order },
-    CreateSubAccount { action: CreateSubAccount },
-    SubAccountModify { action: SubAccountModify },
-    SubAccountTransfer { action: SubAccountTransfer },
-    UpdateLeverage { action: UpdateLeverage },
-    UpdateIsolatedMargin { action: UpdateIsolatedMargin },
-    NormalTpsl { action: Order },
-    Cancel { action: Cancel },
+    #[serde(rename_all = "camelCase")]
+    Order {
+        action: Order,
+        vault_address: Option<Address>,
+    },
+    CreateSubAccount {
+        action: CreateSubAccount,
+    },
+    SubAccountModify {
+        action: SubAccountModify,
+    },
+    SubAccountTransfer {
+        action: SubAccountTransfer,
+    },
+    UpdateLeverage {
+        action: UpdateLeverage,
+    },
+    UpdateIsolatedMargin {
+        action: UpdateIsolatedMargin,
+    },
+    #[serde(rename_all = "camelCase")]
+    NormalTpsl {
+        action: Order,
+        vault_address: Option<Address>,
+    },
+    #[serde(rename_all = "camelCase")]
+    Cancel {
+        action: Cancel,
+        vault_address: Option<Address>,
+    },
     Connect(ConnectRequest),
-    TwapOrder { action: TwapOrder },
+    #[serde(rename_all = "camelCase")]
+    TwapOrder {
+        action: Twap,
+        vault_address: Option<Address>,
+    },
 }
 
+#[derive(Debug)]
+pub enum InternalRequest {
+    TwapOrder {
+        request: TwapOrderRequest,
+        agent: Arc<LocalWallet>,
+        vault_address: Option<Address>,
+    },
+}
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "endpoint")]
 pub enum Request {
