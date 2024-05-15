@@ -135,6 +135,34 @@ export class Hyperliquid {
     return this.#post(request);
   };
 
+  scaleOrderDistribution = (
+    sz: number | string,
+    szDecimals: number,
+    startPx: number,
+    endPx: number,
+    orderCount: number,
+    skew: number = 1.0
+  ) => {
+    let totalSz = parseFloat(sz.toString());
+
+    let baseSz = totalSz / ((orderCount * (1 + skew)) / 2);
+
+    let endSz = baseSz * skew;
+
+    let remaining = orderCount - 1;
+
+    let sizeStep = (endSz - baseSz) / remaining;
+
+    let priceStep = (endPx - startPx) / remaining;
+
+    let orders = Array.from({ length: orderCount }, (_, i) => ({
+      limitPx: parsePrice(startPx + priceStep * i),
+      sz: parseSize(baseSz + sizeStep * i, szDecimals),
+    }));
+
+    return orders;
+  };
+
   updateLeverage = async (
     asset: number,
     isCross: boolean,
@@ -202,31 +230,6 @@ export class Hyperliquid {
     let request = {
       endpoint: 'exchange',
       type: 'twapOrder',
-      action,
-      ...(vaultAdress && { vaultAdress }),
-    };
-
-    return this.#post(request);
-  };
-
-  // ----------------- EXCHANGE => SCALE ORDER <= -----------------
-  placeScaleOrder = async (
-    asset: number,
-    isBuy: boolean,
-    quantity: number | string,
-    scale: number,
-    vaultAdress: string | null = null
-  ) => {
-    let orders = [{ a: asset, b: isBuy, s: quantity.toString(), c: scale }];
-
-    let action = {
-      grouping: 'na',
-      orders,
-    };
-
-    let request = {
-      endpoint: 'exchange',
-      type: 'order',
       action,
       ...(vaultAdress && { vaultAdress }),
     };
@@ -438,11 +441,7 @@ export const parsePrice = (px: number) => {
     let sep = diff > 0 ? '.' : '';
 
     pxAdjusted =
-      sep === ''
-        ? `${whole}`
-        : `${whole}${sep}${decimals}`.match(
-            new RegExp(`^-?\\d+(?:\\.\\d{0,${diff}})?`, 'g')
-          )![0];
+      sep === '' ? `${whole}` : toFixed(`${whole}${sep}${decimals}`, diff);
   }
 
   let pxCleaned = removeTrailingZeros(pxAdjusted);
@@ -450,10 +449,24 @@ export const parsePrice = (px: number) => {
   return positive(pxCleaned);
 };
 
-export const parseSize = (sz: number | string, szDecimals: number) => {
-  let szFormatted = parseFloat(sz.toString()).toFixed(szDecimals);
+/**
+ * @param n number toFixed
+ * @param fixed number of decimals
+ * @returns string
+ * @description
+ *
+ * @example
+ * toFixed(1.2345, 2) => '1.23'
+ * toFixed(1.2345, 4) => '1.2345'
+ * toFixed(1.2345, 5) => '1.23450'
+ *
+ * @source https://quickref.me/truncate-a-number-to-a-given-number-of-decimal-places-without-rounding.html
+ */
+export const toFixed = (n: number | string, fixed: number) =>
+  `${n}`.match(new RegExp(`^-?\\d+(?:\.\\d{0,${fixed}})?`))![0];
 
-  let px = removeTrailingZeros(szFormatted);
+export const parseSize = (sz: number | string, szDecimals: number) => {
+  let px = removeTrailingZeros(toFixed(sz, szDecimals));
 
   return positive(px);
 };

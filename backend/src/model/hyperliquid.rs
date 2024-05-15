@@ -114,10 +114,10 @@ pub enum Exchange {
     SubAccountTransfer { action: SubAccountTransfer },
     UpdateLeverage { action: UpdateLeverage },
     UpdateIsolatedMargin { action: UpdateIsolatedMargin },
-    TwapOrder { action: TwapOrder },
     NormalTpsl { action: Order },
     Cancel { action: Cancel },
     Connect(ConnectRequest),
+    TwapOrder { action: TwapOrder },
 }
 
 #[derive(Debug, Deserialize)]

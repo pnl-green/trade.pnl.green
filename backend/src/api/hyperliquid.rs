@@ -242,20 +242,6 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
-                Exchange::TwapOrder { action } => {
-                    match sender.send(Exchange::TwapOrder { action }).await {
-                        Ok(_) => HttpResponse::Ok().json(Response {
-                            success: true,
-                            data: None::<String>,
-                            msg: None,
-                        }),
-                        Err(_) => HttpResponse::Ok().json(Response {
-                            success: false,
-                            data: None::<String>,
-                            msg: Some("Failed to send message".to_string()),
-                        }),
-                    }
-                }
                 Exchange::NormalTpsl { action } => {
                     let data = exchange
                         .normal_tpsl(agent, action.orders, vault_address)
@@ -312,6 +298,20 @@ pub async fn hyperliquid(
                             success: false,
                             data: None::<String>,
                             msg: Some(msg),
+                        }),
+                    }
+                }
+                Exchange::TwapOrder { action } => {
+                    match sender.send(Exchange::TwapOrder { action }).await {
+                        Ok(_) => HttpResponse::Ok().json(Response {
+                            success: true,
+                            data: None::<String>,
+                            msg: None,
+                        }),
+                        Err(_) => HttpResponse::Ok().json(Response {
+                            success: false,
+                            data: None::<String>,
+                            msg: Some("Failed to send message".to_string()),
                         }),
                     }
                 }
