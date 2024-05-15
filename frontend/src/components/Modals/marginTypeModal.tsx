@@ -19,9 +19,9 @@ const MarginTypeModal: React.FC<ModalProps> = ({ onClose }) => {
   const { establishedConnection, handleEstablishConnection, hyperliquid } =
     useHyperLiquidContext();
 
-  const marginMode = activeAssetData?.leverage.type ?? '';
+  const marginType = activeAssetData?.leverage.type ?? '';
   const [activeTab, setActiveTab] = useState(
-    marginMode === 'cross' ? 'Cross' : 'Isolated'
+    marginType === 'cross' ? 'Cross' : 'Isolated'
   );
   const [isLoading, setIsLoading] = useState(false);
   const [establishConnModal, setEstablishedConnModal] = useState(false);
@@ -30,7 +30,7 @@ const MarginTypeModal: React.FC<ModalProps> = ({ onClose }) => {
     setActiveTab(tabName);
   };
 
-  const handleMarginModeUpdate = async () => {
+  const handleMarginTypeUpdate = async () => {
     try {
       setIsLoading(true);
       let asset = Number(assetId);
@@ -146,7 +146,7 @@ const MarginTypeModal: React.FC<ModalProps> = ({ onClose }) => {
                 onClick={
                   !establishedConnection
                     ? () => setEstablishedConnModal(true)
-                    : handleMarginModeUpdate
+                    : handleMarginTypeUpdate
                 }
               >
                 {!establishedConnection ? (

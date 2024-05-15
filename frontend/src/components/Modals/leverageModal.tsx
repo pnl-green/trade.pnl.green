@@ -20,7 +20,7 @@ const LeverageModal: React.FC<ModalProps> = ({ onClose, onConfirm }) => {
   const { establishedConnection, handleEstablishConnection, hyperliquid } =
     useHyperLiquidContext();
 
-  const marginMode = activeAssetData?.leverage.type ?? '';
+  const marginType = activeAssetData?.leverage.type ?? '';
   let maxLeverage = Number(tokenPairData[assetId]?.universe.maxLeverage);
   let currentLeverage = Number(activeAssetData?.leverage.value);
 
@@ -49,7 +49,7 @@ const LeverageModal: React.FC<ModalProps> = ({ onClose, onConfirm }) => {
     try {
       setIsLoading(true);
       let asset = Number(assetId);
-      let isCross = marginMode === 'cross';
+      let isCross = marginType === 'cross';
       let leverage = sliderValue;
 
       const { data, msg, success } = await hyperliquid.updateLeverage(
