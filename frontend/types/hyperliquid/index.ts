@@ -18,7 +18,7 @@ export type OrderType =
     }
   | {
       trigger: {
-        triggerPx: number;
+        triggerPx: string;
         isMarket: boolean;
         tpsl: 'tp' | 'sl';
       };
