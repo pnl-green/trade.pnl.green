@@ -141,7 +141,14 @@ export class Hyperliquid {
     startPx: number,
     endPx: number,
     orderCount: number,
-    skew: number = 1.0
+    skew: number = 1.0,
+    extraArgs?: {
+      asset: number;
+      isBuy: boolean;
+      reduceOnly: boolean;
+      orderType: OrderType;
+      cloid?: string | null;
+    }
   ) => {
     let totalSz = parseFloat(sz.toString());
 
@@ -158,6 +165,7 @@ export class Hyperliquid {
     let orders = Array.from({ length: orderCount }, (_, i) => ({
       limitPx: parsePrice(startPx + priceStep * i),
       sz: parseSize(baseSz + sizeStep * i, szDecimals),
+      ...extraArgs,
     }));
 
     return orders;
