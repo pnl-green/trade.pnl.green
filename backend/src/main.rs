@@ -65,7 +65,8 @@ async fn main() -> anyhow::Result<()> {
                     let exchange: Exchange = Hyperliquid::new(chain);
 
                     // auto calculate order count based on minutes
-                    let order_count = request.minutes * 2 + 1;
+                    let order_count = request.runtime / 60 * 2 + 1;
+
                     let sz = request.sz / order_count as f64;
 
                     let interval = Duration::from_secs(request.frequency);
@@ -176,6 +177,7 @@ async fn main() -> anyhow::Result<()> {
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin("http://localhost:3000")
+            .allowed_origin("http://127.0.0.1:3000")
             .allowed_origin("https://trade.pnl.green")
             .allowed_methods(vec!["GET", "POST"])
             .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
