@@ -1,4 +1,3 @@
-import { providers, utils, constants } from 'ethers';
 import {
   AssetCtx,
   Cancel,
@@ -10,8 +9,9 @@ import {
   OrderType,
   SubAccount,
 } from '@/types/hyperliquid';
-import { timestamp } from './timestamp';
+import { constants, providers, utils } from 'ethers';
 import { signInner } from './signing';
+import { timestamp } from './timestamp';
 
 export class Hyperliquid {
   private chain: Chain;
@@ -233,7 +233,7 @@ export class Hyperliquid {
       action: {
         asset,
         isBuy,
-        minutes,
+        runtime: minutes * 60, // minutes to seconds
         reduceOnly,
         sz: parseFloat(sz.toString()),
         randomize,
@@ -316,29 +316,24 @@ export class Hyperliquid {
 
   connectAgent = async (
     signer: providers.JsonRpcSigner,
-    agentAddress: String,
-    extra_agent_name: String | null = null,
-    vaultAdress: string | null = null
+    agentAddress: string,
+    agentName?: string,
+    vaultAdress?: string
   ) => {
     let nonce = timestamp();
 
-    let connectionId = utils.keccak256(
-      extra_agent_name
-        ? utils.defaultAbiCoder.encode(
-            ['address', 'string'],
-            [agentAddress, extra_agent_name]
-          )
-        : utils.defaultAbiCoder.encode(['address'], [agentAddress])
-    );
+    let hyperliquidChain =
+      this.chain === Chain.Arbitrum ? 'Mainnet' : 'Testnet';
+
+    agentName = (agentName || '').trim();
 
     let action = {
-      agent: {
-        connectionId,
-        source: 'https://hyperliquid.xyz',
-      },
+      hyperliquidChain,
       agentAddress,
-      chain: this.chain,
-      type: 'connect',
+      nonce,
+      type: 'approveAgent',
+      signatureChainId: `0x${Number(421614).toString(16)}`,
+      agentName,
     };
 
     let chainId =
@@ -348,23 +343,28 @@ export class Hyperliquid {
 
     let domain = {
       chainId,
-      name: 'Exchange',
+      name: 'HyperliquidSignTransaction',
       verifyingContract: constants.AddressZero,
       version: '1',
     };
 
     let types = {
-      Agent: [
-        { name: 'source', type: 'string' },
-        { name: 'connectionId', type: 'bytes32' },
+      'HyperliquidTransaction:ApproveAgent': [
+        { name: 'hyperliquidChain', type: 'string' },
+        { name: 'agentAddress', type: 'address' },
+        { name: 'agentName', type: 'string' },
+        { name: 'nonce', type: 'uint64' },
       ],
     };
 
-    let signature = await signInner(signer, domain, types, action.agent);
+    let signature = await signInner(signer, domain, types, action);
+
+    // @ts-ignore
+    if (!agentName) delete action.agentName;
 
     let request = {
       endpoint: 'exchange',
-      type: 'connect',
+      type: 'approveAgent',
       action,
       nonce,
       signature,
