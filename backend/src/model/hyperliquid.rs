@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use ethers::{
     signers::LocalWallet,
-    types::{Address, Signature},
+    types::{Address, Signature, U256},
 };
 use hyperliquid::types::{
     exchange::request::{CancelRequest, OrderRequest},
@@ -78,8 +78,8 @@ pub struct TwapOrderRequest {
     pub asset: u32,
     #[serde(rename = "b", alias = "isBuy")]
     pub is_buy: bool,
-    #[serde(rename = "m", alias = "minutes")]
-    pub minutes: u32,
+    #[serde(rename = "m", alias = "runtime")]
+    pub runtime: u64,
     #[serde(rename = "r", alias = "reduceOnly")]
     pub reduce_only: bool,
     #[serde(rename = "s", alias = "sz")]
@@ -104,25 +104,21 @@ pub struct Cancel {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ConnectAgent {
-    pub connection_id: String,
-    pub source: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Connect {
-    pub agent: ConnectAgent,
+pub struct AproveAgent {
+    pub hyperliquid_chain: String,
+    pub signature_chain_id: U256,
     pub agent_address: Address,
-    pub chain: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_name: Option<String>,
+    pub nonce: u64,
     #[serde(rename = "type")]
     pub type_: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ConnectRequest {
-    action: Connect,
+pub struct AproveAgentRequest {
+    action: AproveAgent,
     nonce: u64,
     signature: Signature,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -162,7 +158,8 @@ pub enum Exchange {
         action: Cancel,
         vault_address: Option<Address>,
     },
-    Connect(ConnectRequest),
+    ApproveAgent(AproveAgentRequest),
+
     #[serde(rename_all = "camelCase")]
     TwapOrder {
         action: Twap,
