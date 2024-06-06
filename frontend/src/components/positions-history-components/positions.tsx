@@ -126,7 +126,7 @@ const PositionComponentTable = () => {
                       <TableCell>{row.position.liquidationPx}</TableCell>
                       <TableCell>{row.position.marginUsed}</TableCell>
                       <TableCell>{row.position.cumFunding.allTime}</TableCell>
-                      <TableCell>tp/sl</TableCell>
+                      <TableCell>{'--'}</TableCell>
                     </TableRow>
                   );
                 })}

@@ -45,6 +45,7 @@ const OpenOrdersComponentTable = () => {
   const { webData2, loadingWebData2 } = useWebDataContext();
 
   const openOrdersData = webData2.openOrders;
+  console.log(openOrdersData)
 
   return (
     <Paper
@@ -121,13 +122,15 @@ const OpenOrdersComponentTable = () => {
                       </TableCell>
                       <TableCell>{row.orderType}</TableCell>
                       <TableCell>{row.coin}</TableCell>
-                      <TableCell>{row.side}</TableCell>
+                      <TableCell>
+                        {row.side === 'A' ? 'short' : 'Long'}
+                      </TableCell>
                       <TableCell>{row.sz}</TableCell>
                       <TableCell>{row.origSz}</TableCell>
                       <TableCell>{''}</TableCell>
-                      <TableCell>{'row.price'}</TableCell>
+                      <TableCell>{row.limitPx}</TableCell>
                       <TableCell>{row.triggerCondition}</TableCell>
-                      <TableCell>{'row.tp/sl'}</TableCell>
+                      <TableCell>{'--'}</TableCell>
                     </TableRow>
                   );
                 })}
