@@ -288,7 +288,7 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
-                Exchange::Connect(req) => {
+                Exchange::ApproveAgent(req) => {
                     let data = exchange
                         .client
                         .post(&API::Exchange, &req)
@@ -315,21 +315,21 @@ pub async fn hyperliquid(
                     let request = action.twap;
 
                     // ----------------------------------------------------------------
-                    // ensure that the frequency is between 1 and 180 seconds; 1s to 3min
-                    if request.frequency < 1 || request.frequency > 180 {
+                    // ensure that the frequency is between 1 and 3600 seconds; 1s to 1hr
+                    if request.frequency < 1 || request.frequency > 3600 {
                         return Ok(HttpResponse::BadRequest().json(Response {
                             success: false,
                             data: None::<String>,
-                            msg: Some("Frequency must be between 1 and 180 seconds".into()),
+                            msg: Some("Frequency must be between 1 and 3600 seconds".into()),
                         }));
                     }
 
-                    // ensure minutes are between 5 and 1440 minutes; 5min to 24hrs
-                    if request.minutes < 5 || request.minutes > 1440 {
+                    // ensure runtime is between 2 and 86400s; 2s to 24hrs
+                    if request.runtime < 2 || request.runtime > 86400 {
                         return Ok(HttpResponse::BadRequest().json(Response {
                             success: false,
                             data: None::<String>,
-                            msg: Some("Running time must be between 5m and 24h".into()),
+                            msg: Some("Running time must be between 2 and 86400 seconds".into()),
                         }));
                     }
 
