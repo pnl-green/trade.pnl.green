@@ -12,9 +12,11 @@ export const PnlWrapper = styled(Box)(() => ({
   padding: '10px 20px',
 
   '@media (max-width: 1535px)': {
+    // flexWrap: 'wrap',
+  },
+  '@media (max-width: 1200px)': {
     flexWrap: 'wrap',
   },
-
   // justifyContent: "space-between",
   // alignContent: "flex-start",
   '@media (max-width: 899px)': {
@@ -31,6 +33,9 @@ export const TradingViewComponent = styled(Box)(() => ({
   justifyContent: 'center',
 
   '@media (max-width: 1535px)': {
+    width: 'calc(100vw - 670px)',
+  },
+  '@media (max-width: 1200px)': {
     width: 'calc(100vw - 400px)',
   },
 
@@ -71,6 +76,9 @@ export const WalletBox = styled(Box)(() => ({
   },
   '@media screen and (min-width: 1535px)': {
     height: 'calc(100vh - 710px)',
+  },
+  '@media screen and (max-width: 1535px)': {
+    width: '315px !important',
   },
 }));
 
@@ -197,6 +205,9 @@ export const ChatBox = styled(Box)(() => ({
   },
   '@media screen and (min-width: 1535px)': {
     height: 'calc(100vh - 660px)',
+  },
+  '@media screen and (max-width: 1535px)': {
+    width: '315px !important',
   },
 }));
 
