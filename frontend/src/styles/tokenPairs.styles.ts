@@ -28,9 +28,9 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
     fontSize: '16px',
     fontWeight: '600',
     cursor: 'pointer',
-    span:{
+    span: {
       marginRight: '10px',
-    }
+    },
   },
 
   '.upDownIcon': {
@@ -72,7 +72,7 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
   },
 
   '@media (max-width: 1535px)': {
-    width: 'calc(100vw - 400px)',
+    width: 'calc(100vw - 670px)',
     overflowX: 'auto',
     overflowY: 'hidden',
     cursor: 'move',
@@ -81,6 +81,10 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
     '&::-webkit-scrollbar': {
       height: '5px',
     },
+  },
+
+  '@media (max-width: 1200px)': {
+    width: 'calc(100vw - 400px)',
   },
 
   '@media (max-width: 899px)': {
