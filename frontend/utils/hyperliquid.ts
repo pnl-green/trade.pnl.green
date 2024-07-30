@@ -327,19 +327,19 @@ export class Hyperliquid {
 
     agentName = (agentName || '').trim();
 
+    let chainId =
+      this.chain === Chain.Arbitrum
+        ? ChainId.Arbitrum
+        : ChainId.ArbitrumTestnet;
+
     let action = {
       hyperliquidChain,
       agentAddress,
       nonce,
       type: 'approveAgent',
-      signatureChainId: `0x${Number(421614).toString(16)}`,
+      signatureChainId: `0x${Number(chainId).toString(16)}`,
       agentName,
     };
-
-    let chainId =
-      this.chain === Chain.Arbitrum
-        ? ChainId.Arbitrum
-        : ChainId.ArbitrumTestnet;
 
     let domain = {
       chainId,
