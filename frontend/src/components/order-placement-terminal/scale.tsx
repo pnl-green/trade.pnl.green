@@ -8,11 +8,16 @@ import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
 import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
+import EstablishConnectionModal from '../Modals/establishConnectionModal';
+import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 
 const ScaleOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
   const { tokenPairs } = usePairTokensContext();
+  const { establishedConnection, handleEstablishConnection } =
+    useHyperLiquidContext();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [radioValue, setRadioValue] = useState('');
   const [selectOrderType, setSelectOrderType] = useState('GTC');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -21,6 +26,8 @@ const ScaleOrderTerminal = () => {
   const [size, setSize] = useState('');
   const [allowedBeforeMarketPurchase, setAllowedBeforeMarketPurchase] =
     useState('');
+
+  const [establishConnModal, setEstablishedConnModal] = useState(false);
 
   //Take Profit / Stop Loss
   const [takeProfitPrice, setTakeProfitPrice] = useState('');
@@ -302,22 +309,34 @@ const ScaleOrderTerminal = () => {
         </Box>
       )}
 
-      <Box sx={{ ...ButtonStyles }}>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="buyBtn"
-          onClick={() => toggleConfirmModal('buy')}
-        >
-          Buy
-        </BuySellBtn>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="sellBtn"
-          onClick={() => toggleConfirmModal('sell')}
-        >
-          Sell
-        </BuySellBtn>
-      </Box>
+      {establishedConnection ? (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="buyBtn"
+            onClick={() => toggleConfirmModal('buy')}
+          >
+            Buy
+          </BuySellBtn>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="sellBtn"
+            onClick={() => toggleConfirmModal('sell')}
+          >
+            Sell
+          </BuySellBtn>
+        </Box>
+      ) : (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            className="buyBtn"
+            sx={{ width: '100%' }}
+            onClick={() => setEstablishedConnModal(true)}
+          >
+            Enable trading
+          </BuySellBtn>
+        </Box>
+      )}
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -335,6 +354,21 @@ const ScaleOrderTerminal = () => {
           skew={sizeSkew}
           fee={fee}
           isBuyOrSell={isBuyOrSell}
+          loading={isLoading}
+          setLoading={setIsLoading}
+        />
+      )}
+
+      {establishConnModal && (
+        <EstablishConnectionModal
+          onClose={() => setEstablishedConnModal(false)}
+          onEstablishConnection={() =>
+            handleEstablishConnection({
+              setIsLoading: setIsLoading,
+              setEstablishedConnModal: setEstablishedConnModal,
+            })
+          }
+          isLoading={isLoading}
         />
       )}
 

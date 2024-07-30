@@ -9,11 +9,16 @@ import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import toast from 'react-hot-toast';
+import EstablishConnectionModal from '../Modals/establishConnectionModal';
+import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 
 const TwapOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
   const { tokenPairs } = usePairTokensContext();
+  const { establishedConnection, handleEstablishConnection } =
+    useHyperLiquidContext();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [timeBtwnIntervals, setTimeBtwnIntervals] = useState('');
   const [theTimeInterval, setTheTimeInterval] = useState('');
   const [radioValue, setRadioValue] = useState('');
@@ -22,6 +27,8 @@ const TwapOrderTerminal = () => {
   const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
   const [size, setSize] = useState('');
+
+  const [establishConnModal, setEstablishedConnModal] = useState(false);
 
   //Take Profit / Stop Loss
   const [takeProfitPrice, setTakeProfitPrice] = useState('');
@@ -55,9 +62,7 @@ const TwapOrderTerminal = () => {
 
   const handlePlaceTwapOrder = () => {
     try {
-
       // const {}=hyperli
-      
     } catch (error) {
       console.log(error);
       toast.error('Error placing order, please try again later.');
@@ -264,22 +269,34 @@ const TwapOrderTerminal = () => {
         </Box>
       )}
 
-      <Box sx={{ ...ButtonStyles }}>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="buyBtn"
-          onClick={() => toggleConfirmModal('buy')}
-        >
-          Buy
-        </BuySellBtn>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="sellBtn"
-          onClick={() => toggleConfirmModal('sell')}
-        >
-          Sell
-        </BuySellBtn>
-      </Box>
+      {!establishedConnection ? (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            className="buyBtn"
+            sx={{ width: '100%' }}
+            onClick={() => setEstablishedConnModal(true)}
+          >
+            Enable trading
+          </BuySellBtn>
+        </Box>
+      ) : (
+        <Box sx={{ ...ButtonStyles }}>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="buyBtn"
+            onClick={() => toggleConfirmModal('buy')}
+          >
+            Buy
+          </BuySellBtn>
+          <BuySellBtn
+            sx={{ width: '112px' }}
+            className="sellBtn"
+            onClick={() => toggleConfirmModal('sell')}
+          >
+            Sell
+          </BuySellBtn>
+        </Box>
+      )}
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -297,6 +314,21 @@ const TwapOrderTerminal = () => {
           estLiqPrice={estLiqPrice}
           fee={fee}
           isBuyOrSell={isBuyOrSell}
+          loading={isLoading}
+          setLoading={setIsLoading}
+        />
+      )}
+
+      {establishConnModal && (
+        <EstablishConnectionModal
+          onClose={() => setEstablishedConnModal(false)}
+          onEstablishConnection={() =>
+            handleEstablishConnection({
+              setIsLoading: setIsLoading,
+              setEstablishedConnModal: setEstablishedConnModal,
+            })
+          }
+          isLoading={isLoading}
         />
       )}
 

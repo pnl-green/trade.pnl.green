@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { useAddress, useChainId } from '@thirdweb-dev/react';
 import { Chain, SubAccount } from '@/types/hyperliquid';
 import { Hyperliquid } from '@/utils/hyperliquid';
@@ -11,14 +19,14 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
 interface SubAccountsProps {
   subaccounts: SubAccount[];
   relaodSubAccounts: boolean;
-  setReloadSubAccounts: React.Dispatch<React.SetStateAction<boolean>>;
+  setReloadSubAccounts: Dispatch<SetStateAction<boolean>>;
   hyperliquid: Hyperliquid;
-  setHyperliquid: React.Dispatch<React.SetStateAction<Hyperliquid>>;
+  setHyperliquid: Dispatch<SetStateAction<Hyperliquid>>;
   establishedConnection: boolean;
-  setEstablishedConnection: React.Dispatch<React.SetStateAction<boolean>>;
+  setEstablishedConnection: Dispatch<SetStateAction<boolean>>;
   handleEstablishConnection: (props: {
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-    setEstablishedConnModal?: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsLoading: Dispatch<SetStateAction<boolean>>;
+    setEstablishedConnModal?: Dispatch<SetStateAction<boolean>>;
   }) => void;
 }
 
@@ -39,7 +47,7 @@ export const useHyperLiquidContext = () => {
   return context;
 };
 
-const HyperliquidProvider = ({ children }: { children: React.ReactNode }) => {
+const HyperliquidProvider = ({ children }: { children: ReactNode }) => {
   //-------Hooks------
   const userAddress = useAddress();
 
@@ -67,8 +75,8 @@ const HyperliquidProvider = ({ children }: { children: React.ReactNode }) => {
     setIsLoading,
     setEstablishedConnModal,
   }: {
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-    setEstablishedConnModal?: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsLoading: Dispatch<SetStateAction<boolean>>;
+    setEstablishedConnModal?: Dispatch<SetStateAction<boolean>>;
   }) => {
     try {
       //wallet address when connected to metamask

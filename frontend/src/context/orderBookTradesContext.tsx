@@ -3,9 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { BookDataProps, WsTrades } from '@/types/hyperliquid';
 import { usePairTokensContext } from './pairTokensContext';
+import { useChainId } from '@thirdweb-dev/react';
 
-const WSS_URL =
-  process.env.NEXT_PUBLIC_WSS_URL || 'wss://api.hyperliquid-testnet.xyz/ws';
 interface OrderBookTradesProps {
   bookData: BookDataProps;
   tradesData: WsTrades[];
@@ -38,12 +37,18 @@ const OrderBookTradesProvider = ({
   const [tradesData, setTradesData] = useState<WsTrades | any>({});
   const [loadingBookData, setLoadingBookData] = useState<boolean>(true);
 
+  const chainId = useChainId();
+
   //Subscribe to trades for a specific coin:
   //{ "method": "subscribe", "subscription": { "type": "trades", "coin": "<coin_symbol>" } }
 
   useEffect(() => {
     // Create a new WebSocket connection
-    const ws = new WebSocket(`${WSS_URL}`);
+    const ws = new WebSocket(
+      chainId === 42161
+        ? 'wss://api.hyperliquid.xyz/ws'
+        : 'wss://api.hyperliquid-testnet.xyz/ws'
+    );
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
@@ -99,7 +104,12 @@ const OrderBookTradesProvider = ({
 
   useEffect(() => {
     // Create a new WebSocket connection
-    const ws = new WebSocket(`${WSS_URL}`);
+
+    const ws = new WebSocket(
+      chainId === 42161
+        ? 'wss://api.hyperliquid.xyz/ws'
+        : 'wss://api.hyperliquid-testnet.xyz/ws'
+    );
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {

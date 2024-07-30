@@ -3,10 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActiveAssetData, PairData, tokenPairs } from '../../types/hyperliquid';
 import { useHyperLiquidContext } from './hyperLiquidContext';
-import { useAddress } from '@thirdweb-dev/react';
-
-const WSS_URL =
-  process.env.NEXT_PUBLIC_WSS_URL || 'wss://api.hyperliquid-testnet.xyz/ws';
+import { useAddress, useChainId } from '@thirdweb-dev/react';
 
 //default dummy token data
 const defaultDummyTokenData: PairData | any = {
@@ -63,6 +60,7 @@ export const usePairTokensContext = () => {
 const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   //------Hooks------
   const userAddress = useAddress();
+  const chainId = useChainId();
   const { hyperliquid } = useHyperLiquidContext();
 
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
@@ -106,7 +104,11 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Create a new WebSocket connection
-    const ws = new WebSocket(`${WSS_URL}`);
+    const ws = new WebSocket(
+      chainId === 42161
+        ? 'wss://api.hyperliquid.xyz/ws'
+        : 'wss://api.hyperliquid-testnet.xyz/ws'
+    );
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
@@ -164,7 +166,11 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
     if (!userAddress) return;
 
     // Create a new WebSocket connection
-    const ws = new WebSocket(`${WSS_URL}`);
+    const ws = new WebSocket(
+      chainId === 42161
+        ? 'wss://api.hyperliquid.xyz/ws'
+        : 'wss://api.hyperliquid-testnet.xyz/ws'
+    );
 
     // When the WebSocket connection is open, send the subscribe message
     ws.onopen = () => {
