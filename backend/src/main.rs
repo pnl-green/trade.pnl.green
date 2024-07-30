@@ -49,7 +49,7 @@ async fn main() -> anyhow::Result<()> {
 
     let (tx, mut rx) = mpsc::channel::<InternalRequest>(128);
 
-    let chain = Chain::ArbitrumTestnet;
+    let chain = Chain::Arbitrum;
 
     spawn(async move {
         while let Some(request) = rx.recv().await {

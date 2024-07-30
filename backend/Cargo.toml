@@ -12,16 +12,16 @@ actix-rt = "2.10.0"
 actix-session = { version = "0.9.0", features = ["redis-rs-session"] }
 actix-web = "4.8.0"
 actix-web-actors = "4.3.0"
-actix-ws = "0.2.5"
+actix-ws = "0.3.0"
 anyhow = "1.0.86"
 config = { version = "0.14.0", default-features = false, features = ["toml"] }
 envy = "0.4.2"
 ethers = "2.0.14"
 futures-util = "0.3.30"
 serde = { version = "1.0.204", features = ["derive"] }
-serde_json = "1.0.120"
-thiserror = "1.0.61"
-tokio = { version = "1.38.0", features = ["rt", "macros"] }
+serde_json = "1.0.121"
+thiserror = "1.0.63"
+tokio = { version = "1.39.2", features = ["rt", "macros"] }
 tokio-tungstenite = { version = "0.23.1", features = ["rustls"] }
 tracing = { version = "0.1.40", features = ["log"] }
 tracing-actix-web = "0.7.11"
