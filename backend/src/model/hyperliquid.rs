@@ -182,3 +182,86 @@ pub enum Request {
     Exchange(Exchange),
     Connect { user: Address },
 }
+
+#[derive(Debug, Serialize)]
+#[serde(tag = "method", rename_all = "camelCase")]
+pub enum WSMethod {
+    Ping,
+    Subscribe(Subscription),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Subscription {
+    pub subscription: Subscribe,
+}
+
+impl Subscription {
+    pub fn new(subscription: Subscribe) -> Self {
+        Self { subscription }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+pub enum Subscribe {
+    Candle { coin: String, interval: String },
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(tag = "channel", content = "data", rename_all = "camelCase")]
+pub enum WSResponse {
+    SubscriptionResponse(Subscription),
+    Candle(Candle),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Candle {
+    #[serde(rename = "t")]
+    pub open_time: i64,
+    #[serde(rename = "T")]
+    pub close_time: i64,
+    #[serde(rename = "s")]
+    pub symbol: String,
+    #[serde(rename = "i")]
+    pub interval: String,
+    #[serde(rename = "o", deserialize_with = "parse")]
+    pub open_price: f64,
+    #[serde(rename = "c", deserialize_with = "parse")]
+    pub close_price: f64,
+    #[serde(rename = "h", deserialize_with = "parse")]
+    pub high_price: f64,
+    #[serde(rename = "l", deserialize_with = "parse")]
+    pub low_price: f64,
+    #[serde(rename = "v", deserialize_with = "parse")]
+    pub volume: f64,
+    #[serde(rename = "n")]
+    pub num_trade: i64,
+}
+
+impl Candle {
+    pub fn pair(&self, right: &Self) -> Self {
+        Self {
+            open_time: self.open_time,
+            close_time: self.close_time,
+            symbol: format!("{}{}", self.symbol, right.symbol),
+            interval: self.interval.clone(),
+            open_price: self.open_price / right.open_price,
+            close_price: self.close_price / right.close_price,
+            high_price: self.high_price / right.high_price,
+            low_price: self.low_price / right.low_price,
+            volume: 0., // self.volume + right.volume, // TODO: how do we handle volume in pairs?
+            num_trade: self.num_trade + right.num_trade,
+        }
+    }
+}
+
+fn parse<'de, T, D>(de: D) -> Result<T, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: std::str::FromStr,
+    <T as std::str::FromStr>::Err: std::fmt::Display,
+{
+    String::deserialize(de)?
+        .parse()
+        .map_err(serde::de::Error::custom)
+}
