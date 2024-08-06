@@ -25,6 +25,7 @@ pub enum Info {
     HistoricalOrders { user: Address },
     UserFees { user: Address },
     CandleSnapshot { req: CandleSnapshotRequest },
+    PairCandleSnapshot { req: CandleSnapshotRequest, pair_coin: String },
     SpotMeta,
 }
 
