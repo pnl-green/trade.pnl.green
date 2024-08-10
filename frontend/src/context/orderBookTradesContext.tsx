@@ -150,7 +150,6 @@ const OrderBookTradesProvider = ({
 
           const bids: Order[] = data_parsed[0];
           const asks: Order[] = data_parsed[1];
-          alert(bids.map((order) => JSON.stringify(order)))
 
           setBookData({ asks, bids });
           setLoadingBookData(false);
