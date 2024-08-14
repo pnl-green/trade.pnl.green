@@ -25,7 +25,23 @@ pub enum Info {
     HistoricalOrders { user: Address },
     UserFees { user: Address },
     CandleSnapshot { req: CandleSnapshotRequest },
+    Depth { req: DepthCalculationRequest },
     SpotMeta,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DepthCalculationRequest {
+    pub symbol: String,
+    pub percentage: f32,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DepthCalculationResponse {
+    pub total_size: f32,
+    pub total_price: f32,
+    pub timestamp: u64,
 }
 
 #[derive(Debug, Deserialize)]
