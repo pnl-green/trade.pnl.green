@@ -319,6 +319,8 @@ const MarketComponent = () => {
         <SelectItemsBox sx={{ '&:hover': { border: 'none' }, m: 0 }}>
           <span>Current Market Price</span>
           <CurrentMarketPriceWidget>
+            {/* @Todo investigato how get currentMarketPrice directly from ws, not order book */}
+            {/* Quick fix, i will rewrite it */}
             <CurrentMarketPriceAsk>{ orders.asks.length !== 0 ? (orders.asks[orders.asks.length-1].px).toFixed(2) : ''}</CurrentMarketPriceAsk>
             <CurrentMarketPriceBid>{ orders.bids.length !== 0 ? (orders.bids[0].px).toFixed(2) : '' }</CurrentMarketPriceBid>
           </CurrentMarketPriceWidget>
