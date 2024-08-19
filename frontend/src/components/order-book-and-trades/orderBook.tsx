@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   SpreadAndPairSelects,
   StyledTable,
@@ -9,19 +9,28 @@ import HandleSelectItems from '../handleSelectItems';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
 import { SizeEquivalentsProps } from '@/utils/usdEquivalents';
+import { Order } from '@/context/orderBookTradesContext';
 
-interface OrderBookProps {
-  spread: number;
-  pair: string;
-  setSpread: (spread: number) => void;
-  setPair: (pair: string) => void;
+enum Pair {
+  USD = "USD",
+  ETH = "ETH",
+  BTC = "BTC"
 }
 
-const calculateBarWidth = (size: number, max: number) => {
-  return (size / max) * 100; // Assuming a percentage-based width
+// Props for OrderBook component
+interface OrderBookProps {
+  spread: number;
+  pair: Pair;
+  setSpread: (spread: number) => void;
+  setPair: (pair: Pair) => void;
+}
+
+// Calculate bar width as a percentage
+const calculateBarWidth = (total: number, max: number) => {
+  return (total / max) * 100;
 };
 
-//only calculate the USD equivalent of a given size of a token pair
+// Get USD value if token is USD
 export const getUsdEquivalentOnly = ({
   size,
   currentMarkPrice,
@@ -34,48 +43,103 @@ export const getUsdEquivalentOnly = ({
   }
 };
 
+// Calculate total size for each order
+const calculateTotal = (orders: Order[], pair: Pair, reverse: boolean = false) => {
+  let cumulativeTotal = 0;
+  const ordersCopy = reverse ? [...orders].reverse() : [...orders];
+  const ordersWithTotal = ordersCopy.map(order => {
+    const orderSize = order.sz;
+    const orderPx = order.px; 
+    let sizeEquivalent = pair.toUpperCase() === 'USD'
+      ? getUsdEquivalentOnly({ size: orderSize, currentMarkPrice: orderPx, token: pair })
+      : orderSize;
+
+    cumulativeTotal += sizeEquivalent;
+
+    const roundedTotal = Number(cumulativeTotal.toFixed(2));
+    return { ...order, total: roundedTotal };
+  });
+  return reverse ? ordersWithTotal.reverse() : ordersWithTotal;
+};
+
+// Render table rows for orders
 const renderOrderBookTable = (
   orders: { px: number; sz: number; n: number }[],
   type: string,
-  pair: string
+  pair: Pair,
+  reverseTotal: boolean
 ) => {
-  const maxOrderSize = Math.max(...orders.map((order) => order.sz));
+  const ordersWithTotal = calculateTotal(orders, pair, reverseTotal);
+  const maxOrderTotal = Math.max(...ordersWithTotal.map((order) => order.total));
 
   return (
     <tbody>
-      {orders.map((order, index) => (
+      {ordersWithTotal.map((order, index) => (
         <Tablerows
           key={index}
           type={type}
-          width={calculateBarWidth(order.sz, maxOrderSize)}
+          width={calculateBarWidth(order.total, maxOrderTotal)}
         >
-          <td className="first-column">{order.px}</td>
+          <td className="first-column">{order.px.toFixed(2)}</td>
           <td>
-            {getUsdEquivalentOnly({
-              size: Number(order.sz),
-              currentMarkPrice: Number(order.px),
-              token: pair,
-            })}
+            {pair.toUpperCase() === 'USD'
+              ? Math.trunc(getUsdEquivalentOnly({
+                  size: order.sz,
+                  currentMarkPrice: order.px,
+                  token: pair,
+                }))
+              : getUsdEquivalentOnly({
+                  size: order.sz,
+                  currentMarkPrice: order.px,
+                  token: pair,
+                }).toFixed(2)}
           </td>
-          <td>{order.n}</td>
+          <td>{pair.toUpperCase() === 'USD' ? Math.trunc(order.total) : order.total}</td>
         </Tablerows>
       ))}
     </tbody>
   );
 };
 
+// Calculate spread percentage
+const calculateSpreadPercentage = (asks: Order[], bids: Order[]) => {
+  if (asks.length === 0 || bids.length === 0) return 0;
+  const highestBid = bids[0].px;
+  const lowestAsk = asks[asks.length-1].px
+  const spread = lowestAsk - highestBid;
+  const spreadPercentage = parseFloat(((spread / lowestAsk ) * 100).toFixed(2)); 
+  return spreadPercentage;
+};
+
+// Main component for order book
 const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
   const { tokenPairs } = usePairTokensContext();
   const { bookData, loadingBookData } = useOrderBookTradesContext();
   const [spreadPercentage, setSpreadPercentage] = React.useState(0);
 
+  // Get asks and bids data
+  //
+  // @TODO investigate how sort orders with step: 1/2/5/10/100/1000
   function getBookData() {
     let limit = 10;
-    const asks = bookData.asks.slice(0, limit).sort((a, b) => a.px - b.px);
-    const bids = bookData.bids.slice(0, limit).sort((a, b) => a.px - b.px);
-
+    const asks = bookData.asks
+      .slice(0, limit)
+      .sort((a, b) => b.px - a.px);
+    const bids = bookData.bids
+      .slice(0, limit)
+    .sort((a, b) => b.px - a.px);
     return { asks, bids };
   }
+
+  // Update spread percentage when book data changes
+  useEffect(() => {
+    if (!loadingBookData) {
+      const { asks, bids } = getBookData();
+      if (asks.length > 0 && bids.length > 0) {
+        setSpreadPercentage(calculateSpreadPercentage(asks, bids));
+      }
+    }
+  }, [bookData, loadingBookData]);
 
   return (
     <Box>
@@ -93,7 +157,9 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
             styles={{ background: '#131212' }}
             selectItem={pair}
             setSelectItem={setPair}
-            selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
+            selectDataItems={Array.isArray(tokenPairs) ? tokenPairs.map(tokenPair => {
+              return tokenPair ? tokenPair.toString() : '';
+            }) : []}
           />
         </div>
       </SpreadAndPairSelects>
@@ -125,7 +191,7 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
             </tbody>
           ) : (
             <>
-              {renderOrderBookTable(getBookData().asks, 'asks', pair)}
+              {renderOrderBookTable(getBookData().asks, 'asks', pair, true)} {}
               {getBookData().asks.length !== 0 &&
                 getBookData().bids.length !== 0 && (
                   <thead className="spread">
@@ -136,7 +202,7 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
                     </tr>
                   </thead>
                 )}
-              {renderOrderBookTable(getBookData().bids, 'bids', pair)}
+              {renderOrderBookTable(getBookData().bids, 'bids', pair, false)} {}
             </>
           )}
         </StyledTable>
