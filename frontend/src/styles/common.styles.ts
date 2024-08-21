@@ -1,4 +1,4 @@
-import { Box, Button, styled } from '@mui/material';
+import { Box, Button, Typography, styled } from '@mui/material';
 
 export const ItemsSelect = styled('select')(() => ({
   height: '30px',
@@ -70,6 +70,21 @@ export const BuySellBtn = styled(Button)(() => ({
     backgroundColor: '#B04747',
   },
 }));
+
+export const CurrentMarketPriceWidget = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "column"
+}))
+
+export const CurrentMarketPriceAsk = styled(Typography)(() => ({
+  fontSize: "12px",
+  color: "red"
+}))
+
+export const CurrentMarketPriceBid = styled(Typography)(() => ({
+  fontSize: "12px",
+  color: "lime"
+}))
 
 //flex items
 export const FlexItems = styled(Box)(() => ({

@@ -2,7 +2,7 @@ import { SelectItemsBox } from '@/styles/riskManager.styles';
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
-import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
+import { ButtonStyles, BuySellBtn, CurrentMarketPriceAsk, CurrentMarketPriceBid, CurrentMarketPriceWidget, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
@@ -14,6 +14,7 @@ import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
 import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
 import EstablishConnectionModal from '../Modals/establishConnectionModal';
+import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
 
 const MarketComponent = () => {
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
@@ -34,6 +35,19 @@ const MarketComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
+  const { bookData, loadingBookData } = useOrderBookTradesContext();
+  function getBookData() {
+    let limit = 10;
+    const asks = bookData.asks
+      .slice(0, limit)
+      .sort((a, b) => b.px - a.px);
+    const bids = bookData.bids
+      .slice(0, limit)
+    .sort((a, b) => b.px - a.px);
+    return { asks, bids };
+  }
+  let orders = getBookData();
+
   let szDecimals = tokenPairData[assetId]?.universe.szDecimals;
 
   const handleSizeInput = (e: {
@@ -304,7 +318,12 @@ const MarketComponent = () => {
       >
         <SelectItemsBox sx={{ '&:hover': { border: 'none' }, m: 0 }}>
           <span>Current Market Price</span>
-          <span>${currentMarketPrice}</span>
+          <CurrentMarketPriceWidget>
+            {/* @Todo investigato how get currentMarketPrice directly from ws, not order book */}
+            {/* Quick fix, i will rewrite it */}
+            <CurrentMarketPriceAsk>{ orders.asks.length !== 0 ? (orders.asks[orders.asks.length-1].px).toFixed(2) : ''}</CurrentMarketPriceAsk>
+            <CurrentMarketPriceBid>{ orders.bids.length !== 0 ? (orders.bids[0].px).toFixed(2) : '' }</CurrentMarketPriceBid>
+          </CurrentMarketPriceWidget>
         </SelectItemsBox>
 
         <SelectItemsBox sx={{ m: 0 }}>
