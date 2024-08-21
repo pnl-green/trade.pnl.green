@@ -17,7 +17,7 @@ use tokio::sync::mpsc::Sender;
 use crate::{
     error::Error::BadRequestError,
     model::{
-        hyperliquid::{Agent, Exchange, Info, InternalRequest, Request},
+        hyperliquid::{Agent, DepthCalculationResponse, Exchange, Info, InternalRequest, Request},
         Response,
     },
     prelude::Result,
@@ -136,6 +136,57 @@ pub async fn hyperliquid(
                         msg: Some(msg.to_string()),
                     }),
                 },
+                Info::Depth { req } => {
+                    let book = info
+                        .l2_book(req.symbol)
+                        .await
+                        .map_err(|msg| BadRequestError(msg.to_string()))?;
+
+                    let percentage = req.percentage / 100.;
+                    let is_ask = req.percentage < 0.;
+
+                    let levels = if is_ask {
+                        // ask
+                        book.levels.first()
+                    } else {
+                        // bid
+                        book.levels.get(1)
+                    }
+                    .ok_or(BadRequestError("Book doesn't contain ask/bid level".into()))?
+                    .iter()
+                    .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+                    .collect::<Vec<_>>();
+
+                    let best = if is_ask {
+                        levels.iter().max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                    } else {
+                        levels.iter().min_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                    }
+                    .ok_or(BadRequestError(
+                        "Ask/bid level doesn't have any items in it".into(),
+                    ))?;
+                    let mut total = DepthCalculationResponse {
+                        total_price: 0.,
+                        total_size: 0.,
+                        timestamp: book.time,
+                    };
+                    let best_price = best.0;
+                    for (px, sz) in levels {
+                        if (is_ask && best_price * (1. + percentage) > px)
+                            || (!is_ask && best_price * (1. + percentage) < px)
+                        {
+                            continue;
+                        }
+                        total.total_size += sz;
+                        total.total_price += px;
+                    }
+
+                    HttpResponse::Ok().json(Response {
+                        success: true,
+                        data: Some(total),
+                        msg: None,
+                    })
+                }
             }
         }
         Request::Exchange(req) => {
