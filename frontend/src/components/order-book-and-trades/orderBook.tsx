@@ -12,9 +12,9 @@ import { SizeEquivalentsProps } from '@/utils/usdEquivalents';
 import { Order } from '@/context/orderBookTradesContext';
 
 enum Pair {
-  USD = "USD",
-  ETH = "ETH",
-  BTC = "BTC"
+  USD = 'USD',
+  ETH = 'ETH',
+  BTC = 'BTC',
 }
 
 // Props for OrderBook component
@@ -44,15 +44,24 @@ export const getUsdEquivalentOnly = ({
 };
 
 // Calculate total size for each order
-const calculateTotal = (orders: Order[], pair: Pair, reverse: boolean = false) => {
+const calculateTotal = (
+  orders: Order[],
+  pair: Pair,
+  reverse: boolean = false
+) => {
   let cumulativeTotal = 0;
   const ordersCopy = reverse ? [...orders].reverse() : [...orders];
-  const ordersWithTotal = ordersCopy.map(order => {
+  const ordersWithTotal = ordersCopy.map((order) => {
     const orderSize = order.sz;
-    const orderPx = order.px; 
-    let sizeEquivalent = pair.toUpperCase() === 'USD'
-      ? getUsdEquivalentOnly({ size: orderSize, currentMarkPrice: orderPx, token: pair })
-      : orderSize;
+    const orderPx = order.px;
+    let sizeEquivalent =
+      pair.toUpperCase() === 'USD'
+        ? getUsdEquivalentOnly({
+            size: orderSize,
+            currentMarkPrice: orderPx,
+            token: pair,
+          })
+        : orderSize;
 
     cumulativeTotal += sizeEquivalent;
 
@@ -70,7 +79,9 @@ const renderOrderBookTable = (
   reverseTotal: boolean
 ) => {
   const ordersWithTotal = calculateTotal(orders, pair, reverseTotal);
-  const maxOrderTotal = Math.max(...ordersWithTotal.map((order) => order.total));
+  const maxOrderTotal = Math.max(
+    ...ordersWithTotal.map((order) => order.total)
+  );
 
   return (
     <tbody>
@@ -83,18 +94,24 @@ const renderOrderBookTable = (
           <td className="first-column">{order.px.toFixed(2)}</td>
           <td>
             {pair.toUpperCase() === 'USD'
-              ? Math.trunc(getUsdEquivalentOnly({
-                  size: order.sz,
-                  currentMarkPrice: order.px,
-                  token: pair,
-                }))
+              ? Math.trunc(
+                  getUsdEquivalentOnly({
+                    size: order.sz,
+                    currentMarkPrice: order.px,
+                    token: pair,
+                  })
+                )
               : getUsdEquivalentOnly({
                   size: order.sz,
                   currentMarkPrice: order.px,
                   token: pair,
                 }).toFixed(2)}
           </td>
-          <td>{pair.toUpperCase() === 'USD' ? Math.trunc(order.total) : order.total}</td>
+          <td>
+            {pair.toUpperCase() === 'USD'
+              ? Math.trunc(order.total)
+              : order.total}
+          </td>
         </Tablerows>
       ))}
     </tbody>
@@ -105,9 +122,9 @@ const renderOrderBookTable = (
 const calculateSpreadPercentage = (asks: Order[], bids: Order[]) => {
   if (asks.length === 0 || bids.length === 0) return 0;
   const highestBid = bids[0].px;
-  const lowestAsk = asks[asks.length-1].px
+  const lowestAsk = asks[asks.length - 1].px;
   const spread = lowestAsk - highestBid;
-  const spreadPercentage = parseFloat(((spread / lowestAsk ) * 100).toFixed(2)); 
+  const spreadPercentage = parseFloat(((spread / lowestAsk) * 100).toFixed(2));
   return spreadPercentage;
 };
 
@@ -122,12 +139,8 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
   // @TODO investigate how sort orders with step: 1/2/5/10/100/1000
   function getBookData() {
     let limit = 10;
-    const asks = bookData.asks
-      .slice(0, limit)
-      .sort((a, b) => b.px - a.px);
-    const bids = bookData.bids
-      .slice(0, limit)
-    .sort((a, b) => b.px - a.px);
+    const asks = bookData.asks.slice(0, limit).sort((a, b) => b.px - a.px);
+    const bids = bookData.bids.slice(0, limit).sort((a, b) => b.px - a.px);
     return { asks, bids };
   }
 
@@ -157,9 +170,13 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
             styles={{ background: '#131212' }}
             selectItem={pair}
             setSelectItem={setPair}
-            selectDataItems={Array.isArray(tokenPairs) ? tokenPairs.map(tokenPair => {
-              return tokenPair ? tokenPair.toString() : '';
-            }) : []}
+            selectDataItems={
+              Array.isArray(tokenPairs)
+                ? tokenPairs.map((tokenPair) => {
+                    return tokenPair ? tokenPair.toString() : '';
+                  })
+                : []
+            }
           />
         </div>
       </SpreadAndPairSelects>

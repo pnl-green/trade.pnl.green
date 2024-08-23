@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { TabsButtons } from "@/styles/common.styles";
+import React, { useEffect, useState } from 'react';
+import { TabsButtons } from '@/styles/common.styles';
 import {
   OrderBookContainer,
   OrderBookTabsWrapper,
-} from "@/styles/orderbook.styles";
-import OrderBook from "./orderBook";
-import Trades from "./trades";
-import { usePairTokensContext } from "@/context/pairTokensContext";
+} from '@/styles/orderbook.styles';
+import OrderBook from './orderBook';
+import Trades from './trades';
+import { usePairTokensContext } from '@/context/pairTokensContext';
 
 const OrderBookAndTrades = () => {
-  const [activeTab, setActiveTab] = useState("Order Book");
+  const [activeTab, setActiveTab] = useState('Order Book');
   const [spread, setSpread] = useState(1);
   const { pair, setPair } = usePairTokensContext();
 
@@ -20,15 +20,15 @@ const OrderBookAndTrades = () => {
   return (
     <OrderBookContainer>
       <OrderBookTabsWrapper>
-        {["Order Book", "Trades"].map((label) => (
+        {['Order Book', 'Trades'].map((label) => (
           <TabsButtons
             key={label}
             sx={{
-              backgroundColor: "#34484D",
-              minWidth: "110px",
-              height: "30px",
+              backgroundColor: '#34484D',
+              minWidth: '110px',
+              height: '30px',
             }}
-            className={activeTab === label ? "active" : ""}
+            className={activeTab === label ? 'active' : ''}
             onClick={() => handleTabClick(label)}
           >
             {label}
@@ -36,15 +36,15 @@ const OrderBookAndTrades = () => {
         ))}
       </OrderBookTabsWrapper>
 
-      {activeTab === "Order Book" && (
+      {activeTab === 'Order Book' && (
         <OrderBook
           spread={spread}
-          pair={pair}
+          pair={pair as any} // FIX: pair is not a string
           setSpread={setSpread}
           setPair={setPair}
         />
       )}
-      {activeTab === "Trades" && <Trades />}
+      {activeTab === 'Trades' && <Trades />}
     </OrderBookContainer>
   );
 };
