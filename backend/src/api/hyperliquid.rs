@@ -17,7 +17,10 @@ use tokio::sync::mpsc::Sender;
 use crate::{
     error::Error::BadRequestError,
     model::{
-        hyperliquid::{Agent, DepthCalculationResponse, Exchange, Info, InternalRequest, Request},
+        hyperliquid::{
+            Agent, BookKind, DepthCalculationResponse, Exchange, Info, InternalRequest,
+            LiquidityResponse, Request, ValueKind,
+        },
         Response,
     },
     prelude::Result,
@@ -151,6 +154,61 @@ pub async fn hyperliquid(
                     HttpResponse::Ok().json(Response {
                         success: true,
                         data: Some(total),
+                        msg: None,
+                    })
+                }
+                Info::Liquidity { req } => {
+                    let book = info
+                        .l2_book(req.symbol)
+                        .await
+                        .map_err(|msg| BadRequestError(msg.to_string()))?;
+
+                    let ask = &book.levels.first();
+                    let bid = &book.levels.last();
+
+                    let mut top_ask = ask.and_then(|a| a.first());
+                    let mut top_bid = bid.and_then(|b| b.first());
+
+                    match req.book_kind {
+                        Some(BookKind::Ask) => top_bid = None,
+                        Some(BookKind::Bid) => top_ask = None,
+                        _ => {},
+                    }
+
+                    let (top_ask_qty, top_ask_price, top_bid_qty, top_bid_price) =
+                        match req.value_kind {
+                            Some(ValueKind::Price) => (
+                                None,
+                                top_ask.map(|l| l.px.clone()),
+                                None,
+                                top_bid.map(|l| l.px.clone()),
+                            ),
+                            Some(ValueKind::Quantity) => (
+                                top_ask.map(|l| l.sz.clone()),
+                                None,
+                                top_bid.map(|l| l.sz.clone()),
+                                None,
+                            ),
+                            None => (
+                                top_ask.map(|l| l.sz.clone()),
+                                top_ask.map(|l| l.px.clone()),
+                                top_bid.map(|l| l.sz.clone()),
+                                top_bid.map(|l| l.px.clone()),
+                            ),
+                        };
+
+                    let response = LiquidityResponse {
+                        symbol: book.coin,
+                        top_ask_qty,
+                        top_ask_price,
+                        top_bid_qty,
+                        top_bid_price,
+                        timestamp: book.time,
+                    };
+
+                    HttpResponse::Ok().json(Response {
+                        success: true,
+                        data: Some(response),
                         msg: None,
                     })
                 }

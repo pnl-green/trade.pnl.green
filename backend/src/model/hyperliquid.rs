@@ -27,6 +27,44 @@ pub enum Info {
     CandleSnapshot { req: CandleSnapshotRequest },
     Depth { req: DepthCalculationRequest },
     SpotMeta,
+    Liquidity { req: LiquidityRequest },
+}
+
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum BookKind {
+    Ask,
+    Bid,
+}
+
+#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum ValueKind {
+    Price,
+    Quantity,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LiquidityRequest {
+    pub symbol: String,
+    pub book_kind: Option<BookKind>,
+    pub value_kind: Option<ValueKind>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LiquidityResponse {
+    pub symbol: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub top_ask_qty: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub top_ask_price: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub top_bid_qty: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub top_bid_price: Option<String>,
+    pub timestamp: u64,
 }
 
 #[derive(Debug, Deserialize)]
