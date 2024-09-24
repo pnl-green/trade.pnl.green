@@ -37,7 +37,7 @@ jobs:
           UPLOAD_MODE: none
           SRC_DIR: backend
           # STATIC_LINKING: false
-          # EXTRA_FILES: ".env"
+          EXTRA_FILES: ".env"
 
       - name: Deploy to EC2
         uses: appleboy/scp-action@v0.1.4
