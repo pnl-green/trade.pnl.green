@@ -34,3 +34,26 @@ pub mod info {
             .await
     }
 }
+
+pub mod pair {
+    use crate::prelude::Result;
+    use hyperliquid::types::info::response::CandleSnapshot;
+
+    pub fn pair_candle(
+        left_candle: CandleSnapshot,
+        right_candle: CandleSnapshot,
+    ) -> Result<CandleSnapshot> {
+        Ok(CandleSnapshot {
+            t: left_candle.t,
+            t_: left_candle.t_,
+            i: left_candle.i,
+            s: format!("{}-{}", left_candle.s, right_candle.s),
+            c: (left_candle.c.parse::<f64>()? / right_candle.c.parse::<f64>()?).to_string(),
+            h: (left_candle.h.parse::<f64>()? / right_candle.h.parse::<f64>()?).to_string(),
+            l: (left_candle.l.parse::<f64>()? / right_candle.l.parse::<f64>()?).to_string(),
+            o: (left_candle.o.parse::<f64>()? / right_candle.o.parse::<f64>()?).to_string(),
+            v: 0.to_string(),
+            n: left_candle.n + right_candle.n,
+        })
+    }
+}

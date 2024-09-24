@@ -9,6 +9,8 @@ pub enum Error {
     IOError(std::io::Error),
     #[error("{0:?}")]
     BadRequestError(String),
+    #[error("{0:?}")]
+    FloatParsingFailed(#[from] std::num::ParseFloatError),
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }

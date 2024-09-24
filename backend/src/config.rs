@@ -7,6 +7,8 @@ use serde::Deserialize;
 pub struct Config {
     server_host: String,
     server_port: u16,
+    ws_host: String,
+    ws_port: u16,
 
     pub level: String,
 
@@ -41,6 +43,10 @@ impl Config {
 impl Config {
     pub fn server_url(&self) -> String {
         format!("{}:{}", self.server_host, self.server_port)
+    }
+
+    pub fn ws_url(&self) -> String {
+        format!("{}:{}", self.ws_host, self.ws_port)
     }
 
     pub fn set_port(&mut self, port: u16) {

@@ -9,7 +9,7 @@ use actix_web::{
     web, App, HttpServer,
 };
 use anyhow::Context;
-use backend::{api, log, model::hyperliquid::InternalRequest, Config};
+use backend::{api, log, model::hyperliquid::InternalRequest, ws, Config};
 
 use hyperliquid::{
     types::{
@@ -42,6 +42,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Build the server
     let listener = TcpListener::bind(config.server_url()).context("Failed to bind to port")?;
+    let ws_listener = tokio::net::TcpListener::bind(config.ws_url()).await?;
 
     let cookie_key = Key::from(config.cookie_key.as_bytes());
 
@@ -108,7 +109,7 @@ async fn main() -> anyhow::Result<()> {
                             let limit_px =
                                 mark_px * (1.0 + if request.is_buy { SLIPPAGE } else { -SLIPPAGE }); // 3% slippage
 
-                            let universe = match ctxs.get(0) {
+                            let universe = match ctxs.first() {
                                 Some(AssetContext::Meta(meta)) => &meta.universe,
                                 _ => {
                                     tracing::error!("Failed to get universe");
@@ -167,6 +168,12 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             }
+        }
+    });
+    // WS
+    spawn(async move {
+        while let Ok((stream, _addr)) = ws_listener.accept().await {
+            spawn(ws::handler::handler(stream));
         }
     });
 

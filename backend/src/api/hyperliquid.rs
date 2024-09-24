@@ -21,7 +21,7 @@ use crate::{
         Response,
     },
     prelude::Result,
-    service::hyperliquid::info,
+    service::hyperliquid::{info, pair::pair_candle},
 };
 
 pub async fn hyperliquid(
@@ -84,6 +84,39 @@ pub async fn hyperliquid(
                     )
                     .await
                     .map_err(|msg| BadRequestError(msg.to_string()))?;
+
+                    HttpResponse::Ok().json(Response {
+                        success: true,
+                        data: Some(data),
+                        msg: None,
+                    })
+                }
+                Info::PairCandleSnapshot { req, pair_coin } => {
+                    let data = info::candle_snapshot(
+                        &info,
+                        req.coin,
+                        req.interval.clone(),
+                        req.start_time,
+                        req.end_time,
+                    )
+                    .await
+                    .map_err(|msg| BadRequestError(msg.to_string()))?;
+                    let pair_data = info::candle_snapshot(
+                        &info,
+                        pair_coin,
+                        req.interval,
+                        req.start_time,
+                        req.end_time,
+                    )
+                    .await
+                    .map_err(|msg| BadRequestError(msg.to_string()))?;
+
+                    let data = data
+                        .into_iter()
+                        .zip(pair_data)
+                        .map(|(left, right)| pair_candle(left, right))
+                        .filter_map(Result::ok)
+                        .collect::<Vec<_>>();
 
                     HttpResponse::Ok().json(Response {
                         success: true,
