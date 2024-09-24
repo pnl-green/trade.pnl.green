@@ -260,7 +260,7 @@ impl Candle {
         Self {
             open_time: self.open_time,
             close_time: self.close_time,
-            symbol: format!("{}{}", self.symbol, right.symbol),
+            symbol: format!("{}/{}", self.symbol, right.symbol),
             interval: self.interval.clone(),
             open_price: self.open_price / right.open_price,
             close_price: self.close_price / right.close_price,

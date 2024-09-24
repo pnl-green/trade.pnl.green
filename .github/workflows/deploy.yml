@@ -20,8 +20,8 @@ jobs:
           echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env    
           echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env    
 
-          echo "WS_HOST=0.0.0.0" >> .env
-          echo "WS_PORT=8081" >> .env
+          echo "WS_HOST=${{ secrets.WS_HOST }}" >> .env
+          echo "WS_PORT=${{ secrets.WS_PORT }}" >> .env
 
           echo "LEVEL=${{ secrets.LEVEL }}" >> .env    
 
