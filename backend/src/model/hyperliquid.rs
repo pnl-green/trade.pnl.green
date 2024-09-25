@@ -27,7 +27,21 @@ pub enum Info {
     CandleSnapshot { req: CandleSnapshotRequest },
     PairCandleSnapshot { req: CandleSnapshotRequest, pair_coin: String },
     Depth { req: DepthCalculationRequest },
+    Delta { req: DeltaCalculationRequest },
     SpotMeta,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeltaCalculationRequest {
+    pub symbol: String,
+    pub range: String,
+}
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeltaCalculationResponse {
+    pub delta: f32,
+    pub timestamp: u64,
 }
 
 #[derive(Debug, Deserialize)]
