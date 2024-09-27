@@ -38,6 +38,7 @@ interface PairTokensProps {
   setPair: React.Dispatch<React.SetStateAction<string>>;
 
   tokenPairData: any;
+  allTokenPairs: any;
 
   assetId: string | number;
   setAssetId: React.Dispatch<React.SetStateAction<string | number>>;
@@ -65,6 +66,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
   const [tokenPairData, setTokenPairData] = useState([]); //all token pair data
+  const [allTokenPairs, setAllTokenPairs] = useState([]); //all token pair data
   const [selectedPairsTokenData, setSelectPairsTokenData] =
     useState<PairData | null>(defaultDummyTokenData);
   //single token pair data
@@ -135,12 +137,27 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
           hyperliquid
             .metaAndAssetCtxs(data.meta, data.assetCtxs)
             .then((result) => {
+              const tokens = result.map( (r: any) => r.universe.name );
+              const tokenPair = tokens.flatMap( (token, i) => 
+                tokens
+                  .filter( (otherToken) => otherToken !== token )
+                  .map( (otherToken) => {
+                  const tokenData = result.find((r: any) => r.universe.name === token);
+                    return {
+                      pairs: `${token}-${otherToken}`,
+                      ...tokenData
+                    }
+                  })
+              )
+
               const newData = result.map((res: any) => {
                 return {
                   pairs: `${res.universe.name}-USD`,
                   ...res,
                 };
               });
+              
+              setAllTokenPairs(tokenPair as any);
               setTokenPairData(newData as any);
             });
         }
@@ -242,6 +259,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
         pair,
         setPair,
         tokenPairData,
+        allTokenPairs,
         assetId,
         setAssetId,
         activeAssetData: activeAssetData || undefined, // Update the type to include null
