@@ -54,7 +54,7 @@ const TokenPairsInfoTable = ({
   handleClose,
 }: TokenPairsInfoTableProps) => {
   //------Hooks------
-  const { tokenPairData, setAssetId, setSelectPairsTokenData } =
+  const { tokenPairData, allTokenPairs, setAssetId, setSelectPairsTokenData } =
     usePairTokensContext();
 
   //------Local State------
@@ -105,8 +105,10 @@ const TokenPairsInfoTable = ({
     return sortedPairDataArray;
   };
 
+  let merged: any = tokenPairData;
+  merged = merged.concat(allTokenPairs);
   // Filter the data based on the search query
-  const filteredPairDataArray = tokenPairData?.filter((pairData: any) =>
+  const filteredPairDataArray = merged?.filter((pairData: any) =>
     pairData.universe.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

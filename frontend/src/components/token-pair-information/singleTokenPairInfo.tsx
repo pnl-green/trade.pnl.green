@@ -20,14 +20,17 @@ const SingleTokenPairInfo = ({
   tableISOpen,
   toggleTablePairs,
 }: SingleTokenPairInfoProps) => {
-  const { tokenPairData, assetId, selectedPairsTokenData } =
+  const { tokenPairData, allTokenPairs, assetId, selectedPairsTokenData } =
     usePairTokensContext();
 
+  let merged: any = tokenPairData;
+  merged = merged.concat(allTokenPairs);
+
   const pairDataInformation = () => {
-    if (tokenPairData.length > 0) {
-      return tokenPairData[assetId];
-    } else {
+    if (merged.length > 0) {
       return selectedPairsTokenData;
+    } else {
+      return tokenPairData[assetId];
     }
   };
 
