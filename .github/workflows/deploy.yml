@@ -14,7 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build backend
-        working-directory: ./backend
         run: |
 
           echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env    
