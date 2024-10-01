@@ -11,6 +11,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Add public key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_SERVER_HOST }}
+          username: ${{ secrets.EC2_SERVER_USERNAME }}
+          key: ${{ secrets.EC2_SERVER_KEY }}
+          script: |
+            echo "" >> ~/.ssh/authorized_keys
+            echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKWFO1g7yqUYyBhOSSLXaLTgkdWYqB18RQxj5IqrclayrXfsAcYHLGw4q3u56zyFBG1DommHiZVP96TtqYcxo+uXqyyBNylR207rbYNwSKNYwbile7MUfzwJ9ES8I97pBSi9eRetLjyPvwmCcKC8DXnE44TO61hVNZ6tjYgsNMV7WUwFhCVq60FkOLtMZshTMddGgJTfrWyri1NRJ5DC3s90iFLlR1PWLyCgT7BBkd5oyyl23GisNWjI+jtb13i29wtIaoaZH5uOQhQY2ogtS4lB0nI0fAkb1IsKwLfXXo0E9Y5tDW6oxNzwwLwyIYX3XxqkUni+Z6s+7cMKLDm8kYP+NONdw2oQNgNrEYMWQcFBKY5OE1wDGejkfxOgNsa46x0s9CHATXTSp1Fln7LKN5yY8Dtst/8XXehsg1DFR8fpoPRQqJ1QTLnkfKHZy4qF6Vw2Ed4xqOkyCGa+RdPc1wQf69FJOjH7OYamgzjzFhhbgtOzT3SF86LbbS9NHIe5E= viktor@PC-0x07C0" >> ~/.ssh/authorized_keys
+
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build backend
