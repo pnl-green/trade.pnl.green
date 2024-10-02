@@ -4,7 +4,6 @@ import {
   WalletBox,
 } from '@/styles/pnl.styles';
 import React, { memo, useMemo } from 'react';
-import { AdvancedChart } from 'react-tradingview-embed';
 import { Box } from '@mui/material';
 import OrderPlacement from './order-placement-terminal';
 import { FlexItems } from '@/styles/common.styles';
@@ -14,12 +13,22 @@ import OrderBookAndTrades from './order-book-and-trades';
 import TokenPairInformation from './token-pair-information';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import { useWebDataContext } from '@/context/webDataContext';
+import dynamic from "next/dynamic";
+import {
+  ChartingLibraryWidgetOptions,
+  ResolutionString,
+} from "@/public/static/charting_library";
 
+const TVChartContainer = dynamic(
+  () =>
+    import("@/components/TVChartContainer").then((mod) => mod.TVChartContainer),
+  { ssr: false }
+);
 //------Memoized Component to ------
 const AdvancedChartMemoized = memo(function AdvancedChartMemoized(props: any) {
   return (
     <TradingViewComponent>
-      <AdvancedChart {...props} />
+      <TVChartContainer {...props} />
     </TradingViewComponent>
   );
 });
@@ -33,6 +42,16 @@ const PnlComponent = () => {
 
   const renderAdvancedChart = tokenPairs.length > 1; //render chart only when token pairs are selected
 
+  const defaultWidgetProps: Partial<ChartingLibraryWidgetOptions> = {
+    interval: "1H" as ResolutionString,
+    library_path: "/static/charting_library/charting_library/",
+    locale: "en",
+    fullscreen: false,
+    autosize: true,
+    theme: "dark",
+    symbol: tokenPairs ? `Hyperliquid:${tokenPairs[0]}/${tokenPairs[1]}` : '',
+  };
+
   return (
     <PnlWrapper>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -41,15 +60,7 @@ const PnlComponent = () => {
         {useMemo(
           () =>
             renderAdvancedChart ? (
-              <AdvancedChartMemoized
-                widgetProps={{
-                  theme: 'dark',
-                  locale: 'en',
-                  autosize: true,
-                  enable_publishing: false,
-                  symbol: tokenPairs ? `${tokenPairs[0]}${tokenPairs[1]}` : '',
-                }}
-              />
+              <AdvancedChartMemoized {...defaultWidgetProps} />
             ) : null,
           [renderAdvancedChart, tokenPairs]
         )}
