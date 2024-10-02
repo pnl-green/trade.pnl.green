@@ -27,7 +27,6 @@ export const PnlWrapper = styled(Box)(() => ({
 export const TradingViewComponent = styled(Box)(() => ({
   display: 'flex',
   width: 'calc(100vw - 720px)',
-  height: '550px',
   borderRadius: '5px',
   backgroundColor: '#171b26',
   justifyContent: 'center',
@@ -46,6 +45,13 @@ export const TradingViewComponent = styled(Box)(() => ({
 
   div: {
     width: '100%',
+
+    iframe: {
+      borderRadius: '5px',
+      padding: '1px',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      backgroundColor: '#13121296;',
+    }
   },
 
   '@media screen and (min-width: 1535px)': {
