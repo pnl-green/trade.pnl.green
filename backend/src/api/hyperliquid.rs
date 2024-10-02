@@ -17,7 +17,10 @@ use tokio::sync::mpsc::Sender;
 use crate::{
     error::Error::BadRequestError,
     model::{
-        hyperliquid::{Agent, DepthCalculationResponse, Exchange, Info, InternalRequest, Request},
+        hyperliquid::{
+            Agent, DeltaCalculationResponse, DepthCalculationResponse, Exchange, Info,
+            InternalRequest, Request,
+        },
         Response,
     },
     prelude::Result,
@@ -184,6 +187,91 @@ pub async fn hyperliquid(
                     HttpResponse::Ok().json(Response {
                         success: true,
                         data: Some(total),
+                        msg: None,
+                    })
+                }
+                Info::Delta { req } => {
+                    // Fetch the order book
+                    let book = info
+                        .l2_book(req.symbol)
+                        .await
+                        .map_err(|msg| BadRequestError(msg.to_string()))?;
+                    let ask_levels = book
+                        .levels
+                        .first()
+                        .ok_or(BadRequestError("Book doesn't contain ask level".into()))?
+                        .iter()
+                        .filter_map(|l| {
+                            Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?))
+                        })
+                        .collect::<Vec<_>>();
+                    let bid_levels = book
+                        .levels
+                        .get(1)
+                        .ok_or(BadRequestError("Book doesn't contain bid level".into()))?
+                        .iter()
+                        .filter_map(|l| {
+                            Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?))
+                        })
+                        .collect::<Vec<_>>();
+                    // Determine whether to calculate delta over a percentage range or the entire book
+                    let (bid_size, ask_size) = match req.range.as_str() {
+                        "total" => {
+                            // Calculate the total sizes across the entire book
+                            let total_bid_size = bid_levels.iter().map(|&(_, sz)| sz).sum::<f32>();
+                            let total_ask_size = ask_levels.iter().map(|&(_, sz)| sz).sum::<f32>();
+                            (total_bid_size, total_ask_size)
+                        }
+                        _ => {
+                            // Percentage range calculation - reuse the depth calculation logic
+                            let percentage: f32 = req
+                                .range
+                                .trim_end_matches('%')
+                                .parse::<f32>()
+                                .map_err(|_| {
+                                    BadRequestError("Error while parsing range percentage".into())
+                                })?
+                                / 100.;
+                            let best_price_ask = ask_levels
+                                .iter()
+                                .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                                .ok_or(BadRequestError(
+                                    "Ask level doesn't have any items in it".into(),
+                                ))?
+                                .0;
+                            let dest_price_bid = bid_levels
+                                .iter()
+                                .min_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                                .ok_or(BadRequestError(
+                                    "Bid level doesn't have any items in it".into(),
+                                ))?
+                                .0;
+                            let mut ask_size = 0.;
+                            let mut bid_size = 0.;
+                            for (px, sz) in ask_levels {
+                                if best_price_ask * (1. + percentage) > px {
+                                    continue;
+                                }
+                                ask_size += sz;
+                            }
+                            for (px, sz) in bid_levels {
+                                if dest_price_bid * (1. + -percentage) < px {
+                                    continue;
+                                }
+                                bid_size += sz;
+                            }
+                            (bid_size, ask_size)
+                        }
+                    };
+                    // Calculate delta: difference between total bid and ask sizes
+                    let delta = bid_size - ask_size;
+                    let delta = DeltaCalculationResponse {
+                        delta,
+                        timestamp: book.time,
+                    };
+                    HttpResponse::Ok().json(Response {
+                        success: true,
+                        data: Some(delta),
                         msg: None,
                     })
                 }

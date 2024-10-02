@@ -9,6 +9,8 @@
       - [candleSnapshot](#candlesnapshot)
       - [spotMeta](#spotmeta)
       - [pairCandleSnapshot](#paircandlesnapshot)
+      - [depth](#depth)
+      - [delta](#delta)
     - [Exchange `POST /hyperliquid`](#exchange-post-hyperliquid)
       - [order](#order)
       - [createSubAccount](#createsubaccount)
@@ -114,7 +116,7 @@ Example:
 ```json
 {
     "endpoint": "info",
-    "type": "candleSnapshot",
+    "type": "pairCandleSnapshot",
     "req": {
         "coin": "BTC",
         "interval": "1h",
@@ -125,6 +127,46 @@ Example:
 }
 ```
 Returns pair candle snapshot for BTC/ETH.
+
+#### depth
+
+Retrieve depth for an asset
+
+`symbol` - Name of the asset to retrieve depth for
+
+`percentage` - Depth percentage
+
+Example: 
+```json
+{
+    "endpoint": "info",
+    "type": "depth",
+    "req": {
+        "symbol": "BTC",
+        "percentage": 1.23
+    }
+}
+```
+
+#### delta
+
+Retrieve delta value for an asset
+
+`symbol` - Name of the asset to retrieve delta calculations for
+
+`range` - Range in percentage (`"10%"`) or total (`"total"`)
+
+Example: 
+```json
+{
+    "endpoint": "info",
+    "type": "depth",
+    "req": {
+        "symbol": "BTC",
+        "range": "10%"
+    }
+}
+```
 
 ### Exchange `POST /hyperliquid`
 
