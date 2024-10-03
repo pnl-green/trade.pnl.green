@@ -1,4 +1,4 @@
-import { parseFullSymbol } from './helpers.js';
+import { parseFullSymbol } from './helpers';
 
 const socket = new WebSocket(
   'ws://127.0.0.1:8081'
@@ -114,7 +114,7 @@ export function subscribeOnStream(
   }`);
 }
 
-export function unsubscribeFromStream(subscriberUID) {
+export function unsubscribeFromStream(subscriberUID: string) {
   // TODO
   // Find a subscription with id === subscriberUID
   for (const channelString of channelToSubscription.keys()) {

@@ -1,11 +1,11 @@
 import {
   generateSymbol,
   parseFullSymbol,
-} from './helpers.js';
+} from './helpers';
 import {
   subscribeOnStream,
   unsubscribeFromStream,
-} from './streaming.js';
+} from './streaming';
 
 const lastBarsCache = new Map();
 
@@ -111,11 +111,11 @@ export default {
     console.log('[getBars]: Method call', symbolInfo, resolution, from, to);
     const parsedSymbol = parseFullSymbol(symbolInfo.full_name);
     try {
-      var headers = new Headers();
+      let headers = new Headers();
       headers.append("Content-Type", "application/json");
 
 
-      var raw = JSON.stringify({
+      let raw = JSON.stringify({
         "endpoint": "info",
         "type": "pairCandleSnapshot",
         "req": {
@@ -127,7 +127,7 @@ export default {
         "pair_coin": parsedSymbol.toSymbol
       });
 
-      var requestOptions = {
+      let requestOptions = {
         method: 'POST',
         headers: headers,
         body: raw,

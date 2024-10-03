@@ -30,32 +30,48 @@ const configurationData = {
 };
 
 // Obtains all symbols for all exchanges supported by CryptoCompare API
-async function getAllSymbols() {
-  let allSymbols = [{
-    symbol: "BTC/APT",
-    full_name: "Hyperliquid:BTC/APT",
-    description: "BTC/APT",
-    exchange: "Hyperliquid",
-    type: 'crypto',
-  }];
+async function getAllSymbols(allSymbolsCtx: any[]) {
+  let allSymbols = allSymbolsCtx.map( (item: any ) => {
+    let formatted_pair = item.pairs.replaceAll("-", "/");
+    return {
+      symbol: formatted_pair,
+      full_name: `Hyperliquid:${formatted_pair}`,
+      description: formatted_pair,
+      exchange: "Hyperliquid",
+      type: 'crypto'
+    }
+  })
 
+  //   [{ symbol: "BTC/APT",
+  //   full_name: "Hyperliquid:BTC/APT",
+  //   description: "BTC/APT",
+  //   exchange: "Hyperliquid",
+  //   type: 'crypto',
+  // }];
+  console.log(allSymbols)
   return allSymbols;
 }
 
 export default {
+  allSymbolsCtx: [{}],
+
+  setAllSymbolsCtx(newCtx: any[]) {
+    this.allSymbolsCtx = newCtx
+  },
+
   onReady: (callback: any) => {
     console.log('[onReady]: Method call');
     setTimeout(() => callback(configurationData));
   },
 
-  searchSymbols: async (
+  async searchSymbols (
     userInput: any,
     exchange: any,
     symbolType: any,
     onResultReadyCallback: any,
-  ) => {
+  ) {
     console.log('[searchSymbols]: Method call');
-    const symbols = await getAllSymbols();
+    const symbols = await getAllSymbols(this.allSymbolsCtx)
     const newSymbols = symbols.filter(symbol => {
       const isExchangeValid = exchange === '' || symbol.exchange === exchange;
       const isFullSymbolContainsInput = symbol.full_name
@@ -65,15 +81,15 @@ export default {
     });
     onResultReadyCallback(newSymbols);
   },
-
-  resolveSymbol: async (
+  
+  async resolveSymbol (
     symbolName: any,
     onSymbolResolvedCallback: any,
     onResolveErrorCallback: any,
     extension: any
-  ) => {
+  ) {
     console.log('[resolveSymbol]: Method call', symbolName);
-    const symbols = await getAllSymbols();
+    const symbols = await getAllSymbols(this.allSymbolsCtx);
     console.log(symbols, symbolName);
     const symbolItem = symbols.find(({
       full_name,
@@ -117,7 +133,7 @@ export default {
 
       let raw = JSON.stringify({
         "endpoint": "info",
-        "type": "pairCandleSnapshot",
+        "type": parsedSymbol.toSymbol === "USD" ? "candleSnapshot" : "pairCandleSnapshot",
         "req": {
           "coin": parsedSymbol.fromSymbol,
           "interval": "1h",
@@ -133,7 +149,8 @@ export default {
         body: raw,
       };
 
-      let data = await fetch("http://127.0.0.1:5000/hyperliquid", requestOptions)
+      let url = parsedSymbol.toSymbol === "USD" ? "https://api.hyperliquid.xyz/info" : "http://127.0.0.1:5000/hyperliquid" 
+      let data = await fetch(url, requestOptions)
         .then(response => response.json());
       let bars: any[] = [];
       data.data.forEach((bar: any) => {

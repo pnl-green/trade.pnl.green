@@ -1,7 +1,7 @@
 import styles from "./index.module.css";
 import { useEffect, useRef } from "react";
 import { ChartingLibraryWidgetOptions, LanguageCode, ResolutionString, widget } from "@/public/static/charting_library";
-import Datafeed from './datafeed';
+import { UDFCompatibleDatafeed } from "@/public/static/datafeeds/udf/types";
 
 export const TVChartContainer = (props: Partial<ChartingLibraryWidgetOptions>) => {
 	const chartContainerRef =
@@ -10,7 +10,7 @@ export const TVChartContainer = (props: Partial<ChartingLibraryWidgetOptions>) =
 	useEffect(() => {
 		const widgetOptions: ChartingLibraryWidgetOptions = {
 			symbol: props.symbol,
-			datafeed: Datafeed,
+			datafeed: props.datafeed as UDFCompatibleDatafeed,
 			interval: props.interval as ResolutionString,
 			container: chartContainerRef.current,
 			library_path: props.library_path,

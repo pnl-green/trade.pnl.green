@@ -1,9 +1,10 @@
 // Datafeed implementation
-import Datafeed from './datafeed.js';
+import Datafeed from './datafeed';
+import TradingView from '../charting_library'
 
 window.tvWidget = new TradingView.widget({
   symbol: 'Hyperliquid:BTC/ETH',
-  interval: '1H',
+  interval: "1H",
   fullscreen: true,
   container: 'tv_chart_container',
   datafeed: Datafeed,
