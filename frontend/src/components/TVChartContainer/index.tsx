@@ -1,6 +1,6 @@
 import styles from "./index.module.css";
 import { useEffect, useRef } from "react";
-import { ChartingLibraryWidgetOptions, LanguageCode, ResolutionString, widget } from "@/public/static/charting_library";
+import { ChartingLibraryWidgetOptions, LanguageCode, ResolutionString, widget } from "@/public/static/charting_library/charting_library";
 import { UDFCompatibleDatafeed } from "@/public/static/datafeeds/udf/types";
 
 export const TVChartContainer = (props: Partial<ChartingLibraryWidgetOptions>) => {

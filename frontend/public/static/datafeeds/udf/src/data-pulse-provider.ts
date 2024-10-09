@@ -1,4 +1,4 @@
-import { LibrarySymbolInfo, ResolutionString, SubscribeBarsCallback } from '../../../charting_library/datafeed-api';
+import { LibrarySymbolInfo, ResolutionString, SubscribeBarsCallback } from '../../../charting_library/charting_library/datafeed-api';
 
 import {
 	getErrorMessage,
