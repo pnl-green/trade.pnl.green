@@ -1,7 +1,7 @@
 import { parseFullSymbol } from './helpers';
 
 const socket = new WebSocket(
-  'ws://127.0.0.1:8081'
+  'wss://api.pnl.green/ws/'
 );
 const channelToSubscription = new Map();
 
