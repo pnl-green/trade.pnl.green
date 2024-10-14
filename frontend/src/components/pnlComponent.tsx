@@ -198,7 +198,7 @@ const PnlComponent = () => {
           body: raw,
         };
 
-        let url = parsedSymbol.toSymbol === "USD" ? "https://api.hyperliquid.xyz/info" : "http://127.0.0.1:5000/hyperliquid" 
+        let url = parsedSymbol.toSymbol === "USD" ? "https://api.hyperliquid.xyz/info" : "https://api.pnl.green/hyperliquid" 
         let data = await fetch(url, requestOptions)
           .then(response => response.json());
         let bars: any[] = [];
