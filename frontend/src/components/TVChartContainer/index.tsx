@@ -23,7 +23,7 @@ export const TVChartContainer = (props: Partial<ChartingLibraryWidgetOptions>) =
 			user_id: props.user_id,
 			fullscreen: props.fullscreen,
       autosize: props.autosize,
-      theme: props.theme
+      theme: props.theme,
 		};
 
 		const tvWidget = new widget(widgetOptions);

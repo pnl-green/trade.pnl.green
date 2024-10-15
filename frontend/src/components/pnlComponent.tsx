@@ -139,7 +139,6 @@ const PnlComponent = () => {
     ) => {
       console.log('[resolveSymbol]: Method call', symbolName);
       const symbols = getAllSymbols();
-      console.log(symbols, symbolName);
       const symbolItem = symbols.find(({
         full_name,
       }: { full_name: any }) => full_name === symbolName);
@@ -206,11 +205,11 @@ const PnlComponent = () => {
         response.forEach((bar: any) => {
           if (bar.t >= from * 1000 && bar.T < to * 1000) {
             bars = [...bars, {
-              time: bar.t,
-              low: bar.l,
-              high: bar.h,
-              open: bar.o,
-              close: bar.c,
+              time: Number(bar.t),
+              low: Number(bar.l),
+              high: Number(bar.h),
+              open: Number(bar.o),
+              close: Number(bar.c),
             }];
           }
         });
@@ -219,10 +218,13 @@ const PnlComponent = () => {
             ...bars[bars.length - 1],
           });
         }
-        console.log(`[getBars]: returned ${bars.length} bar(s)`);
-        onHistoryCallback(bars, {
-          noData: false,
-        });
+
+        if (bars.length > 0) {
+          onHistoryCallback(bars, { noData: false });
+        }
+        else {
+          onHistoryCallback([], { noData: true });
+        }      
       } catch (error) {
         console.log('[getBars]: Get error', error);
         onErrorCallback(error);
