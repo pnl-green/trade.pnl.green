@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TabsButtons } from '@/styles/common.styles';
+import { BlurContainer, ComingSoonText, TabsButtons } from '@/styles/common.styles';
 import {
   OrderBookContainer,
   OrderBookTabsWrapper,
@@ -19,6 +19,10 @@ const OrderBookAndTrades = () => {
 
   return (
     <OrderBookContainer>
+      <BlurContainer />
+      <ComingSoonText>
+        Coming Soon...
+      </ComingSoonText>
       <OrderBookTabsWrapper>
         {['Order Book', 'Trades'].map((label) => (
           <TabsButtons

@@ -114,3 +114,23 @@ export const TabsButtons = styled(Button)(() => ({
     backgroundColor: '#049260',
   },
 }));
+
+export const BlurContainer = styled('div')(() => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: '-5px',
+  bottom: 0,
+  backdropFilter: 'blur(3px)',
+  zIndex: 4
+}))
+
+export const ComingSoonText = styled('div')(() => ({
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  color: '#fff',
+  fontSize: '1.5rem',
+  zIndex: 5
+}))
