@@ -12,19 +12,21 @@ use hyperliquid::{
     types::{exchange::response, Chain, API},
     Hyperliquid,
 };
-use tokio::sync::mpsc::Sender;
+use tokio::sync::{mpsc::Sender, Mutex};
 
 use crate::{
     error::Error::BadRequestError,
     model::{
         hyperliquid::{
-            Agent, DeltaCalculationResponse, DepthCalculationResponse, Exchange, Info,
-            InternalRequest, Request,
+            Agent, ChannelConnection, Condition, DeltaCalculationResponse,
+            DepthCalculationResponse, Exchange, Info, InternalRequest, QueueElem, Request,
+            CONNECTIONS,
         },
         Response,
     },
     prelude::Result,
     service::hyperliquid::{info, pair::pair_candle},
+    ws::hyperliquid::BookPrice,
 };
 
 pub async fn hyperliquid(
@@ -32,6 +34,7 @@ pub async fn hyperliquid(
     req: web::Json<Request>,
     session: Session,
     sender: web::Data<Sender<InternalRequest>>,
+    queue: web::Data<Mutex<Vec<QueueElem>>>,
 ) -> Result<impl Responder> {
     let req = req.into_inner();
     let chain = **chain;
@@ -277,6 +280,7 @@ pub async fn hyperliquid(
                 }
             }
         }
+
         Request::Exchange(req) => {
             let agent = session
                 .get::<Agent>("agent")
@@ -315,6 +319,7 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
+
                 Exchange::CreateSubAccount { action } => {
                     let data = exchange
                         .create_sub_account(agent, action.name)
@@ -376,6 +381,70 @@ pub async fn hyperliquid(
                             msg: Some(msg),
                         }),
                     }
+                }
+
+                Exchange::CondOrder {
+                    action,
+                    condition,
+                    source,
+                    vault_address,
+                } => {
+                    queue.lock().await.push(QueueElem {
+                        source,
+                        agent,
+                        action,
+                        condition: condition.clone(),
+                        vault_address,
+                    });
+
+                    match condition {
+                        Condition::PairPrice {
+                            is_less: _,
+                            price: _,
+                            left_symbol,
+                            right_symbol,
+                        } => {
+                            let mut connections = CONNECTIONS.lock().await;
+
+                            if let Some(connection) = connections.get_mut(&left_symbol) {
+                                connection.count += 1;
+                            } else {
+                                let (receiver, stop_sender) =
+                                    BookPrice::add_to_handler(&left_symbol).await?;
+
+                                connections.insert(
+                                    left_symbol.clone(),
+                                    ChannelConnection {
+                                        count: 1,
+                                        receiver,
+                                        stop_sender,
+                                    },
+                                );
+                            }
+
+                            if let Some(connection) = connections.get_mut(&right_symbol) {
+                                connection.count += 1;
+                            } else {
+                                let (receiver, stop_sender) =
+                                    BookPrice::add_to_handler(&right_symbol).await?;
+
+                                connections.insert(
+                                    right_symbol.clone(),
+                                    ChannelConnection {
+                                        count: 1,
+                                        receiver,
+                                        stop_sender,
+                                    },
+                                );
+                            }
+                        }
+                    }
+
+                    HttpResponse::Ok().json(Response::<()> {
+                        success: true,
+                        data: None,
+                        msg: None,
+                    })
                 }
                 Exchange::UpdateLeverage { action } => {
                     let data = exchange

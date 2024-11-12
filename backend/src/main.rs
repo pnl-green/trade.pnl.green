@@ -9,7 +9,11 @@ use actix_web::{
     web, App, HttpServer,
 };
 use anyhow::Context;
-use backend::{api, log, model::hyperliquid::InternalRequest, ws, Config};
+use backend::{
+    api, log,
+    model::hyperliquid::{InternalRequest, QueueElem},
+    ws, Config,
+};
 
 use hyperliquid::{
     types::{
@@ -23,7 +27,9 @@ use hyperliquid::{
     utils::{parse_price, parse_size},
     Exchange, Hyperliquid, Info,
 };
+
 use tokio::sync::mpsc;
+use tokio::sync::Mutex;
 use tracing_actix_web::TracingLogger;
 
 const SLIPPAGE: f64 = 0.03;
@@ -177,6 +183,27 @@ async fn main() -> anyhow::Result<()> {
         }
     });
 
+    let queue: Mutex<Vec<QueueElem>> = Mutex::new(vec![]);
+    let queue = web::Data::new(queue);
+    let queue_2 = queue.clone();
+
+    tokio::spawn(async move {
+        let exchange: Exchange = Hyperliquid::new(chain);
+        let mut queue_m = queue_2.lock().await;
+
+        loop {
+            let mut i = 0;
+            while i < queue_m.len() {
+                if queue_m[i].check().await.unwrap() {
+                    let elem = queue_m.remove(i);
+                    elem.execute(&exchange).await;
+                } else {
+                    i += 1;
+                }
+            }
+        }
+    });
+
     // Global
     let chain = web::Data::new(chain);
     let sender = web::Data::new(tx);
@@ -206,6 +233,7 @@ async fn main() -> anyhow::Result<()> {
             .default_service(web::to(api::not_found))
             .app_data(chain.clone())
             .app_data(sender.clone())
+            .app_data(queue.clone())
     })
     .listen(listener)?
     .run()

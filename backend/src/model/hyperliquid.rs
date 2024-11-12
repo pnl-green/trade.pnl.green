@@ -1,14 +1,23 @@
-use std::sync::Arc;
-
 use ethers::{
     signers::LocalWallet,
     types::{Address, Signature, U256},
 };
+use std::{collections::HashMap, sync::Arc};
+use tokio::sync::mpsc;
+
 use hyperliquid::types::{
     exchange::request::{CancelRequest, OrderRequest},
     info::request::CandleSnapshotRequest,
 };
 use serde::{Deserialize, Serialize};
+use tokio::sync::Mutex;
+
+use anyhow::anyhow;
+use lazy_static::lazy_static;
+lazy_static! {
+    pub static ref CONNECTIONS: Arc<Mutex<HashMap<String, ChannelConnection>>> =
+        Arc::new(Mutex::new(HashMap::new()));
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,13 +30,28 @@ pub struct Agent {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "type")]
 pub enum Info {
-    SubAccounts { user: Address },
-    HistoricalOrders { user: Address },
-    UserFees { user: Address },
-    CandleSnapshot { req: CandleSnapshotRequest },
-    PairCandleSnapshot { req: CandleSnapshotRequest, pair_coin: String },
-    Depth { req: DepthCalculationRequest },
-    Delta { req: DeltaCalculationRequest },
+    SubAccounts {
+        user: Address,
+    },
+    HistoricalOrders {
+        user: Address,
+    },
+    UserFees {
+        user: Address,
+    },
+    CandleSnapshot {
+        req: CandleSnapshotRequest,
+    },
+    PairCandleSnapshot {
+        req: CandleSnapshotRequest,
+        pair_coin: String,
+    },
+    Depth {
+        req: DepthCalculationRequest,
+    },
+    Delta {
+        req: DeltaCalculationRequest,
+    },
     SpotMeta,
 }
 
@@ -197,6 +221,154 @@ pub enum Exchange {
         action: Twap,
         vault_address: Option<Address>,
     },
+
+    #[serde(rename_all = "camelCase")]
+    CondOrder {
+        action: CondAction,
+        condition: Condition,
+        source: Source,
+        vault_address: Option<Address>,
+    },
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum CondAction {
+    HLOrder(Order),
+}
+
+pub struct QueueElem {
+    pub source: Source,
+    pub agent: Arc<LocalWallet>,
+    pub action: CondAction,
+    pub condition: Condition,
+    pub vault_address: Option<Address>,
+}
+
+impl QueueElem {
+    pub async fn check(&self) -> anyhow::Result<bool> {
+        match &self.condition {
+            Condition::PairPrice {
+                is_less,
+                price,
+                left_symbol,
+                right_symbol,
+            } => {
+                let mut connection = CONNECTIONS.lock().await;
+                let left_receiver = connection
+                    .get_mut(left_symbol)
+                    .ok_or(anyhow!("There are no connections for coin"))?;
+
+                let book = left_receiver
+                    .receiver
+                    .recv()
+                    .await
+                    .ok_or(anyhow!("Receiver doesn't contain any books"))?;
+                let ask_levels = book
+                    .levels
+                    .first()
+                    .ok_or(anyhow!("Book doesn't contain ask level"))?
+                    .iter()
+                    .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+                    .collect::<Vec<_>>();
+                let left_price = ask_levels
+                    .iter()
+                    .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                    .ok_or(anyhow!("Ask level doesn't have any items in it"))?
+                    .0;
+
+                let right_receiver = connection
+                    .get_mut(right_symbol)
+                    .ok_or(anyhow!("There are no connections for coin"))?;
+
+                let book = right_receiver
+                    .receiver
+                    .recv()
+                    .await
+                    .ok_or(anyhow!("Receiver doesn't contain any books"))?;
+                let bid_levels = book
+                    .levels
+                    .get(1)
+                    .ok_or(anyhow!("Book doesn't contain bid level"))?
+                    .iter()
+                    .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+                    .collect::<Vec<_>>();
+                let right_price = bid_levels
+                    .iter()
+                    .min_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                    .ok_or(anyhow!("Bid level doesn't have any items in it"))?
+                    .0;
+
+                if *is_less && left_price / right_price < *price
+                    || !*is_less && left_price / right_price > *price
+                {
+                    return Ok(true);
+                }
+            }
+            _ => return Err(anyhow!("There is no such Condition")),
+        }
+
+        Ok(false)
+    }
+
+    pub async fn execute(self, exchange: &hyperliquid::Exchange) {
+        match self.action {
+            CondAction::HLOrder(order) => {
+                let result = exchange
+                    .place_order(self.agent.clone(), order.orders, self.vault_address)
+                    .await;
+
+                if let Err(err) = result {
+                    tracing::error!("Failed to place order: {}", err);
+                }
+
+                match self.condition {
+                    Condition::PairPrice {
+                        is_less: _,
+                        price: _,
+                        left_symbol,
+                        right_symbol,
+                    } => {
+                        let mut connection = CONNECTIONS.lock().await;
+                        let left_connection = connection.get_mut(&left_symbol).unwrap();
+                        left_connection.count -= 1;
+                        if left_connection.count == 0 {
+                            left_connection.stop_sender.send(()).await;
+                        }
+                        let right_connection = connection.get_mut(&right_symbol).unwrap();
+                        right_connection.count -= 1;
+                        if right_connection.count == 0 {
+                            right_connection.stop_sender.send(()).await;
+                        }
+                    }
+                }
+            }
+            _ => tracing::error!("There is no such action!"),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Source {
+    Hyperliquid,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub enum Condition {
+    PairPrice {
+        is_less: bool,
+        price: f32,
+        left_symbol: String,
+        right_symbol: String,
+    },
+}
+
+pub struct ChannelConnection {
+    pub receiver: mpsc::Receiver<L2Book>,
+    pub stop_sender: mpsc::Sender<()>,
+    pub count: usize,
 }
 
 #[derive(Debug)]
@@ -220,6 +392,7 @@ pub enum Request {
 pub enum WSMethod {
     Ping,
     Subscribe(Subscription),
+    Unsubscribe(Subscription),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -233,10 +406,11 @@ impl Subscription {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum Subscribe {
     Candle { coin: String, interval: String },
+    L2Book { coin: String },
 }
 
 #[derive(Debug, Deserialize)]
@@ -244,6 +418,22 @@ pub enum Subscribe {
 pub enum WSResponse {
     SubscriptionResponse(Subscription),
     Candle(Candle),
+    L2Book(L2Book),
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Level {
+    pub px: String,
+    pub sz: String,
+    pub n: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct L2Book {
+    pub coin: String,
+    pub levels: Vec<Vec<Level>>,
+    pub time: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
