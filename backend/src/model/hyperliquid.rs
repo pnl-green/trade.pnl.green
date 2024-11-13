@@ -353,9 +353,10 @@ impl QueueElem {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub enum Source {
+    #[default]
     Hyperliquid,
 }
 
