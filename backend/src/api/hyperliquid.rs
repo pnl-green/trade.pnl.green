@@ -12,7 +12,7 @@ use hyperliquid::{
     types::{exchange::response, Chain, API},
     Hyperliquid,
 };
-use tokio::sync::{mpsc::Sender, Mutex};
+use tokio::sync::{mpsc::Sender, RwLock};
 
 use crate::{
     error::Error::BadRequestError,
@@ -34,7 +34,7 @@ pub async fn hyperliquid(
     req: web::Json<Request>,
     session: Session,
     sender: web::Data<Sender<InternalRequest>>,
-    queue: web::Data<Mutex<Vec<QueueElem>>>,
+    queue: web::Data<RwLock<Vec<QueueElem>>>,
 ) -> Result<impl Responder> {
     let req = req.into_inner();
     let chain = **chain;
@@ -389,7 +389,7 @@ pub async fn hyperliquid(
                     source,
                     vault_address,
                 } => {
-                    queue.lock().await.push(QueueElem {
+                    queue.write().await.push(QueueElem {
                         source,
                         agent,
                         action,

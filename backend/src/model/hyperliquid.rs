@@ -251,59 +251,61 @@ pub trait Check {
     async fn check(&self) -> anyhow::Result<bool>;
 }
 
+impl PairPrice {
+    async fn get_price_from_book(&self, symbol: &str, level_index: usize) -> anyhow::Result<f32> {
+        let connection = CONNECTIONS.lock().await;
+        let receiver = connection
+            .get(symbol)
+            .ok_or_else(|| anyhow!("There are no connections for symbol {}", symbol))?;
+
+        let ref_book = receiver.receiver.borrow();
+        let ws_response = ref_book
+            .as_ref()
+            .ok_or_else(|| anyhow!("Receiver doesn't contain WSResponse"))?;
+
+        if let WSResponse::L2Book(book) = ws_response {
+            let levels = book
+                .levels
+                .get(level_index)
+                .ok_or_else(|| anyhow!("Book doesn't contain level {}", level_index))?
+                .iter()
+                .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+                .collect::<Vec<_>>();
+
+            let price = if level_index == 0 {
+                levels
+                    .iter()
+                    .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                    .ok_or_else(|| anyhow!("Level doesn't have any items"))?
+                    .0
+            } else {
+                levels
+                    .iter()
+                    .min_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                    .ok_or_else(|| anyhow!("Level doesn't have any items"))?
+                    .0
+            };
+
+            Ok(price)
+        } else {
+            Err(anyhow!("Book is not L2Book"))
+        }
+    }
+}
+
 #[async_trait]
 impl Check for PairPrice {
     async fn check(&self) -> anyhow::Result<bool> {
-        let connection = CONNECTIONS.lock().await;
-        let left_receiver = connection
-            .get(&self.left_symbol)
-            .ok_or(anyhow!("There are no connections for coin"))?;
+        let left_price = self.get_price_from_book(&self.left_symbol, 0).await?;
+        let right_price = self.get_price_from_book(&self.right_symbol, 1).await?;
 
-        let ref_book = left_receiver.receiver.borrow();
-        let book = ref_book
-            .as_ref()
-            .ok_or(anyhow!("Receiver doesn't contain L2Book"))?;
+        let comparison_result = if self.is_less {
+            left_price / right_price < self.price
+        } else {
+            left_price / right_price > self.price
+        };
 
-        let ask_levels = book
-            .levels
-            .first()
-            .ok_or(anyhow!("Book doesn't contain ask level"))?
-            .iter()
-            .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
-            .collect::<Vec<_>>();
-        let left_price = ask_levels
-            .iter()
-            .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
-            .ok_or(anyhow!("Ask level doesn't have any items in it"))?
-            .0;
-
-        let right_receiver = connection
-            .get(&self.right_symbol)
-            .ok_or(anyhow!("There are no connections for coin"))?;
-
-        let ref_book = right_receiver.receiver.borrow();
-        let book = ref_book
-            .as_ref()
-            .ok_or(anyhow!("Receiver doesn't contain L2Book"))?;
-        let bid_levels = book
-            .levels
-            .get(1)
-            .ok_or(anyhow!("Book doesn't contain bid level"))?
-            .iter()
-            .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
-            .collect::<Vec<_>>();
-        let right_price = bid_levels
-            .iter()
-            .min_by(|l1, l2| l1.0.total_cmp(&l2.0))
-            .ok_or(anyhow!("Bid level doesn't have any items in it"))?
-            .0;
-
-        if self.is_less && left_price / right_price < self.price
-            || !self.is_less && left_price / right_price > self.price
-        {
-            return Ok(true);
-        }
-        Ok(false)
+        Ok(comparison_result)
     }
 }
 
@@ -372,7 +374,7 @@ pub struct PairPrice {
 }
 
 pub struct ChannelConnection {
-    pub receiver: watch::Receiver<Option<L2Book>>,
+    pub receiver: watch::Receiver<Option<WSResponse>>,
     pub stop_sender: oneshot::Sender<()>,
     pub count: usize,
 }

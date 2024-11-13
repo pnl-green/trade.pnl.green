@@ -49,7 +49,7 @@ pub async fn handler(stream: TcpStream) -> Result<()> {
             } => {
                 pairs_candle_handler(&mut stream, &symbol_left, &symbol_right).await?;
             }
-            WSRequest::Price { symbol } => {}
+            WSRequest::Price { symbol: _ } => {}
         }
     }
 

@@ -3,14 +3,14 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use futures_util::{SinkExt, StreamExt};
-use tokio::net::TcpStream;
 use tokio::sync::mpsc;
 use tokio::sync::oneshot;
 use tokio::sync::watch;
 
-use crate::model::hyperliquid::{L2Book, Subscribe, Subscription, WSMethod, WSResponse};
+use crate::model::hyperliquid::{Subscribe, Subscription, WSMethod, WSResponse};
 use crate::prelude::Result;
 use lazy_static::lazy_static;
+use tokio::net::TcpStream;
 use tokio::sync::Mutex;
 use tokio_tungstenite::tungstenite::Message;
 use tokio_tungstenite::MaybeTlsStream;
@@ -25,17 +25,17 @@ pub type StreamSender = mpsc::Sender<(
     Subscription,
     ResponsePattern,
     oneshot::Receiver<()>,
-    watch::Sender<Option<L2Book>>,
+    watch::Sender<Option<WSResponse>>,
 )>;
 
 pub type StreamReceiver = mpsc::Receiver<(
     Subscription,
     ResponsePattern,
     oneshot::Receiver<()>,
-    watch::Sender<Option<L2Book>>,
+    watch::Sender<Option<WSResponse>>,
 )>;
 pub struct WSSubscriptions {
-    pub stream: WebSocketStream<MaybeTlsStream<TcpStream>>,
+    pub stream: Arc<Mutex<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
     pub subscriptions_count: u16,
     pub sender: StreamSender,
 }
@@ -57,18 +57,20 @@ pub async fn find_free_websocket() -> Result<usize> {
         Subscription,
         ResponsePattern,
         oneshot::Receiver<()>,
-        watch::Sender<Option<L2Book>>,
+        watch::Sender<Option<WSResponse>>,
     )>(1);
 
     let new_key = wsm.len() + 1;
     wsm.insert(
         new_key,
         WSSubscriptions {
-            stream,
+            stream: Arc::new(Mutex::new(stream)),
             subscriptions_count: 1,
             sender: stream_sender,
         },
     );
+
+    drop(wsm);
 
     tokio::spawn(async move {
         if let Err(err) = stream_recv(new_key, stream_reciver).await {
@@ -80,13 +82,17 @@ pub async fn find_free_websocket() -> Result<usize> {
 }
 
 async fn stream_recv(new_key: usize, mut recv_subs: StreamReceiver) -> Result<()> {
-    let mut subscription_map: HashMap<ResponsePattern, watch::Sender<Option<L2Book>>> =
+    let mut subscription_map: HashMap<ResponsePattern, watch::Sender<Option<WSResponse>>> =
         HashMap::new();
     let mut unsubscription_list: Vec<(oneshot::Receiver<()>, WSMethod)> = Vec::new();
 
-    let mut wsm = WSMAP.lock().await;
-    let ws_stream = wsm.get_mut(&new_key).unwrap();
-    while let Some(msg) = ws_stream.stream.next().await {
+    let wsm = WSMAP.lock().await;
+    let ws_subscription = wsm.get(&new_key).unwrap();
+    let ws_stream = ws_subscription.stream.clone();
+
+    drop(wsm);
+
+    while let Some(msg) = ws_stream.lock().await.next().await {
         let Ok(msg) = msg else {
             warn!("Failed to extract message from the stream");
             continue;
@@ -110,7 +116,8 @@ async fn stream_recv(new_key: usize, mut recv_subs: StreamReceiver) -> Result<()
             let payload = serde_json::to_string(&method)
                 .context("Failed to serialize subscription payload")?;
             ws_stream
-                .stream
+                .lock()
+                .await
                 .send(Message::Text(payload))
                 .await
                 .context("Failed to subscribe to desired coin price")?;
@@ -119,11 +126,9 @@ async fn stream_recv(new_key: usize, mut recv_subs: StreamReceiver) -> Result<()
             unsubscription_list.push((stop_reciver, WSMethod::Unsubscribe(sub)));
         }
         if let Some(sender) = subscription_map.get(&msg_resp_patrn) {
-            if let WSResponse::L2Book(l2_book) = msg {
-                sender
-                    .send(Some(l2_book))
-                    .context("Failed sending price to the receiver")?;
-            }
+            sender
+                .send(Some(msg))
+                .context("Failed sending price to the receiver")?;
         }
 
         for (stop_reciver, method) in unsubscription_list.iter_mut() {
@@ -131,10 +136,14 @@ async fn stream_recv(new_key: usize, mut recv_subs: StreamReceiver) -> Result<()
                 let payload = serde_json::to_string(&method)
                     .context("Failed to serialize unsubscription payload")?;
                 ws_stream
-                    .stream
+                    .lock()
+                    .await
                     .send(Message::Text(payload))
                     .await
                     .context("Failed to unsubscribe to desired coin price")?;
+
+                let mut wsm = WSMAP.lock().await;
+                let ws_stream = wsm.get_mut(&new_key).unwrap();
                 ws_stream.subscriptions_count -= 1;
             }
         }
@@ -169,8 +178,8 @@ pub struct BookPrice;
 impl BookPrice {
     pub async fn init(
         symbol: &str,
-    ) -> anyhow::Result<(watch::Receiver<Option<L2Book>>, oneshot::Sender<()>)> {
-        let (sender, receiver) = tokio::sync::watch::channel::<Option<L2Book>>(None);
+    ) -> anyhow::Result<(watch::Receiver<Option<WSResponse>>, oneshot::Sender<()>)> {
+        let (sender, receiver) = tokio::sync::watch::channel::<Option<WSResponse>>(None);
         let (stop_sender, stop_reciver) = tokio::sync::oneshot::channel::<()>();
 
         let topic = Subscribe::L2Book {

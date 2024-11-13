@@ -28,8 +28,7 @@ use hyperliquid::{
     Exchange, Hyperliquid, Info,
 };
 
-use tokio::sync::mpsc;
-use tokio::sync::Mutex;
+use tokio::sync::{mpsc, RwLock};
 use tracing_actix_web::TracingLogger;
 
 const SLIPPAGE: f64 = 0.03;
@@ -183,22 +182,34 @@ async fn main() -> anyhow::Result<()> {
         }
     });
 
-    let queue: Mutex<Vec<QueueElem>> = Mutex::new(vec![]);
+    let queue: RwLock<Vec<QueueElem>> = RwLock::new(vec![]);
     let queue = web::Data::new(queue);
     let queue_2 = queue.clone();
 
     tokio::spawn(async move {
         let exchange: Exchange = Hyperliquid::new(chain);
-        let mut queue_m = queue_2.lock().await;
 
         loop {
-            let mut i = 0;
-            while i < queue_m.len() {
-                if queue_m[i].check().await.unwrap() {
-                    let elem = queue_m.remove(i);
+            let queue_r = queue_2.read().await;
+
+            let mut indices_to_remove = Vec::new();
+
+            for (i, elem) in queue_r.iter().enumerate() {
+                if elem.check().await.unwrap() {
+                    indices_to_remove.push(i);
+                }
+            }
+
+            drop(queue_r);
+
+            if !indices_to_remove.is_empty() {
+                let mut queue_w = queue_2.write().await;
+
+                for &i in indices_to_remove.iter().rev() {
+                    let elem = queue_w.remove(i);
+                    drop(queue_w);
                     elem.execute(&exchange).await;
-                } else {
-                    i += 1;
+                    queue_w = queue_2.write().await;
                 }
             }
         }
