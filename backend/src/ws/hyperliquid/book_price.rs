@@ -69,7 +69,7 @@ pub async fn find_free_websocket() -> Result<usize> {
             sender: stream_sender,
         },
     );
-
+    error!("2!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     drop(wsm);
 
     tokio::spawn(async move {
@@ -85,14 +85,16 @@ async fn stream_recv(new_key: usize, mut recv_subs: StreamReceiver) -> Result<()
     let mut subscription_map: HashMap<ResponsePattern, watch::Sender<Option<WSResponse>>> =
         HashMap::new();
     let mut unsubscription_list: Vec<(oneshot::Receiver<()>, WSMethod)> = Vec::new();
-
+    error!("4.5!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     let wsm = WSMAP.lock().await;
+    error!("4.6!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     let ws_subscription = wsm.get(&new_key).unwrap();
+    error!("4.7!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     let ws_stream = ws_subscription.stream.clone();
-
+    error!("4!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     drop(wsm);
-
-    while let Some(msg) = ws_stream.lock().await.next().await {
+    let mut ws_stream_lock = ws_stream.lock().await;
+    while let Some(msg) = ws_stream_lock.next().await {
         let Ok(msg) = msg else {
             warn!("Failed to extract message from the stream");
             continue;
@@ -115,9 +117,7 @@ async fn stream_recv(new_key: usize, mut recv_subs: StreamReceiver) -> Result<()
             let method = WSMethod::Subscribe(sub.clone());
             let payload = serde_json::to_string(&method)
                 .context("Failed to serialize subscription payload")?;
-            ws_stream
-                .lock()
-                .await
+            ws_stream_lock
                 .send(Message::Text(payload))
                 .await
                 .context("Failed to subscribe to desired coin price")?;
@@ -135,9 +135,7 @@ async fn stream_recv(new_key: usize, mut recv_subs: StreamReceiver) -> Result<()
             if stop_reciver.try_recv().is_ok() {
                 let payload = serde_json::to_string(&method)
                     .context("Failed to serialize unsubscription payload")?;
-                ws_stream
-                    .lock()
-                    .await
+                ws_stream_lock
                     .send(Message::Text(payload))
                     .await
                     .context("Failed to unsubscribe to desired coin price")?;
@@ -188,9 +186,11 @@ impl BookPrice {
         let subscription = Subscription::new(topic.clone());
 
         let response = ResponsePattern::L2Book(symbol.to_string());
-
+        error!("3!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         let ws_key = find_free_websocket().await?;
+        error!("5!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         let mut wsm = WSMAP.lock().await;
+        error!("6!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         let ws_stream = wsm.get_mut(&ws_key).unwrap();
         ws_stream
             .sender

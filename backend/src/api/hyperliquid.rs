@@ -6,6 +6,7 @@ use anyhow::Context;
 use ethers::{
     core::rand,
     signers::{LocalWallet, Signer},
+    types::H160,
     utils::hex::ToHex,
 };
 use hyperliquid::{
@@ -13,6 +14,7 @@ use hyperliquid::{
     Hyperliquid,
 };
 use tokio::sync::{mpsc::Sender, RwLock};
+use tracing::error;
 
 use crate::{
     error::Error::BadRequestError,
@@ -282,18 +284,21 @@ pub async fn hyperliquid(
         }
 
         Request::Exchange(req) => {
-            let agent = session
-                .get::<Agent>("agent")
-                .context("Failed to get agent")?
-                .ok_or_else(|| BadRequestError("Establish a connection first".to_string()))?;
+            let mut rng = rand::thread_rng();
+            let agent = Arc::new(LocalWallet::new(&mut rng));
+            error!("Error creating");
+            /* let agent = session
+                           .get::<Agent>("agent")
+                           .context("Failed to get agent")?
+                           .ok_or_else(|| BadRequestError("Establish a connection first".to_string()))?;
 
-            let agent: Arc<LocalWallet> = Arc::new(
-                agent
-                    .private_key
-                    .parse()
-                    .context("Failed to parse agent wallet")?,
-            );
-
+                       let agent: Arc<LocalWallet> = Arc::new(
+                           agent
+                               .private_key
+                               .parse()
+                               .context("Failed to parse agent wallet")?,
+                       );
+            */
             let exchange: hyperliquid::Exchange = Hyperliquid::new(chain);
 
             match req {
@@ -389,17 +394,10 @@ pub async fn hyperliquid(
                     source,
                     vault_address,
                 } => {
-                    queue.write().await.push(QueueElem {
-                        source,
-                        agent,
-                        action,
-                        condition: condition.clone(),
-                        vault_address,
-                    });
-
-                    match condition {
+                    match &condition {
                         Condition::PairPrice(pair_price) => {
                             let mut connections = CONNECTIONS.lock().await;
+                            error!("1!!!!!!!!!!!!!!");
 
                             if let Some(connection) = connections.get_mut(&pair_price.left_symbol) {
                                 connection.count += 1;
@@ -435,6 +433,13 @@ pub async fn hyperliquid(
                             }
                         }
                     }
+                    queue.write().await.push(QueueElem {
+                        source,
+                        agent,
+                        action,
+                        condition,
+                        vault_address,
+                    });
 
                     HttpResponse::Ok().json(Response::<()> {
                         success: true,
