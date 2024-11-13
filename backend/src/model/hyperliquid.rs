@@ -3,17 +3,18 @@ use ethers::{
     types::{Address, Signature, U256},
 };
 use std::{collections::HashMap, sync::Arc};
-use tokio::sync::mpsc;
+use tokio::sync::oneshot;
+use tokio::sync::watch;
 
+use anyhow::anyhow;
+use async_trait::async_trait;
 use hyperliquid::types::{
     exchange::request::{CancelRequest, OrderRequest},
     info::request::CandleSnapshotRequest,
 };
+use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
-
-use anyhow::anyhow;
-use lazy_static::lazy_static;
 lazy_static! {
     pub static ref CONNECTIONS: Arc<Mutex<HashMap<String, ChannelConnection>>> =
         Arc::new(Mutex::new(HashMap::new()));
@@ -245,70 +246,73 @@ pub struct QueueElem {
     pub vault_address: Option<Address>,
 }
 
+#[async_trait]
+pub trait Check {
+    async fn check(&self) -> anyhow::Result<bool>;
+}
+
+#[async_trait]
+impl Check for PairPrice {
+    async fn check(&self) -> anyhow::Result<bool> {
+        let connection = CONNECTIONS.lock().await;
+        let left_receiver = connection
+            .get(&self.left_symbol)
+            .ok_or(anyhow!("There are no connections for coin"))?;
+
+        let ref_book = left_receiver.receiver.borrow();
+        let book = ref_book
+            .as_ref()
+            .ok_or(anyhow!("Receiver doesn't contain L2Book"))?;
+
+        let ask_levels = book
+            .levels
+            .first()
+            .ok_or(anyhow!("Book doesn't contain ask level"))?
+            .iter()
+            .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+            .collect::<Vec<_>>();
+        let left_price = ask_levels
+            .iter()
+            .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+            .ok_or(anyhow!("Ask level doesn't have any items in it"))?
+            .0;
+
+        let right_receiver = connection
+            .get(&self.right_symbol)
+            .ok_or(anyhow!("There are no connections for coin"))?;
+
+        let ref_book = right_receiver.receiver.borrow();
+        let book = ref_book
+            .as_ref()
+            .ok_or(anyhow!("Receiver doesn't contain L2Book"))?;
+        let bid_levels = book
+            .levels
+            .get(1)
+            .ok_or(anyhow!("Book doesn't contain bid level"))?
+            .iter()
+            .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+            .collect::<Vec<_>>();
+        let right_price = bid_levels
+            .iter()
+            .min_by(|l1, l2| l1.0.total_cmp(&l2.0))
+            .ok_or(anyhow!("Bid level doesn't have any items in it"))?
+            .0;
+
+        if self.is_less && left_price / right_price < self.price
+            || !self.is_less && left_price / right_price > self.price
+        {
+            return Ok(true);
+        }
+        Ok(false)
+    }
+}
+
 impl QueueElem {
     pub async fn check(&self) -> anyhow::Result<bool> {
         match &self.condition {
-            Condition::PairPrice {
-                is_less,
-                price,
-                left_symbol,
-                right_symbol,
-            } => {
-                let mut connection = CONNECTIONS.lock().await;
-                let left_receiver = connection
-                    .get_mut(left_symbol)
-                    .ok_or(anyhow!("There are no connections for coin"))?;
-
-                let book = left_receiver
-                    .receiver
-                    .recv()
-                    .await
-                    .ok_or(anyhow!("Receiver doesn't contain any books"))?;
-                let ask_levels = book
-                    .levels
-                    .first()
-                    .ok_or(anyhow!("Book doesn't contain ask level"))?
-                    .iter()
-                    .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
-                    .collect::<Vec<_>>();
-                let left_price = ask_levels
-                    .iter()
-                    .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
-                    .ok_or(anyhow!("Ask level doesn't have any items in it"))?
-                    .0;
-
-                let right_receiver = connection
-                    .get_mut(right_symbol)
-                    .ok_or(anyhow!("There are no connections for coin"))?;
-
-                let book = right_receiver
-                    .receiver
-                    .recv()
-                    .await
-                    .ok_or(anyhow!("Receiver doesn't contain any books"))?;
-                let bid_levels = book
-                    .levels
-                    .get(1)
-                    .ok_or(anyhow!("Book doesn't contain bid level"))?
-                    .iter()
-                    .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
-                    .collect::<Vec<_>>();
-                let right_price = bid_levels
-                    .iter()
-                    .min_by(|l1, l2| l1.0.total_cmp(&l2.0))
-                    .ok_or(anyhow!("Bid level doesn't have any items in it"))?
-                    .0;
-
-                if *is_less && left_price / right_price < *price
-                    || !*is_less && left_price / right_price > *price
-                {
-                    return Ok(true);
-                }
-            }
-            _ => return Err(anyhow!("There is no such Condition")),
+            Condition::PairPrice(pair_price) => pair_price.check().await,
+            _ => Err(anyhow!("There is no such Condition")),
         }
-
-        Ok(false)
     }
 
     pub async fn execute(self, exchange: &hyperliquid::Exchange) {
@@ -323,22 +327,21 @@ impl QueueElem {
                 }
 
                 match self.condition {
-                    Condition::PairPrice {
-                        is_less: _,
-                        price: _,
-                        left_symbol,
-                        right_symbol,
-                    } => {
+                    Condition::PairPrice(pair_price) => {
                         let mut connection = CONNECTIONS.lock().await;
-                        let left_connection = connection.get_mut(&left_symbol).unwrap();
+                        let left_connection = connection.get_mut(&pair_price.left_symbol).unwrap();
                         left_connection.count -= 1;
                         if left_connection.count == 0 {
-                            left_connection.stop_sender.send(()).await;
+                            let con = connection.remove(&pair_price.left_symbol).unwrap();
+                            con.stop_sender.send(());
                         }
-                        let right_connection = connection.get_mut(&right_symbol).unwrap();
+
+                        let right_connection =
+                            connection.get_mut(&pair_price.right_symbol).unwrap();
                         right_connection.count -= 1;
                         if right_connection.count == 0 {
-                            right_connection.stop_sender.send(()).await;
+                            let con = connection.remove(&pair_price.right_symbol).unwrap();
+                            con.stop_sender.send(());
                         }
                     }
                 }
@@ -357,17 +360,20 @@ pub enum Source {
 #[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum Condition {
-    PairPrice {
-        is_less: bool,
-        price: f32,
-        left_symbol: String,
-        right_symbol: String,
-    },
+    PairPrice(PairPrice),
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct PairPrice {
+    pub is_less: bool,
+    pub price: f32,
+    pub left_symbol: String,
+    pub right_symbol: String,
 }
 
 pub struct ChannelConnection {
-    pub receiver: mpsc::Receiver<L2Book>,
-    pub stop_sender: mpsc::Sender<()>,
+    pub receiver: watch::Receiver<Option<L2Book>>,
+    pub stop_sender: oneshot::Sender<()>,
     pub count: usize,
 }
 
@@ -395,7 +401,7 @@ pub enum WSMethod {
     Unsubscribe(Subscription),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Subscription {
     pub subscription: Subscribe,
 }

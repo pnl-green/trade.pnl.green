@@ -1,12 +1,10 @@
-use crate::prelude::Result;
+use crate::{prelude::Result, ws::hyperliquid::pairs_candle::PairsCandle};
 use anyhow::Context;
 use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{tungstenite::Message, WebSocketStream};
 use tracing::{debug, error, info, warn};
-
-use super::hyperliquid::PairsCandle;
 
 #[derive(Debug, Deserialize)]
 #[serde(tag = "method", content = "data", rename_all = "snake_case")]

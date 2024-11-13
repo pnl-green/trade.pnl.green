@@ -26,7 +26,7 @@ use crate::{
     },
     prelude::Result,
     service::hyperliquid::{info, pair::pair_candle},
-    ws::hyperliquid::BookPrice,
+    ws::hyperliquid::book_price::BookPrice,
 };
 
 pub async fn hyperliquid(
@@ -398,22 +398,17 @@ pub async fn hyperliquid(
                     });
 
                     match condition {
-                        Condition::PairPrice {
-                            is_less: _,
-                            price: _,
-                            left_symbol,
-                            right_symbol,
-                        } => {
+                        Condition::PairPrice(pair_price) => {
                             let mut connections = CONNECTIONS.lock().await;
 
-                            if let Some(connection) = connections.get_mut(&left_symbol) {
+                            if let Some(connection) = connections.get_mut(&pair_price.left_symbol) {
                                 connection.count += 1;
                             } else {
                                 let (receiver, stop_sender) =
-                                    BookPrice::add_to_handler(&left_symbol).await?;
+                                    BookPrice::init(&pair_price.left_symbol).await?;
 
                                 connections.insert(
-                                    left_symbol.clone(),
+                                    pair_price.left_symbol.clone(),
                                     ChannelConnection {
                                         count: 1,
                                         receiver,
@@ -422,14 +417,15 @@ pub async fn hyperliquid(
                                 );
                             }
 
-                            if let Some(connection) = connections.get_mut(&right_symbol) {
+                            if let Some(connection) = connections.get_mut(&pair_price.right_symbol)
+                            {
                                 connection.count += 1;
                             } else {
                                 let (receiver, stop_sender) =
-                                    BookPrice::add_to_handler(&right_symbol).await?;
+                                    BookPrice::init(&pair_price.right_symbol).await?;
 
                                 connections.insert(
-                                    right_symbol.clone(),
+                                    pair_price.right_symbol.clone(),
                                     ChannelConnection {
                                         count: 1,
                                         receiver,
