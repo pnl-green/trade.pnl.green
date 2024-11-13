@@ -195,8 +195,14 @@ async fn main() -> anyhow::Result<()> {
             let mut indices_to_remove = Vec::new();
 
             for (i, elem) in queue_r.iter().enumerate() {
-                if elem.check().await.unwrap() {
-                    indices_to_remove.push(i);
+                match elem.check().await {
+                    Ok(true) => {
+                        indices_to_remove.push(i);
+                    }
+                    Err(err) => {
+                        //tracing::error!("{:?}", err);
+                    }
+                    _ => {}
                 }
             }
 

@@ -397,7 +397,6 @@ pub async fn hyperliquid(
                     match &condition {
                         Condition::PairPrice(pair_price) => {
                             let mut connections = CONNECTIONS.lock().await;
-                            error!("1!!!!!!!!!!!!!!");
 
                             if let Some(connection) = connections.get_mut(&pair_price.left_symbol) {
                                 connection.count += 1;

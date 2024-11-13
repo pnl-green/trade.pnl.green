@@ -1,17 +1,17 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use anyhow::Context;
-use futures_util::{SinkExt, StreamExt};
-use tokio::sync::mpsc;
-use tokio::sync::oneshot;
-use tokio::sync::watch;
-
 use crate::model::hyperliquid::{Subscribe, Subscription, WSMethod, WSResponse};
 use crate::prelude::Result;
+use anyhow::Context;
+use futures_util::TryStreamExt;
+use futures_util::{SinkExt, StreamExt};
 use lazy_static::lazy_static;
 use tokio::net::TcpStream;
+use tokio::sync::oneshot;
+use tokio::sync::watch;
 use tokio::sync::Mutex;
+use tokio::sync::{mpsc, RwLock};
 use tokio_tungstenite::tungstenite::Message;
 use tokio_tungstenite::MaybeTlsStream;
 use tokio_tungstenite::WebSocketStream;
@@ -35,7 +35,7 @@ pub type StreamReceiver = mpsc::Receiver<(
     watch::Sender<Option<WSResponse>>,
 )>;
 pub struct WSSubscriptions {
-    pub stream: Arc<Mutex<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
+    //pub stream: Arc<Mutex<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
     pub subscriptions_count: u16,
     pub sender: StreamSender,
 }
@@ -58,22 +58,21 @@ pub async fn find_free_websocket() -> Result<usize> {
         ResponsePattern,
         oneshot::Receiver<()>,
         watch::Sender<Option<WSResponse>>,
-    )>(1);
+    )>(16);
 
     let new_key = wsm.len() + 1;
     wsm.insert(
         new_key,
         WSSubscriptions {
-            stream: Arc::new(Mutex::new(stream)),
             subscriptions_count: 1,
             sender: stream_sender,
         },
     );
-    error!("2!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
     drop(wsm);
 
     tokio::spawn(async move {
-        if let Err(err) = stream_recv(new_key, stream_reciver).await {
+        if let Err(err) = stream_recv(stream, new_key, stream_reciver).await {
             error!("Price receiver exited:{}", err);
         }
     });
@@ -81,28 +80,95 @@ pub async fn find_free_websocket() -> Result<usize> {
     Ok(new_key)
 }
 
-async fn stream_recv(new_key: usize, mut recv_subs: StreamReceiver) -> Result<()> {
-    let mut subscription_map: HashMap<ResponsePattern, watch::Sender<Option<WSResponse>>> =
-        HashMap::new();
+async fn stream_recv(
+    stream: WebSocketStream<MaybeTlsStream<TcpStream>>,
+    new_key: usize,
+    mut recv_subs: StreamReceiver,
+) -> Result<()> {
+    let mut subscription_map: Arc<
+        RwLock<HashMap<ResponsePattern, watch::Sender<Option<WSResponse>>>>,
+    > = Arc::default();
     let mut unsubscription_list: Vec<(oneshot::Receiver<()>, WSMethod)> = Vec::new();
-    error!("4.5!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    let wsm = WSMAP.lock().await;
-    error!("4.6!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    let ws_subscription = wsm.get(&new_key).unwrap();
-    error!("4.7!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    let ws_stream = ws_subscription.stream.clone();
-    error!("4!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    drop(wsm);
-    let mut ws_stream_lock = ws_stream.lock().await;
-    while let Some(msg) = ws_stream_lock.next().await {
+    let subscription_map_2 = subscription_map.clone();
+    let (mut writer, mut reader) = stream.split();
+    tokio::spawn(async move {
+        while let Some(msg) = reader.next().await {
+            error!("{:?}", &msg);
+            let Ok(msg) = msg else {
+                warn!("Failed to extract message from the stream");
+                continue;
+            };
+
+            let Ok(data) = msg.into_text() else {
+                warn!("Incoming message isn't text from the stream");
+                continue;
+            };
+            error!("{}", data);
+
+            let msg = match serde_json::from_str::<WSResponse>(&data) {
+                Ok(msg) => msg,
+                Err(e) => {
+                    warn!("Failed to parse message response from WS: {e} - {data}");
+                    continue;
+                }
+            };
+            let msg_resp_patrn = ResponsePattern::from(&msg);
+
+            if let Some(sender) = subscription_map.read().await.get(&msg_resp_patrn) {
+                sender
+                    .send(Some(msg))
+                    .context("Failed sending price to the receiver")
+                    .unwrap();
+            }
+        }
+        error!("Price receiver stopped");
+    });
+    loop {
+        if let Ok((sub, response_pattern, stop_reciver, sender)) = recv_subs.try_recv() {
+            let method = WSMethod::Subscribe(sub.clone());
+            let payload = serde_json::to_string(&method)
+                .context("Failed to serialize subscription payload")?;
+            writer
+                .send(Message::Text(payload))
+                .await
+                .context("Failed to subscribe to desired coin price")?;
+            subscription_map_2
+                .write()
+                .await
+                .insert(response_pattern, sender);
+
+            unsubscription_list.push((stop_reciver, WSMethod::Unsubscribe(sub)));
+        }
+
+        for (stop_reciver, method) in unsubscription_list.iter_mut() {
+            if stop_reciver.try_recv().is_ok() {
+                let payload = serde_json::to_string(&method)
+                    .context("Failed to serialize unsubscription payload")?;
+                writer
+                    .send(Message::Text(payload))
+                    .await
+                    .context("Failed to unsubscribe to desired coin price")?;
+
+                let mut wsm = WSMAP.lock().await;
+                let ws_stream = wsm.get_mut(&new_key).unwrap();
+                ws_stream.subscriptions_count -= 1;
+            }
+            // видаляти з списку підписок
+        }
+    }
+
+    /* while let Ok(msg) = ws_stream_lock.try_next().await {
+        error!("{:?}", &msg);
         let Ok(msg) = msg else {
             warn!("Failed to extract message from the stream");
             continue;
         };
+
         let Ok(data) = msg.into_text() else {
             warn!("Incoming message isn't text from the stream");
             continue;
         };
+        error!("{}", data);
 
         let msg = match serde_json::from_str::<WSResponse>(&data) {
             Ok(msg) => msg,
@@ -145,7 +211,7 @@ async fn stream_recv(new_key: usize, mut recv_subs: StreamReceiver) -> Result<()
                 ws_stream.subscriptions_count -= 1;
             }
         }
-    }
+    } */
     Ok(())
 }
 
@@ -186,11 +252,11 @@ impl BookPrice {
         let subscription = Subscription::new(topic.clone());
 
         let response = ResponsePattern::L2Book(symbol.to_string());
-        error!("3!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         let ws_key = find_free_websocket().await?;
-        error!("5!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         let mut wsm = WSMAP.lock().await;
-        error!("6!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         let ws_stream = wsm.get_mut(&ws_key).unwrap();
         ws_stream
             .sender
