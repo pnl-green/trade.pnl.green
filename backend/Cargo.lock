@@ -468,7 +468,6 @@ dependencies = [
  "futures-util",
  "hyperliquid",
  "lazy_static",
- "rand",
  "serde",
  "serde_json",
  "thiserror",

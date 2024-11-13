@@ -200,7 +200,7 @@ async fn main() -> anyhow::Result<()> {
                         indices_to_remove.push(i);
                     }
                     Err(err) => {
-                        //tracing::error!("{:?}", err);
+                        tracing::error!("{:?}", err);
                     }
                     _ => {}
                 }

@@ -252,16 +252,21 @@ pub trait Check {
 }
 
 impl PairPrice {
-    async fn get_price_from_book(&self, symbol: &str, level_index: usize) -> anyhow::Result<f32> {
+    async fn get_price_from_book(
+        &self,
+        symbol: &str,
+        level_index: usize,
+    ) -> anyhow::Result<Option<f32>> {
         let connection = CONNECTIONS.lock().await;
         let receiver = connection
             .get(symbol)
             .ok_or_else(|| anyhow!("There are no connections for symbol {}", symbol))?;
 
         let ref_book = receiver.receiver.borrow();
-        let ws_response = ref_book
-            .as_ref()
-            .ok_or_else(|| anyhow!("Receiver doesn't contain WSResponse"))?;
+        let ws_response = match ref_book.as_ref() {
+            Some(response) => response,
+            None => return Ok(None),
+        };
 
         if let WSResponse::L2Book(book) = ws_response {
             let levels = book
@@ -286,7 +291,7 @@ impl PairPrice {
                     .0
             };
 
-            Ok(price)
+            Ok(Some(price))
         } else {
             Err(anyhow!("Book is not L2Book"))
         }
@@ -298,6 +303,11 @@ impl Check for PairPrice {
     async fn check(&self) -> anyhow::Result<bool> {
         let left_price = self.get_price_from_book(&self.left_symbol, 0).await?;
         let right_price = self.get_price_from_book(&self.right_symbol, 1).await?;
+        if left_price.is_none() || right_price.is_none() {
+            return Ok(false);
+        }
+        let left_price = left_price.unwrap();
+        let right_price = right_price.unwrap();
 
         let comparison_result = if self.is_less {
             left_price / right_price < self.price

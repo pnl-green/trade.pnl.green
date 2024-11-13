@@ -1,21 +1,3 @@
-use std::sync::Arc;
-
-use actix_session::Session;
-use actix_web::{web, HttpResponse, Responder};
-use anyhow::Context;
-use ethers::{
-    core::rand,
-    signers::{LocalWallet, Signer},
-    types::H160,
-    utils::hex::ToHex,
-};
-use hyperliquid::{
-    types::{exchange::response, Chain, API},
-    Hyperliquid,
-};
-use tokio::sync::{mpsc::Sender, RwLock};
-use tracing::error;
-
 use crate::{
     error::Error::BadRequestError,
     model::{
@@ -30,6 +12,20 @@ use crate::{
     service::hyperliquid::{info, pair::pair_candle},
     ws::hyperliquid::book_price::BookPrice,
 };
+use actix_session::Session;
+use actix_web::{web, HttpResponse, Responder};
+use anyhow::Context;
+use ethers::{
+    core::rand,
+    signers::{LocalWallet, Signer},
+    utils::hex::ToHex,
+};
+use hyperliquid::{
+    types::{exchange::response, Chain, API},
+    Hyperliquid,
+};
+use std::sync::Arc;
+use tokio::sync::{mpsc::Sender, RwLock};
 
 pub async fn hyperliquid(
     chain: web::Data<Chain>,
@@ -284,21 +280,18 @@ pub async fn hyperliquid(
         }
 
         Request::Exchange(req) => {
-            let mut rng = rand::thread_rng();
-            let agent = Arc::new(LocalWallet::new(&mut rng));
-            error!("Error creating");
-            /* let agent = session
-                           .get::<Agent>("agent")
-                           .context("Failed to get agent")?
-                           .ok_or_else(|| BadRequestError("Establish a connection first".to_string()))?;
+            let agent = session
+                .get::<Agent>("agent")
+                .context("Failed to get agent")?
+                .ok_or_else(|| BadRequestError("Establish a connection first".to_string()))?;
 
-                       let agent: Arc<LocalWallet> = Arc::new(
-                           agent
-                               .private_key
-                               .parse()
-                               .context("Failed to parse agent wallet")?,
-                       );
-            */
+            let agent: Arc<LocalWallet> = Arc::new(
+                agent
+                    .private_key
+                    .parse()
+                    .context("Failed to parse agent wallet")?,
+            );
+
             let exchange: hyperliquid::Exchange = Hyperliquid::new(chain);
 
             match req {

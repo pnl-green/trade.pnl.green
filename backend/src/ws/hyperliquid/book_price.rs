@@ -1,12 +1,10 @@
-use std::collections::HashMap;
-use std::sync::Arc;
-
 use crate::model::hyperliquid::{Subscribe, Subscription, WSMethod, WSResponse};
 use crate::prelude::Result;
 use anyhow::Context;
-use futures_util::TryStreamExt;
 use futures_util::{SinkExt, StreamExt};
 use lazy_static::lazy_static;
+use std::collections::HashMap;
+use std::sync::Arc;
 use tokio::net::TcpStream;
 use tokio::sync::oneshot;
 use tokio::sync::watch;
@@ -35,7 +33,6 @@ pub type StreamReceiver = mpsc::Receiver<(
     watch::Sender<Option<WSResponse>>,
 )>;
 pub struct WSSubscriptions {
-    //pub stream: Arc<Mutex<WebSocketStream<MaybeTlsStream<TcpStream>>>>,
     pub subscriptions_count: u16,
     pub sender: StreamSender,
 }
@@ -45,6 +42,7 @@ pub async fn find_free_websocket() -> Result<usize> {
 
     for (&key, ws_subs) in wsm.iter_mut() {
         if ws_subs.subscriptions_count < 1000 {
+            ws_subs.subscriptions_count += 1;
             return Ok(key);
         }
     }
@@ -85,15 +83,14 @@ async fn stream_recv(
     new_key: usize,
     mut recv_subs: StreamReceiver,
 ) -> Result<()> {
-    let mut subscription_map: Arc<
-        RwLock<HashMap<ResponsePattern, watch::Sender<Option<WSResponse>>>>,
-    > = Arc::default();
-    let mut unsubscription_list: Vec<(oneshot::Receiver<()>, WSMethod)> = Vec::new();
+    let subscription_map: Arc<RwLock<HashMap<ResponsePattern, watch::Sender<Option<WSResponse>>>>> =
+        Arc::default();
+    let mut unsubscription_list: Vec<(oneshot::Receiver<()>, WSMethod, ResponsePattern)> =
+        Vec::new();
     let subscription_map_2 = subscription_map.clone();
     let (mut writer, mut reader) = stream.split();
     tokio::spawn(async move {
         while let Some(msg) = reader.next().await {
-            error!("{:?}", &msg);
             let Ok(msg) = msg else {
                 warn!("Failed to extract message from the stream");
                 continue;
@@ -103,7 +100,6 @@ async fn stream_recv(
                 warn!("Incoming message isn't text from the stream");
                 continue;
             };
-            error!("{}", data);
 
             let msg = match serde_json::from_str::<WSResponse>(&data) {
                 Ok(msg) => msg,
@@ -135,12 +131,15 @@ async fn stream_recv(
             subscription_map_2
                 .write()
                 .await
-                .insert(response_pattern, sender);
+                .insert(response_pattern.clone(), sender);
 
-            unsubscription_list.push((stop_reciver, WSMethod::Unsubscribe(sub)));
+            unsubscription_list.push((stop_reciver, WSMethod::Unsubscribe(sub), response_pattern));
         }
 
-        for (stop_reciver, method) in unsubscription_list.iter_mut() {
+        let mut i = 0;
+        while i < unsubscription_list.len() {
+            let (stop_reciver, method, response_pattern) = &mut unsubscription_list[i];
+
             if stop_reciver.try_recv().is_ok() {
                 let payload = serde_json::to_string(&method)
                     .context("Failed to serialize unsubscription payload")?;
@@ -151,71 +150,21 @@ async fn stream_recv(
 
                 let mut wsm = WSMAP.lock().await;
                 let ws_stream = wsm.get_mut(&new_key).unwrap();
+                subscription_map_2.write().await.remove(response_pattern);
+
                 ws_stream.subscriptions_count -= 1;
+
+                unsubscription_list.remove(i);
+            } else {
+                i += 1;
             }
-            // видаляти з списку підписок
         }
+
+        tokio::time::sleep(std::time::Duration::from_millis(10)).await;
     }
-
-    /* while let Ok(msg) = ws_stream_lock.try_next().await {
-        error!("{:?}", &msg);
-        let Ok(msg) = msg else {
-            warn!("Failed to extract message from the stream");
-            continue;
-        };
-
-        let Ok(data) = msg.into_text() else {
-            warn!("Incoming message isn't text from the stream");
-            continue;
-        };
-        error!("{}", data);
-
-        let msg = match serde_json::from_str::<WSResponse>(&data) {
-            Ok(msg) => msg,
-            Err(e) => {
-                warn!("Failed to parse message response from WS: {e} - {data}");
-                continue;
-            }
-        };
-        let msg_resp_patrn = ResponsePattern::from(&msg);
-
-        if let Some((sub, response_pattern, stop_reciver, sender)) = recv_subs.recv().await {
-            let method = WSMethod::Subscribe(sub.clone());
-            let payload = serde_json::to_string(&method)
-                .context("Failed to serialize subscription payload")?;
-            ws_stream_lock
-                .send(Message::Text(payload))
-                .await
-                .context("Failed to subscribe to desired coin price")?;
-            subscription_map.insert(response_pattern, sender);
-
-            unsubscription_list.push((stop_reciver, WSMethod::Unsubscribe(sub)));
-        }
-        if let Some(sender) = subscription_map.get(&msg_resp_patrn) {
-            sender
-                .send(Some(msg))
-                .context("Failed sending price to the receiver")?;
-        }
-
-        for (stop_reciver, method) in unsubscription_list.iter_mut() {
-            if stop_reciver.try_recv().is_ok() {
-                let payload = serde_json::to_string(&method)
-                    .context("Failed to serialize unsubscription payload")?;
-                ws_stream_lock
-                    .send(Message::Text(payload))
-                    .await
-                    .context("Failed to unsubscribe to desired coin price")?;
-
-                let mut wsm = WSMAP.lock().await;
-                let ws_stream = wsm.get_mut(&new_key).unwrap();
-                ws_stream.subscriptions_count -= 1;
-            }
-        }
-    } */
-    Ok(())
 }
 
-#[derive(Eq, Hash, PartialEq)]
+#[derive(Eq, Hash, PartialEq, Clone)]
 pub enum ResponsePattern {
     L2Book(String),
     Candle(String),
