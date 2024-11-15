@@ -1,14 +1,24 @@
-use std::sync::Arc;
-
 use ethers::{
     signers::LocalWallet,
     types::{Address, Signature, U256},
 };
+use std::{collections::HashMap, sync::Arc};
+use tokio::sync::oneshot;
+use tokio::sync::watch;
+
+use anyhow::anyhow;
+use async_trait::async_trait;
 use hyperliquid::types::{
     exchange::request::{CancelRequest, OrderRequest},
     info::request::CandleSnapshotRequest,
 };
+use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
+use tokio::sync::Mutex;
+lazy_static! {
+    pub static ref CONNECTIONS: Arc<Mutex<HashMap<String, ChannelConnection>>> =
+        Arc::new(Mutex::new(HashMap::new()));
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,13 +31,28 @@ pub struct Agent {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "type")]
 pub enum Info {
-    SubAccounts { user: Address },
-    HistoricalOrders { user: Address },
-    UserFees { user: Address },
-    CandleSnapshot { req: CandleSnapshotRequest },
-    PairCandleSnapshot { req: CandleSnapshotRequest, pair_coin: String },
-    Depth { req: DepthCalculationRequest },
-    Delta { req: DeltaCalculationRequest },
+    SubAccounts {
+        user: Address,
+    },
+    HistoricalOrders {
+        user: Address,
+    },
+    UserFees {
+        user: Address,
+    },
+    CandleSnapshot {
+        req: CandleSnapshotRequest,
+    },
+    PairCandleSnapshot {
+        req: CandleSnapshotRequest,
+        pair_coin: String,
+    },
+    Depth {
+        req: DepthCalculationRequest,
+    },
+    Delta {
+        req: DeltaCalculationRequest,
+    },
     SpotMeta,
 }
 
@@ -197,6 +222,172 @@ pub enum Exchange {
         action: Twap,
         vault_address: Option<Address>,
     },
+
+    #[serde(rename_all = "camelCase")]
+    CondOrder {
+        action: CondAction,
+        condition: Condition,
+        source: Source,
+        vault_address: Option<Address>,
+    },
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum CondAction {
+    HLOrder(Order),
+}
+
+pub struct QueueElem {
+    pub source: Source,
+    pub agent: Arc<LocalWallet>,
+    pub action: CondAction,
+    pub condition: Condition,
+    pub vault_address: Option<Address>,
+}
+
+#[async_trait]
+pub trait Check {
+    async fn check(&self) -> anyhow::Result<bool>;
+}
+
+impl PairPrice {
+    async fn get_price_from_book(
+        &self,
+        symbol: &str,
+        level_index: usize,
+    ) -> anyhow::Result<Option<f32>> {
+        let connection = CONNECTIONS.lock().await;
+        let receiver = connection
+            .get(symbol)
+            .ok_or_else(|| anyhow!("There are no connections for symbol {}", symbol))?;
+
+        let ref_book = receiver.receiver.borrow();
+        let ws_response = match ref_book.as_ref() {
+            Some(response) => response,
+            None => return Ok(None),
+        };
+
+        if let WSResponse::L2Book(book) = ws_response {
+            let levels = book
+                .levels
+                .get(level_index)
+                .ok_or_else(|| anyhow!("Book doesn't contain level {}", level_index))?
+                .iter()
+                .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+                .collect::<Vec<_>>();
+
+            let price = if level_index == 0 {
+                levels
+                    .iter()
+                    .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                    .ok_or_else(|| anyhow!("Level doesn't have any items"))?
+                    .0
+            } else {
+                levels
+                    .iter()
+                    .min_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                    .ok_or_else(|| anyhow!("Level doesn't have any items"))?
+                    .0
+            };
+
+            Ok(Some(price))
+        } else {
+            Err(anyhow!("Book is not L2Book"))
+        }
+    }
+}
+
+#[async_trait]
+impl Check for PairPrice {
+    async fn check(&self) -> anyhow::Result<bool> {
+        let left_price = self.get_price_from_book(&self.left_symbol, 0).await?;
+        let right_price = self.get_price_from_book(&self.right_symbol, 1).await?;
+        if left_price.is_none() || right_price.is_none() {
+            return Ok(false);
+        }
+        let left_price = left_price.unwrap();
+        let right_price = right_price.unwrap();
+
+        let comparison_result = if self.is_less {
+            left_price / right_price < self.price
+        } else {
+            left_price / right_price > self.price
+        };
+
+        Ok(comparison_result)
+    }
+}
+
+impl QueueElem {
+    pub async fn check(&self) -> anyhow::Result<bool> {
+        match &self.condition {
+            Condition::PairPrice(pair_price) => pair_price.check().await,
+            _ => Err(anyhow!("There is no such Condition")),
+        }
+    }
+
+    pub async fn execute(self, exchange: &hyperliquid::Exchange) {
+        match self.action {
+            CondAction::HLOrder(order) => {
+                let result = exchange
+                    .place_order(self.agent.clone(), order.orders, self.vault_address)
+                    .await;
+
+                if let Err(err) = result {
+                    tracing::error!("Failed to place order: {}", err);
+                }
+
+                match self.condition {
+                    Condition::PairPrice(pair_price) => {
+                        let mut connection = CONNECTIONS.lock().await;
+                        let left_connection = connection.get_mut(&pair_price.left_symbol).unwrap();
+                        left_connection.count -= 1;
+                        if left_connection.count == 0 {
+                            let con = connection.remove(&pair_price.left_symbol).unwrap();
+                            con.stop_sender.send(());
+                        }
+
+                        let right_connection =
+                            connection.get_mut(&pair_price.right_symbol).unwrap();
+                        right_connection.count -= 1;
+                        if right_connection.count == 0 {
+                            let con = connection.remove(&pair_price.right_symbol).unwrap();
+                            con.stop_sender.send(());
+                        }
+                    }
+                }
+            }
+            _ => tracing::error!("There is no such action!"),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum Source {
+    #[default]
+    Hyperliquid,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub enum Condition {
+    PairPrice(PairPrice),
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct PairPrice {
+    pub is_less: bool,
+    pub price: f32,
+    pub left_symbol: String,
+    pub right_symbol: String,
+}
+
+pub struct ChannelConnection {
+    pub receiver: watch::Receiver<Option<WSResponse>>,
+    pub stop_sender: oneshot::Sender<()>,
+    pub count: usize,
 }
 
 #[derive(Debug)]
@@ -220,9 +411,10 @@ pub enum Request {
 pub enum WSMethod {
     Ping,
     Subscribe(Subscription),
+    Unsubscribe(Subscription),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Subscription {
     pub subscription: Subscribe,
 }
@@ -233,10 +425,11 @@ impl Subscription {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum Subscribe {
     Candle { coin: String, interval: String },
+    L2Book { coin: String },
 }
 
 #[derive(Debug, Deserialize)]
@@ -244,6 +437,22 @@ pub enum Subscribe {
 pub enum WSResponse {
     SubscriptionResponse(Subscription),
     Candle(Candle),
+    L2Book(L2Book),
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Level {
+    pub px: String,
+    pub sz: String,
+    pub n: u64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct L2Book {
+    pub coin: String,
+    pub levels: Vec<Vec<Level>>,
+    pub time: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

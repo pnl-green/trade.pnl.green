@@ -9,7 +9,11 @@ use actix_web::{
     web, App, HttpServer,
 };
 use anyhow::Context;
-use backend::{api, log, model::hyperliquid::InternalRequest, ws, Config};
+use backend::{
+    api, log,
+    model::hyperliquid::{InternalRequest, QueueElem},
+    ws, Config,
+};
 
 use hyperliquid::{
     types::{
@@ -23,7 +27,8 @@ use hyperliquid::{
     utils::{parse_price, parse_size},
     Exchange, Hyperliquid, Info,
 };
-use tokio::sync::mpsc;
+
+use tokio::sync::{mpsc, RwLock};
 use tracing_actix_web::TracingLogger;
 
 const SLIPPAGE: f64 = 0.03;
@@ -177,6 +182,45 @@ async fn main() -> anyhow::Result<()> {
         }
     });
 
+    let queue: RwLock<Vec<QueueElem>> = RwLock::new(vec![]);
+    let queue = web::Data::new(queue);
+    let queue_2 = queue.clone();
+
+    tokio::spawn(async move {
+        let exchange: Exchange = Hyperliquid::new(chain);
+
+        loop {
+            let queue_r = queue_2.read().await;
+
+            let mut indices_to_remove = Vec::new();
+
+            for (i, elem) in queue_r.iter().enumerate() {
+                match elem.check().await {
+                    Ok(true) => {
+                        indices_to_remove.push(i);
+                    }
+                    Err(err) => {
+                        tracing::error!("{:?}", err);
+                    }
+                    _ => {}
+                }
+            }
+
+            drop(queue_r);
+
+            if !indices_to_remove.is_empty() {
+                let mut queue_w = queue_2.write().await;
+
+                for &i in indices_to_remove.iter().rev() {
+                    let elem = queue_w.remove(i);
+                    drop(queue_w);
+                    elem.execute(&exchange).await;
+                    queue_w = queue_2.write().await;
+                }
+            }
+        }
+    });
+
     // Global
     let chain = web::Data::new(chain);
     let sender = web::Data::new(tx);
@@ -206,6 +250,7 @@ async fn main() -> anyhow::Result<()> {
             .default_service(web::to(api::not_found))
             .app_data(chain.clone())
             .app_data(sender.clone())
+            .app_data(queue.clone())
     })
     .listen(listener)?
     .run()

@@ -1,5 +1,17 @@
-use std::sync::Arc;
-
+use crate::{
+    error::Error::BadRequestError,
+    model::{
+        hyperliquid::{
+            Agent, ChannelConnection, Condition, DeltaCalculationResponse,
+            DepthCalculationResponse, Exchange, Info, InternalRequest, QueueElem, Request,
+            CONNECTIONS,
+        },
+        Response,
+    },
+    prelude::Result,
+    service::hyperliquid::{info, pair::pair_candle},
+    ws::hyperliquid::book_price::BookPrice,
+};
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Responder};
 use anyhow::Context;
@@ -12,26 +24,15 @@ use hyperliquid::{
     types::{exchange::response, Chain, API},
     Hyperliquid,
 };
-use tokio::sync::mpsc::Sender;
-
-use crate::{
-    error::Error::BadRequestError,
-    model::{
-        hyperliquid::{
-            Agent, DeltaCalculationResponse, DepthCalculationResponse, Exchange, Info,
-            InternalRequest, Request,
-        },
-        Response,
-    },
-    prelude::Result,
-    service::hyperliquid::{info, pair::pair_candle},
-};
+use std::sync::Arc;
+use tokio::sync::{mpsc::Sender, RwLock};
 
 pub async fn hyperliquid(
     chain: web::Data<Chain>,
     req: web::Json<Request>,
     session: Session,
     sender: web::Data<Sender<InternalRequest>>,
+    queue: web::Data<RwLock<Vec<QueueElem>>>,
 ) -> Result<impl Responder> {
     let req = req.into_inner();
     let chain = **chain;
@@ -277,6 +278,7 @@ pub async fn hyperliquid(
                 }
             }
         }
+
         Request::Exchange(req) => {
             let agent = session
                 .get::<Agent>("agent")
@@ -315,6 +317,7 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
+
                 Exchange::CreateSubAccount { action } => {
                     let data = exchange
                         .create_sub_account(agent, action.name)
@@ -376,6 +379,65 @@ pub async fn hyperliquid(
                             msg: Some(msg),
                         }),
                     }
+                }
+
+                Exchange::CondOrder {
+                    action,
+                    condition,
+                    source,
+                    vault_address,
+                } => {
+                    match &condition {
+                        Condition::PairPrice(pair_price) => {
+                            let mut connections = CONNECTIONS.lock().await;
+
+                            if let Some(connection) = connections.get_mut(&pair_price.left_symbol) {
+                                connection.count += 1;
+                            } else {
+                                let (receiver, stop_sender) =
+                                    BookPrice::init(&pair_price.left_symbol).await?;
+
+                                connections.insert(
+                                    pair_price.left_symbol.clone(),
+                                    ChannelConnection {
+                                        count: 1,
+                                        receiver,
+                                        stop_sender,
+                                    },
+                                );
+                            }
+
+                            if let Some(connection) = connections.get_mut(&pair_price.right_symbol)
+                            {
+                                connection.count += 1;
+                            } else {
+                                let (receiver, stop_sender) =
+                                    BookPrice::init(&pair_price.right_symbol).await?;
+
+                                connections.insert(
+                                    pair_price.right_symbol.clone(),
+                                    ChannelConnection {
+                                        count: 1,
+                                        receiver,
+                                        stop_sender,
+                                    },
+                                );
+                            }
+                        }
+                    }
+                    queue.write().await.push(QueueElem {
+                        source,
+                        agent,
+                        action,
+                        condition,
+                        vault_address,
+                    });
+
+                    HttpResponse::Ok().json(Response::<()> {
+                        success: true,
+                        data: None,
+                        msg: None,
+                    })
                 }
                 Exchange::UpdateLeverage { action } => {
                     let data = exchange

@@ -1,20 +1,19 @@
+use crate::model::hyperliquid::{Candle, Subscribe, Subscription, WSMethod, WSResponse};
+use crate::prelude::Result;
 use anyhow::Context;
 use futures_util::{SinkExt, StreamExt};
-use tokio::sync::mpsc::{Receiver, Sender};
+use tokio::sync::mpsc;
 use tokio_tungstenite::tungstenite::Message;
 use tracing::{info, warn};
 
-use crate::model::hyperliquid::{Candle, Subscribe, Subscription, WSMethod, WSResponse};
-use crate::prelude::Result;
-
 pub struct PairsCandle {
-    sender: Sender<Candle>,
+    sender: mpsc::Sender<Candle>,
     symbol_left: String,
     symbol_right: String,
 }
 
 impl PairsCandle {
-    pub fn new(symbol_left: &str, symbol_right: &str) -> (Self, Receiver<Candle>) {
+    pub fn new(symbol_left: &str, symbol_right: &str) -> (Self, mpsc::Receiver<Candle>) {
         let (sender, receiver) = tokio::sync::mpsc::channel::<Candle>(1);
 
         (
@@ -110,6 +109,7 @@ impl PairsCandle {
                             .context("Failed sending paired candle to the receiver")?;
                     }
                 }
+                WSResponse::L2Book(price) => (),
             }
         }
 
