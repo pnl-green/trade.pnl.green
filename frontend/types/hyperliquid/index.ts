@@ -30,13 +30,12 @@ export type Cancel = {
 };
 
 export type OrderRequest = {
-  asset: number;
-  isBuy: boolean;
-  limitPx: number | string;
-  sz: number | string;
-  reduceOnly: boolean;
-  orderType: OrderType;
-  cloid?: string | null;
+  a: number;  // asset
+  b: boolean; // isBuy
+  p: number | string, // price
+  s: number | string, // size
+  r: boolean  // reduceOnly
+  t: OrderType,
 };
 
 export type Interval = '1m' | '5m' | '15m' | '1h' | '4h' | '1d';

@@ -56,9 +56,11 @@ const RiskManagerModal: React.FC<ModalProps> = ({
               gap: '10px',
             }}
           >
+            {/* remove disabled={true} when feature will be ready */}
             <Buttons
+              disabled={true}
               onClick={() => handleButtonClick(true)}
-              className={isPortfolio ? 'active' : ''}
+              // className={isPortfolio ? 'active' : ''}
             >
               % Portfolio
             </Buttons>

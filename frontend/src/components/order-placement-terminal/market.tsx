@@ -116,12 +116,12 @@ const MarketComponent = () => {
     try {
       setIsLoading(true);
       const { success, data, msg } = await hyperliquid.placeOrder({
-        asset: Number(assetId),
-        isBuy,
-        limitPx: parsePrice(normalLimitPx),
-        sz: parseSize(sz, szDecimals),
-        orderType,
-        reduceOnly,
+        a: Number(assetId),
+        b: isBuy,
+        p: parsePrice(normalLimitPx),
+        s: parseSize(sz, szDecimals),
+        r: reduceOnly,
+        t: orderType,
       });
 
       if (success) {
@@ -207,43 +207,31 @@ const MarketComponent = () => {
 
       const { success, data, msg } = await hyperliquid.normalTpSl(
         {
-          asset: Number(assetId),
-          isBuy,
-          limitPx: parsePrice(normalLimitPx),
-          sz: parseSize(sz, szDecimals),
-          orderType,
-          reduceOnly,
+          a: Number(assetId),
+          b: isBuy,
+          p: parsePrice(normalLimitPx),
+          s: parseSize(sz, szDecimals),
+          r: reduceOnly,
+          t: orderType,
         },
         takeProfitPrice.trim() !== ''
           ? {
-              asset: Number(assetId),
-              isBuy: tpSlIsBuy,
-              limitPx: parsePrice(tpslLimitPx),
-              sz: parseSize(sz, szDecimals),
-              orderType: {
-                trigger: {
-                  isMarket: true,
-                  tpsl: 'tp',
-                  triggerPx: takeProfitPrice,
-                },
-              },
-              reduceOnly: !reduceOnly,
-            }
+              a: Number(assetId),
+              b: tpSlIsBuy,
+              p: parsePrice(tpslLimitPx),
+              s: parseSize(sz, szDecimals),
+              r: !reduceOnly,
+              t: orderType
+              }
           : undefined,
         stopLossPrice.trim() !== ''
           ? {
-              asset: Number(assetId),
-              isBuy: tpSlIsBuy,
-              limitPx: parsePrice(tpslLimitPx),
-              sz: parseSize(sz, szDecimals),
-              orderType: {
-                trigger: {
-                  isMarket: true,
-                  tpsl: 'sl',
-                  triggerPx: stopLossPrice,
-                },
-              },
-              reduceOnly: !reduceOnly,
+              a: Number(assetId),
+              b: tpSlIsBuy,
+              p: parsePrice(tpslLimitPx),
+              s: parseSize(sz, szDecimals),
+              r: !reduceOnly,
+              t: orderType
             }
           : undefined
       );
@@ -343,7 +331,7 @@ const MarketComponent = () => {
           <HandleSelectItems
             selectItem={selectItem}
             setSelectItem={setSelectItem}
-            selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
+            selectDataItems={[`${tokenPairs[0]}`, `USD`]}
           />
         </SelectItemsBox>
 

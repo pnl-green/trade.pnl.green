@@ -49,13 +49,12 @@ export class Hyperliquid {
   ) => {
     let orders = [order].reduce((acc: OrderRequest[], order) => {
       acc.push({
-        asset: order.asset,
-        isBuy: order.isBuy,
-        limitPx: order.limitPx,
-        sz: order.sz,
-        reduceOnly: order.reduceOnly,
-        orderType: order.orderType,
-        ...(order?.cloid && { cloid: order.cloid }),
+        a: order.a,
+        b: order.b,
+        p: order.p,
+        s: order.s,
+        r: order.r,
+        t: order.t,
       });
 
       return acc;
@@ -64,13 +63,16 @@ export class Hyperliquid {
     let action = {
       grouping: 'na',
       orders,
+      type: 'order'
     };
 
     let request = {
       endpoint: 'exchange',
       type: 'order',
       action,
-      ...(vaultAdress && { vaultAdress }),
+      nonce: Date.now(),
+      signature: null,
+      vaultAdress: null,
     };
 
     return this.#post(request);
@@ -108,13 +110,12 @@ export class Hyperliquid {
     let orders = [normal, tp, sl].reduce((acc: OrderRequest[], order) => {
       if (order) {
         acc.push({
-          asset: order.asset,
-          isBuy: order.isBuy,
-          limitPx: order.limitPx.toString(),
-          reduceOnly: order.reduceOnly,
-          sz: order.sz.toString(),
-          orderType: order.orderType,
-          ...(order?.cloid && { cloid: order.cloid }),
+          a: order.a,
+          b: order.b,
+          p: order.p,
+          s: order.s.toString(),
+          r: order.r,
+          t: order.t
         });
       }
       return acc;
