@@ -3,7 +3,7 @@ use crate::{
     model::{
         hyperliquid::{
             Agent, ChannelConnection, Condition, DeltaCalculationResponse,
-            DepthCalculationResponse, Exchange, Info, InternalRequest, QueueElem, Request,
+            DepthCalculationResponse, Exchange, Info, InternalRequest, QueueElem, Request, Risk,
             CONNECTIONS,
         },
         Response,
@@ -14,9 +14,11 @@ use crate::{
 };
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Responder};
+use anyhow::anyhow;
 use anyhow::Context;
 use ethers::{
     core::rand,
+    etherscan::account,
     signers::{LocalWallet, Signer},
     utils::hex::ToHex,
 };
@@ -296,9 +298,83 @@ pub async fn hyperliquid(
 
             match req {
                 Exchange::Order {
+                    risk,
                     action,
                     vault_address,
                 } => {
+                    // ??? який з ордерів брати
+                    if action.orders[0].is_buy {
+                        let info: hyperliquid::Info = Hyperliquid::new(chain);
+
+                        let symbol_left = "BTC";
+                        let symbol_right = "SOL";
+                        // ??? який з ордерів брати
+                        let price = action.orders[0].limit_px.parse::<f32>()?;
+                        let size = action.orders[0].sz.parse::<f32>()?;
+                        let order_sum = price * size;
+
+                        let book = info
+                            .l2_book(symbol_right.to_string())
+                            .await
+                            .map_err(|msg| BadRequestError(msg.to_string()))?;
+                        // ??? на купівлю брати
+                        let ask_levels = book
+                            .levels
+                            .first()
+                            .ok_or(BadRequestError("Book doesn't contain ask level".into()))?
+                            .iter()
+                            .filter_map(|l| {
+                                Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?))
+                            })
+                            .collect::<Vec<_>>();
+
+                        let ask_price = ask_levels
+                            .iter()
+                            .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                            .ok_or_else(|| anyhow!("Level doesn't have any items"))?
+                            .0;
+
+                        let order_sum_usd = order_sum * ask_price;
+
+                        match risk {
+                            Risk::Percentage(per) => {
+                                // ??? або .user_state()
+                                let account_info = info
+                                    .sub_accounts(vault_address.unwrap())
+                                    .await
+                                    .map_err(|msg| BadRequestError(msg.to_string()))?;
+
+                                // Якщо немає вертати помилку
+                                // ??? Який з субакаунтів брати?
+                                let account_info = account_info.unwrap();
+                                let portfolio_value = account_info[0]
+                                    .clearinghouse_state
+                                    .margin_summary
+                                    .account_value
+                                    .clone()
+                                    .parse::<f32>()?;
+
+                                let max_val = portfolio_value * per as f32;
+                                if order_sum_usd > max_val {
+                                    let res = HttpResponse::Ok().json(Response {
+                                        success: false,
+                                        data: None::<String>,
+                                        msg: Some("Risk exceeded".to_string()),
+                                    });
+                                }
+                            }
+                            Risk::Value(max_val) => {
+                                if order_sum_usd > max_val {
+                                    let res = HttpResponse::Ok().json(Response {
+                                        success: false,
+                                        data: None::<String>,
+                                        msg: Some("Risk exceeded".to_string()),
+                                    });
+                                }
+                            }
+                        }
+                    }
+
                     let data = exchange
                         .place_order(agent, action.orders, vault_address)
                         .await

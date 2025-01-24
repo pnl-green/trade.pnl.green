@@ -93,6 +93,13 @@ pub struct Order {
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub enum Risk {
+    Percentage(u8),
+    Value(f32),
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateSubAccount {
     pub name: String,
 }
@@ -187,6 +194,7 @@ pub struct AproveAgentRequest {
 pub enum Exchange {
     #[serde(rename_all = "camelCase")]
     Order {
+        risk: Risk,
         action: Order,
         vault_address: Option<Address>,
     },
