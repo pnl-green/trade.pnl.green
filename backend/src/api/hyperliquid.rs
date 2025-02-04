@@ -302,22 +302,49 @@ pub async fn hyperliquid(
                     action,
                     vault_address,
                 } => {
+                    let order = &action.orders[0];
                     // ??? який з ордерів брати
-                    if action.orders[0].is_buy {
+                    if order.is_buy {
                         let info: hyperliquid::Info = Hyperliquid::new(chain);
 
-                        let symbol_left = "BTC";
-                        let symbol_right = "SOL";
-                        // ??? який з ордерів брати
-                        let price = action.orders[0].limit_px.parse::<f32>()?;
-                        let size = action.orders[0].sz.parse::<f32>()?;
+                        let spot_meta = info
+                            .spot_meta()
+                            .await
+                            .map_err(|msg| BadRequestError(msg.to_string()))?;
+
+                        // Знайти потрібний SpotUniverse за його індексом
+                        let universe = spot_meta
+                            .universe
+                            .iter()
+                            .find(|u| u.index == order.asset as u64)
+                            .ok_or_else(|| anyhow!("There are no matches for this index"))?;
+
+                        // Переконатися, що у `tokens` є хоча б два елементи
+                        if universe.tokens.len() < 2 {
+                            return Err(anyhow!("Can't take token name from universe").into());
+                        }
+
+                        // Отримати другий індекс із `tokens`
+                        let second_token_index = universe.tokens[1];
+
+                        // Знайти відповідний токен у `tokens` за індексом
+                        let token = spot_meta
+                            .tokens
+                            .iter()
+                            .find(|t| t.index == second_token_index)
+                            .ok_or_else(|| anyhow!("There is no token with this index"))?;
+
+                        let symbol_right = token.name.clone();
+
+                        let price = order.limit_px.parse::<f32>()?;
+                        let size = order.sz.parse::<f32>()?;
                         let order_sum = price * size;
 
                         let book = info
-                            .l2_book(symbol_right.to_string())
+                            .l2_book(symbol_right)
                             .await
                             .map_err(|msg| BadRequestError(msg.to_string()))?;
-                        // ??? на купівлю брати
+
                         let ask_levels = book
                             .levels
                             .first()
