@@ -180,7 +180,7 @@ Place an order
 
 `cloid` in argument order is an optional 128 bit hex string, e.g. 0x1234567890abcdef1234567890abcdef
 
-
+`risk` in argument order is an optional maximum available USD amount for an order
 
 ```json
 {

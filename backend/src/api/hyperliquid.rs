@@ -306,7 +306,11 @@ pub async fn hyperliquid(
                     action,
                     vault_address,
                 } => {
-                    let orders = filter_orders_by_risk(action.orders, chain, risk).await?;
+                    let orders = if let Some(risk) = risk {
+                        filter_orders_by_risk(action.orders, risk).await?
+                    } else {
+                        action.orders
+                    };
 
                     let data = exchange
                         .place_order(agent, orders, vault_address)
@@ -652,17 +656,18 @@ pub async fn hyperliquid(
 /// invalid data during processing.
 async fn filter_orders_by_risk(
     orders: Vec<OrderRequest>,
-    chain: Chain,
     risk: f32,
 ) -> anyhow::Result<Vec<OrderRequest>> {
     let mut filtered_orders = Vec::new();
 
-    // Create an instance of Hyperliquid Info to fetch market data
-    let info: hyperliquid::Info = Hyperliquid::new(chain);
-
     for order in orders {
         if order.is_buy {
-            // Fetch metadata for spot markets
+            let price = order.limit_px.parse::<f32>()?;
+            let size = order.sz.parse::<f32>()?;
+            let order_sum_usd = price * size;
+
+            // If the order is not paired with USDC
+            /* // Fetch metadata for spot markets
             let spot_meta = info
                 .spot_meta()
                 .await
@@ -695,35 +700,38 @@ async fn filter_orders_by_risk(
 
             // Skip fetching the order book if the token is USDC
             if symbol_right != *"USDC" {
-                /* let book = info
-                    .l2_book(symbol_right)
-                    .await
-                    .map_err(|msg| anyhow!(msg.to_string()))?;
+                // let book = info
+                //     .l2_book(symbol_right)
+                //     .await
+                //     .map_err(|msg| anyhow!(msg.to_string()))?;
 
-                // Extract ask levels and calculate the maximum ask price
-                let ask_levels = book
-                    .levels
-                    .first()
-                    .ok_or_else(|| anyhow!("Book doesn't contain ask level"))?
-                    .iter()
-                    .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
-                    .collect::<Vec<_>>();
+                // // Extract ask levels and calculate the maximum ask price
+                // let ask_levels = book
+                //     .levels
+                //     .first()
+                //     .ok_or_else(|| anyhow!("Book doesn't contain ask level"))?
+                //     .iter()
+                //     .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+                //     .collect::<Vec<_>>();
 
-                let ask_price = ask_levels
-                    .iter()
-                    .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
-                    .ok_or_else(|| anyhow!("Level doesn't have any items"))?
-                    .0; */
-                let mids = info.mids().await?;
-                let ask_price = mids
-                    .get(&symbol_right)
-                    .ok_or_else(|| {
-                        anyhow!("There is no price information for {symbol_right} token")
-                    })?
-                    .parse::<f32>()?;
+                // let ask_price = ask_levels
+                //     .iter()
+                //     .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                //     .ok_or_else(|| anyhow!("Level doesn't have any items"))?
+                //     .0;
 
-                order_sum_usd *= ask_price;
-            }
+                // or
+
+                // let mids = info.mids().await?;
+                // let ask_price = mids
+                //     .get(&symbol_right)
+                //     .ok_or_else(|| {
+                //         anyhow!("There is no price information for {symbol_right} token")
+                //     })?
+                //     .parse::<f32>()?;
+
+                // order_sum_usd *= ask_price;
+            }*/
 
             // Exclude orders exceeding the risk threshold
             if order_sum_usd <= risk {
