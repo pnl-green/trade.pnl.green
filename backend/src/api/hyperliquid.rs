@@ -3,7 +3,7 @@ use crate::{
     model::{
         hyperliquid::{
             Agent, ChannelConnection, Condition, DeltaCalculationResponse,
-            DepthCalculationResponse, Exchange, Info, InternalRequest, QueueElem, Request, Risk,
+            DepthCalculationResponse, Exchange, Info, InternalRequest, QueueElem, Request,
             CONNECTIONS,
         },
         Response,
@@ -23,11 +23,15 @@ use ethers::{
     utils::hex::ToHex,
 };
 use hyperliquid::{
-    types::{exchange::response, Chain, API},
+    types::{
+        exchange::{request::OrderRequest, response},
+        Chain, API,
+    },
     Hyperliquid,
 };
 use std::sync::Arc;
 use tokio::sync::{mpsc::Sender, RwLock};
+use tracing::error;
 
 pub async fn hyperliquid(
     chain: web::Data<Chain>,
@@ -302,108 +306,10 @@ pub async fn hyperliquid(
                     action,
                     vault_address,
                 } => {
-                    let order = &action.orders[0];
-                    // ??? який з ордерів брати
-                    if order.is_buy {
-                        let info: hyperliquid::Info = Hyperliquid::new(chain);
-
-                        let spot_meta = info
-                            .spot_meta()
-                            .await
-                            .map_err(|msg| BadRequestError(msg.to_string()))?;
-
-                        // Знайти потрібний SpotUniverse за його індексом
-                        let universe = spot_meta
-                            .universe
-                            .iter()
-                            .find(|u| u.index == order.asset as u64)
-                            .ok_or_else(|| anyhow!("There are no matches for this index"))?;
-
-                        // Переконатися, що у `tokens` є хоча б два елементи
-                        if universe.tokens.len() < 2 {
-                            return Err(anyhow!("Can't take token name from universe").into());
-                        }
-
-                        // Отримати другий індекс із `tokens`
-                        let second_token_index = universe.tokens[1];
-
-                        // Знайти відповідний токен у `tokens` за індексом
-                        let token = spot_meta
-                            .tokens
-                            .iter()
-                            .find(|t| t.index == second_token_index)
-                            .ok_or_else(|| anyhow!("There is no token with this index"))?;
-
-                        let symbol_right = token.name.clone();
-
-                        let price = order.limit_px.parse::<f32>()?;
-                        let size = order.sz.parse::<f32>()?;
-                        let order_sum = price * size;
-
-                        let book = info
-                            .l2_book(symbol_right)
-                            .await
-                            .map_err(|msg| BadRequestError(msg.to_string()))?;
-
-                        let ask_levels = book
-                            .levels
-                            .first()
-                            .ok_or(BadRequestError("Book doesn't contain ask level".into()))?
-                            .iter()
-                            .filter_map(|l| {
-                                Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?))
-                            })
-                            .collect::<Vec<_>>();
-
-                        let ask_price = ask_levels
-                            .iter()
-                            .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
-                            .ok_or_else(|| anyhow!("Level doesn't have any items"))?
-                            .0;
-
-                        let order_sum_usd = order_sum * ask_price;
-
-                        match risk {
-                            Risk::Percentage(per) => {
-                                // ??? або .user_state()
-                                let account_info = info
-                                    .sub_accounts(vault_address.unwrap())
-                                    .await
-                                    .map_err(|msg| BadRequestError(msg.to_string()))?;
-
-                                // Якщо немає вертати помилку
-                                // ??? Який з субакаунтів брати?
-                                let account_info = account_info.unwrap();
-                                let portfolio_value = account_info[0]
-                                    .clearinghouse_state
-                                    .margin_summary
-                                    .account_value
-                                    .clone()
-                                    .parse::<f32>()?;
-
-                                let max_val = portfolio_value * per as f32;
-                                if order_sum_usd > max_val {
-                                    let res = HttpResponse::Ok().json(Response {
-                                        success: false,
-                                        data: None::<String>,
-                                        msg: Some("Risk exceeded".to_string()),
-                                    });
-                                }
-                            }
-                            Risk::Value(max_val) => {
-                                if order_sum_usd > max_val {
-                                    let res = HttpResponse::Ok().json(Response {
-                                        success: false,
-                                        data: None::<String>,
-                                        msg: Some("Risk exceeded".to_string()),
-                                    });
-                                }
-                            }
-                        }
-                    }
+                    let orders = filter_orders_by_risk(action.orders, chain, risk).await?;
 
                     let data = exchange
-                        .place_order(agent, action.orders, vault_address)
+                        .place_order(agent, orders, vault_address)
                         .await
                         .map_err(|msg| BadRequestError(msg.to_string()))?;
 
@@ -723,4 +629,111 @@ pub async fn hyperliquid(
             })
         }
     })
+}
+
+/// Filters a list of orders based on their risk value.
+///
+/// This function evaluates each order in the given vector of `OrderRequest` objects.
+/// If an order is a buy order, it calculates the total USD value of the order using
+/// associated metadata from the Hyperliquid API and the current market price.
+/// Orders that exceed the specified risk threshold are excluded from the result.
+///
+/// # Parameters
+/// - `orders`: A vector of `OrderRequest` objects representing the orders to be filtered.
+/// - `chain`: A `Chain` instance used to interact with the Hyperliquid API.
+/// - `risk`: A `f32` value representing the maximum allowable risk threshold.
+///
+/// # Returns
+/// A `Result` containing a vector of `OrderRequest` objects that do not exceed the risk threshold.
+/// If any errors occur during processing, an `anyhow::Error` is returned.
+///
+/// # Errors
+/// This function may return an error if it fails to fetch metadata, parse values, or encounter
+/// invalid data during processing.
+async fn filter_orders_by_risk(
+    orders: Vec<OrderRequest>,
+    chain: Chain,
+    risk: f32,
+) -> anyhow::Result<Vec<OrderRequest>> {
+    let mut filtered_orders = Vec::new();
+
+    // Create an instance of Hyperliquid Info to fetch market data
+    let info: hyperliquid::Info = Hyperliquid::new(chain);
+
+    for order in orders {
+        if order.is_buy {
+            // Fetch metadata for spot markets
+            let spot_meta = info
+                .spot_meta()
+                .await
+                .map_err(|msg| anyhow!(msg.to_string()))?;
+
+            // Find the universe corresponding to the order's asset
+            let universe = spot_meta
+                .universe
+                .iter()
+                .find(|u| u.index == order.asset as u64)
+                .ok_or_else(|| anyhow!("There are no matches for this index"))?;
+
+            // Ensure the universe contains at least two tokens
+            if universe.tokens.len() < 2 {
+                return Err(anyhow!("Can't take token name from universe"));
+            }
+
+            // Get the second token index and fetch its metadata
+            let second_token_index = universe.tokens[1];
+            let token = spot_meta
+                .tokens
+                .iter()
+                .find(|t| t.index == second_token_index)
+                .ok_or_else(|| anyhow!("There is no token with this index"))?;
+
+            let symbol_right = token.name.clone();
+            let price = order.limit_px.parse::<f32>()?;
+            let size = order.sz.parse::<f32>()?;
+            let mut order_sum_usd = price * size;
+
+            // Skip fetching the order book if the token is USDC
+            if symbol_right != *"USDC" {
+                /* let book = info
+                    .l2_book(symbol_right)
+                    .await
+                    .map_err(|msg| anyhow!(msg.to_string()))?;
+
+                // Extract ask levels and calculate the maximum ask price
+                let ask_levels = book
+                    .levels
+                    .first()
+                    .ok_or_else(|| anyhow!("Book doesn't contain ask level"))?
+                    .iter()
+                    .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+                    .collect::<Vec<_>>();
+
+                let ask_price = ask_levels
+                    .iter()
+                    .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                    .ok_or_else(|| anyhow!("Level doesn't have any items"))?
+                    .0; */
+                let mids = info.mids().await?;
+                let ask_price = mids
+                    .get(&symbol_right)
+                    .ok_or_else(|| {
+                        anyhow!("There is no price information for {symbol_right} token")
+                    })?
+                    .parse::<f32>()?;
+
+                order_sum_usd *= ask_price;
+            }
+
+            // Exclude orders exceeding the risk threshold
+            if order_sum_usd <= risk {
+                filtered_orders.push(order);
+            }
+        } else {
+            // Include non-buy orders without evaluation
+            filtered_orders.push(order);
+        }
+    }
+
+    Ok(filtered_orders)
 }
