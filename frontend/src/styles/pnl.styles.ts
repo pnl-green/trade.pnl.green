@@ -51,7 +51,7 @@ export const TradingViewComponent = styled(Box)(() => ({
       padding: '1px',
       border: '1px solid rgba(255, 255, 255, 0.1)',
       backgroundColor: '#13121296;',
-    }
+    },
   },
 
   '@media screen and (min-width: 1535px)': {
@@ -81,7 +81,7 @@ export const WalletBox = styled(Box)(() => ({
     marginLeft: '-8px',
   },
   '@media screen and (min-width: 1535px)': {
-    height: 'calc(100vh - 710px)',
+    height: 'calc(100vh - 670px)',
   },
   '@media screen and (max-width: 1535px)': {
     width: '315px !important',

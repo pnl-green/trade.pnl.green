@@ -1,8 +1,15 @@
 import { SelectItemsBox } from '@/styles/riskManager.styles';
 import { Box } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
-import { ButtonStyles, BuySellBtn, CurrentMarketPriceAsk, CurrentMarketPriceBid, CurrentMarketPriceWidget, FlexItems } from '@/styles/common.styles';
+import {
+  ButtonStyles,
+  BuySellBtn,
+  CurrentMarketPriceAsk,
+  CurrentMarketPriceBid,
+  CurrentMarketPriceWidget,
+  FlexItems,
+} from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
@@ -15,6 +22,7 @@ import { useWebDataContext } from '@/context/webDataContext';
 import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
 import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
+import { riskValues } from '@/utils/risk';
 
 const MarketComponent = () => {
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
@@ -22,15 +30,21 @@ const MarketComponent = () => {
     useHyperLiquidContext();
   const { webData2 } = useWebDataContext();
 
+  const balance = Number(
+    webData2.clearinghouseState?.marginSummary.accountValue
+  );
+
   const [radioValue, setRadioValue] = useState<string>('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
+  const [riskSelectItem, setRiskSelectItem] = useState(`${riskValues[0]}`);
   const [takeProfitPrice, setTakeProfitPrice] = useState('');
   const [stopLossPrice, setStopLossPrice] = useState('');
   const [gain, setGain] = useState('');
   const [loss, setLoss] = useState('');
   const [size, setSize] = useState<number>(0.0);
+  const [risk, setRisk] = useState(0);
   const [establishConnModal, setEstablishedConnModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,12 +52,8 @@ const MarketComponent = () => {
   const { bookData, loadingBookData } = useOrderBookTradesContext();
   function getBookData() {
     let limit = 10;
-    const asks = bookData.asks
-      .slice(0, limit)
-      .sort((a, b) => b.px - a.px);
-    const bids = bookData.bids
-      .slice(0, limit)
-    .sort((a, b) => b.px - a.px);
+    const asks = bookData.asks.slice(0, limit).sort((a, b) => b.px - a.px);
+    const bids = bookData.bids.slice(0, limit).sort((a, b) => b.px - a.px);
     return { asks, bids };
   }
   let orders = getBookData();
@@ -55,6 +65,34 @@ const MarketComponent = () => {
   }) => {
     const value = e.target.value;
     setSize(value);
+  };
+
+  const handleRiskInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = +e.target.value;
+    if (riskSelectItem === 'Percent') {
+      if (value > 100) {
+        value = 100;
+      }
+    }
+    setRisk(value);
+  };
+
+  const handleRiskSelectItem = (value: string) => {
+    setRisk(0);
+    setRiskSelectItem(value);
+  };
+
+  const formatRiskValue = (
+    balance: number,
+    risk: number,
+    riskSelectItem: string
+  ) => {
+    if (riskSelectItem === 'Percent') {
+      const percent = risk;
+      return (balance * percent) / 100;
+    } else {
+      return risk;
+    }
   };
 
   //setting the equivalent size in the selected token
@@ -105,6 +143,7 @@ const MarketComponent = () => {
     },
   };
   let reduceOnly = radioValue === '1';
+  const riskIncluded = radioValue === '3';
 
   // Calculate limit price based on buy or sell
   let normalLimitPx = isBuy
@@ -122,6 +161,11 @@ const MarketComponent = () => {
         sz: parseSize(sz, szDecimals),
         orderType,
         reduceOnly,
+        ...(riskIncluded
+          ? {
+              risk: formatRiskValue(balance, risk, riskSelectItem),
+            }
+          : {}),
       });
 
       if (success) {
@@ -213,6 +257,11 @@ const MarketComponent = () => {
           sz: parseSize(sz, szDecimals),
           orderType,
           reduceOnly,
+          ...(riskIncluded
+            ? {
+                risk: formatRiskValue(balance, risk, riskSelectItem),
+              }
+            : {}),
         },
         takeProfitPrice.trim() !== ''
           ? {
@@ -228,6 +277,11 @@ const MarketComponent = () => {
                 },
               },
               reduceOnly: !reduceOnly,
+              ...(riskIncluded
+                ? {
+                    risk: formatRiskValue(balance, risk, riskSelectItem),
+                  }
+                : {}),
             }
           : undefined,
         stopLossPrice.trim() !== ''
@@ -244,6 +298,11 @@ const MarketComponent = () => {
                 },
               },
               reduceOnly: !reduceOnly,
+              ...(riskIncluded
+                ? {
+                    risk: formatRiskValue(balance, risk, riskSelectItem),
+                  }
+                : {}),
             }
           : undefined
       );
@@ -321,8 +380,14 @@ const MarketComponent = () => {
           <CurrentMarketPriceWidget>
             {/* @Todo investigato how get currentMarketPrice directly from ws, not order book */}
             {/* Quick fix, i will rewrite it */}
-            <CurrentMarketPriceAsk>{ orders.asks.length !== 0 ? (orders.asks[orders.asks.length-1].px).toFixed(2) : ''}</CurrentMarketPriceAsk>
-            <CurrentMarketPriceBid>{ orders.bids.length !== 0 ? (orders.bids[0].px).toFixed(2) : '' }</CurrentMarketPriceBid>
+            <CurrentMarketPriceAsk>
+              {orders.asks.length !== 0
+                ? orders.asks[orders.asks.length - 1].px.toFixed(2)
+                : ''}
+            </CurrentMarketPriceAsk>
+            <CurrentMarketPriceBid>
+              {orders.bids.length !== 0 ? orders.bids[0].px.toFixed(2) : ''}
+            </CurrentMarketPriceBid>
           </CurrentMarketPriceWidget>
         </SelectItemsBox>
 
@@ -395,6 +460,20 @@ const MarketComponent = () => {
             />
           </label>
           <span>Take Profit / Stop Loss</span>
+        </FlexItems>
+
+        <FlexItems sx={{ justifyContent: 'flex-start' }}>
+          <label>
+            <input
+              type="radio"
+              name="radio"
+              value="3"
+              checked={radioValue === '3'}
+              onChange={handleRadioChange}
+              onClick={handleRadioClick}
+            />
+          </label>
+          <span>Add Risk</span>
         </FlexItems>
       </Box>
 
@@ -473,6 +552,28 @@ const MarketComponent = () => {
             />
           </FlexItems>
         </Box>
+      )}
+
+      {radioValue === '3' && (
+        <SelectItemsBox sx={{ mt: '10px' }}>
+          <RenderInput
+            label={'Risk'}
+            type="number"
+            value={risk.toString()}
+            onChange={(e: any) => handleRiskInput(e)}
+            styles={{
+              background: 'transparent',
+              ':hover': {
+                border: 'none !important',
+              },
+            }}
+          />
+          <HandleSelectItems
+            selectItem={riskSelectItem}
+            setSelectItem={handleRiskSelectItem}
+            selectDataItems={[`${riskValues[0]}`, `${riskValues[1]}`]}
+          />
+        </SelectItemsBox>
       )}
 
       {!establishedConnection ? (
