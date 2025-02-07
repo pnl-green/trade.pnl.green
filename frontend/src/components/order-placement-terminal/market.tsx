@@ -44,7 +44,7 @@ const MarketComponent = () => {
   const [gain, setGain] = useState('');
   const [loss, setLoss] = useState('');
   const [size, setSize] = useState<number>(0.0);
-  const [risk, setRisk] = useState(0);
+  const [risk, setRisk] = useState<number>(0.0);
   const [establishConnModal, setEstablishedConnModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -67,13 +67,10 @@ const MarketComponent = () => {
     setSize(value);
   };
 
-  const handleRiskInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = +e.target.value;
-    if (riskSelectItem === 'Percent') {
-      if (value > 100) {
-        value = 100;
-      }
-    }
+  const handleRiskInput = (e: {
+    target: { value: React.SetStateAction<number> };
+  }) => {
+    const value = e.target.value;
     setRisk(value);
   };
 
@@ -84,15 +81,22 @@ const MarketComponent = () => {
 
   const formatRiskValue = (
     balance: number,
-    risk: number,
+    risk: string | number,
     riskSelectItem: string
   ) => {
-    if (riskSelectItem === 'Percent') {
-      const percent = risk;
-      return (balance * percent) / 100;
-    } else {
-      return risk;
+    if (!risk || isNaN(+risk)) {
+      return 0;
     }
+
+    let riskValue = +parseSize(+risk, szDecimals);
+    if (riskSelectItem === 'Percent') {
+      riskValue = (balance * +parseSize(+risk, szDecimals)) / 100;
+    }
+    if (isNaN(+riskValue)) {
+      return 0;
+    }
+
+    return riskValue;
   };
 
   //setting the equivalent size in the selected token
@@ -161,7 +165,7 @@ const MarketComponent = () => {
         sz: parseSize(sz, szDecimals),
         orderType,
         reduceOnly,
-        ...(riskIncluded
+        ...(riskIncluded && risk
           ? {
               risk: formatRiskValue(balance, risk, riskSelectItem),
             }
@@ -257,7 +261,7 @@ const MarketComponent = () => {
           sz: parseSize(sz, szDecimals),
           orderType,
           reduceOnly,
-          ...(riskIncluded
+          ...(riskIncluded && risk
             ? {
                 risk: formatRiskValue(balance, risk, riskSelectItem),
               }
@@ -277,7 +281,7 @@ const MarketComponent = () => {
                 },
               },
               reduceOnly: !reduceOnly,
-              ...(riskIncluded
+              ...(riskIncluded && risk
                 ? {
                     risk: formatRiskValue(balance, risk, riskSelectItem),
                   }
@@ -298,7 +302,7 @@ const MarketComponent = () => {
                 },
               },
               reduceOnly: !reduceOnly,
-              ...(riskIncluded
+              ...(riskIncluded && risk
                 ? {
                     risk: formatRiskValue(balance, risk, riskSelectItem),
                   }
@@ -558,6 +562,7 @@ const MarketComponent = () => {
         <SelectItemsBox sx={{ mt: '10px' }}>
           <RenderInput
             label={'Risk'}
+            placeholder="|"
             type="number"
             value={risk.toString()}
             onChange={(e: any) => handleRiskInput(e)}
