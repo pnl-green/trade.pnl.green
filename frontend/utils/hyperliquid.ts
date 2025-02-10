@@ -56,6 +56,7 @@ export class Hyperliquid {
         reduceOnly: order.reduceOnly,
         orderType: order.orderType,
         ...(order?.cloid && { cloid: order.cloid }),
+        ...(order?.risk ? { risk: order.risk } : {}),
       });
 
       return acc;
@@ -115,6 +116,7 @@ export class Hyperliquid {
           sz: order.sz.toString(),
           orderType: order.orderType,
           ...(order?.cloid && { cloid: order.cloid }),
+          ...(order?.risk ? { risk: order.risk } : {}),
         });
       }
       return acc;

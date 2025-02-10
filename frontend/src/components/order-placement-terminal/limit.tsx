@@ -14,12 +14,17 @@ import toast from 'react-hot-toast';
 import { OrderType } from '@/types/hyperliquid';
 import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
 import EstablishConnectionModal from '../Modals/establishConnectionModal';
+import { riskValues } from '@/utils/risk';
 
 const LimitComponent = () => {
   const { webData2 } = useWebDataContext();
   const { hyperliquid, establishedConnection, handleEstablishConnection } =
     useHyperLiquidContext();
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
+
+  const balance = Number(
+    webData2.clearinghouseState?.marginSummary.accountValue
+  );
 
   //------Local State------
   const [selectOrderType, setSelectOrderType] = useState<
@@ -29,6 +34,7 @@ const LimitComponent = () => {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
+  const [riskSelectItem, setRiskSelectItem] = useState(`${riskValues[0]}`);
   const [size, setSize] = useState<number>(0.0);
   const [isLoading, setIsLoading] = useState(false);
   const [limitPx, setLimitPx] = useState<number>(0.0);
@@ -38,6 +44,7 @@ const LimitComponent = () => {
   const [stopLossPrice, setStopLossPrice] = useState('');
   const [gain, setGain] = useState('');
   const [loss, setLoss] = useState('');
+  const [risk, setRisk] = useState<number>(0.0);
   const [estLiqPrice, setEstLiquidationPrice] = useState('');
   const [fee, setFee] = useState('');
 
@@ -59,6 +66,38 @@ const LimitComponent = () => {
     if (radioValue === e.target.value) {
       setRadioValue('');
     }
+  };
+
+  const handleRiskInput = (e: {
+    target: { value: React.SetStateAction<number> };
+  }) => {
+    const value = e.target.value;
+    setRisk(value);
+  };
+
+  const handleRiskSelectItem = (value: string) => {
+    setRisk(0);
+    setRiskSelectItem(value);
+  };
+
+  const formatRiskValue = (
+    balance: number,
+    risk: string | number,
+    riskSelectItem: string
+  ) => {
+    if (!risk || isNaN(+risk)) {
+      return 0;
+    }
+
+    let riskValue = +parseSize(+risk, szDecimals);
+    if (riskSelectItem === 'Percent') {
+      riskValue = (balance * +parseSize(+risk, szDecimals)) / 100;
+    }
+    if (isNaN(+riskValue)) {
+      return 0;
+    }
+
+    return riskValue;
   };
 
   useEffect(() => {
@@ -96,6 +135,7 @@ const LimitComponent = () => {
         },
       };
       let reduceOnly = radioValue === '1';
+      const riskIncluded = radioValue === '3';
 
       const { success, data, msg } = await hyperliquid.placeOrder({
         asset: Number(assetId),
@@ -104,6 +144,11 @@ const LimitComponent = () => {
         sz: parseSize(sz, szDecimals),
         orderType,
         reduceOnly,
+        ...(riskIncluded && risk
+          ? {
+              risk: formatRiskValue(balance, risk, riskSelectItem),
+            }
+          : {}),
       });
 
       if (success) {
@@ -251,6 +296,20 @@ const LimitComponent = () => {
           </label>
           <span>Take Profit / Stop Loss</span>
         </FlexItems>
+
+        <FlexItems sx={{ justifyContent: 'flex-start' }}>
+          <label>
+            <input
+              type="radio"
+              name="radio"
+              value="3"
+              checked={radioValue === '3'}
+              onChange={handleRadioChange}
+              onClick={handleRadioClick}
+            />
+          </label>
+          <span>Add Risk</span>
+        </FlexItems>
       </Box>
 
       {radioValue === '2' && (
@@ -324,6 +383,29 @@ const LimitComponent = () => {
             />
           </FlexItems>
         </Box>
+      )}
+
+      {radioValue === '3' && (
+        <SelectItemsBox sx={{ mt: '10px' }}>
+          <RenderInput
+            label={'Risk'}
+            placeholder="|"
+            type="number"
+            value={risk.toString()}
+            onChange={(e: any) => handleRiskInput(e)}
+            styles={{
+              background: 'transparent',
+              ':hover': {
+                border: 'none !important',
+              },
+            }}
+          />
+          <HandleSelectItems
+            selectItem={riskSelectItem}
+            setSelectItem={handleRiskSelectItem}
+            selectDataItems={[`${riskValues[0]}`, `${riskValues[1]}`]}
+          />
+        </SelectItemsBox>
       )}
 
       <SelectItemsBox
