@@ -187,6 +187,7 @@ pub struct AproveAgentRequest {
 pub enum Exchange {
     #[serde(rename_all = "camelCase")]
     Order {
+        risk: Option<f32>,
         action: Order,
         vault_address: Option<Address>,
     },
