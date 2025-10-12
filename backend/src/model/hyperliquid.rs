@@ -24,6 +24,11 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 lazy_static! {
     /// Shared cache of live websocket subscriptions keyed by symbol.
+    ///
+    /// The watcher allows multiple conditional orders to reuse the same
+    /// Hyperliquid stream without spawning duplicate websocket tasks. Each
+    /// consumer increments [`ChannelConnection::count`] so we can tear down the
+    /// task once the last dependent order has been executed.
     pub static ref CONNECTIONS: Arc<Mutex<HashMap<String, ChannelConnection>>> =
         Arc::new(Mutex::new(HashMap::new()));
 }
@@ -452,6 +457,9 @@ impl Check for PairPrice {
 
 impl QueueElem {
     /// Evaluate the stored condition against the latest websocket data.
+    ///
+    /// Returning `Ok(false)` allows the worker loop to keep polling without
+    /// tearing down the subscription until the condition is eventually met.
     pub async fn check(&self) -> anyhow::Result<bool> {
         match &self.condition {
             Condition::PairPrice(pair_price) => pair_price.check().await,
@@ -461,6 +469,10 @@ impl QueueElem {
 
     /// Execute the queued action if the condition is satisfied, cleaning up
     /// websocket subscriptions when no longer needed.
+    ///
+    /// The clean-up logic mirrors the reference counting performed when the
+    /// condition was registered: once no listeners remain, the background task
+    /// receives a stop signal so the process doesn't leak open sockets.
     pub async fn execute(self, exchange: &hyperliquid::Exchange) {
         match self.action {
             CondAction::HLOrder(order) => {
@@ -534,6 +546,11 @@ pub struct ChannelConnection {
     /// Signal used to request a graceful shutdown of the background task.
     pub stop_sender: oneshot::Sender<()>,
     /// Number of consumers currently relying on this connection.
+    ///
+    /// Every conditional order increments the counter when it first subscribes
+    /// and decrements it once the order is executed or cancelled. When the
+    /// counter reaches zero we close the websocket to free up Hyperliquid
+    /// resources.
     pub count: usize,
 }
 
@@ -542,6 +559,10 @@ pub struct ChannelConnection {
 pub enum InternalRequest {
     /// Queue entry representing a TWAP action to execute on the background
     /// worker.
+    ///
+    /// Worker threads receive these messages through an mpsc channel so the
+    /// API layer can enqueue long-running executions without blocking client
+    /// responses.
     TwapOrder {
         /// TWAP configuration forwarded to the worker.
         request: TwapOrderRequest,
@@ -560,6 +581,9 @@ pub enum Request {
     /// Hyperliquid exchange endpoint request.
     Exchange(Exchange),
     /// Initiate a websocket connection for a specific user.
+    ///
+    /// The websocket worker caches subscriptions per user so multiple tabs can
+    /// reuse a single underlying connection.
     Connect { user: Address },
 }
 
