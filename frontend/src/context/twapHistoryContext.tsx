@@ -1,4 +1,4 @@
-//
+// Tracks TWAP automation history for the active Hyperliquid account.
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress, useChainId } from '@thirdweb-dev/react';
@@ -18,6 +18,7 @@ export const useTwapHistoryContext = () => {
   return context;
 };
 
+// Provider that listens for Hyperliquid userTwapHistory websocket updates.
 const TwapHistoryProvider = ({ children }: { children: React.ReactNode }) => {
   const [twapHistoryData, setTwapHistoryData] = useState<any>([]);
   const [loadingTwapData, setLoadingTwapData] = useState<boolean>(true);
@@ -25,6 +26,7 @@ const TwapHistoryProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId();
 
   useEffect(() => {
+    // Bail out if no wallet is connected; otherwise stream TWAP history.
     if (userAddress) {
       // Create a new WebSocket connection
       const ws = new WebSocket(
@@ -84,6 +86,7 @@ const TwapHistoryProvider = ({ children }: { children: React.ReactNode }) => {
         loadingTwapData,
       }}
     >
+      {/* Provide scheduled TWAP job history to UI consumers. */}
       {children}
     </TwapHistoryContext.Provider>
   );

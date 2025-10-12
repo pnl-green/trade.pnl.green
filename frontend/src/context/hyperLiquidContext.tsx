@@ -1,3 +1,4 @@
+// Manages Hyperliquid SDK connection state and exposes sub-account helpers.
 import React, {
   createContext,
   Dispatch,
@@ -14,6 +15,7 @@ import toast from 'react-hot-toast';
 import { providers } from 'ethers';
 import { useWebDataContext } from './webDataContext';
 
+// Base REST origin that the client SDK will speak to for API calls.
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:5000';
 
 interface SubAccountsProps {
@@ -30,6 +32,7 @@ interface SubAccountsProps {
   }) => void;
 }
 
+// Persist the connected agent per wallet so refreshes can restore the session.
 const SESSION_STORAGE_PREFIX = 'pnl.green';
 
 const DEFAULT_AGENT = {
@@ -47,6 +50,7 @@ export const useHyperLiquidContext = () => {
   return context;
 };
 
+// Provider that bootstraps Hyperliquid SDK instances and sub-account polling.
 const HyperliquidProvider = ({ children }: { children: ReactNode }) => {
   //-------Hooks------
   const userAddress = useAddress();
@@ -55,22 +59,28 @@ const HyperliquidProvider = ({ children }: { children: ReactNode }) => {
   const { webData2 } = useWebDataContext();
 
   const agentAddressFromWebdata = webData2.agentAddress;
+  // Use the connected wallet as the namespace for session storage entries.
   let sessionAgentKey =
     userAddress &&
     `${SESSION_STORAGE_PREFIX}.agent.${userAddress.toLowerCase()}`;
 
+
   //------Local State------
+  // Local cache of sub-account listings and connection state toggles.
   const [subaccounts, setSubAccounts] = useState<SubAccount[]>([]);
   const [relaodSubAccounts, setReloadSubAccounts] = useState(false);
   const [establishedConnection, setEstablishedConnection] = useState(false);
   const [agent, setAgent] = useState(DEFAULT_AGENT);
 
   //------Hyperliquid------
+  // Hold a configured Hyperliquid client that other hooks can reuse.
   const [hyperliquid, setHyperliquid] = useState(
     new Hyperliquid(`${BASE_URL}`)
   );
 
   //establish connection
+  // Establishes the Hyperliquid agent connection by requesting an agent and
+  // registering it with the connected wallet.
   const handleEstablishConnection = async ({
     setIsLoading,
     setEstablishedConnModal,
@@ -147,6 +157,8 @@ const HyperliquidProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // Fetch the latest list of sub-accounts whenever we trigger a reload or the
+    // Hyperliquid SDK reference changes.
     if (userAddress) {
       hyperliquid.subAccounts(userAddress).then(({ data, success, msg }) => {
         success && data && setSubAccounts(data as SubAccount[]);
@@ -160,11 +172,15 @@ const HyperliquidProvider = ({ children }: { children: ReactNode }) => {
   }, [hyperliquid, relaodSubAccounts, userAddress]);
 
   useEffect(() => {
+    // Recreate the SDK whenever the connected chain changes so requests hit the
+    // correct Hyperliquid environment (mainnet vs testnet).
     let chain = chainId === 42161 ? Chain.Arbitrum : Chain.ArbitrumTestnet;
     setHyperliquid(new Hyperliquid(BASE_URL, chain));
   }, [chainId]);
 
   useEffect(() => {
+    // Rehydrate agent connections from storage and fall back if the server has
+    // rotated credentials behind the scenes.
     let agent = sessionStorage.getItem(
       `pnl.green.agent.${(userAddress || '').toLowerCase()}`
     );

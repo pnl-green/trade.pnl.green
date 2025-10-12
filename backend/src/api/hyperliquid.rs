@@ -1,3 +1,9 @@
+//! Actix handler for Hyperliquid REST endpoints.
+//!
+//! The handler fans out requests to the Hyperliquid SDK and supporting
+//! services, returning a shared [`Response`] wrapper so the frontend can consume
+//! each operation in a consistent shape.
+
 use crate::{
     error::Error::BadRequestError,
     model::{
@@ -33,6 +39,13 @@ use std::sync::Arc;
 use tokio::sync::{mpsc::Sender, RwLock};
 use tracing::error;
 
+/// Entry point for `/hyperliquid` requests coming from the frontend.
+///
+/// The Hyperliquid API groups functionality into logical request enums. The
+/// handler examines the payload, executes the appropriate SDK call, and
+/// normalises the response into the shared [`Response`] structure. Complex
+/// operations (like conditional orders) also interact with background queues or
+/// websocket listeners managed by the backend.
 pub async fn hyperliquid(
     chain: web::Data<Chain>,
     req: web::Json<Request>,
@@ -285,6 +298,8 @@ pub async fn hyperliquid(
             }
         }
 
+        // Trading actions require a previously established session agent and
+        // operate on the Hyperliquid exchange client.
         Request::Exchange(req) => {
             let agent = session
                 .get::<Agent>("agent")
@@ -394,6 +409,9 @@ pub async fn hyperliquid(
                     }
                 }
 
+                // Conditional orders enqueue work for the background worker and
+                // optionally create shared websocket subscriptions so multiple
+                // jobs can reuse the same price feed.
                 Exchange::CondOrder {
                     action,
                     condition,
@@ -452,6 +470,8 @@ pub async fn hyperliquid(
                         msg: None,
                     })
                 }
+                // Account management endpoints largely forward to the SDK and
+                // return the canonical response body.
                 Exchange::UpdateLeverage { action } => {
                     let data = exchange
                         .update_leverage(agent, action.leverage, action.asset, action.is_cross)
@@ -622,6 +642,8 @@ pub async fn hyperliquid(
                 user,
             };
 
+            // Persist the agent in the session so future Exchange requests can
+            // authenticate without resending credentials.
             session
                 .insert("agent", agent)
                 .context("Failed to insert agent")?;

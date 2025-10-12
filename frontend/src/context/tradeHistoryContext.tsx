@@ -1,4 +1,4 @@
-//
+// Supplies executed trade history for the connected wallet.
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress, useChainId } from '@thirdweb-dev/react';
@@ -18,6 +18,7 @@ export const useTradeHistoryContext = () => {
   return context;
 };
 
+// Provider that watches the Hyperliquid userFills feed.
 const TradeHistoryProvider = ({ children }: { children: React.ReactNode }) => {
   const [tradeHistoryData, setTradeHistoryData] = useState<any>([]);
   const [loadingTradeHistoryData, setLoadingTradeHistoryData] =
@@ -26,6 +27,7 @@ const TradeHistoryProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId();
 
   useEffect(() => {
+    // Skip wiring the websocket when no wallet is present.
     if (userAddress) {
       // Create a new WebSocket connection
       const ws = new WebSocket(
@@ -85,6 +87,7 @@ const TradeHistoryProvider = ({ children }: { children: React.ReactNode }) => {
         loadingTradeHistoryData,
       }}
     >
+      {/* Provide fills to analytics widgets and recent activity tables. */}
       {children}
     </TradeHistoryContext.Provider>
   );

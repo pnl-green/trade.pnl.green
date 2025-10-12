@@ -1,4 +1,4 @@
-//
+// Delivers user-specific historical order activity to downstream components.
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress, useChainId } from '@thirdweb-dev/react';
@@ -17,6 +17,7 @@ export const useOrderHistoryContext = () => {
   return context;
 };
 
+// Provider that subscribes to the Hyperliquid historical order stream.
 const OrderHistoryProvider = ({ children }: { children: React.ReactNode }) => {
   const [orderHistoryData, setOrderHistoryData] = useState<any>([]);
   const [loadingOrderHistory, setLoadingOrderHistory] = useState<boolean>(true);
@@ -24,6 +25,7 @@ const OrderHistoryProvider = ({ children }: { children: React.ReactNode }) => {
   const chainId = useChainId();
 
   useEffect(() => {
+    // Only subscribe when a wallet is connected; otherwise expose empty state.
     if (userAddress) {
       // Create a new WebSocket connection
       const ws = new WebSocket(
@@ -83,6 +85,7 @@ const OrderHistoryProvider = ({ children }: { children: React.ReactNode }) => {
         loadingOrderHistory,
       }}
     >
+      {/* Share historical fills so tables and analytics can consume them. */}
       {children}
     </OrderHistoryContext.Provider>
   );

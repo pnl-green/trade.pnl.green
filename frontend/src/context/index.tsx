@@ -1,3 +1,4 @@
+// Compose all custom React contexts that power the trading experience.
 import React from 'react';
 import PairTokensProvider from './pairTokensContext';
 import OrderBookTradesProvider from './orderBookTradesContext';
@@ -10,6 +11,7 @@ import TwapHistoryProvider from './twapHistoryContext';
 import SwitchAccountProvider from './switchTradingAccContext';
 
 const ContextProviders = ({ children }: { children: React.ReactNode }) => {
+  // Each provider wraps the next so that downstream hooks can rely on shared state.
   return (
     <WebDataProvider>
       <HyperliquidProvider>
@@ -20,6 +22,7 @@ const ContextProviders = ({ children }: { children: React.ReactNode }) => {
                 <OrderHistoryProvider>
                   <TwapHistoryProvider>
                     <SwitchAccountProvider>
+                      {/* Finally render the actual page content within the provider stack. */}
                       <React.Fragment>{children}</React.Fragment>
                     </SwitchAccountProvider>
                   </TwapHistoryProvider>

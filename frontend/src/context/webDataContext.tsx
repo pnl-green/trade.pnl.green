@@ -1,4 +1,4 @@
-//
+// Centralizes the Hyperliquid webData2 feed used across contexts and widgets.
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress, useChainId } from '@thirdweb-dev/react';
@@ -18,13 +18,16 @@ export const useWebDataContext = () => {
   return context;
 };
 
+// Provider that subscribes to webData2 for balances, open positions, and agent info.
 const WebDataProvider = ({ children }: { children: React.ReactNode }) => {
+  // Cache the most recent clearinghouse snapshot and whether it's being refreshed.
   const [webData2, setWebData2] = useState<any>([]);
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
   const userAddress = useAddress();
   const chainId = useChainId();
 
   useEffect(() => {
+    // Only subscribe when a wallet address is available; otherwise expose blanks.
     if (userAddress) {
       // Create a new WebSocket connection
       const ws = new WebSocket(
@@ -84,6 +87,7 @@ const WebDataProvider = ({ children }: { children: React.ReactNode }) => {
         loadingWebData2,
       }}
     >
+      {/* Make the core exchange snapshot available to nested providers/components. */}
       {children}
     </WebDataContext.Provider>
   );
