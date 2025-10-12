@@ -62,6 +62,7 @@ pub async fn find_free_websocket() -> Result<usize> {
 
     for (&key, ws_subs) in wsm.iter_mut() {
         if ws_subs.subscriptions_count < 1000 {
+            // Reuse an existing connection and increment its load counter.
             ws_subs.subscriptions_count += 1;
             return Ok(key);
         }
@@ -90,6 +91,8 @@ pub async fn find_free_websocket() -> Result<usize> {
     drop(wsm);
 
     tokio::spawn(async move {
+        // Run the main websocket loop detached so callers only wait on the
+        // initial subscription setup.
         if let Err(err) = stream_recv(stream, new_key, stream_reciver).await {
             error!("Price receiver exited:{}", err);
         }
@@ -105,8 +108,12 @@ async fn stream_recv(
     new_key: usize,
     mut recv_subs: StreamReceiver,
 ) -> Result<()> {
+    // Track every subscription keyed by the response pattern so the reader
+    // task can wake the proper watchers.
     let subscription_map: Arc<RwLock<HashMap<ResponsePattern, watch::Sender<Option<WSResponse>>>>> =
         Arc::default();
+    // Track outstanding unsubscription signals and the payload we need to send
+    // back to Hyperliquid once the consumer is done streaming.
     let mut unsubscription_list: Vec<(oneshot::Receiver<()>, WSMethod, ResponsePattern)> =
         Vec::new();
     let subscription_map_2 = subscription_map.clone();
@@ -134,6 +141,7 @@ async fn stream_recv(
             };
             let msg_resp_patrn = ResponsePattern::from(&msg);
 
+            // Wake any watchers that registered interest in this payload shape.
             if let Some(sender) = subscription_map.read().await.get(&msg_resp_patrn) {
                 sender
                     .send(Some(msg))
@@ -187,6 +195,8 @@ async fn stream_recv(
             }
         }
 
+        // Prevent the loop from spinning at 100% CPU while waiting for control
+        // signals from consumers.
         tokio::time::sleep(std::time::Duration::from_millis(10)).await;
     }
 }
@@ -194,8 +204,11 @@ async fn stream_recv(
 /// Key describing which subscribers should receive a response.
 #[derive(Eq, Hash, PartialEq, Clone)]
 pub enum ResponsePattern {
+    /// Order-book updates for a given coin symbol.
     L2Book(String),
+    /// Candle stream updates keyed by symbol.
     Candle(String),
+    /// Confirmation message acknowledging a subscribe/unsubscribe call.
     SubscriptionResponse(String),
 }
 
@@ -225,6 +238,8 @@ impl BookPrice {
     pub async fn init(
         symbol: &str,
     ) -> anyhow::Result<(watch::Receiver<Option<WSResponse>>, oneshot::Sender<()>)> {
+        // Each caller gets its own watch channel so they observe the latest
+        // payload immediately after subscribing.
         let (sender, receiver) = tokio::sync::watch::channel::<Option<WSResponse>>(None);
         let (stop_sender, stop_reciver) = tokio::sync::oneshot::channel::<()>();
 
@@ -240,6 +255,8 @@ impl BookPrice {
         let mut wsm = WSMAP.lock().await;
 
         let ws_stream = wsm.get_mut(&ws_key).unwrap();
+        // Hand the subscription request to the socket background task; it will
+        // resolve immediately and continue pushing updates over `receiver`.
         ws_stream
             .sender
             .send((subscription, response, stop_reciver, sender))

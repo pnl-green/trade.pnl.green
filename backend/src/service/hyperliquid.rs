@@ -11,6 +11,8 @@ pub mod info {
     /// Fetch the list of sub-accounts belonging to the provided user address.
     #[tracing::instrument(name = "Fetching sub accounts", skip(info))]
     pub async fn sub_accounts(info: &Info, user: Address) -> Result<Option<Vec<SubAccount>>> {
+        // Thin wrapper around the SDK call so the API layer only imports this
+        // module and not the upstream crate directly.
         info.sub_accounts(user).await
     }
 
@@ -19,6 +21,8 @@ pub mod info {
     #[tracing::instrument(name = "Fetching historical orders", skip(info))]
     pub async fn historical_orders(info: &Info, user: Address) -> Result<Option<Vec<SubAccount>>> {
         // info.historical_orders(user).await
+        // Fall back to the closest available data until Hyperliquid releases
+        // the historical order endpoint.
         info.sub_accounts(user).await
     }
 
@@ -27,6 +31,8 @@ pub mod info {
     #[tracing::instrument(name = "Fetching user fees", skip(info))]
     pub async fn user_fees(info: &Info, user: Address) -> Result<Option<Vec<SubAccount>>> {
         // info.user_fees(user).await
+        // Same fallback strategy as above—returns sub account information so
+        // callers receive some data while the SDK catches up.
         info.sub_accounts(user).await
     }
 
@@ -55,11 +61,15 @@ pub mod pair {
         left_candle: CandleSnapshot,
         right_candle: CandleSnapshot,
     ) -> Result<CandleSnapshot> {
+        // Compose the symbol from the two legs so downstream consumers can
+        // render the derived market name.
         Ok(CandleSnapshot {
             t: left_candle.t,
             t_: left_candle.t_,
             i: left_candle.i,
             s: format!("{}-{}", left_candle.s, right_candle.s),
+            // Convert numeric strings into floats so we can divide the values
+            // before re-encoding as strings for the Hyperliquid types.
             c: (left_candle.c.parse::<f64>()? / right_candle.c.parse::<f64>()?).to_string(),
             h: (left_candle.h.parse::<f64>()? / right_candle.h.parse::<f64>()?).to_string(),
             l: (left_candle.l.parse::<f64>()? / right_candle.l.parse::<f64>()?).to_string(),

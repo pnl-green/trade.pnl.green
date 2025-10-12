@@ -12,8 +12,11 @@ use tracing::{info, warn};
 /// Maintains a websocket session streaming two coin candles and relays paired
 /// results over a channel.
 pub struct PairsCandle {
+    /// Channel end used to forward paired candle data to subscribers.
     sender: mpsc::Sender<Candle>,
+    /// Symbol treated as the numerator when computing the ratio.
     symbol_left: String,
+    /// Symbol treated as the denominator when computing the ratio.
     symbol_right: String,
 }
 
@@ -73,6 +76,8 @@ impl PairsCandle {
             .context("Failed to subscribe to desired coin candle")?;
         // TODO: add pings
 
+        // Remember the latest observation for each symbol so we can emit a
+        // paired update once both sides tick.
         let mut symbol_left_candle = None;
         let mut symbol_right_candle = None;
 
@@ -111,6 +116,8 @@ impl PairsCandle {
                         .as_ref()
                         .zip(symbol_right_candle.as_ref())
                     {
+                        // Both legs are populated: emit the derived pair candle
+                        // downstream for charting consumers.
                         self.sender
                             .send(left.pair(right))
                             .await

@@ -14,13 +14,13 @@ use tracing::{debug, error, info, warn};
 #[derive(Debug, Deserialize)]
 #[serde(tag = "method", content = "data", rename_all = "snake_case")]
 pub enum WSRequest {
+    /// Client wants a candle ratio stream for the given base/quote symbols.
     PairsCandle {
         symbol_left: String,
         symbol_right: String,
     },
-    Price {
-        symbol: String,
-    },
+    /// Client wants the order book depth stream for a single symbol.
+    Price { symbol: String },
 }
 // { "method": "pairs_candle", "data": { "symbol_left": "BTC", "symbol_right": "ETH" } }
 
@@ -32,11 +32,14 @@ pub enum WSRequest {
 /// stream producer (e.g. [`pairs_candle_handler`]) and pipe its updates back to
 /// the client.
 pub async fn handler(stream: TcpStream) -> Result<()> {
+    // Finalize the websocket handshake before starting our control loop.
     let mut stream = tokio_tungstenite::accept_async(stream)
         .await
         .context("Failed accepting WS connection")?;
 
     while let Some(msg) = stream.next().await {
+        // Surface connection-level errors but keep the loop running for
+        // transient tungstenite issues.
         let Ok(msg) = msg else {
             warn!("Failed to extract message from the WS client stream");
             continue;
@@ -61,6 +64,9 @@ pub async fn handler(stream: TcpStream) -> Result<()> {
             } => {
                 pairs_candle_handler(&mut stream, &symbol_left, &symbol_right).await?;
             }
+            // Price streaming is currently handled directly by `BookPrice` via
+            // the shared map; we ignore these messages until the API exposes
+            // the handler to clients.
             WSRequest::Price { symbol: _ } => {}
         }
     }
@@ -81,6 +87,8 @@ pub async fn pairs_candle_handler(
     let (pairs, mut receiver) = PairsCandle::new(symbol_left, symbol_right);
 
     tokio::spawn(async move {
+        // Keep the websocket worker alive on a detached task so we can await
+        // updates on this thread while surfacing background failures via logs.
         if let Err(err) = pairs.receive_candle().await {
             error!("Candle receiver exited: {err}");
         }
