@@ -5,4 +5,6 @@
 
 mod subscriber;
 
+// Re-export the subscriber helpers so binaries can call `log::init_subscriber`
+// directly without needing to know the module layout of this crate.
 pub use subscriber::{get_subscriber, init_subscriber};

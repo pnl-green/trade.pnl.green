@@ -53,15 +53,20 @@ pub async fn hyperliquid(
     sender: web::Data<Sender<InternalRequest>>,
     queue: web::Data<RwLock<Vec<QueueElem>>>,
 ) -> Result<impl Responder> {
+    // Pull the request out of the Actix wrappers so we can branch on the enum
+    // variants directly.
     let req = req.into_inner();
     let chain = **chain;
 
     Ok(match req {
         Request::Info(req) => {
+            // All informational queries share a Hyperliquid SDK client.
             let info = Hyperliquid::new(chain);
 
             match req {
                 Info::SubAccounts { user } => {
+                    // Resolve the complete set of sub-accounts owned by the
+                    // caller for dashboard selection.
                     tracing::info!("User: {:#?}", user);
                     let data = info::sub_accounts(&info, user)
                         .await
@@ -75,6 +80,8 @@ pub async fn hyperliquid(
                 }
 
                 Info::HistoricalOrders { user } => {
+                    // Provide fills for the order history tables rendered on
+                    // the frontend.
                     let data = info::historical_orders(&info, user)
                         .await
                         .map_err(|msg| BadRequestError(msg.to_string()))?;
@@ -87,6 +94,8 @@ pub async fn hyperliquid(
                 }
 
                 Info::UserFees { user } => {
+                    // Expose the maker/taker schedule that influences order
+                    // cost calculations in the UI.
                     let data = info::user_fees(&info, user)
                         .await
                         .map_err(|msg| BadRequestError(msg.to_string()))?;
@@ -98,6 +107,8 @@ pub async fn hyperliquid(
                     })
                 }
                 Info::CandleSnapshot { req } => {
+                    // Fetch a single asset's candles for chart rendering or
+                    // analytics.
                     let data = info::candle_snapshot(
                         &info,
                         req.coin,
@@ -115,6 +126,8 @@ pub async fn hyperliquid(
                     })
                 }
                 Info::PairCandleSnapshot { req, pair_coin } => {
+                    // Pair up two assets and collapse them into spread candles
+                    // used by the pair trading charts.
                     let data = info::candle_snapshot(
                         &info,
                         req.coin,
@@ -148,6 +161,8 @@ pub async fn hyperliquid(
                     })
                 }
                 Info::SpotMeta => match info.spot_meta().await {
+                    // Spot metadata is optional for the UI, so bubble errors up
+                    // while keeping the response envelope consistent.
                     Ok(data) => HttpResponse::Ok().json(Response {
                         success: true,
                         data: Some(data),
@@ -168,6 +183,8 @@ pub async fn hyperliquid(
                     let percentage = req.percentage / 100.;
                     let is_ask = req.percentage < 0.;
 
+                    // Select the ask or bid side based on the requested
+                    // direction and normalise into numeric tuples.
                     let levels = if is_ask {
                         // ask
                         book.levels.first()
@@ -198,6 +215,8 @@ pub async fn hyperliquid(
                         if (is_ask && best_price * (1. + percentage) > px)
                             || (!is_ask && best_price * (1. + percentage) < px)
                         {
+                            // Only aggregate price levels that fall within the
+                            // configured percentage band.
                             continue;
                         }
                         total.total_size += sz;
@@ -211,11 +230,13 @@ pub async fn hyperliquid(
                     })
                 }
                 Info::Delta { req } => {
-                    // Fetch the order book
+                    // Fetch the order book so we can measure bid/ask imbalance
+                    // for the requested symbol.
                     let book = info
                         .l2_book(req.symbol)
                         .await
                         .map_err(|msg| BadRequestError(msg.to_string()))?;
+                    // Pull the raw price levels for both sides of the book.
                     let ask_levels = book
                         .levels
                         .first()
@@ -301,11 +322,14 @@ pub async fn hyperliquid(
         // Trading actions require a previously established session agent and
         // operate on the Hyperliquid exchange client.
         Request::Exchange(req) => {
+            // Retrieve the authenticated agent from the session to sign outbound
+            // exchange calls.
             let agent = session
                 .get::<Agent>("agent")
                 .context("Failed to get agent")?
                 .ok_or_else(|| BadRequestError("Establish a connection first".to_string()))?;
 
+            // Rehydrate the wallet from the persisted secret for signing.
             let agent: Arc<LocalWallet> = Arc::new(
                 agent
                     .private_key
@@ -313,6 +337,8 @@ pub async fn hyperliquid(
                     .context("Failed to parse agent wallet")?,
             );
 
+            // Instantiate a fresh exchange client bound to the current chain
+            // for each request branch below.
             let exchange: hyperliquid::Exchange = Hyperliquid::new(chain);
 
             match req {
@@ -321,6 +347,8 @@ pub async fn hyperliquid(
                     action,
                     vault_address,
                 } => {
+                    // Optionally drop orders that exceed the configured risk
+                    // appetite before forwarding to Hyperliquid.
                     let orders = if let Some(risk) = risk {
                         filter_orders_by_risk(action.orders, risk).await?
                     } else {
@@ -418,6 +446,8 @@ pub async fn hyperliquid(
                     source,
                     vault_address,
                 } => {
+                    // Conditional triggers depend on live book data; make sure
+                    // we are subscribed to the necessary websocket streams.
                     match &condition {
                         Condition::PairPrice(pair_price) => {
                             let mut connections = CONNECTIONS.lock().await;

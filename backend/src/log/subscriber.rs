@@ -25,6 +25,8 @@ where
     // data for downstream layers.
     let formatting_layer = BunyanFormattingLayer::new(name.into(), sink);
 
+    // Layer the filter, JSON storage, and formatting on top of the default
+    // registry so tracing captures span metadata before serialising it.
     Registry::default()
         .with(env_filter)
         .with(JsonStorageLayer)
@@ -37,6 +39,8 @@ where
 /// [`LogTracer`] to forward those records into `tracing` before setting the
 /// subscriber as the process-wide default.
 pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync) {
+    // Enable the `log` crate to forward records into tracing.
     LogTracer::init().expect("Failed to set logger");
+    // Register the provided subscriber as the process-global tracing backend.
     set_global_default(subscriber).expect("Failed to set subscriber");
 }
