@@ -1,3 +1,11 @@
+//! Shared websocket infrastructure for streaming Hyperliquid book and candle
+//! updates.
+//!
+//! This module multiplexes a limited number of long-lived Hyperliquid socket
+//! connections across subscribers. It tracks which response patterns belong to
+//! each client, forwards updates via `watch` channels, and exposes helpers to
+//! acquire a connection that has spare capacity.
+
 use crate::model::hyperliquid::{Subscribe, Subscription, WSMethod, WSResponse};
 use crate::prelude::Result;
 use anyhow::Context;
@@ -16,9 +24,12 @@ use tokio_tungstenite::WebSocketStream;
 use tracing::{error, warn};
 
 lazy_static! {
+    /// Registry tracking active Hyperliquid websocket connections and their
+    /// subscription load.
     pub static ref WSMAP: Arc<Mutex<HashMap<usize, WSSubscriptions>>> =
         Arc::new(Mutex::new(HashMap::new()));
 }
+/// Channel used to push subscription requests at the websocket task.
 pub type StreamSender = mpsc::Sender<(
     Subscription,
     ResponsePattern,
@@ -26,17 +37,26 @@ pub type StreamSender = mpsc::Sender<(
     watch::Sender<Option<WSResponse>>,
 )>;
 
+/// Receiver counterpart yielding subscription instructions for execution.
 pub type StreamReceiver = mpsc::Receiver<(
     Subscription,
     ResponsePattern,
     oneshot::Receiver<()>,
     watch::Sender<Option<WSResponse>>,
 )>;
+/// Metadata associated with an established websocket connection.
 pub struct WSSubscriptions {
+    /// Number of active subscriptions currently pinned to the socket.
     pub subscriptions_count: u16,
+    /// Channel to request additional subscription/unsubscription operations.
     pub sender: StreamSender,
 }
 
+/// Find an existing websocket with spare capacity or create a new one.
+///
+/// The Hyperliquid API tolerates up to roughly 1k subscriptions per socket, so
+/// we reuse connections until they fill up. New sockets spawn a background task
+/// that listens for responses and fans them out to interested consumers.
 pub async fn find_free_websocket() -> Result<usize> {
     let mut wsm = WSMAP.lock().await;
 
@@ -78,6 +98,8 @@ pub async fn find_free_websocket() -> Result<usize> {
     Ok(new_key)
 }
 
+/// Drive a websocket connection by subscribing/unsubscribing and routing
+/// incoming frames to interested listeners.
 async fn stream_recv(
     stream: WebSocketStream<MaybeTlsStream<TcpStream>>,
     new_key: usize,
@@ -89,6 +111,8 @@ async fn stream_recv(
         Vec::new();
     let subscription_map_2 = subscription_map.clone();
     let (mut writer, mut reader) = stream.split();
+    // Reader task: decode every server frame and notify the matching
+    // subscriber if we have someone waiting on that response pattern.
     tokio::spawn(async move {
         while let Some(msg) = reader.next().await {
             let Ok(msg) = msg else {
@@ -120,6 +144,7 @@ async fn stream_recv(
         error!("Price receiver stopped");
     });
     loop {
+        // Pick up new subscription requests pushed in by `find_free_websocket`.
         if let Ok((sub, response_pattern, stop_reciver, sender)) = recv_subs.try_recv() {
             let method = WSMethod::Subscribe(sub.clone());
             let payload = serde_json::to_string(&method)
@@ -141,6 +166,8 @@ async fn stream_recv(
             let (stop_reciver, method, response_pattern) = &mut unsubscription_list[i];
 
             if stop_reciver.try_recv().is_ok() {
+                // Client signalled that it no longer needs updates; tear down the
+                // remote subscription and free a slot on the shared socket.
                 let payload = serde_json::to_string(&method)
                     .context("Failed to serialize unsubscription payload")?;
                 writer
@@ -164,6 +191,7 @@ async fn stream_recv(
     }
 }
 
+/// Key describing which subscribers should receive a response.
 #[derive(Eq, Hash, PartialEq, Clone)]
 pub enum ResponsePattern {
     L2Book(String),
@@ -172,6 +200,8 @@ pub enum ResponsePattern {
 }
 
 impl From<&WSResponse> for ResponsePattern {
+    /// Deduce the pattern key that will wake any listeners awaiting this
+    /// response.
     fn from(value: &WSResponse) -> ResponsePattern {
         match value {
             WSResponse::L2Book(price) => ResponsePattern::L2Book(price.coin.clone()),
@@ -186,9 +216,12 @@ impl From<&WSResponse> for ResponsePattern {
     }
 }
 
+/// Access point for consumers that need a live Hyperliquid L2 book stream.
 pub struct BookPrice;
 
 impl BookPrice {
+    /// Ensure a connection streaming the requested L2 book exists and return a
+    /// watcher that yields updates until the provided stop signal is fired.
     pub async fn init(
         symbol: &str,
     ) -> anyhow::Result<(watch::Receiver<Option<WSResponse>>, oneshot::Sender<()>)> {

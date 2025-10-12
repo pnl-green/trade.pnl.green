@@ -1,3 +1,6 @@
+//! Candle pairing helper that maintains a websocket connection for two coins
+//! and emits combined price series for the frontend charts.
+
 use crate::model::hyperliquid::{Candle, Subscribe, Subscription, WSMethod, WSResponse};
 use crate::prelude::Result;
 use anyhow::Context;
@@ -6,6 +9,8 @@ use tokio::sync::mpsc;
 use tokio_tungstenite::tungstenite::Message;
 use tracing::{info, warn};
 
+/// Maintains a websocket session streaming two coin candles and relays paired
+/// results over a channel.
 pub struct PairsCandle {
     sender: mpsc::Sender<Candle>,
     symbol_left: String,
@@ -13,6 +18,7 @@ pub struct PairsCandle {
 }
 
 impl PairsCandle {
+    /// Create a candle pairer alongside the channel consumer will read from.
     pub fn new(symbol_left: &str, symbol_right: &str) -> (Self, mpsc::Receiver<Candle>) {
         let (sender, receiver) = tokio::sync::mpsc::channel::<Candle>(1);
 
@@ -26,6 +32,8 @@ impl PairsCandle {
         )
     }
 
+    /// Subscribe to both candles and forward paired snapshots until the stream
+    /// ends or an error occurs.
     pub async fn receive_candle(&self) -> Result<()> {
         let Self {
             symbol_left,

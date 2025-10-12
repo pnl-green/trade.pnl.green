@@ -6,6 +6,11 @@ use tokio::net::TcpStream;
 use tokio_tungstenite::{tungstenite::Message, WebSocketStream};
 use tracing::{debug, error, info, warn};
 
+/// Describes the supported client-initiated websocket requests.
+///
+/// Actix routes the raw websocket upgrade into [`handler`], which then
+/// deserializes the inbound JSON frame into one of these variants to dispatch
+/// downstream stream logic.
 #[derive(Debug, Deserialize)]
 #[serde(tag = "method", content = "data", rename_all = "snake_case")]
 pub enum WSRequest {
@@ -19,6 +24,13 @@ pub enum WSRequest {
 }
 // { "method": "pairs_candle", "data": { "symbol_left": "BTC", "symbol_right": "ETH" } }
 
+/// Accept a websocket upgrade and forward supported subscription requests to
+/// their dedicated handlers.
+///
+/// The function keeps a single client connection alive, continuously reading
+/// JSON frames. When a recognized request arrives we spin up the associated
+/// stream producer (e.g. [`pairs_candle_handler`]) and pipe its updates back to
+/// the client.
 pub async fn handler(stream: TcpStream) -> Result<()> {
     let mut stream = tokio_tungstenite::accept_async(stream)
         .await
@@ -56,6 +68,11 @@ pub async fn handler(stream: TcpStream) -> Result<()> {
     Ok(())
 }
 
+/// Stream Hyperliquid candle updates for a pair of coins back to the client.
+///
+/// The helper spawns the [`PairsCandle`] worker to multiplex two candle feeds
+/// into a paired ratio. We forward the resulting snapshots over the websocket
+/// connection while propagating serialization or IO failures back to Actix.
 pub async fn pairs_candle_handler(
     stream: &mut WebSocketStream<TcpStream>,
     symbol_left: &str,
