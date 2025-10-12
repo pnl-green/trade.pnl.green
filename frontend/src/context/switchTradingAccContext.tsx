@@ -1,3 +1,4 @@
+// Tracks which Hyperliquid account the UI should act against (master vs sub).
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useAddress } from '@thirdweb-dev/react';
 
@@ -25,6 +26,7 @@ export const useSwitchTradingAccount = () => {
 };
 
 // Create the context provider component
+// Provider that stores the active trading account selection.
 const SwitchAccountProvider = ({ children }: { children: React.ReactNode }) => {
   const userAddress = useAddress();
 
@@ -41,6 +43,7 @@ const SwitchAccountProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    // Default new sessions to the master account when a wallet connects.
     if (userAddress) {
       setCurrentAccount({ address: userAddress, name: 'Master' });
     }
@@ -50,6 +53,7 @@ const SwitchAccountProvider = ({ children }: { children: React.ReactNode }) => {
     <SwitchAccountContext.Provider
       value={{ currentAccount, switchAccountHandler }}
     >
+      {/* Allow descendants to read the active account without prop drilling. */}
       {children}
     </SwitchAccountContext.Provider>
   );

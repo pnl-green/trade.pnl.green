@@ -1,4 +1,4 @@
-//
+// Provides funding payment history for the connected wallet.
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AllWebData2 } from '../../types/hyperliquid';
 import { useAddress, useChainId } from '@thirdweb-dev/react';
@@ -18,6 +18,7 @@ export const useFundingHistoryContext = () => {
   return context;
 };
 
+// Provider that subscribes to the Hyperliquid userFundings websocket channel.
 const FundingHistoryProvider = ({
   children,
 }: {
@@ -30,6 +31,7 @@ const FundingHistoryProvider = ({
   const chainId = useChainId();
 
   useEffect(() => {
+    // Avoid opening sockets without an authenticated wallet context.
     if (userAddress) {
       // Create a new WebSocket connection
       const ws = new WebSocket(
@@ -89,6 +91,7 @@ const FundingHistoryProvider = ({
         loadingFundingHistoryData,
       }}
     >
+      {/* Expose funding accrual records for dashboards and summaries. */}
       {children}
     </FundingHistoryContext.Provider>
   );

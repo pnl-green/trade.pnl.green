@@ -8,6 +8,8 @@ mod hyperliquid;
 mod not_found;
 mod status;
 
+// Surface each handler so the Actix router in `main.rs` can attach them to
+// their respective paths without leaking the internal module organisation.
 pub use hyperliquid::hyperliquid;
 pub use not_found::not_found;
 pub use status::status;

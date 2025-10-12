@@ -1,4 +1,4 @@
-//get data from websocket and pass it to the context
+// Streams Hyperliquid order book and trade updates into React context.
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { BookDataProps, WsTrades } from '@/types/hyperliquid';
@@ -29,12 +29,14 @@ export const useOrderBookTradesContext = () => {
   return context;
 };
 
+// Provider that subscribes to L2 book/trade feeds for the currently selected pair.
 const OrderBookTradesProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
   const { pair, tokenPairs } = usePairTokensContext();
+  // Local caches for current depth snapshot, recent trades, and loading status.
   const [bookData, setBookData] = useState<BookDataProps>({
     asks: [],
     bids: [],
@@ -49,6 +51,7 @@ const OrderBookTradesProvider = ({
   //{ "method": "subscribe", "subscription": { "type": "trades", "coin": "<coin_symbol>" } }
 
   useEffect(() => {
+    // Subscribe to trade prints for the active coin to drive the ticker/history.
     // Create a new WebSocket connection
     const ws = new WebSocket(
       chainId === 42161
@@ -109,6 +112,7 @@ const OrderBookTradesProvider = ({
   }, [pair]);
 
   useEffect(() => {
+    // Listen to the L2 book feed to keep bids/asks synchronized with Hyperliquid.
     // Create a new WebSocket connection
 
     const ws = new WebSocket(
@@ -180,6 +184,7 @@ const OrderBookTradesProvider = ({
         loadingBookData,
       }}
     >
+      {/* Surface real-time order flow data to any component below the provider. */}
       {children}
     </OrderBookTradesContext.Provider>
   );

@@ -55,10 +55,12 @@ const bgImages = [
   },
 ];
 
+// Page component that manages Hyperliquid sub-account CRUD and transfers.
 const SubAccounts = () => {
   const router = useRouter();
 
   //--------------------useContext hooks------------------
+  // Pull the latest clearinghouse snapshot and status flags from shared contexts.
   const { webData2, loadingWebData2 } = useWebDataContext();
   const {
     subaccounts,
@@ -82,6 +84,7 @@ const SubAccounts = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [establishConnModal, setEstablishedConnModal] = useState(false);
   const [allAccountsData, setAllAccountsData] = useState<any>([]);
+  // Derive an entry for the primary wallet so it can be rendered alongside sub-accounts.
   const masterAccount: AccountProps = {
     name: 'Master Account',
     address: userAddress,
@@ -252,7 +255,7 @@ const SubAccounts = () => {
   };
 
   useEffect(() => {
-    // Combine the fetched data with the previous allAccountsData and the master account
+    // Synchronize table rows whenever the Hyperliquid context fetches new sub-accounts.
     if (Array.isArray(subaccounts)) {
       const restructuredAccounts = subaccounts.map((account) => ({
         name: account.name,
@@ -266,6 +269,7 @@ const SubAccounts = () => {
 
   return (
     <>
+      {/* Decorative background gradients shared across the account dashboard. */}
       <SubAccWrapper>
         {bgImages.map((bg, index) => (
           <LinearBgColors key={index} bgimage={bg.image} styles={bg.styles} />
@@ -278,6 +282,7 @@ const SubAccounts = () => {
               <WalletConnectModal />
             ) : (
               <>
+                {/* If the user hasn't linked their Hyperliquid API, keep prompting for setup. */}
                 {!establishedConnection ? (
                   <GreenBtn
                     onClick={() =>
@@ -566,5 +571,6 @@ const SubAccounts = () => {
 export default SubAccounts;
 
 SubAccounts.getLayout = function getLayout(page: ReactElement) {
+  // Reuse the global layout shell while customizing the title for this route.
   return <Layout pageTitle="Pnl.Green | Sub-Accounts">{page}</Layout>;
 };

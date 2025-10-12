@@ -1,4 +1,4 @@
-//usecontext to pass common pair tokens across
+// Shares token pair metadata and live asset state across the dashboard.
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActiveAssetData, PairData, tokenPairs } from '../../types/hyperliquid';
@@ -58,12 +58,14 @@ export const usePairTokensContext = () => {
   return context;
 };
 
+// Provider that streams Hyperliquid token metadata and caches selections.
 const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   //------Hooks------
   const userAddress = useAddress();
   const chainId = useChainId();
   const { hyperliquid } = useHyperLiquidContext();
 
+  // Local caches for token pair metadata, user selection, and active asset stats.
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
   const [tokenPairData, setTokenPairData] = useState([]); //all token pair data
   const [allTokenPairs, setAllTokenPairs] = useState([]); //all token pair data
@@ -97,15 +99,17 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    // Mirror the parsed symbol (e.g., BTC) so UI components can reference it directly.
     setPair(`${tokenPairs[0]}`);
   }, [tokenPairs]);
 
   useEffect(() => {
+    // Whenever the selected pair changes, refresh the derived token symbol tuple.
     splitTokenPairs();
   }, [selectedPairsTokenData]);
 
   useEffect(() => {
-    // Create a new WebSocket connection
+    // Stream the public webData2 feed to derive universe metadata for all assets.
     const ws = new WebSocket(
       chainId === 42161
         ? 'wss://api.hyperliquid.xyz/ws'
@@ -227,7 +231,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [tokenPairData]);
 
-  // set data from local storage
+  // Restore the last viewed market from session storage so tabs persist.
   useEffect(() => {
     if (savedAssetId && savedSelectPairsTokenData) {
       setAssetId(savedAssetId);
@@ -265,6 +269,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
         activeAssetData: activeAssetData || undefined, // Update the type to include null
       }}
     >
+      {/* Expose all pair-related helpers to any component below in the tree. */}
       {children}
     </PairTokensContext.Provider>
   );
