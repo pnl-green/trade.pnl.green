@@ -1,0 +1,29 @@
+# AI-CLI
+
+The AI-CLI translates natural language into executable orders. It understands intents, conditions, and risk constraints without requiring code.
+
+## Command patterns
+
+- **Directional orders:** “Buy 10 BTC at the 4-hour 50 EMA.”
+- **Conditional logic:** “Limit chase 1 BTC on 4-hour close above 51k.”
+- **Risk constraints:** “Size so max loss is $500 if stop hits.”
+
+## Safeguards
+
+- Intelayer previews the parsed order before execution.
+- Dry-run mode simulates fills without touching live balances.
+- Invalid or ambiguous commands respond with human-readable clarifications.
+
+## Tips
+
+- Chain conditions with words like “then” or “after.”
+- Reference spreads (e.g., “Long SOL, short MATIC with 2:1 ratio”).
+- Call bots by name: “Update Atlas bot to use EMA crossover.”
+
+## Examples
+
+```tsx
+intelayer> Buy 5 ETH if RSI(1h) crosses above 35 then trail stop 1.5%
+intelayer> Hedge 2 BTC perpetual short if funding > 0.05%
+intelayer> Alert me when BONK/DOGE spread widens by 3 std dev
+```

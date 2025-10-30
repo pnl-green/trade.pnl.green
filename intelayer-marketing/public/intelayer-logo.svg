@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Intelayer Logo</title>
+  <desc id="desc">Stylized hexagon with layered nodes</desc>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3FE18F" />
+      <stop offset="100%" stop-color="#10B873" />
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#grad)" stroke-width="6" stroke-linejoin="round">
+    <polygon points="64 10 110 36 110 92 64 118 18 92 18 36" opacity="0.9" />
+    <polygon points="64 28 94 45 94 83 64 100 34 83 34 45" opacity="0.6" />
+    <circle cx="64" cy="64" r="18" fill="#15D380" opacity="0.6" />
+  </g>
+</svg>
