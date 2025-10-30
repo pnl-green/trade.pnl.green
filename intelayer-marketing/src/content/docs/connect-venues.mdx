@@ -1,0 +1,34 @@
+# Connect Venues
+
+Intelayer integrates with centralized exchanges (CEXs), decentralized exchanges (DEXs), and traditional brokerages. Connections use OAuth where available or API keys scoped to trading and read access.
+
+## Centralized exchanges
+
+| Venue | Auth method | Required scopes | Notes |
+| --- | --- | --- | --- |
+| Coinbase Advanced | OAuth | trading, transfers | OAuth tokens auto-refresh. |
+| Binance | API key | trade, read balance | Enable IP allowlists for extra safety. |
+| Kraken | API key | trade, ledgers | Set withdrawal permissions to **off**. |
+
+### API key creation checklist
+
+1. Generate a new API key dedicated to Intelayer.
+2. Disable withdrawal permissions.
+3. Restrict by IP if the venue supports static allowlists.
+4. Store the key in your password manager.
+
+## Decentralized venues
+
+- Connect wallets via WalletConnect or injected extensions.
+- Intelayer signs orders locally and relays them to venue APIs; private keys never leave your device.
+- For smart order routing, Intelayer requests read-only access to pool state.
+
+## Brokerages
+
+Intelayer supports equities and options via supported broker APIs. OAuth is used where possible; otherwise, create a limited-scope key with trade + balances access.
+
+## Safety tips
+
+- Rotate API keys every 90 days.
+- Review venue dashboards for active Intelayer sessions.
+- Enable multi-factor authentication on all accounts.
