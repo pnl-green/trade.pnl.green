@@ -32,6 +32,10 @@ tracing-subscriber = { version = "0.3.18", features = [
     "env-filter",
 ] }
 uuid = { version = "1.10.0", features = ["v4"] }
+lazy_static = "1.5.0"
+async-trait = "0.1.83"
+
+
 
 
 [dependencies.hyperliquid]

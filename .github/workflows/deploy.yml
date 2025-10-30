@@ -13,9 +13,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Build backend
-        run: |
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.79.0"
+          targets: x86_64-unknown-linux-gnu
 
+      - name: Compile
+        working-directory: ./backend
+        shell: bash
+        run: cargo build --release --target x86_64-unknown-linux-gnu
+
+      - name: Build archive
+        working-directory: ./backend
+        shell: bash
+        run: |
           echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env    
           echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env    
 
@@ -28,15 +41,8 @@ jobs:
 
           echo "COOKIE_KEY=${{ secrets.COOKIE_KEY }}" >> .env
 
-      - name: Compile
-        id: compile
-        uses: rust-build/rust-build.action@v1.4.5
-        with:
-          RUSTTARGET: x86_64-unknown-linux-musl
-          UPLOAD_MODE: none
-          SRC_DIR: backend
-          STATIC_LINKING: false
-          EXTRA_FILES: ".env"
+          tar -czf backend.tar.gz .env -C target/x86_64-unknown-linux-gnu/release/ backend
+          echo "ASSET=${PWD}/backend.tar.gz" >> $GITHUB_ENV
 
       - name: Deploy to EC2
         uses: appleboy/scp-action@v0.1.4
@@ -44,7 +50,7 @@ jobs:
           host: ${{ secrets.EC2_SERVER_HOST }}
           username: ${{ secrets.EC2_SERVER_USERNAME }}
           key: ${{ secrets.EC2_SERVER_KEY }}
-          source: ${{ steps.compile.outputs.BUILT_ARCHIVE }}
+          source: ${{ env.ASSET }}
           target: ${{ secrets.EC2_SERVER_TARGET }}
 
       - name: Restart server
@@ -57,6 +63,6 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             cd ${{ secrets.EC2_SERVER_TARGET }}
-            unzip -o ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            rm ${{ steps.compile.outputs.BUILT_ARCHIVE }}
+            tar -xfv ${{ env.ASSET }}
+            rm ${{ env.ASSET }}
             pm2 restart all

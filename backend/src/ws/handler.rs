@@ -1,4 +1,4 @@
-use crate::prelude::Result;
+use crate::{prelude::Result, ws::hyperliquid::pairs_candle::PairsCandle};
 use anyhow::Context;
 use futures_util::{SinkExt, StreamExt};
 use serde::Deserialize;
@@ -6,8 +6,11 @@ use tokio::net::TcpStream;
 use tokio_tungstenite::{tungstenite::Message, WebSocketStream};
 use tracing::{debug, error, info, warn};
 
-use super::hyperliquid::PairsCandle;
-
+/// Describes the supported client-initiated websocket requests.
+///
+/// Actix routes the raw websocket upgrade into [`handler`], which then
+/// deserializes the inbound JSON frame into one of these variants to dispatch
+/// downstream stream logic.
 #[derive(Debug, Deserialize)]
 #[serde(tag = "method", content = "data", rename_all = "snake_case")]
 pub enum WSRequest {
@@ -15,9 +18,19 @@ pub enum WSRequest {
         symbol_left: String,
         symbol_right: String,
     },
+    Price {
+        symbol: String,
+    },
 }
 // { "method": "pairs_candle", "data": { "symbol_left": "BTC", "symbol_right": "ETH" } }
 
+/// Accept a websocket upgrade and forward supported subscription requests to
+/// their dedicated handlers.
+///
+/// The function keeps a single client connection alive, continuously reading
+/// JSON frames. When a recognized request arrives we spin up the associated
+/// stream producer (e.g. [`pairs_candle_handler`]) and pipe its updates back to
+/// the client.
 pub async fn handler(stream: TcpStream) -> Result<()> {
     let mut stream = tokio_tungstenite::accept_async(stream)
         .await
@@ -48,12 +61,18 @@ pub async fn handler(stream: TcpStream) -> Result<()> {
             } => {
                 pairs_candle_handler(&mut stream, &symbol_left, &symbol_right).await?;
             }
+            WSRequest::Price { symbol: _ } => {}
         }
     }
 
     Ok(())
 }
 
+/// Stream Hyperliquid candle updates for a pair of coins back to the client.
+///
+/// The helper spawns the [`PairsCandle`] worker to multiplex two candle feeds
+/// into a paired ratio. We forward the resulting snapshots over the websocket
+/// connection while propagating serialization or IO failures back to Actix.
 pub async fn pairs_candle_handler(
     stream: &mut WebSocketStream<TcpStream>,
     symbol_left: &str,

@@ -6,7 +6,7 @@ export const RiskManagerWrapper = styled(Box)(() => ({
   gap: '10px',
   backgroundColor: '#13121296',
   width: '325px',
-  minHeight: '620px',
+  minHeight: '680px',
   height: 'auto',
   padding: '10px',
   position: 'relative',

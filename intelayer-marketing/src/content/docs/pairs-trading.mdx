@@ -1,0 +1,23 @@
+# Pairs Trading
+
+Intelayer lets you chart and execute custom crypto-vs-crypto spreads without third-party scripts.
+
+## Constructing spreads
+
+1. Choose the base asset (e.g., ETH).
+2. Select the quote asset (e.g., BTC).
+3. Optionally apply weightings such as 1.2x vs. 0.8x to balance volatility.
+
+Intelayer normalizes historical prices and displays spread charts alongside DOM data for both legs.
+
+## Execution flow
+
+- Stage orders leg-by-leg or use the spread ticket for simultaneous routing.
+- AI-CLI commands like “Long SOL, short MATIC with 2:1 ratio” prefill the spread ticket.
+- Risk manager respects your max-loss constraint across both legs.
+
+## Common pitfalls
+
+- **Liquidity drift:** Thin books may cause slippage between legs; set tolerance bands.
+- **Funding differentials:** Track perp funding or borrow rates for each venue.
+- **Exchange downtime:** Route legs across multiple venues to avoid maintenance windows.

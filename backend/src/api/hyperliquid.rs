@@ -1,10 +1,30 @@
-use std::sync::Arc;
+//! Actix handler for Hyperliquid REST endpoints.
+//!
+//! The handler fans out requests to the Hyperliquid SDK and supporting
+//! services, returning a shared [`Response`] wrapper so the frontend can consume
+//! each operation in a consistent shape.
 
+use crate::{
+    error::Error::BadRequestError,
+    model::{
+        hyperliquid::{
+            Agent, ChannelConnection, Condition, DeltaCalculationResponse,
+            DepthCalculationResponse, Exchange, Info, InternalRequest, QueueElem, Request,
+            CONNECTIONS,
+        },
+        Response,
+    },
+    prelude::Result,
+    service::hyperliquid::{info, pair::pair_candle},
+    ws::hyperliquid::book_price::BookPrice,
+};
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Responder};
+use anyhow::anyhow;
 use anyhow::Context;
 use ethers::{
     core::rand,
+    etherscan::account,
     signers::{LocalWallet, Signer},
     utils::hex::ToHex,
 };
@@ -18,20 +38,30 @@ use crate::{
     error::Error::BadRequestError,
     model::{
         hyperliquid::{
-            Agent, DeltaCalculationResponse, DepthCalculationResponse, Exchange, Info,
-            InternalRequest, Request,
+            Agent, BookKind, DepthCalculationResponse, Exchange, Info, InternalRequest,
+            LiquidityResponse, Request, ValueKind,
         },
         Response,
     },
-    prelude::Result,
-    service::hyperliquid::{info, pair::pair_candle},
+    Hyperliquid,
 };
+use std::sync::Arc;
+use tokio::sync::{mpsc::Sender, RwLock};
+use tracing::error;
 
+/// Entry point for `/hyperliquid` requests coming from the frontend.
+///
+/// The Hyperliquid API groups functionality into logical request enums. The
+/// handler examines the payload, executes the appropriate SDK call, and
+/// normalises the response into the shared [`Response`] structure. Complex
+/// operations (like conditional orders) also interact with background queues or
+/// websocket listeners managed by the backend.
 pub async fn hyperliquid(
     chain: web::Data<Chain>,
     req: web::Json<Request>,
     session: Session,
     sender: web::Data<Sender<InternalRequest>>,
+    queue: web::Data<RwLock<Vec<QueueElem>>>,
 ) -> Result<impl Responder> {
     let req = req.into_inner();
     let chain = **chain;
@@ -190,93 +220,66 @@ pub async fn hyperliquid(
                         msg: None,
                     })
                 }
-                Info::Delta { req } => {
-                    // Fetch the order book
+                Info::Liquidity { req } => {
                     let book = info
                         .l2_book(req.symbol)
                         .await
                         .map_err(|msg| BadRequestError(msg.to_string()))?;
-                    let ask_levels = book
-                        .levels
-                        .first()
-                        .ok_or(BadRequestError("Book doesn't contain ask level".into()))?
-                        .iter()
-                        .filter_map(|l| {
-                            Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?))
-                        })
-                        .collect::<Vec<_>>();
-                    let bid_levels = book
-                        .levels
-                        .get(1)
-                        .ok_or(BadRequestError("Book doesn't contain bid level".into()))?
-                        .iter()
-                        .filter_map(|l| {
-                            Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?))
-                        })
-                        .collect::<Vec<_>>();
-                    // Determine whether to calculate delta over a percentage range or the entire book
-                    let (bid_size, ask_size) = match req.range.as_str() {
-                        "total" => {
-                            // Calculate the total sizes across the entire book
-                            let total_bid_size = bid_levels.iter().map(|&(_, sz)| sz).sum::<f32>();
-                            let total_ask_size = ask_levels.iter().map(|&(_, sz)| sz).sum::<f32>();
-                            (total_bid_size, total_ask_size)
-                        }
-                        _ => {
-                            // Percentage range calculation - reuse the depth calculation logic
-                            let percentage: f32 = req
-                                .range
-                                .trim_end_matches('%')
-                                .parse::<f32>()
-                                .map_err(|_| {
-                                    BadRequestError("Error while parsing range percentage".into())
-                                })?
-                                / 100.;
-                            let best_price_ask = ask_levels
-                                .iter()
-                                .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
-                                .ok_or(BadRequestError(
-                                    "Ask level doesn't have any items in it".into(),
-                                ))?
-                                .0;
-                            let dest_price_bid = bid_levels
-                                .iter()
-                                .min_by(|l1, l2| l1.0.total_cmp(&l2.0))
-                                .ok_or(BadRequestError(
-                                    "Bid level doesn't have any items in it".into(),
-                                ))?
-                                .0;
-                            let mut ask_size = 0.;
-                            let mut bid_size = 0.;
-                            for (px, sz) in ask_levels {
-                                if best_price_ask * (1. + percentage) > px {
-                                    continue;
-                                }
-                                ask_size += sz;
-                            }
-                            for (px, sz) in bid_levels {
-                                if dest_price_bid * (1. + -percentage) < px {
-                                    continue;
-                                }
-                                bid_size += sz;
-                            }
-                            (bid_size, ask_size)
-                        }
-                    };
-                    // Calculate delta: difference between total bid and ask sizes
-                    let delta = bid_size - ask_size;
-                    let delta = DeltaCalculationResponse {
-                        delta,
+
+                    let ask = &book.levels.first();
+                    let bid = &book.levels.last();
+
+                    let mut top_ask = ask.and_then(|a| a.first());
+                    let mut top_bid = bid.and_then(|b| b.first());
+
+                    match req.book_kind {
+                        Some(BookKind::Ask) => top_bid = None,
+                        Some(BookKind::Bid) => top_ask = None,
+                        _ => {},
+                    }
+
+                    let (top_ask_qty, top_ask_price, top_bid_qty, top_bid_price) =
+                        match req.value_kind {
+                            Some(ValueKind::Price) => (
+                                None,
+                                top_ask.map(|l| l.px.clone()),
+                                None,
+                                top_bid.map(|l| l.px.clone()),
+                            ),
+                            Some(ValueKind::Quantity) => (
+                                top_ask.map(|l| l.sz.clone()),
+                                None,
+                                top_bid.map(|l| l.sz.clone()),
+                                None,
+                            ),
+                            None => (
+                                top_ask.map(|l| l.sz.clone()),
+                                top_ask.map(|l| l.px.clone()),
+                                top_bid.map(|l| l.sz.clone()),
+                                top_bid.map(|l| l.px.clone()),
+                            ),
+                        };
+
+                    let response = LiquidityResponse {
+                        symbol: book.coin,
+                        top_ask_qty,
+                        top_ask_price,
+                        top_bid_qty,
+                        top_bid_price,
                         timestamp: book.time,
                     };
+
                     HttpResponse::Ok().json(Response {
                         success: true,
-                        data: Some(delta),
+                        data: Some(response),
                         msg: None,
                     })
                 }
             }
         }
+
+        // Trading actions require a previously established session agent and
+        // operate on the Hyperliquid exchange client.
         Request::Exchange(req) => {
             let agent = session
                 .get::<Agent>("agent")
@@ -294,11 +297,18 @@ pub async fn hyperliquid(
 
             match req {
                 Exchange::Order {
+                    risk,
                     action,
                     vault_address,
                 } => {
+                    let orders = if let Some(risk) = risk {
+                        filter_orders_by_risk(action.orders, risk).await?
+                    } else {
+                        action.orders
+                    };
+
                     let data = exchange
-                        .place_order(agent, action.orders, vault_address)
+                        .place_order(agent, orders, vault_address)
                         .await
                         .map_err(|msg| BadRequestError(msg.to_string()))?;
 
@@ -315,6 +325,7 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
+
                 Exchange::CreateSubAccount { action } => {
                     let data = exchange
                         .create_sub_account(agent, action.name)
@@ -377,6 +388,70 @@ pub async fn hyperliquid(
                         }),
                     }
                 }
+
+                // Conditional orders enqueue work for the background worker and
+                // optionally create shared websocket subscriptions so multiple
+                // jobs can reuse the same price feed.
+                Exchange::CondOrder {
+                    action,
+                    condition,
+                    source,
+                    vault_address,
+                } => {
+                    match &condition {
+                        Condition::PairPrice(pair_price) => {
+                            let mut connections = CONNECTIONS.lock().await;
+
+                            if let Some(connection) = connections.get_mut(&pair_price.left_symbol) {
+                                connection.count += 1;
+                            } else {
+                                let (receiver, stop_sender) =
+                                    BookPrice::init(&pair_price.left_symbol).await?;
+
+                                connections.insert(
+                                    pair_price.left_symbol.clone(),
+                                    ChannelConnection {
+                                        count: 1,
+                                        receiver,
+                                        stop_sender,
+                                    },
+                                );
+                            }
+
+                            if let Some(connection) = connections.get_mut(&pair_price.right_symbol)
+                            {
+                                connection.count += 1;
+                            } else {
+                                let (receiver, stop_sender) =
+                                    BookPrice::init(&pair_price.right_symbol).await?;
+
+                                connections.insert(
+                                    pair_price.right_symbol.clone(),
+                                    ChannelConnection {
+                                        count: 1,
+                                        receiver,
+                                        stop_sender,
+                                    },
+                                );
+                            }
+                        }
+                    }
+                    queue.write().await.push(QueueElem {
+                        source,
+                        agent,
+                        action,
+                        condition,
+                        vault_address,
+                    });
+
+                    HttpResponse::Ok().json(Response::<()> {
+                        success: true,
+                        data: None,
+                        msg: None,
+                    })
+                }
+                // Account management endpoints largely forward to the SDK and
+                // return the canonical response body.
                 Exchange::UpdateLeverage { action } => {
                     let data = exchange
                         .update_leverage(agent, action.leverage, action.asset, action.is_cross)
@@ -547,6 +622,8 @@ pub async fn hyperliquid(
                 user,
             };
 
+            // Persist the agent in the session so future Exchange requests can
+            // authenticate without resending credentials.
             session
                 .insert("agent", agent)
                 .context("Failed to insert agent")?;
@@ -558,4 +635,115 @@ pub async fn hyperliquid(
             })
         }
     })
+}
+
+/// Filters a list of orders based on their risk value.
+///
+/// This function evaluates each order in the given vector of `OrderRequest` objects.
+/// If an order is a buy order, it calculates the total USD value of the order using
+/// associated metadata from the Hyperliquid API and the current market price.
+/// Orders that exceed the specified risk threshold are excluded from the result.
+///
+/// # Parameters
+/// - `orders`: A vector of `OrderRequest` objects representing the orders to be filtered.
+/// - `chain`: A `Chain` instance used to interact with the Hyperliquid API.
+/// - `risk`: A `f32` value representing the maximum allowable risk threshold.
+///
+/// # Returns
+/// A `Result` containing a vector of `OrderRequest` objects that do not exceed the risk threshold.
+/// If any errors occur during processing, an `anyhow::Error` is returned.
+///
+/// # Errors
+/// This function may return an error if it fails to fetch metadata, parse values, or encounter
+/// invalid data during processing.
+async fn filter_orders_by_risk(
+    orders: Vec<OrderRequest>,
+    risk: f32,
+) -> anyhow::Result<Vec<OrderRequest>> {
+    let mut filtered_orders = Vec::new();
+
+    for order in orders {
+        if order.is_buy {
+            let price = order.limit_px.parse::<f32>()?;
+            let size = order.sz.parse::<f32>()?;
+            let order_sum_usd = price * size;
+
+            // If the order is not paired with USDC
+            /* // Fetch metadata for spot markets
+            let spot_meta = info
+                .spot_meta()
+                .await
+                .map_err(|msg| anyhow!(msg.to_string()))?;
+
+            // Find the universe corresponding to the order's asset
+            let universe = spot_meta
+                .universe
+                .iter()
+                .find(|u| u.index == order.asset as u64)
+                .ok_or_else(|| anyhow!("There are no matches for this index"))?;
+
+            // Ensure the universe contains at least two tokens
+            if universe.tokens.len() < 2 {
+                return Err(anyhow!("Can't take token name from universe"));
+            }
+
+            // Get the second token index and fetch its metadata
+            let second_token_index = universe.tokens[1];
+            let token = spot_meta
+                .tokens
+                .iter()
+                .find(|t| t.index == second_token_index)
+                .ok_or_else(|| anyhow!("There is no token with this index"))?;
+
+            let symbol_right = token.name.clone();
+            let price = order.limit_px.parse::<f32>()?;
+            let size = order.sz.parse::<f32>()?;
+            let mut order_sum_usd = price * size;
+
+            // Skip fetching the order book if the token is USDC
+            if symbol_right != *"USDC" {
+                // let book = info
+                //     .l2_book(symbol_right)
+                //     .await
+                //     .map_err(|msg| anyhow!(msg.to_string()))?;
+
+                // // Extract ask levels and calculate the maximum ask price
+                // let ask_levels = book
+                //     .levels
+                //     .first()
+                //     .ok_or_else(|| anyhow!("Book doesn't contain ask level"))?
+                //     .iter()
+                //     .filter_map(|l| Some((l.px.parse::<f32>().ok()?, l.sz.parse::<f32>().ok()?)))
+                //     .collect::<Vec<_>>();
+
+                // let ask_price = ask_levels
+                //     .iter()
+                //     .max_by(|l1, l2| l1.0.total_cmp(&l2.0))
+                //     .ok_or_else(|| anyhow!("Level doesn't have any items"))?
+                //     .0;
+
+                // or
+
+                // let mids = info.mids().await?;
+                // let ask_price = mids
+                //     .get(&symbol_right)
+                //     .ok_or_else(|| {
+                //         anyhow!("There is no price information for {symbol_right} token")
+                //     })?
+                //     .parse::<f32>()?;
+
+                // order_sum_usd *= ask_price;
+            }*/
+
+            // Exclude orders exceeding the risk threshold
+            if order_sum_usd <= risk {
+                filtered_orders.push(order);
+            }
+        } else {
+            // Include non-buy orders without evaluation
+            filtered_orders.push(order);
+        }
+    }
+
+    Ok(filtered_orders)
 }
