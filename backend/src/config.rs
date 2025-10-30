@@ -3,19 +3,28 @@ use std::{fs::File, io::Read};
 use anyhow::Context;
 use serde::Deserialize;
 
+/// Strongly typed view over the environment variables required to boot the backend. Environment
+/// loading happens at runtime so the same struct can be reused for different deployment targets.
 #[derive(Debug, Deserialize)]
 pub struct Config {
     server_host: String,
     server_port: u16,
+    ws_host: String,
+    ws_port: u16,
 
+    /// Log level string consumed by the tracing subscriber builder.
     pub level: String,
 
+    /// Redis connection string used by the session middleware.
     pub redis_url: String,
 
+    /// Secret used to sign session cookies.
     pub cookie_key: String,
 }
 
 impl Config {
+    /// Build a configuration instance using environment variables and `.env` fallbacks. This
+    /// method is used from `main` so it bubbles up detailed context errors when things go wrong.
     pub fn new() -> Result<Self, anyhow::Error> {
         match envy::from_env() {
             Ok(config) => Ok(config),
@@ -39,10 +48,17 @@ impl Config {
 }
 
 impl Config {
+    /// Helper that returns the HTTP bind target as `host:port`.
     pub fn server_url(&self) -> String {
         format!("{}:{}", self.server_host, self.server_port)
     }
 
+    /// Helper that returns the websocket bind target as `host:port`.
+    pub fn ws_url(&self) -> String {
+        format!("{}:{}", self.ws_host, self.ws_port)
+    }
+
+    /// Allow integration tests to override the HTTP port while reusing the rest of the config.
     pub fn set_port(&mut self, port: u16) {
         self.server_port = port;
     }

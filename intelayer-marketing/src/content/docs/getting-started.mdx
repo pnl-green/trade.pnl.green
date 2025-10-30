@@ -1,0 +1,30 @@
+import Button from '../../components/Button';
+
+# Getting Started
+
+Welcome to Intelayer, the crypto-first multi-venue terminal. This guide walks through onboarding, the default workspace, and handy shortcuts so you can ship trades faster.
+
+## Create your Intelayer account
+
+1. Visit [intelayer.com](https://intelayer.com) and launch **Trade Now**.
+2. Sign up with email + password or OAuth where available.
+3. Confirm your email address to unlock live trading.
+
+## Quick tour
+
+- **Workspace presets**: Choose between Momentum, Market Neutral, and Scalps. Each preset preloads layouts for DOMs, charts, and the AI-CLI overlay.
+- **Portfolio panel**: Aggregates balances and PnL across every connected venue.
+- **Activity feed**: Tracks fills, alerts, and bot edits in real time.
+
+## Keyboard shortcuts
+
+Intelayer ships with sensible defaults. Press `?` inside the app to open the cheat sheet.
+
+- `⌘/Ctrl + K` – Command palette
+- `T` – Toggle AI-CLI overlay
+- `⌘/Ctrl + B` – Open bot builder
+- `⌘/Ctrl + Shift + M` – Switch workspaces
+
+<Button onClick={() => window.open(import.meta.env.VITE_TRADE_URL ?? 'https://trade.intelayer.com', '_blank', 'noopener,noreferrer')}>
+  Launch the terminal
+</Button>

@@ -9,7 +9,11 @@ use actix_web::{
     web, App, HttpServer,
 };
 use anyhow::Context;
-use backend::{api, log, model::hyperliquid::InternalRequest, Config};
+use backend::{
+    api, log,
+    model::hyperliquid::{InternalRequest, QueueElem},
+    ws, Config,
+};
 
 use hyperliquid::{
     types::{
@@ -23,15 +27,23 @@ use hyperliquid::{
     utils::{parse_price, parse_size},
     Exchange, Hyperliquid, Info,
 };
-use tokio::sync::mpsc;
+
+use tokio::sync::{mpsc, RwLock};
 use tracing_actix_web::TracingLogger;
 
 const SLIPPAGE: f64 = 0.03;
 
+/// Application entry point that wires together configuration, logging, HTTP routing, and
+/// background workers. This function is intentionally linear so newcomers can follow the boot
+/// sequence from loading configuration all the way to serving requests.
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
+    // Pull environment configuration (and `.env` fallbacks) before constructing any other
+    // resources so all subsequent helpers rely on the same values.
     let config = Config::new()?;
 
+    // Configure tracing before creating any async tasks to ensure logs from spawned workers use
+    // the same subscriber.
     let subscriber = log::get_subscriber(
         env!("CARGO_PKG_NAME").into(),
         &config.level,
@@ -40,8 +52,9 @@ async fn main() -> anyhow::Result<()> {
 
     log::init_subscriber(subscriber);
 
-    // Build the server
+    // Build the inbound listeners that back both HTTP and websocket surfaces.
     let listener = TcpListener::bind(config.server_url()).context("Failed to bind to port")?;
+    let ws_listener = tokio::net::TcpListener::bind(config.ws_url()).await?;
 
     let cookie_key = Key::from(config.cookie_key.as_bytes());
 
@@ -51,6 +64,8 @@ async fn main() -> anyhow::Result<()> {
 
     let chain = Chain::Arbitrum;
 
+    // Dedicated worker that consumes internal TWAP requests from the mpsc channel and executes
+    // them against Hyperliquid on a cadence derived from the payload parameters.
     spawn(async move {
         while let Some(request) = rx.recv().await {
             match request {
@@ -108,7 +123,7 @@ async fn main() -> anyhow::Result<()> {
                             let limit_px =
                                 mark_px * (1.0 + if request.is_buy { SLIPPAGE } else { -SLIPPAGE }); // 3% slippage
 
-                            let universe = match ctxs.get(0) {
+                            let universe = match ctxs.first() {
                                 Some(AssetContext::Meta(meta)) => &meta.universe,
                                 _ => {
                                     tracing::error!("Failed to get universe");
@@ -169,12 +184,64 @@ async fn main() -> anyhow::Result<()> {
             }
         }
     });
+    // Lightweight websocket accept loop that forwards raw TCP streams into the websocket handler
+    // module. This keeps websocket orchestration out of the main HTTP server lifecycle above.
+    spawn(async move {
+        while let Ok((stream, _addr)) = ws_listener.accept().await {
+            spawn(ws::handler::handler(stream));
+        }
+    });
 
-    // Global
+    let queue: RwLock<Vec<QueueElem>> = RwLock::new(vec![]);
+    let queue = web::Data::new(queue);
+    let queue_2 = queue.clone();
+
+    // Background reconciliation loop that periodically checks queued tasks (e.g. delayed
+    // executions) and drives them to completion while pruning finished entries.
+    tokio::spawn(async move {
+        let exchange: Exchange = Hyperliquid::new(chain);
+
+        loop {
+            let queue_r = queue_2.read().await;
+
+            let mut indices_to_remove = Vec::new();
+
+            for (i, elem) in queue_r.iter().enumerate() {
+                match elem.check().await {
+                    Ok(true) => {
+                        indices_to_remove.push(i);
+                    }
+                    Err(err) => {
+                        tracing::error!("{:?}", err);
+                    }
+                    _ => {}
+                }
+            }
+
+            drop(queue_r);
+
+            if !indices_to_remove.is_empty() {
+                let mut queue_w = queue_2.write().await;
+
+                for &i in indices_to_remove.iter().rev() {
+                    let elem = queue_w.remove(i);
+                    drop(queue_w);
+                    elem.execute(&exchange).await;
+                    queue_w = queue_2.write().await;
+                }
+            }
+        }
+    });
+
+    // Share global application state with the Actix data registry so request handlers can access
+    // the Hyperliquid chain choice, TWAP sender, and queue storage.
     let chain = web::Data::new(chain);
     let sender = web::Data::new(tx);
 
     HttpServer::new(move || {
+        // Configure CORS and session middleware on a per-worker basis. This is executed for each
+        // Actix worker thread so we clone state rather than move ownership out of the parent
+        // future.
         let cors = Cors::default()
             .allowed_origin("http://localhost:3000")
             .allowed_origin("http://127.0.0.1:3000")
@@ -199,6 +266,7 @@ async fn main() -> anyhow::Result<()> {
             .default_service(web::to(api::not_found))
             .app_data(chain.clone())
             .app_data(sender.clone())
+            .app_data(queue.clone())
     })
     .listen(listener)?
     .run()

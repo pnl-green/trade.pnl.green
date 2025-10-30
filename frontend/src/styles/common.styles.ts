@@ -1,4 +1,4 @@
-import { Box, Button, styled } from '@mui/material';
+import { Box, Button, Typography, styled } from '@mui/material';
 
 export const ItemsSelect = styled('select')(() => ({
   height: '30px',
@@ -71,6 +71,21 @@ export const BuySellBtn = styled(Button)(() => ({
   },
 }));
 
+export const CurrentMarketPriceWidget = styled(Box)(() => ({
+  display: "flex",
+  flexDirection: "column"
+}))
+
+export const CurrentMarketPriceAsk = styled(Typography)(() => ({
+  fontSize: "12px",
+  color: "red"
+}))
+
+export const CurrentMarketPriceBid = styled(Typography)(() => ({
+  fontSize: "12px",
+  color: "lime"
+}))
+
 //flex items
 export const FlexItems = styled(Box)(() => ({
   display: 'flex',
@@ -99,3 +114,23 @@ export const TabsButtons = styled(Button)(() => ({
     backgroundColor: '#049260',
   },
 }));
+
+export const BlurContainer = styled('div')(() => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: '-5px',
+  bottom: 0,
+  backdropFilter: 'blur(3px)',
+  zIndex: 4
+}))
+
+export const ComingSoonText = styled('div')(() => ({
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  color: '#fff',
+  fontSize: '1.5rem',
+  zIndex: 5
+}))

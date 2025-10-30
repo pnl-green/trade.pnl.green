@@ -1,0 +1,25 @@
+# Risk Manager
+
+Intelayer’s semi-automatic risk manager sizes positions around a target max loss per trade. Enter your threshold once and every ticket respects it.
+
+## How it works
+
+1. Set your **Max Loss** amount (e.g., $500).
+2. Define your stop distance or liquidation trigger.
+3. Intelayer calculates the correct position size and adjusts quantity as price moves.
+
+## Example math
+
+```
+Max loss = $500
+Stop distance = 2%
+Size = Max loss / Stop distance = $500 / 0.02 = $25,000 notionally
+```
+
+Intelayer rounds quantities to venue tick sizes and previews the numbers before submission.
+
+## Edge cases
+
+- If the required position is smaller than the venue minimum, Intelayer highlights the gap.
+- For levered products, margin requirements are factored into the preview.
+- Alerts trigger when consecutive trades approach your daily or weekly loss limits.

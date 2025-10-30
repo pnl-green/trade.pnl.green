@@ -1,0 +1,21 @@
+# Security
+
+Intelayer is designed for traders who demand tight operational security. The marketing site and terminal minimize data collection and emphasize client-side control.
+
+## Key handling
+
+- API keys remain encrypted in the browser and are only transmitted to the venue you authorize.
+- OAuth tokens refresh via the venue’s official APIs and are scoped to trading + balances.
+- Hardware wallet support keeps private keys off hot machines.
+
+## Client controls
+
+- Content Security Policy defaults to `default-src 'self'` with explicit allowances for venue APIs.
+- Frame embedding is disabled via `frame-ancestors 'none'`.
+- No analytics load until a user toggles opt-in (stored locally).
+
+## Incident response
+
+- Intelayer publishes status updates on the Socials page if venue connectivity degrades.
+- Automated monitoring flags abnormal API activity and prompts key rotation.
+- Security disclosures can be sent to `security@intelayer.com` using PGP (fingerprint available on request).

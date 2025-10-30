@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-page text-ink font-body antialiased;
+  min-height: 100vh;
+}
+
+a {
+  @apply text-green-400 underline-offset-4 transition-colors;
+}
+
+a:hover {
+  @apply text-green-200;
+}
+
+::selection {
+  background: rgba(21, 211, 128, 0.35);
+}
+
+[data-prefers-reduced-motion='true'] * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
