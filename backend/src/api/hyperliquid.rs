@@ -20,31 +20,20 @@ use crate::{
 };
 use actix_session::Session;
 use actix_web::{web, HttpResponse, Responder};
-use anyhow::anyhow;
 use anyhow::Context;
 use ethers::{
     core::rand,
-    etherscan::account,
     signers::{LocalWallet, Signer},
     utils::hex::ToHex,
 };
 use hyperliquid::{
-    types::{exchange::response, Chain, API},
-    Hyperliquid,
-};
-use tokio::sync::mpsc::Sender;
-
-use crate::{
-    error::Error::BadRequestError,
-    model::{
-        hyperliquid::{
-            Agent, BookKind, DepthCalculationResponse, Exchange, Info, InternalRequest,
-            LiquidityResponse, Request, ValueKind,
-        },
-        Response,
+    types::{
+        exchange::{request::OrderRequest, response},
+        Chain, API,
     },
     Hyperliquid,
 };
+
 use std::sync::Arc;
 use tokio::sync::{mpsc::Sender, RwLock};
 use tracing::error;
