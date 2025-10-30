@@ -8,9 +8,9 @@ use crate::{
     error::Error::BadRequestError,
     model::{
         hyperliquid::{
-            Agent, ChannelConnection, Condition, DeltaCalculationResponse,
-            DepthCalculationResponse, Exchange, Info, InternalRequest, QueueElem, Request,
-            CONNECTIONS,
+            Agent, BookKind, ChannelConnection, Condition,
+            DepthCalculationResponse, Exchange, Info, InternalRequest, LiquidityResponse,
+            QueueElem, Request, ValueKind, CONNECTIONS,
         },
         Response,
     },
@@ -36,7 +36,6 @@ use hyperliquid::{
 
 use std::sync::Arc;
 use tokio::sync::{mpsc::Sender, RwLock};
-use tracing::error;
 
 /// Entry point for `/hyperliquid` requests coming from the frontend.
 ///
@@ -262,6 +261,13 @@ pub async fn hyperliquid(
                         success: true,
                         data: Some(response),
                         msg: None,
+                    })
+                }
+                Info::Delta { req: _ } => {
+                    HttpResponse::Ok().json(Response::<()> {
+                        success: false,
+                        data: None,
+                        msg: Some("Delta endpoint not implemented".into()),
                     })
                 }
             }
