@@ -30,7 +30,7 @@ interface SubAccountsProps {
   }) => void;
 }
 
-const SESSION_STORAGE_PREFIX = 'pnl.green';
+const SESSION_STORAGE_PREFIX = 'intelayer';
 
 const DEFAULT_AGENT = {
   agentAddress: '',
@@ -166,7 +166,7 @@ const HyperliquidProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let agent = sessionStorage.getItem(
-      `pnl.green.agent.${(userAddress || '').toLowerCase()}`
+      `intelayer.agent.${(userAddress || '').toLowerCase()}`
     );
     let parsedAgent = agent && JSON.parse(agent); // parse agent string from session storage
 

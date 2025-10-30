@@ -245,7 +245,7 @@ async fn main() -> anyhow::Result<()> {
         let cors = Cors::default()
             .allowed_origin("http://localhost:3000")
             .allowed_origin("http://127.0.0.1:3000")
-            .allowed_origin("https://trade.pnl.green")
+            .allowed_origin("https://trade.intelayer.com")
             .allowed_methods(vec!["GET", "POST"])
             .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
             .allowed_header(header::CONTENT_TYPE)

@@ -1,7 +1,7 @@
 import { parseFullSymbol } from './helpers';
 
 const socket = new WebSocket(
-  'wss://api.pnl.green/ws/'
+  'wss://trade.intelayer.com/ws/'
 );
 const channelToSubscription = new Map();
 
