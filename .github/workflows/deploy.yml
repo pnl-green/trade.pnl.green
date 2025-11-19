@@ -54,9 +54,7 @@ jobs:
         working-directory: ./frontend
         shell: bash
         run: |
-          # Install dependencies from package-lock.json to ensure reproducible builds
-          npm ci
-          # Build the production-ready Next.js assets
+          npm install
           npm run build
 
       - name: Package frontend build artifacts
