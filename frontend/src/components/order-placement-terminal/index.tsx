@@ -2,8 +2,6 @@ import { Box } from '@mui/material';
 import React, { useState } from 'react';
 import {
   RiskManagerWrapper,
-  TabsButton,
-  TabsWrapper,
 } from '@/styles/riskManager.styles';
 import MarketComponent from './market';
 import LimitComponent from './limit';
@@ -13,6 +11,7 @@ import ScaleOrderTerminal from './scale';
 import RiskManagerModal from '../Modals/riskManagerModal';
 import LeverageModal from '../Modals/leverageModal';
 import MarginTypeModal from '../Modals/marginTypeModal';
+import SegmentedControl from '../ui/SegmentedControl';
 
 // Interface to define the shape of the modals state
 interface optionsProps {
@@ -24,9 +23,57 @@ interface optionsProps {
 
 // Array to hold the types and labels for various modal options
 const options = [
-  { type: 'riskManager', label: 'Risk Manager' },
-  { type: 'leverage', label: 'Leverage' },
-  { type: 'marginType', label: 'Margin Type' },
+  {
+    type: 'riskManager',
+    label: 'Risk Manager',
+    tooltip:
+      'Risk Manager helps you size trades based on your max loss, margin mode, and current portfolio risk.',
+  },
+  {
+    type: 'leverage',
+    label: 'Leverage',
+    tooltip:
+      'Leverage controls how large your position can be relative to your account equity. Higher leverage increases both potential profit and liquidation risk.',
+  },
+  {
+    type: 'marginType',
+    label: 'Margin Type',
+    tooltip:
+      'Margin Type lets you choose between cross and isolated margin, defining how much of your account can back this position.',
+  },
+];
+
+const orderTabOptions = [
+  {
+    label: 'Market',
+    value: 'Market',
+    tooltip:
+      'Market orders execute immediately at the best available prices in the orderbook, with potential slippage.',
+  },
+  {
+    label: 'Limit',
+    value: 'Limit',
+    tooltip:
+      'Limit orders let you specify a price. They only execute if the market trades at or through your limit price.',
+  },
+  {
+    label: 'TWAP',
+    value: 'TWAP',
+    tooltip:
+      'TWAP spreads your order over time to reduce market impact by executing smaller slices at intervals.',
+  },
+  {
+    label: 'Chase',
+    value: 'Chase',
+    tooltip:
+      'Chase orders automatically follow the best bid or ask within a defined range, helping you stay near the top of the book.',
+  },
+  {
+    label: 'Scale',
+    value: 'Scale',
+    tooltip:
+      'Scale orders place a ladder of multiple limit orders at different prices to build a position across a range.',
+  },
 ];
 
 const OrderPlacementTerminal = () => {
@@ -68,23 +115,16 @@ const OrderPlacementTerminal = () => {
 
   return (
     <RiskManagerWrapper id="order-placement-terminal">
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-        }}
-      >
-        {options.map(({ type, label }) => (
-          <div
-            key={type}
-            className={`captions ${activeButton === type ? 'active' : ''}`}
-            onClick={() => toggleModal(type)}
-          >
-            {label}
-          </div>
-        ))}
-      </Box>
+      <SegmentedControl
+        ariaLabel="Risk controls"
+        options={options.map(({ label, type, tooltip }) => ({
+          label,
+          value: type,
+          tooltip,
+        }))}
+        value={activeButton || ''}
+        onChange={(value) => toggleModal(value)}
+      />
 
       {/* Render modals based on the modals state */}
       {modals.riskManager && (
@@ -109,17 +149,12 @@ const OrderPlacementTerminal = () => {
         <MarginTypeModal onClose={() => closeModal('marginType')} />
       )}
 
-      <TabsWrapper>
-        {['Market', 'Limit', 'TWAP', 'Chase', 'Scale'].map((tabName) => (
-          <TabsButton
-            key={tabName}
-            className={activeTab === tabName ? 'active' : ''}
-            onClick={() => handleTabChange(tabName)}
-          >
-            {tabName}
-          </TabsButton>
-        ))}
-      </TabsWrapper>
+      <SegmentedControl
+        ariaLabel="Order ticket mode"
+        options={orderTabOptions}
+        value={activeTab}
+        onChange={handleTabChange}
+      />
 
       {/* Conditionally render components based on active tab */}
       {activeTab === 'Market' && <MarketComponent />}

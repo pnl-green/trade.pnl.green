@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  PositionTabsButtonsWrapper,
   PositionsOrdersHistoryWrapper,
 } from "@/styles/positionsOrdersHistory.styles";
 import PositionComponentTable from "./positions";
@@ -9,19 +8,49 @@ import TwapComponentTable from "./twap";
 import TradeHistoryComponentTable from "./tradehistory";
 import FundingHistoryComponentTable from "./fundingHistory";
 import OrderHistoryComponentTable from "./orderHistory";
-import { TabsButtons } from "@/styles/common.styles";
+import BottomTabs from "../ui/BottomTabs";
 
 const PositionsOrdersHistory = () => {
   const tabLabels = [
-    "Positions",
-    "Open Orders",
-    "TWAP",
-    "Trade History",
-    "Funding History",
-    "Order History",
+    {
+      label: "Positions",
+      value: "Positions",
+      tooltip:
+        "Positions lists all of your open positions, including size, entry price, PnL, and liquidation estimates.",
+    },
+    {
+      label: "Open Orders",
+      value: "Open Orders",
+      tooltip:
+        "Open Orders shows all live orders that have been submitted but not fully filled or canceled yet.",
+    },
+    {
+      label: "TWAP",
+      value: "TWAP",
+      tooltip:
+        "TWAP tab shows active and past time-weighted average price orders, including their schedule and fill stats.",
+    },
+    {
+      label: "Trade History",
+      value: "Trade History",
+      tooltip:
+        "Trade History lists every fill in this account, including size, price, fee, and side.",
+    },
+    {
+      label: "Funding History",
+      value: "Funding History",
+      tooltip:
+        "Funding History shows all past funding payments you have paid or received for perpetual futures.",
+    },
+    {
+      label: "Order History",
+      value: "Order History",
+      tooltip:
+        "Order History lists all order lifecycle events—submissions, edits, cancels, and expirations.",
+    },
   ];
 
-  const [activeTab, setActiveTab] = useState(tabLabels[0]);
+  const [activeTab, setActiveTab] = useState(tabLabels[0].value);
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
@@ -29,17 +58,7 @@ const PositionsOrdersHistory = () => {
 
   return (
     <PositionsOrdersHistoryWrapper>
-      <PositionTabsButtonsWrapper>
-        {tabLabels.map((label, index) => (
-          <TabsButtons
-            key={index}
-            className={activeTab === label ? "active" : ""}
-            onClick={() => handleTabClick(label)}
-          >
-            {label}
-          </TabsButtons>
-        ))}
-      </PositionTabsButtonsWrapper>
+      <BottomTabs tabs={tabLabels} active={activeTab} onChange={handleTabClick} />
 
       {/*tableComponents*/}
       {activeTab === "Positions" && <PositionComponentTable />}

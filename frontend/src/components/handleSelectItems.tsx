@@ -1,5 +1,26 @@
 import React from 'react';
 import { ItemsSelect } from '@/styles/common.styles';
+import { intelayerColors } from '@/styles/theme';
+
+const selectVariants = {
+  surface: {
+    backgroundColor: intelayerColors.surface,
+    borderColor: intelayerColors.panelBorder,
+    color: intelayerColors.ink,
+  },
+  elev: {
+    backgroundColor: intelayerColors.elev,
+    borderColor: intelayerColors.gray[600],
+    color: intelayerColors.ink,
+  },
+  muted: {
+    backgroundColor: intelayerColors.gray[700],
+    borderColor: intelayerColors.gray[500],
+    color: intelayerColors.ink,
+  },
+} as const;
+
+type SelectVariant = keyof typeof selectVariants;
 
 export interface HandleSelectProps {
   selectItem: any;
@@ -8,6 +29,7 @@ export interface HandleSelectProps {
   styles?: React.CSSProperties;
   className?: string;
   toLowerCase?: boolean;
+  variant?: SelectVariant;
 }
 
 const HandleSelectItems = ({
@@ -17,10 +39,14 @@ const HandleSelectItems = ({
   styles,
   className,
   toLowerCase,
+  variant = 'surface',
 }: HandleSelectProps) => {
   return (
     <ItemsSelect
-      sx={styles}
+      sx={{
+        ...selectVariants[variant],
+        ...styles,
+      }}
       value={selectItem}
       onChange={(e) => setSelectItem(e.target.value)}
       className={className}

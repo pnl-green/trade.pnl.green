@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Sora:wght@100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 * {
   box-sizing: border-box;
@@ -13,8 +13,10 @@ body {
 }
 
 body {
-  color: #ffffff;
-  background: #000000;
+  color: #e6f1ff;
+  background: #0b0e12;
+  font-family: 'Inter', 'Space Grotesk', sans-serif;
+  line-height: 1.4;
 }
 
 a {
@@ -26,12 +28,13 @@ a {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #141a23;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
-  border: 1px solid #f1f1f1;
+  background: #27343f;
+  border: 1px solid #0e131a;
+  border-radius: 4px;
 }
 
 input[type='radio'] {

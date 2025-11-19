@@ -4,7 +4,11 @@ import { Box } from '@mui/material';
 import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 
-const Trades = () => {
+interface TradesProps {
+  maxHeight?: string | number;
+}
+
+const Trades = ({ maxHeight = '240px' }: TradesProps) => {
   const { tradesData } = useOrderBookTradesContext();
   const { pair, tokenPairs } = usePairTokensContext();
 
@@ -15,9 +19,9 @@ const Trades = () => {
 
   return (
     <Box
-      style={{
-        marginTop: '10px',
-        maxHeight: '100%',
+      sx={{
+        marginTop: '4px',
+        maxHeight,
         overflowY: 'auto',
         overflowX: 'hidden',
       }}
@@ -28,7 +32,7 @@ const Trades = () => {
             position: 'sticky',
             top: '0',
             zIndex: '1',
-            backgroundColor: '#131212',
+            backgroundColor: 'rgba(14, 19, 26, 0.9)',
           }}
         >
           <tr>

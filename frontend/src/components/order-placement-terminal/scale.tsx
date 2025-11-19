@@ -10,6 +10,8 @@ import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
 import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
+import Tooltip from '../ui/Tooltip';
+import { orderTicketTooltips } from './tooltipCopy';
 
 const ScaleOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
@@ -79,13 +81,17 @@ const ScaleOrderTerminal = () => {
         }}
       >
         <FlexItems>
-          <span>Available balance</span>
+          <Tooltip content={orderTicketTooltips.availableBalance}>
+            <span>Available balance</span>
+          </Tooltip>
           <span>
             {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
           </span>
         </FlexItems>
         <FlexItems>
-          <span>Current position size</span>
+          <Tooltip content={orderTicketTooltips.currentPositionSize}>
+            <span>Current position size</span>
+          </Tooltip>
           <span>0.0 APE</span>
         </FlexItems>
       </Box>
@@ -94,6 +100,7 @@ const ScaleOrderTerminal = () => {
         <SelectItemsBox>
           <RenderInput
             label="Size"
+            tooltip={orderTicketTooltips.size}
             placeholder="|"
             type="number"
             value={size}
@@ -211,7 +218,9 @@ const ScaleOrderTerminal = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Reduce Only</span>
+          <Tooltip content={orderTicketTooltips.reduceOnly}>
+            <span>Reduce Only</span>
+          </Tooltip>
         </FlexItems>
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
@@ -225,7 +234,9 @@ const ScaleOrderTerminal = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Take Profit / Stop Loss</span>
+          <Tooltip content={orderTicketTooltips.takeProfitStopLoss}>
+            <span>Take Profit / Stop Loss</span>
+          </Tooltip>
         </FlexItems>
       </Box>
       {radioValue === '2' && (
@@ -328,13 +339,15 @@ const ScaleOrderTerminal = () => {
         </Box>
       ) : (
         <Box sx={{ ...ButtonStyles }}>
-          <BuySellBtn
-            className="buyBtn"
-            sx={{ width: '100%' }}
-            onClick={() => setEstablishedConnModal(true)}
-          >
-            Enable trading
-          </BuySellBtn>
+          <Tooltip content={orderTicketTooltips.enableTrading}>
+            <BuySellBtn
+              className="buyBtn"
+              sx={{ width: '100%' }}
+              onClick={() => setEstablishedConnModal(true)}
+            >
+              Enable trading
+            </BuySellBtn>
+          </Tooltip>
         </Box>
       )}
 

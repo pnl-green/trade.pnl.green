@@ -3,6 +3,7 @@ import { TokenPairsWrapper } from '@/styles/tokenPairs.styles';
 import { Box } from '@mui/material';
 import UpDownIcon from '../../../public/upDownIcon';
 import { usePairTokensContext } from '@/context/pairTokensContext';
+import Tooltip from '../ui/Tooltip';
 
 interface SingleTokenPairInfoProps {
   tableISOpen: boolean;
@@ -12,7 +13,11 @@ interface SingleTokenPairInfoProps {
 const PairDetail = ({ label, value, isRed }: any) => (
   <Box className="pairDetails">
     <span>{label}</span>
-    <span className={isRed ? 'value toRed' : 'value'}>{value}</span>
+    {React.isValidElement(value) ? (
+      value
+    ) : (
+      <span className={isRed ? 'value toRed' : 'value'}>{value}</span>
+    )}
   </Box>
 );
 
@@ -34,6 +39,52 @@ const SingleTokenPairInfo = ({
     }
   };
 
+  const metrics = [
+    {
+      label: 'Mark Price',
+      value: pairDataInformation()?.assetCtx?.markPx,
+      tooltip:
+        "Mark Price is Intelayer's reference price for this market. It is usually a fair value index used for PnL and liquidation calculations.",
+    },
+    {
+      label: 'Oracle Price',
+      value: pairDataInformation()?.assetCtx?.oraclePx,
+      tooltip:
+        "Oracle Price is the external reference price provided by the venue's oracle. It is used for funding and risk checks, not necessarily for order execution.",
+    },
+    {
+      label: '24hr change (in % and $)',
+      value: pairDataInformation()?.hr24change
+        ? pairDataInformation()?.hr24change
+        : '--',
+      tooltip:
+        '24hr Change shows how much the mark price has moved in the last 24 hours, in both percentage and absolute terms.',
+      isRed: true,
+    },
+    {
+      label: '24hr Volume',
+      value: pairDataInformation()?.volume ? pairDataInformation()?.volume : '--',
+      tooltip: '24hr Volume is the total traded volume in this market over the last 24 hours.',
+    },
+    {
+      label: 'OI',
+      value: pairDataInformation()?.assetCtx?.openInterest,
+      tooltip:
+        'OI (Open Interest) is the notional value of all open positions in this market. It is a proxy for market activity and crowding.',
+    },
+    {
+      label: 'Funding / Funding Countdown',
+      value: (
+        <span className="value">
+          <span id="toGreen">{pairDataInformation()?.funding}&nbsp;&nbsp;</span>
+          {pairDataInformation()?.countDown}
+        </span>
+      ),
+      tooltip:
+        'Funding shows the predicted funding rate for this period and the countdown until the next funding payment.',
+    },
+  ];
+
   return (
     <TokenPairsWrapper tableISOpen={tableISOpen}>
       <Box className="pair_tokens" onClick={toggleTablePairs}>
@@ -43,45 +94,11 @@ const SingleTokenPairInfo = ({
         </div>
       </Box>
 
-      <PairDetail
-        label="Mark Price"
-        value={pairDataInformation()?.assetCtx?.markPx}
-      />
-      <PairDetail
-        label="Oracle Price"
-        value={pairDataInformation()?.assetCtx?.oraclePx}
-      />
-      <Box className="pairDetails">
-        <span>
-          24hr change(<span id="toRed">in % </span>and <span id="toRed">$</span>
-          )
-        </span>
-        <span className="value" id="toRed">
-          {pairDataInformation()?.hr24change
-            ? pairDataInformation()?.hr24change
-            : '--'}
-        </span>
-      </Box>
-      <PairDetail
-        label="24hr Volume"
-        value={
-          pairDataInformation()?.volume ? pairDataInformation()?.volume : '--'
-        }
-      />
-      <PairDetail
-        label="OI"
-        value={pairDataInformation()?.assetCtx?.openInterest}
-      />
-      <Box className="pairDetails">
-        <span>Funding/Funding Countdown</span>
-        <span className="value">
-          <span id="toGreen">
-            {pairDataInformation()?.funding}&nbsp;&nbsp;{' '}
-          </span>
-          &nbsp;&nbsp;
-          {pairDataInformation()?.countDown}
-        </span>
-      </Box>
+      {metrics.map(({ label, value, tooltip, isRed }) => (
+        <Tooltip key={label} content={tooltip}>
+          <PairDetail label={label} value={value} isRed={isRed} />
+        </Tooltip>
+      ))}
     </TokenPairsWrapper>
   );
 };

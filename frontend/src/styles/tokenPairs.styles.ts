@@ -1,21 +1,23 @@
 import { Box, styled } from '@mui/material';
+import { intelayerColors, intelayerFonts } from './theme';
 
 interface TokenPairsProps {
   tableISOpen?: boolean;
 }
 
-export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
+export const TokenPairsWrapper = styled(Box)<TokenPairsProps>(({ tableISOpen }) => ({
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'flex-start',
   alignItems: 'center',
-  padding: '0 10px',
-  width: 'calc(100vw - 720px)',
-  minHeight: '55px',
-  borderRadius: '5px',
-  backgroundColor: '#13121296',
-  gap: '25px',
-  border: '1px solid rgba(255, 255, 255, 0.1)',
+  padding: '14px 20px',
+  width: '100%',
+  minHeight: '64px',
+  borderRadius: '12px',
+  backgroundColor: intelayerColors.surface,
+  gap: '24px',
+  border: `1px solid ${intelayerColors.panelBorder}`,
+  flexWrap: 'wrap',
 
   '.pair_tokens': {
     display: 'flex',
@@ -24,9 +26,9 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
     justifyContent: 'space-between',
     minWidth: '100px',
     height: '100%',
-    fontFamily: 'Sora',
+    fontFamily: intelayerFonts.heading,
     fontSize: '16px',
-    fontWeight: '600',
+    fontWeight: 600,
     cursor: 'pointer',
     span: {
       marginRight: '10px',
@@ -37,7 +39,7 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    transform: props.tableISOpen ? 'rotate(0)' : 'rotate(180deg)',
+    transform: tableISOpen ? 'rotate(0)' : 'rotate(180deg)',
     transition: 'transform 0.3s ease-in-out',
     img: {
       width: '12px',
@@ -47,52 +49,36 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>((props) => ({
   '.pairDetails': {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'center',
     gap: '4px',
+    minWidth: '120px',
 
     span: {
-      fontFamily: 'Sora',
-      fontSize: '13px',
-      fontWeight: '300',
-      color: '#FFFFFF99',
+      fontFamily: intelayerFonts.body,
+      fontSize: '12px',
+      fontWeight: 500,
+      color: intelayerColors.subtle,
     },
 
     '#toRed': {
-      color: '#E10000',
+      color: intelayerColors.red[400],
     },
 
     '#toGreen': {
-      color: '#3DBA3D',
+      color: intelayerColors.green[400],
     },
 
     '.value': {
-      color: '#fff',
+      color: intelayerColors.ink,
+      fontSize: '14px',
+      fontWeight: 600,
+      fontFamily: intelayerFonts.body,
     },
   },
-
-  '@media (max-width: 1535px)': {
-    width: 'calc(100vw - 670px)',
-    overflowX: 'auto',
-    overflowY: 'hidden',
-    cursor: 'move',
-
-    //webkit scroll height 5px
-    '&::-webkit-scrollbar': {
-      height: '5px',
-    },
-  },
-
-  '@media (max-width: 1200px)': {
-    width: 'calc(100vw - 400px)',
-  },
-
-  '@media (max-width: 899px)': {
-    width: 'calc(100vw - 20px)',
-    marginLeft: '-8px',
-
-    alignItems: 'center',
-    justifyContent: 'center',
+  '@media (max-width: 768px)': {
+    gap: '16px',
+    padding: '12px 16px',
   },
 }));
 
@@ -101,32 +87,32 @@ export const TokenPairsInfoTableWrapper = styled(Box)(() => ({
   flexDirection: 'column',
   width: '694px',
   height: '348px',
-  background: '#000000',
-  borderRadius: '5px',
-  border: '1px solid #D9D9D947',
+  background: intelayerColors.surface,
+  borderRadius: '12px',
+  border: `1px solid ${intelayerColors.panelBorder}`,
   position: 'absolute',
   zIndex: 10,
-  top: 'calc(100% + 2px)',
-  left: '2px',
-  padding: '5px',
+  top: 'calc(100% + 8px)',
+  left: '0',
+  padding: '12px',
 
   '*': {
-    fontFamily: 'Sora',
+    fontFamily: intelayerFonts.body,
     fontSize: '12px',
-    fontWeight: '400',
+    fontWeight: 500,
   },
 
   input: {
     width: '100%',
     minHeight: '35px',
-    borderRadius: '5px',
+    borderRadius: '8px',
     backgroundColor: 'transparent',
-    border: '1px solid #D9D9D947',
-    color: '#fff',
+    border: `1px solid ${intelayerColors.panelBorder}`,
+    color: intelayerColors.ink,
     padding: '0 10px',
 
     '&::placeholder': {
-      color: '#fff',
+      color: intelayerColors.muted,
     },
   },
 

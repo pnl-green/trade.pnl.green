@@ -1,15 +1,12 @@
-import React, { useEffect } from 'react';
-import {
-  SpreadAndPairSelects,
-  StyledTable,
-  Tablerows,
-} from '@/styles/orderbook.styles';
+import React, { useEffect, useMemo } from 'react';
+import { SpreadAndPairSelects } from '@/styles/orderbook.styles';
 import { Box } from '@mui/material';
 import HandleSelectItems from '../handleSelectItems';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
 import { SizeEquivalentsProps } from '@/utils/usdEquivalents';
 import { Order } from '@/context/orderBookTradesContext';
+import DepthTable from '../ui/DepthTable';
 
 enum Pair {
   USD = 'USD',
@@ -71,53 +68,6 @@ const calculateTotal = (
   return reverse ? ordersWithTotal.reverse() : ordersWithTotal;
 };
 
-// Render table rows for orders
-const renderOrderBookTable = (
-  orders: { px: number; sz: number; n: number }[],
-  type: string,
-  pair: Pair,
-  reverseTotal: boolean
-) => {
-  const ordersWithTotal = calculateTotal(orders, pair, reverseTotal);
-  const maxOrderTotal = Math.max(
-    ...ordersWithTotal.map((order) => order.total)
-  );
-
-  return (
-    <tbody>
-      {ordersWithTotal.map((order, index) => (
-        <Tablerows
-          key={index}
-          type={type}
-          width={calculateBarWidth(order.total, maxOrderTotal)}
-        >
-          <td className="first-column">{order.px.toFixed(2)}</td>
-          <td>
-            {pair.toUpperCase() === 'USD'
-              ? Math.trunc(
-                  getUsdEquivalentOnly({
-                    size: order.sz,
-                    currentMarkPrice: order.px,
-                    token: pair,
-                  })
-                )
-              : getUsdEquivalentOnly({
-                  size: order.sz,
-                  currentMarkPrice: order.px,
-                  token: pair,
-                }).toFixed(2)}
-          </td>
-          <td>
-            {pair.toUpperCase() === 'USD'
-              ? Math.trunc(order.total)
-              : order.total}
-          </td>
-        </Tablerows>
-      ))}
-    </tbody>
-  );
-};
-
 // Calculate spread percentage
 const calculateSpreadPercentage = (asks: Order[], bids: Order[]) => {
   if (asks.length === 0 || bids.length === 0) return 0;
@@ -154,20 +104,72 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
     }
   }, [bookData, loadingBookData]);
 
+  const pairLabel = pair?.toString() ?? 'USD';
+  const { asks, bids } = getBookData();
+
+  const formattedRows = useMemo(() => {
+    const asksWithTotal = calculateTotal(asks, pair, true);
+    const bidsWithTotal = calculateTotal(bids, pair, false);
+    const combinedTotals = [...asksWithTotal, ...bidsWithTotal].map(
+      (order) => order.total
+    );
+    const maxTotal = combinedTotals.length
+      ? Math.max(...combinedTotals)
+      : 1;
+
+    const formatValue = (order: any) =>
+      pair.toUpperCase() === 'USD'
+        ? Math.trunc(
+            getUsdEquivalentOnly({
+              size: order.sz,
+              currentMarkPrice: order.px,
+              token: pair,
+            })
+          ).toLocaleString()
+        : getUsdEquivalentOnly({
+            size: order.sz,
+            currentMarkPrice: order.px,
+            token: pair,
+          })
+            .toFixed(2)
+            .toString();
+
+    const formatTotal = (total: number) =>
+      pair.toUpperCase() === 'USD'
+        ? Math.trunc(total).toLocaleString()
+        : total.toString();
+
+    return {
+      asks: asksWithTotal.map((order) => ({
+        price: order.px.toFixed(2),
+        size: formatValue(order),
+        total: formatTotal(order.total),
+        widthPct: calculateBarWidth(order.total, maxTotal),
+        side: 'ask' as const,
+      })),
+      bids: bidsWithTotal.map((order) => ({
+        price: order.px.toFixed(2),
+        size: formatValue(order),
+        total: formatTotal(order.total),
+        widthPct: calculateBarWidth(order.total, maxTotal),
+        side: 'bid' as const,
+      })),
+    };
+  }, [asks, bids, pair]);
+
   return (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <SpreadAndPairSelects>
-        <div>
+        <div style={{ flex: 1 }}>
           <HandleSelectItems
-            styles={{ background: '#131212' }}
             selectItem={spread}
             setSelectItem={setSpread}
             selectDataItems={['1', '2', '5', '10', '100', '1000']}
+            variant="elev"
           />
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <HandleSelectItems
-            styles={{ background: '#131212' }}
             selectItem={pair}
             setSelectItem={setPair}
             selectDataItems={
@@ -177,53 +179,20 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
                   })
                 : []
             }
+            variant="elev"
           />
         </div>
       </SpreadAndPairSelects>
 
-      <div id="the-order-book">
-        <StyledTable>
-          <thead id="header">
-            <tr>
-              <th>Price</th>
-              <th>Size({pair})</th>
-              <th>Total({pair})</th>
-            </tr>
-          </thead>
-
-          {loadingBookData ? (
-            <span style={{ color: '#fff' }}>loading...</span>
-          ) : !loadingBookData &&
-            bookData.asks.length === 0 &&
-            bookData.bids.length === 0 ? (
-            <tbody>
-              <tr
-                style={{
-                  color: '#fff',
-                  fontSize: '14px',
-                }}
-              >
-                No data Available for {pair}
-              </tr>
-            </tbody>
-          ) : (
-            <>
-              {renderOrderBookTable(getBookData().asks, 'asks', pair, true)} {}
-              {getBookData().asks.length !== 0 &&
-                getBookData().bids.length !== 0 && (
-                  <thead className="spread">
-                    <tr>
-                      <th>Spread</th>
-                      <th>{spread}</th>
-                      <th>{spreadPercentage}%</th>
-                    </tr>
-                  </thead>
-                )}
-              {renderOrderBookTable(getBookData().bids, 'bids', pair, false)} {}
-            </>
-          )}
-        </StyledTable>
-      </div>
+      <DepthTable
+        asks={formattedRows.asks}
+        bids={formattedRows.bids}
+        pairLabel={pairLabel}
+        spreadValue={spread}
+        spreadPercent={spreadPercentage}
+        loading={loadingBookData}
+        emptyMessage={`No data Available for ${pairLabel}`}
+      />
     </Box>
   );
 };
