@@ -1,48 +1,47 @@
 import { Box, Button, Typography, styled } from '@mui/material';
+import { intelayerColors, intelayerFonts } from './theme';
 
 export const ItemsSelect = styled('select')(() => ({
-  height: '30px',
-  padding: '5px',
-  borderRadius: '5px',
-  backgroundColor: '#171b26',
-  color: '#fff',
-  border: 'none',
+  height: '36px',
+  padding: '6px 10px',
+  borderRadius: '8px',
+  backgroundColor: intelayerColors.surface,
+  color: intelayerColors.ink,
+  border: `1px solid ${intelayerColors.panelBorder}`,
   cursor: 'pointer',
+  fontFamily: intelayerFonts.body,
+  fontSize: '13px',
 }));
 
 //buttons
 export const TextBtn = styled(Button)(() => ({
-  color: '#fff',
-  backgroundColor: '#000',
+  color: intelayerColors.ink,
+  backgroundColor: 'transparent',
   textTransform: 'none',
-  fontFamily: 'inter',
+  fontFamily: intelayerFonts.body,
   position: 'relative',
-
-  '&:hover': {
-    backgroundColor: '#000',
-  },
 }));
 
 export const GreenBtn = styled(Button)(() => ({
-  color: '#fff',
-  backgroundColor: '#049260',
+  color: '#04140B',
+  backgroundColor: intelayerColors.green[600],
   textTransform: 'none',
-  fontFamily: 'Montserrat',
+  fontFamily: intelayerFonts.body,
 
   '&:hover': {
-    backgroundColor: '#049260',
+    backgroundColor: intelayerColors.green[500],
   },
 }));
 
 export const OutlinedBtn = styled(Button)(() => ({
-  color: '#049260',
+  color: intelayerColors.green[500],
   backgroundColor: 'transparent',
   textTransform: 'none',
-  fontFamily: 'Montserrat',
-  border: '1px solid #049260',
+  fontFamily: intelayerFonts.body,
+  border: `1px solid ${intelayerColors.green[500]}`,
 
   '&:hover': {
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(21, 211, 128, 0.1)',
   },
 }));
 
@@ -56,18 +55,19 @@ export const ButtonStyles = {
 };
 
 export const BuySellBtn = styled(Button)(() => ({
-  color: '#fff',
-  backgroundColor: '#171b26',
+  color: intelayerColors.ink,
+  backgroundColor: intelayerColors.surface,
   textTransform: 'none',
-  fontFamily: 'Montserrat',
-  padding: '5px 5px !important',
-
+  fontFamily: intelayerFonts.body,
+  padding: '8px 12px !important',
+  borderRadius: '10px',
   '&.buyBtn': {
-    backgroundColor: '#049260',
+    backgroundColor: intelayerColors.green[600],
+    color: '#04140B',
   },
 
   '&.sellBtn': {
-    backgroundColor: '#B04747',
+    backgroundColor: intelayerColors.red[500],
   },
 }));
 
@@ -92,45 +92,35 @@ export const FlexItems = styled(Box)(() => ({
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
-  span: { fontSize: '13px', fontWeight: '400', fontFamily: 'Sora' },
+  span: {
+    fontSize: '13px',
+    fontWeight: 500,
+    fontFamily: intelayerFonts.body,
+  },
 }));
 
 export const TabsButtons = styled(Button)(() => ({
   minWidth: 'fit-content',
   minHeight: '33px',
-  borderRadius: '7px',
-  backgroundColor: '#0F1A1F',
+  borderRadius: '10px',
+  backgroundColor: intelayerColors.surface,
   textTransform: 'none',
-  color: '#FFFFFF',
-  fontSize: '15px',
-  fontWeight: '600',
-  fontFamily: 'Sora',
-  transition: 'all 0.3s ease-in-out',
+  color: intelayerColors.muted,
+  fontSize: '13px',
+  fontWeight: 600,
+  fontFamily: intelayerFonts.body,
+  transition: 'all 0.2s ease-in-out',
 
   '&:hover': {
-    backgroundColor: '#063021',
+    backgroundColor: intelayerColors.gray[700],
+    color: intelayerColors.ink,
   },
   '&.active': {
-    backgroundColor: '#049260',
+    backgroundColor: intelayerColors.green[600],
+    color: '#04140B',
   },
 }));
 
-export const BlurContainer = styled('div')(() => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: '-5px',
-  bottom: 0,
-  backdropFilter: 'blur(3px)',
-  zIndex: 4
-}))
+export const BlurContainer = styled('div')(() => ({}));
 
-export const ComingSoonText = styled('div')(() => ({
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  color: '#fff',
-  fontSize: '1.5rem',
-  zIndex: 5
-}))
+export const ComingSoonText = styled('div')(() => ({}));

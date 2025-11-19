@@ -1,54 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { BlurContainer, ComingSoonText, TabsButtons } from '@/styles/common.styles';
-import {
-  OrderBookContainer,
-  OrderBookTabsWrapper,
-} from '@/styles/orderbook.styles';
+import React, { useState } from 'react';
+import { OrderBookContainer } from '@/styles/orderbook.styles';
 import OrderBook from './orderBook';
 import Trades from './trades';
 import { usePairTokensContext } from '@/context/pairTokensContext';
+import { Box } from '@mui/material';
 
 const OrderBookAndTrades = () => {
-  const [activeTab, setActiveTab] = useState('Order Book');
   const [spread, setSpread] = useState(1);
   const { pair, setPair } = usePairTokensContext();
 
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
-  };
-
   return (
     <OrderBookContainer>
-      <BlurContainer />
-      <ComingSoonText>
-        Coming Soon...
-      </ComingSoonText>
-      <OrderBookTabsWrapper>
-        {['Order Book', 'Trades'].map((label) => (
-          <TabsButtons
-            key={label}
-            sx={{
-              backgroundColor: '#34484D',
-              minWidth: '110px',
-              height: '30px',
-            }}
-            className={activeTab === label ? 'active' : ''}
-            onClick={() => handleTabClick(label)}
-          >
-            {label}
-          </TabsButtons>
-        ))}
-      </OrderBookTabsWrapper>
-
-      {activeTab === 'Order Book' && (
-        <OrderBook
-          spread={spread}
-          pair={pair as any} // FIX: pair is not a string
-          setSpread={setSpread}
-          setPair={setPair}
-        />
-      )}
-      {activeTab === 'Trades' && <Trades />}
+      <OrderBook
+        spread={spread}
+        pair={pair as any}
+        setSpread={setSpread}
+        setPair={setPair}
+      />
+      <Box sx={{ borderTop: `1px solid rgba(28, 38, 53, 0.8)`, paddingTop: '12px' }}>
+        <Box sx={{ fontSize: '13px', marginBottom: '8px', color: 'rgba(230, 241, 255, 0.7)' }}>
+          Recent Trades
+        </Box>
+        <Trades maxHeight="220px" />
+      </Box>
     </OrderBookContainer>
   );
 };

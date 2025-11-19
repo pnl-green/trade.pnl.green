@@ -11,6 +11,8 @@ import { usePairTokensContext } from '@/context/pairTokensContext';
 import toast from 'react-hot-toast';
 import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
+import Tooltip from '../ui/Tooltip';
+import { orderTicketTooltips } from './tooltipCopy';
 
 const TwapOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
@@ -85,13 +87,17 @@ const TwapOrderTerminal = () => {
         }}
       >
         <FlexItems>
-          <span>Available balance</span>
+          <Tooltip content={orderTicketTooltips.availableBalance}>
+            <span>Available balance</span>
+          </Tooltip>
           <span>
             {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
           </span>
         </FlexItems>
         <FlexItems>
-          <span>Current position size</span>
+          <Tooltip content={orderTicketTooltips.currentPositionSize}>
+            <span>Current position size</span>
+          </Tooltip>
           <span>0.0 APE</span>
         </FlexItems>
       </Box>
@@ -131,6 +137,7 @@ const TwapOrderTerminal = () => {
       <SelectItemsBox>
         <RenderInput
           label="Size"
+          tooltip={orderTicketTooltips.size}
           placeholder="|"
           type="number"
           value={size}
@@ -176,7 +183,9 @@ const TwapOrderTerminal = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Reduce Only</span>
+          <Tooltip content={orderTicketTooltips.reduceOnly}>
+            <span>Reduce Only</span>
+          </Tooltip>
         </FlexItems>
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
@@ -190,7 +199,9 @@ const TwapOrderTerminal = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Take Profit / Stop Loss</span>
+          <Tooltip content={orderTicketTooltips.takeProfitStopLoss}>
+            <span>Take Profit / Stop Loss</span>
+          </Tooltip>
         </FlexItems>
       </Box>
 
@@ -271,13 +282,15 @@ const TwapOrderTerminal = () => {
 
       {!establishedConnection ? (
         <Box sx={{ ...ButtonStyles }}>
-          <BuySellBtn
-            className="buyBtn"
-            sx={{ width: '100%' }}
-            onClick={() => setEstablishedConnModal(true)}
-          >
-            Enable trading
-          </BuySellBtn>
+          <Tooltip content={orderTicketTooltips.enableTrading}>
+            <BuySellBtn
+              className="buyBtn"
+              sx={{ width: '100%' }}
+              onClick={() => setEstablishedConnModal(true)}
+            >
+              Enable trading
+            </BuySellBtn>
+          </Tooltip>
         </Box>
       ) : (
         <Box sx={{ ...ButtonStyles }}>

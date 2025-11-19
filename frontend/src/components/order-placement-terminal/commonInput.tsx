@@ -1,12 +1,14 @@
 import { InputBox } from '@/styles/riskManager.styles';
 import { Box } from '@mui/material';
 import React, { useRef } from 'react';
+import Tooltip from '../ui/Tooltip';
 
 interface inputProps {
   placeholder?: string | '';
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   label: string;
+  tooltip?: string;
 }
 
 interface inputBoxProps extends inputProps {
@@ -21,6 +23,7 @@ export const RenderInput = ({
   value,
   onChange,
   styles,
+  tooltip,
 }: inputBoxProps) => {
   const ref: any = useRef(null);
 
@@ -39,7 +42,13 @@ export const RenderInput = ({
       onClick={handleHover}
       sx={styles}
     >
-      <Box className="placeholder_box">{label}</Box>
+      {tooltip ? (
+        <Tooltip content={tooltip}>
+          <Box className="placeholder_box">{label}</Box>
+        </Tooltip>
+      ) : (
+        <Box className="placeholder_box">{label}</Box>
+      )}
       <input
         type={type}
         ref={ref}

@@ -1,95 +1,15 @@
 import { Box, Checkbox, Radio, styled } from '@mui/material';
+import { intelayerColors, intelayerFonts } from './theme';
 
 export const RiskManagerWrapper = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: '10px',
-  backgroundColor: '#13121296',
-  width: '325px',
-  minHeight: '680px',
-  height: 'auto',
-  padding: '10px',
-  position: 'relative',
-  border: '2px solid rgba(255, 255, 255, 0.1)',
-  borderRadius: '8px',
-  // marginTop:"61px",
-
-  '.captions': {
-    display: 'flex',
-    padding: '5px',
-    background: '#34484D',
-    borderRadius: '5px',
-    fontSize: '14px',
-    fontWeight: '400',
-    fontFamily: 'Sora',
-    cursor: 'pointer',
-
-    '&:hover': {
-      background: '#049260',
-    },
-
-    '&.active': {
-      backgroundColor: '#049260',
-    },
-  },
-
-  '@media screen and (max-width: 1535px)': {
-    width: '315px !important',
-  },
-
-  '@media (max-width: 650px)': {
-    width: 'calc(100vw - 20px)',
-    marginLeft: '-8px',
-  },
-}));
-
-export const TabsWrapper = styled(Box)(() => ({
-  display: 'flex',
-  flexDirection: 'row',
-  gap: '2px',
+  gap: '16px',
   width: '100%',
-  height: '38px',
-  paddingBottom: '1px',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.5)',
-}));
-
-export const TabsButton = styled('button')(() => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: '0 9px',
-  color: '#FFFFFF99',
-  backgroundColor: 'transparent',
-  border: 'none',
-  cursor: 'pointer',
+  minHeight: '680px',
+  height: '100%',
+  padding: '4px',
   position: 'relative',
-
-  fontSize: '13px',
-  fontWeight: '400',
-  fontFamily: 'Sora',
-
-  '::after': {
-    position: 'absolute',
-    content: "''",
-    display: 'block',
-    width: '100%',
-    height: '2px',
-    backgroundColor: '#049260',
-    top: '100%',
-    left: '0',
-    transition: 'transform 0.3s ease',
-    transformOrigin: 'right top',
-    transform: 'scaleX(0)',
-    zindex: 2,
-  },
-  // "&:hover::after": {
-  //   transformOrigin: "left top",
-  //   transform: "scaleX(1)",
-  // },
-
-  '&.active::after': {
-    transformOrigin: 'left top',
-    transform: 'scaleX(1)',
-  },
 }));
 
 export const LiquidationWrapper = styled(Box)(() => ({
@@ -97,7 +17,7 @@ export const LiquidationWrapper = styled(Box)(() => ({
   flexDirection: 'column',
   gap: '10px',
   padding: '20px 10px',
-  borderTop: '1px solid #FFFFFF99',
+  borderTop: `1px solid ${intelayerColors.panelBorder}`,
   // position: "absolute",
   // bottom: "0",
   width: '100%',
@@ -110,8 +30,9 @@ export const LiquidationWrapper = styled(Box)(() => ({
     justifyContent: 'space-between',
 
     fontSize: '14px',
-    fontWeight: '400',
-    fontFamily: 'Sora',
+    fontWeight: 500,
+    fontFamily: intelayerFonts.body,
+    color: intelayerColors.ink,
   },
 }));
 
@@ -122,15 +43,17 @@ export const SelectItemsBox = styled(Box)(() => ({
   gap: '10px',
   width: '100%',
   height: '46px',
-  borderRadius: '8px',
-  background: '#171b26',
+  borderRadius: '10px',
+  background: intelayerColors.gray[700],
   marginTop: '10px',
   alignItems: 'center',
   padding: '0 10px 0 10px',
+  border: `1px solid transparent`,
   '*': {
     fontSize: '13px',
-    fontWeight: '400',
-    fontFamily: 'Sora',
+    fontWeight: 500,
+    fontFamily: intelayerFonts.body,
+    color: intelayerColors.ink,
   },
   input: {
     border: 'none',
@@ -138,22 +61,22 @@ export const SelectItemsBox = styled(Box)(() => ({
     background: 'transparent',
     width: '100%',
     height: '100%',
-    color: '#fff',
+    color: intelayerColors.ink,
     paddingLeft: '10px',
     // cursor: "",
 
     '&:hover': {
-      outline: '1px solid #FFFFFF99',
+      outline: `1px solid ${intelayerColors.panelBorder}`,
       borderRadius: '8px',
     },
   },
 
   'input::placeholder': {
-    color: '#fff',
+    color: intelayerColors.muted,
   },
 
   '&:hover': {
-    border: '1px solid #FFFFFF99',
+    border: `1px solid ${intelayerColors.panelBorder}`,
     borderRadius: '8px',
   },
 
@@ -168,14 +91,16 @@ export const InputBox = styled(Box)(() => ({
   width: '100%',
   height: '35px',
   borderRadius: '8px',
-  background: '#171b26',
+  background: intelayerColors.gray[700],
+  border: `1px solid transparent`,
   alignItems: 'center',
   padding: '0 10px 0 5px',
 
   '*': {
     fontSize: '13px',
-    fontWeight: '400',
-    fontFamily: 'Sora',
+    fontWeight: 500,
+    fontFamily: intelayerFonts.body,
+    color: intelayerColors.ink,
   },
 
   '.placeholder_box': {
@@ -192,7 +117,7 @@ export const InputBox = styled(Box)(() => ({
     background: 'transparent',
     width: '50%',
     height: '100%',
-    color: '#fff',
+    color: intelayerColors.ink,
     paddingLeft: '10px',
     justifyContent: 'flex-end',
     textAlign: 'right',
@@ -204,12 +129,11 @@ export const InputBox = styled(Box)(() => ({
   },
 
   'input::placeholder': {
-    color: 'gray !important',
+    color: `${intelayerColors.muted} !important`,
   },
 
   '&:hover': {
-    border: '1px solid #FFFFFF99',
-    borderRadius: '8px',
+    border: `1px solid ${intelayerColors.panelBorder}`,
   },
 }));
 

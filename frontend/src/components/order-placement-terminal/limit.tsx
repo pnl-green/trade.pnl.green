@@ -15,6 +15,8 @@ import { OrderType } from '@/types/hyperliquid';
 import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
 import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { riskValues } from '@/utils/risk';
+import Tooltip from '../ui/Tooltip';
+import { orderTicketTooltips } from './tooltipCopy';
 
 const LimitComponent = () => {
   const { webData2 } = useWebDataContext();
@@ -205,13 +207,17 @@ const LimitComponent = () => {
         }}
       >
         <FlexItems>
-          <span>Available balance</span>
+          <Tooltip content={orderTicketTooltips.availableBalance}>
+            <span>Available balance</span>
+          </Tooltip>
           <span>
             {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
           </span>
         </FlexItems>
         <FlexItems>
-          <span>Current position size</span>
+          <Tooltip content={orderTicketTooltips.currentPositionSize}>
+            <span>Current position size</span>
+          </Tooltip>
           <span>0.0 APE</span>
         </FlexItems>
       </Box>
@@ -219,6 +225,7 @@ const LimitComponent = () => {
       <SelectItemsBox>
         <RenderInput
           label={'Size'}
+          tooltip={orderTicketTooltips.size}
           placeholder="|"
           value={size.toString()}
           onChange={(e: any) => setSize(e.target.value)}
@@ -238,6 +245,7 @@ const LimitComponent = () => {
 
       <RenderInput
         label="Price"
+        tooltip={orderTicketTooltips.price}
         placeholder="0"
         type="number"
         value={limitPx.toString()}
@@ -280,7 +288,9 @@ const LimitComponent = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Reduce Only</span>
+          <Tooltip content={orderTicketTooltips.reduceOnly}>
+            <span>Reduce Only</span>
+          </Tooltip>
         </FlexItems>
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
@@ -294,7 +304,9 @@ const LimitComponent = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Take Profit / Stop Loss</span>
+          <Tooltip content={orderTicketTooltips.takeProfitStopLoss}>
+            <span>Take Profit / Stop Loss</span>
+          </Tooltip>
         </FlexItems>
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
@@ -308,7 +320,9 @@ const LimitComponent = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Add Risk</span>
+          <Tooltip content={orderTicketTooltips.addRisk}>
+            <span>Add Risk</span>
+          </Tooltip>
         </FlexItems>
       </Box>
 
@@ -389,6 +403,7 @@ const LimitComponent = () => {
         <SelectItemsBox sx={{ mt: '10px' }}>
           <RenderInput
             label={'Risk'}
+            tooltip={orderTicketTooltips.addRisk}
             placeholder="|"
             type="number"
             value={risk.toString()}
@@ -428,13 +443,15 @@ const LimitComponent = () => {
 
       {!establishedConnection ? (
         <Box sx={{ ...ButtonStyles }}>
-          <BuySellBtn
-            className="buyBtn"
-            sx={{ width: '100%' }}
-            onClick={() => setEstablishedConnModal(true)}
-          >
-            Enable trading
-          </BuySellBtn>
+          <Tooltip content={orderTicketTooltips.enableTrading}>
+            <BuySellBtn
+              className="buyBtn"
+              sx={{ width: '100%' }}
+              onClick={() => setEstablishedConnModal(true)}
+            >
+              Enable trading
+            </BuySellBtn>
+          </Tooltip>
         </Box>
       ) : (
         <Box sx={{ ...ButtonStyles }}>

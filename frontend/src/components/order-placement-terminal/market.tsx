@@ -23,6 +23,8 @@ import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
 import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
 import { riskValues } from '@/utils/risk';
+import Tooltip from '../ui/Tooltip';
+import { orderTicketTooltips } from './tooltipCopy';
 
 const MarketComponent = () => {
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
@@ -333,13 +335,17 @@ const MarketComponent = () => {
         }}
       >
         <FlexItems>
-          <span>Available balance</span>
+          <Tooltip content={orderTicketTooltips.availableBalance}>
+            <span>Available balance</span>
+          </Tooltip>
           <span>
             {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
           </span>
         </FlexItems>
         <FlexItems>
-          <span>Current position size</span>
+          <Tooltip content={orderTicketTooltips.currentPositionSize}>
+            <span>Current position size</span>
+          </Tooltip>
           <span>0.0 APE</span>
         </FlexItems>
       </Box>
@@ -348,7 +354,9 @@ const MarketComponent = () => {
         sx={{ display: 'flex', flexDirection: 'column', gap: '6px', mt: '6px' }}
       >
         <SelectItemsBox sx={{ '&:hover': { border: 'none' }, m: 0 }}>
-          <span>Current Market Price</span>
+          <Tooltip content={orderTicketTooltips.currentMarketPrice}>
+            <span>Current Market Price</span>
+          </Tooltip>
           <CurrentMarketPriceWidget>
             {/* @Todo investigato how get currentMarketPrice directly from ws, not order book */}
             {/* Quick fix, i will rewrite it */}
@@ -366,6 +374,7 @@ const MarketComponent = () => {
         <SelectItemsBox sx={{ m: 0 }}>
           <RenderInput
             label={'Size'}
+            tooltip={orderTicketTooltips.size}
             placeholder="|"
             type="number"
             value={size.toString()}
@@ -385,7 +394,9 @@ const MarketComponent = () => {
         </SelectItemsBox>
 
         <SelectItemsBox sx={{ '&:hover': { border: 'none' }, m: 0 }}>
-          <span> Price</span>
+          <Tooltip content={orderTicketTooltips.price}>
+            <span> Price</span>
+          </Tooltip>
           <span>$</span>
         </SelectItemsBox>
       </Box>
@@ -402,11 +413,7 @@ const MarketComponent = () => {
           },
         }}
       >
-        <FlexItems
-          sx={{
-            justifyContent: 'flex-start',
-          }}
-        >
+        <FlexItems sx={{ justifyContent: 'flex-start' }}>
           <label>
             <input
               type="radio"
@@ -417,7 +424,9 @@ const MarketComponent = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Reduce Only</span>
+          <Tooltip content={orderTicketTooltips.reduceOnly}>
+            <span>Reduce Only</span>
+          </Tooltip>
         </FlexItems>
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
@@ -431,7 +440,9 @@ const MarketComponent = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Take Profit / Stop Loss</span>
+          <Tooltip content={orderTicketTooltips.takeProfitStopLoss}>
+            <span>Take Profit / Stop Loss</span>
+          </Tooltip>
         </FlexItems>
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
@@ -445,7 +456,9 @@ const MarketComponent = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Add Risk</span>
+          <Tooltip content={orderTicketTooltips.addRisk}>
+            <span>Add Risk</span>
+          </Tooltip>
         </FlexItems>
       </Box>
 
@@ -551,13 +564,15 @@ const MarketComponent = () => {
 
       {!establishedConnection ? (
         <Box sx={{ ...ButtonStyles }}>
-          <BuySellBtn
-            className="buyBtn"
-            sx={{ width: '100%' }}
-            onClick={() => setEstablishedConnModal(true)}
-          >
-            Enable trading
-          </BuySellBtn>
+          <Tooltip content={orderTicketTooltips.enableTrading}>
+            <BuySellBtn
+              className="buyBtn"
+              sx={{ width: '100%' }}
+              onClick={() => setEstablishedConnModal(true)}
+            >
+              Enable trading
+            </BuySellBtn>
+          </Tooltip>
         </Box>
       ) : (
         <Box sx={{ ...ButtonStyles }}>

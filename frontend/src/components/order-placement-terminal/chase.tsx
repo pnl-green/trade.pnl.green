@@ -8,6 +8,8 @@ import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
 import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
+import Tooltip from '../ui/Tooltip';
+import { orderTicketTooltips } from './tooltipCopy';
 
 const ChaseOrderTerminal = () => {
   const { tokenPairs } = usePairTokensContext();
@@ -69,13 +71,17 @@ const ChaseOrderTerminal = () => {
         }}
       >
         <FlexItems>
-          <span>Available balance</span>
+          <Tooltip content={orderTicketTooltips.availableBalance}>
+            <span>Available balance</span>
+          </Tooltip>
           <span>
             {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
           </span>
         </FlexItems>
         <FlexItems>
-          <span>Current position size</span>
+          <Tooltip content={orderTicketTooltips.currentPositionSize}>
+            <span>Current position size</span>
+          </Tooltip>
           <span>0.0 APE</span>
         </FlexItems>
       </Box>
@@ -101,6 +107,7 @@ const ChaseOrderTerminal = () => {
       <SelectItemsBox>
         <RenderInput
           label={'Size'}
+          tooltip={orderTicketTooltips.size}
           placeholder="|"
           type="number"
           value={size}
@@ -146,7 +153,9 @@ const ChaseOrderTerminal = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Reduce Only</span>
+          <Tooltip content={orderTicketTooltips.reduceOnly}>
+            <span>Reduce Only</span>
+          </Tooltip>
         </FlexItems>
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
@@ -160,7 +169,9 @@ const ChaseOrderTerminal = () => {
               onClick={handleRadioClick}
             />
           </label>
-          <span>Take Profit / Stop Loss</span>
+          <Tooltip content={orderTicketTooltips.takeProfitStopLoss}>
+            <span>Take Profit / Stop Loss</span>
+          </Tooltip>
         </FlexItems>
       </Box>
 
