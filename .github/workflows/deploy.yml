@@ -53,7 +53,7 @@ jobs:
       - name: Install and build frontend
         working-directory: ./frontend
         run: |
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Package frontend build artifacts
