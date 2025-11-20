@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Box, ClickAwayListener } from '@mui/material';
 import { IconsStyles, InnerBox, MarginTabs, ModalWrapper } from './styles';
-import { GreenBtn } from '@/styles/common.styles';
-import { TabsButton } from '@/styles/riskManager.styles';
+import { GreenBtn, TabsButtons } from '@/styles/common.styles';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import EstablishConnectionModal from './establishConnectionModal';
@@ -114,7 +113,7 @@ const MarginTypeModal: React.FC<ModalProps> = ({ onClose }) => {
               >
                 <MarginTabs>
                   {['Cross', 'Isolated'].map((tabName) => (
-                    <TabsButton
+                    <TabsButtons
                       sx={{
                         width: '50%',
                         color: '#fff',
@@ -128,7 +127,7 @@ const MarginTypeModal: React.FC<ModalProps> = ({ onClose }) => {
                       onClick={() => handleTabChange(tabName)}
                     >
                       {tabName}
-                    </TabsButton>
+                    </TabsButtons>
                   ))}
                 </MarginTabs>
 
