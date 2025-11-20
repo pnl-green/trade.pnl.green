@@ -52,7 +52,6 @@ jobs:
 
       - name: Install and build frontend
         working-directory: ./frontend
-        shell: bash
         run: |
           npm install
           npm run build
