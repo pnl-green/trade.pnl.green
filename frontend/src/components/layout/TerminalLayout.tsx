@@ -37,9 +37,9 @@ const areaStyles = {
   flexDirection: 'column',
   gap: '16px',
   minHeight: 0,
-};
+} as const;
 
-export const ChartArea = styled('div')(() => ({
+export const ChartArea = styled('div')(({ theme }) => ({
   ...areaStyles,
   gridArea: 'chart',
 }));
