@@ -26,6 +26,7 @@ jobs:
               - 'backend/**'
             frontend:
               - 'frontend/**'
+              - '.github/workflows/deploy.yml'
 
   backend-deploy:
     needs: changes
