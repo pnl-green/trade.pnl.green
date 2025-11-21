@@ -29,20 +29,40 @@ jobs:
         working-directory: ./backend
         shell: bash
         run: |
-          echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env    
-          echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env    
+          echo "SERVER_HOST=${{ secrets.SERVER_HOST }}" >> .env
+          echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env
 
           echo "WS_HOST=${{ secrets.WS_HOST }}" >> .env
           echo "WS_PORT=${{ secrets.WS_PORT }}" >> .env
 
-          echo "LEVEL=${{ secrets.LEVEL }}" >> .env    
+          echo "LEVEL=${{ secrets.LEVEL }}" >> .env
 
-          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env    
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
 
           echo "COOKIE_KEY=${{ secrets.COOKIE_KEY }}" >> .env
 
           tar -czf backend.tar.gz .env -C target/x86_64-unknown-linux-gnu/release/ backend
           echo "ASSET=${PWD}/backend.tar.gz" >> $GITHUB_ENV
+
+      # Install Node.js for building the frontend (dependency caching disabled to avoid path resolution errors)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install and build frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Package frontend build artifacts
+        working-directory: ./frontend
+        shell: bash
+        run: |
+          # Bundle the built frontend assets and required config for deployment
+          tar -czf frontend.tar.gz .next public package.json next.config.js
+          echo "FRONTEND_ASSET=${PWD}/frontend.tar.gz" >> $GITHUB_ENV
 
       - name: Deploy to EC2
         uses: appleboy/scp-action@v0.1.4
@@ -52,6 +72,15 @@ jobs:
           key: ${{ secrets.EC2_SERVER_KEY }}
           source: ${{ env.ASSET }}
           target: ${{ secrets.EC2_SERVER_TARGET }}
+
+      - name: Deploy frontend to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_SERVER_HOST }}
+          username: ${{ secrets.EC2_SERVER_USERNAME }}
+          key: ${{ secrets.EC2_SERVER_KEY }}
+          source: ${{ env.FRONTEND_ASSET }}
+          target: <REPLACE_WITH_REMOTE_FRONTEND_PATH>
 
       - name: Restart server
         uses: appleboy/ssh-action@master
@@ -66,3 +95,17 @@ jobs:
             tar -xfv ${{ env.ASSET }}
             rm ${{ env.ASSET }}
             pm2 restart all
+
+      - name: Restart frontend
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_SERVER_HOST }}
+          username: ${{ secrets.EC2_SERVER_USERNAME }}
+          key: ${{ secrets.EC2_SERVER_KEY }}
+          script: |
+            # Extract the uploaded frontend bundle into the serving directory
+            cd <REPLACE_WITH_REMOTE_FRONTEND_PATH>
+            tar -xfv ${{ env.FRONTEND_ASSET }}
+            rm ${{ env.FRONTEND_ASSET }}
+            # Restart the frontend process manager (adjust command as needed)
+            pm2 restart trade-frontend
