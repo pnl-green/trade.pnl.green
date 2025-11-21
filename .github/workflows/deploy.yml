@@ -8,12 +8,40 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+
+  backend-build:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend != 'true' || needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -42,13 +70,27 @@ jobs:
           echo "COOKIE_KEY=${{ secrets.COOKIE_KEY }}" >> .env
 
           tar -czf backend.tar.gz .env -C target/x86_64-unknown-linux-gnu/release/ backend
-          echo "ASSET=${PWD}/backend.tar.gz" >> $GITHUB_ENV
 
-      # Install Node.js for building the frontend
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-artifact
+          path: backend/backend.tar.gz
+
+  frontend-build:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend != 'true' || needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install and build frontend
         working-directory: ./frontend
@@ -62,9 +104,43 @@ jobs:
         run: |
           # Bundle the built frontend assets and required config for deployment
           tar -czf frontend.tar.gz .next public package.json next.config.js
-          echo "FRONTEND_ASSET=${PWD}/frontend.tar.gz" >> $GITHUB_ENV
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-artifact
+          path: frontend/frontend.tar.gz
+
+  deploy:
+    needs: [backend-build, frontend-build]
+    if: ${{ always() && (needs.backend-build.result == 'success' || needs.frontend-build.result == 'success') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download backend artifact
+        if: needs.backend-build.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-artifact
+          path: artifacts/backend
+
+      - name: Download frontend artifact
+        if: needs.frontend-build.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-artifact
+          path: artifacts/frontend
+
+      - name: Set asset paths
+        run: |
+          if [ -f artifacts/backend/backend.tar.gz ]; then
+            echo "ASSET=artifacts/backend/backend.tar.gz" >> $GITHUB_ENV
+          fi
+          if [ -f artifacts/frontend/frontend.tar.gz ]; then
+            echo "FRONTEND_ASSET=artifacts/frontend/frontend.tar.gz" >> $GITHUB_ENV
+          fi
 
       - name: Deploy to EC2
+        if: env.ASSET != ''
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_SERVER_HOST }}
@@ -74,15 +150,17 @@ jobs:
           target: ${{ secrets.EC2_SERVER_TARGET }}
 
       - name: Deploy frontend to EC2
+        if: env.FRONTEND_ASSET != ''
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_SERVER_HOST }}
           username: ${{ secrets.EC2_SERVER_USERNAME }}
           key: ${{ secrets.EC2_SERVER_KEY }}
           source: ${{ env.FRONTEND_ASSET }}
-          target: <REPLACE_WITH_REMOTE_FRONTEND_PATH>
+          target: /home/ubuntu/trade-frontend
 
       - name: Restart server
+        if: env.ASSET != ''
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_SERVER_HOST }}
@@ -97,15 +175,14 @@ jobs:
             pm2 restart all
 
       - name: Restart frontend
+        if: env.FRONTEND_ASSET != ''
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_SERVER_HOST }}
           username: ${{ secrets.EC2_SERVER_USERNAME }}
           key: ${{ secrets.EC2_SERVER_KEY }}
           script: |
-            # Extract the uploaded frontend bundle into the serving directory
-            cd <REPLACE_WITH_REMOTE_FRONTEND_PATH>
-            tar -xfv ${{ env.FRONTEND_ASSET }}
-            rm ${{ env.FRONTEND_ASSET }}
-            # Restart the frontend process manager (adjust command as needed)
+            cd /home/ubuntu/trade-frontend
+            tar -xfv frontend.tar.gz
+            rm frontend.tar.gz
             pm2 restart trade-frontend
