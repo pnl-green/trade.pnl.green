@@ -1,23 +1,53 @@
 import { parseFullSymbol } from './helpers';
 
-const socket = new WebSocket(
-  'wss://trade.intelayer.com/ws/'
-);
-const channelToSubscription = new Map();
+const channelToSubscription = new Map<string, any>();
 
-socket.addEventListener('open', () => {
+const socketUrl =
+  process.env.NEXT_PUBLIC_WS_URL || 'wss://api.hyperliquid.xyz/ws';
+
+let socket: WebSocket | null = null;
+const sendMessage = (payload: string) => {
+  if (!socket) {
+    console.error('Chart WebSocket unavailable; skipping message.');
+    return;
+  }
+
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(payload);
+  } else {
+    socket.addEventListener(
+      'open',
+      () => socket?.send(payload),
+      { once: true }
+    );
+  }
+};
+
+if (typeof window !== 'undefined') {
+  if (!socketUrl) {
+    console.error('Missing NEXT_PUBLIC_WS_URL – chart streaming disabled');
+  } else {
+    try {
+      socket = new WebSocket(socketUrl);
+    } catch (error) {
+      console.error('Failed to initialize chart WebSocket:', error);
+    }
+  }
+}
+
+socket?.addEventListener('open', () => {
   console.log('[socket] Connected');
 });
 
-socket.addEventListener('close', (reason) => {
+socket?.addEventListener('close', (reason) => {
   console.log('[socket] Disconnected:', reason);
 });
 
-socket.addEventListener('error', (error) => {
+socket?.addEventListener('error', (error) => {
   console.log('[socket] Error:', error);
 });
 
-socket.addEventListener('message', (event) => {
+socket?.addEventListener('message', (event) => {
   const data = JSON.parse(event.data);
   console.log('[socket] Message:', data);
   const {
@@ -30,7 +60,7 @@ socket.addEventListener('message', (event) => {
     h: high,
     l: low,
     v: volume,
-    n: number
+    n: number,
   } = data;
 
   const tradePrice = open; // TODO
@@ -38,7 +68,7 @@ socket.addEventListener('message', (event) => {
 
   const subscriptionItem = channelToSubscription.get(symbol);
   if (subscriptionItem === undefined) {
-    console.log("Undefined")
+    console.log('Undefined');
     return;
   }
   const lastDailyBar = subscriptionItem.lastDailyBar;
@@ -104,7 +134,7 @@ export function subscribeOnStream(
   };
   channelToSubscription.set(channelString, subscriptionItem);
 
-  socket.send(`
+  sendMessage(`
   {
     "method": "pairs_candle",
     "data": {
