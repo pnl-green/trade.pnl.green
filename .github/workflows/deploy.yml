@@ -27,7 +27,7 @@ jobs:
             frontend:
               - 'frontend/**'
 
-  backend-build:
+  backend-deploy:
     needs: changes
     # Run only if backend changed
     if: ${{ needs.changes.outputs.backend == 'true' }}
@@ -42,12 +42,12 @@ jobs:
           toolchain: "1.79.0"
           targets: x86_64-unknown-linux-gnu
 
-      - name: Compile
+      - name: Compile backend
         working-directory: ./backend
         shell: bash
         run: cargo build --release --target x86_64-unknown-linux-gnu
 
-      - name: Build archive
+      - name: Build backend archive
         working-directory: ./backend
         shell: bash
         run: |
@@ -65,13 +65,32 @@ jobs:
 
           tar -czf backend.tar.gz .env -C target/x86_64-unknown-linux-gnu/release/ backend
 
-      - name: Upload backend artifact
-        uses: actions/upload-artifact@v4
+      - name: Deploy backend to EC2
+        uses: appleboy/scp-action@v0.1.4
         with:
-          name: backend-artifact
-          path: backend/backend.tar.gz
+          host: ${{ secrets.EC2_SERVER_HOST }}
+          username: ${{ secrets.EC2_SERVER_USERNAME }}
+          key: ${{ secrets.EC2_SERVER_KEY }}
+          source: backend/backend.tar.gz
+          target: ${{ secrets.EC2_SERVER_TARGET }}
 
-  frontend-build:
+      - name: Restart backend
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_SERVER_HOST }}
+          username: ${{ secrets.EC2_SERVER_USERNAME }}
+          key: ${{ secrets.EC2_SERVER_KEY }}
+          script: |
+            cd ${{ secrets.EC2_SERVER_TARGET }}
+            # Find the uploaded backend.tar.gz inside the target directory
+            BACKEND_TAR=$(find . -name backend.tar.gz -maxdepth 3 | head -n 1)
+            if [ -n "$BACKEND_TAR" ]; then
+              tar -xf "$BACKEND_TAR" -C .
+              rm "$BACKEND_TAR"
+            fi
+            pm2 restart all
+
+  frontend-deploy:
     needs: changes
     # Run only if frontend changed
     if: ${{ needs.changes.outputs.frontend == 'true' }}
@@ -98,87 +117,27 @@ jobs:
           # Bundle the built frontend assets and required config for deployment
           tar -czf frontend.tar.gz .next public package.json next.config.js
 
-      - name: Upload frontend artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-artifact
-          path: frontend/frontend.tar.gz
-
-  deploy:
-    needs: [backend-build, frontend-build]
-    # Run if at least one build job succeeded
-    if: ${{ always() && (needs.backend-build.result == 'success' || needs.frontend-build.result == 'success') }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download backend artifact
-        if: needs.backend-build.result == 'success'
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-artifact
-          path: artifacts/backend
-
-      - name: Download frontend artifact
-        if: needs.frontend-build.result == 'success'
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-artifact
-          path: artifacts/frontend
-
-      - name: Set asset paths
-        run: |
-          if [ -f artifacts/backend/backend.tar.gz ]; then
-            echo "ASSET=artifacts/backend/backend.tar.gz" >> $GITHUB_ENV
-          fi
-          if [ -f artifacts/frontend/frontend.tar.gz ]; then
-            echo "FRONTEND_ASSET=artifacts/frontend/frontend.tar.gz" >> $GITHUB_ENV
-          fi
-
-      - name: Deploy backend to EC2
-        if: env.ASSET != ''
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_SERVER_HOST }}
-          username: ${{ secrets.EC2_SERVER_USERNAME }}
-          key: ${{ secrets.EC2_SERVER_KEY }}
-          source: ${{ env.ASSET }}
-          target: ${{ secrets.EC2_SERVER_TARGET }}
-
       - name: Deploy frontend to EC2
-        if: env.FRONTEND_ASSET != ''
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_SERVER_HOST }}
           username: ${{ secrets.EC2_SERVER_USERNAME }}
           key: ${{ secrets.EC2_SERVER_KEY }}
-          source: ${{ env.FRONTEND_ASSET }}
-          target: <REPLACE_WITH_REMOTE_FRONTEND_PATH>
-
-      - name: Restart backend
-        if: env.ASSET != ''
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_SERVER_HOST }}
-          username: ${{ secrets.EC2_SERVER_USERNAME }}
-          key: ${{ secrets.EC2_SERVER_KEY }}
-          script: |
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            cd ${{ secrets.EC2_SERVER_TARGET }}
-            tar -xfv ${{ env.ASSET }}
-            rm ${{ env.ASSET }}
-            pm2 restart all
+          source: frontend/frontend.tar.gz
+          target: /home/ubuntu/trade-frontend   # change if your frontend lives elsewhere
 
       - name: Restart frontend
-        if: env.FRONTEND_ASSET != ''
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_SERVER_HOST }}
           username: ${{ secrets.EC2_SERVER_USERNAME }}
           key: ${{ secrets.EC2_SERVER_KEY }}
           script: |
-            # Extract the uploaded frontend bundle into the serving directory
-            cd <REPLACE_WITH_REMOTE_FRONTEND_PATH>
-            tar -xfv $(basename "${FRONTEND_ASSET}")
-            rm $(basename "${FRONTEND_ASSET}")
-            # Restart the frontend process manager (adjust command as needed)
+            cd /home/ubuntu/trade-frontend
+            # Find the uploaded frontend.tar.gz inside the target directory
+            FRONTEND_TAR=$(find . -name frontend.tar.gz -maxdepth 3 | head -n 1)
+            if [ -n "$FRONTEND_TAR" ]; then
+              tar -xf "$FRONTEND_TAR" -C .
+              rm "$FRONTEND_TAR"
+            fi
             pm2 restart trade-frontend
