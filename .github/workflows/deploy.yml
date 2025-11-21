@@ -159,6 +159,26 @@ jobs:
           tar -czf frontend.tar.gz .next public package.json next.config.js
           echo "FRONTEND_ASSET=${PWD}/frontend.tar.gz" >> $GITHUB_ENV
 
+      # Install Node.js for building the frontend (dependency caching disabled to avoid path resolution errors)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install and build frontend
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Package frontend build artifacts
+        working-directory: ./frontend
+        shell: bash
+        run: |
+          # Bundle the built frontend assets and required config for deployment
+          tar -czf frontend.tar.gz .next public package.json next.config.js
+          echo "FRONTEND_ASSET=${PWD}/frontend.tar.gz" >> $GITHUB_ENV
+
       - name: Deploy to EC2
         if: env.ASSET != ''
         uses: appleboy/scp-action@v0.1.4
