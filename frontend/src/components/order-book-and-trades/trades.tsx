@@ -17,6 +17,8 @@ const Trades = ({ maxHeight = '240px' }: TradesProps) => {
     console.log('Clicked on details for index:', index);
   };
 
+  const sizeLabel = tokenPairs?.[0] ? String(tokenPairs[0]) : '';
+
   return (
     <Box
       sx={{
@@ -37,7 +39,7 @@ const Trades = ({ maxHeight = '240px' }: TradesProps) => {
         >
           <tr>
             <th>Price</th>
-            <th>Size({tokenPairs[0].toString()})</th>
+            <th>Size({sizeLabel})</th>
             <th>Time</th>
             <th></th>
           </tr>

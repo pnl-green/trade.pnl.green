@@ -14,6 +14,7 @@ import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import NoSSR from 'react-no-ssr';
 import { Toaster } from 'react-hot-toast';
 import ContextProviders from '../context';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -36,39 +37,41 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   }
   return (
     <NoSSR>
-      <ThirdwebProvider
-        activeChain={ArbitrumSepolia}
-        clientId="YOUR_CLIENT_ID"
-        locale={en()}
-        supportedChains={[Arbitrum, ArbitrumSepolia]}
-        supportedWallets={[
-          metamaskWallet(),
-          coinbaseWallet({ recommended: true }),
-          walletConnect(),
-          embeddedWallet({
-            auth: {
-              options: ['email'],
-            },
-          }),
-        ]}
-      >
-        <ContextProviders>
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              style: {
-                background: '#000',
-                borderRadius: '4px',
-                border: '1px solid rgba(255, 255, 255, 0.5)',
-                fontFamily: 'Sora',
-                fontSize: '14px',
-                color: '#fff',
+      <ErrorBoundary>
+        <ThirdwebProvider
+          activeChain={ArbitrumSepolia}
+          clientId="YOUR_CLIENT_ID"
+          locale={en()}
+          supportedChains={[Arbitrum, ArbitrumSepolia]}
+          supportedWallets={[
+            metamaskWallet(),
+            coinbaseWallet({ recommended: true }),
+            walletConnect(),
+            embeddedWallet({
+              auth: {
+                options: ['email'],
               },
-            }}
-          />
-          {getLayout(<Component {...pageProps} />)}
-        </ContextProviders>
-      </ThirdwebProvider>
+            }),
+          ]}
+        >
+          <ContextProviders>
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: '#000',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                  fontFamily: 'Sora',
+                  fontSize: '14px',
+                  color: '#fff',
+                },
+              }}
+            />
+            {getLayout(<Component {...pageProps} />)}
+          </ContextProviders>
+        </ThirdwebProvider>
+      </ErrorBoundary>
     </NoSSR>
   );
 }
