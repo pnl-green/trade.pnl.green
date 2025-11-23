@@ -1,6 +1,6 @@
 import { SelectItemsBox } from '@/styles/riskManager.styles';
 import { Box } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
 import {
   ButtonStyles,
@@ -25,6 +25,7 @@ import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
 import { riskValues } from '@/utils/risk';
 import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
+import { useOrderTicketContext } from '@/context/orderTicketContext';
 
 const MarketComponent = () => {
   const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
@@ -38,7 +39,8 @@ const MarketComponent = () => {
 
   const [radioValue, setRadioValue] = useState<string>('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
+  const { direction, setDirection } = useOrderTicketContext();
+  const isBuyOrSell = direction;
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
   const [riskSelectItem, setRiskSelectItem] = useState(`${riskValues[0]}`);
   const [takeProfitPrice, setTakeProfitPrice] = useState('');
@@ -118,7 +120,7 @@ const MarketComponent = () => {
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
-    setIsBuyOrSell(button);
+    setDirection(button as 'buy' | 'sell');
   };
 
   const handleRadioChange = (e: {
@@ -142,7 +144,7 @@ const MarketComponent = () => {
       ? size / Number(currentMarketPrice)
       : size;
 
-  let isBuy = isBuyOrSell === 'buy';
+  let isBuy = direction === 'buy';
   let orderType: OrderType = {
     limit: {
       tif: 'FrontendMarket',
@@ -244,7 +246,7 @@ const MarketComponent = () => {
         return toast.error('SL price should be less than current market price');
       }
 
-      let tpSlIsBuy = isBuyOrSell !== 'buy'; //tpSl of buy is opposite of normal
+      let tpSlIsBuy = direction !== 'buy'; //tpSl of buy is opposite of normal
       // Calculate tp/sl limit price based on buy or sell
       let tpslLimitPx = tpSlIsBuy
         ? Number(currentMarketPrice) * 1.03
@@ -617,7 +619,7 @@ const MarketComponent = () => {
           stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
           estLiqPrice={''}
           fee={''}
-          isBuyOrSell={isBuyOrSell}
+          isBuyOrSell={direction}
           loading={isLoading}
           setLoading={setIsLoading}
         />

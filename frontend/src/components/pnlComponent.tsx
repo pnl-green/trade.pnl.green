@@ -1,5 +1,5 @@
 import { TradingViewComponent } from '@/styles/pnl.styles';
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import OrderPlacement from './order-placement-terminal';
 import { FlexItems } from '@/styles/common.styles';
@@ -56,6 +56,8 @@ const PnlComponent = () => {
   const { allTokenPairs, tokenPairData } = usePairTokensContext();
 
   const [ pairs, setPairs ] = useState([])
+  const [syncedHeight, setSyncedHeight] = useState<number | undefined>();
+  const orderTicketRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (pairs.length !== 0) {
       return
@@ -64,6 +66,18 @@ const PnlComponent = () => {
     merged = merged.concat(allTokenPairs);
     setPairs(merged)
   }, [allTokenPairs])
+
+  useEffect(() => {
+    if (!orderTicketRef.current || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver((entries) => {
+      const { height } = entries[0].contentRect;
+      setSyncedHeight(height);
+    });
+
+    observer.observe(orderTicketRef.current);
+    return () => observer.disconnect();
+  }, []);
 
 
     // ====== //
@@ -286,59 +300,72 @@ const PnlComponent = () => {
   );
   
   return (
-    <TerminalLayout topBar={<TokenPairInformation />}>
-      <ChartArea>
-        <Panel noPadding sx={{ flex: 1 }}>{chartElement}</Panel>
-      </ChartArea>
-      <OrderbookArea>
-        <Panel title="Order Book & Trades">
-          <OrderBookAndTrades />
-        </Panel>
-      </OrderbookArea>
-      <TicketArea>
-        <Panel title="Risk Manager & Order Ticket" sx={{ flex: 1 }}>
-          <OrderPlacement />
-        </Panel>
-        <Panel
-          title="Portfolio Snapshot"
-          sx={{
-            gap: '8px',
-            '& span': { fontFamily: intelayerFonts.body, fontSize: '14px' },
-          }}
-        >
-          {[{
-            label: 'Balance',
-            value: balance ? `$${Number(balance).toFixed(2)}` : '$0.00',
-            tooltip:
-              'Balance is your total account value before unrealized PnL, denominated in the account currency.',
-          },
-          { label: 'uPNL', value: '$0.00', tooltip: 'uPNL (Unrealized PnL) is your current profit or loss on open positions based on mark price.' },
-          { label: 'Equity', value: '$0.00', tooltip: 'Equity is Balance plus Unrealized PnL. It is the effective value of your account right now.' },
-          { label: 'Cross Margin Ratio', value: '$0.00', tooltip: 'Cross Margin Ratio shows how much of your account equity is currently committed to margin across all positions.' },
-          { label: 'Maintenance Margin', value: '$0.00', tooltip: 'Maintenance Margin is the minimum margin level you must maintain to avoid liquidation.' },
-          { label: 'Cross Account Leverage', value: '$0.00', tooltip: 'Cross Account Leverage is your effective leverage across the entire account, using all open positions and equity.' }].map(
-            ({ label, value, tooltip }) => (
-              <FlexItems key={label}>
-                <Tooltip content={tooltip}>
-                  <span>{label}</span>
-                </Tooltip>
-                <span style={label === 'Cross Margin Ratio' ? { color: intelayerColors.green[500] } : undefined}>
-                  {value}
-                </span>
-              </FlexItems>
-            )
-          )}
-        </Panel>
-        <Panel title="Intelayer Assistant">
-          <ChatComponent />
-        </Panel>
-      </TicketArea>
-      <BottomArea>
-        <Panel title="Positions & History" sx={{ flex: 1 }}>
-          <PositionsOrdersHistory />
-        </Panel>
-      </BottomArea>
-    </TerminalLayout>
+    <OrderTicketProvider>
+      <TerminalLayout topBar={<TokenPairInformation />}>
+        <ChartArea>
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              minHeight: 0,
+              height: syncedHeight ? `${syncedHeight}px` : '100%',
+            }}
+          >
+            <Panel noPadding sx={{ flex: 1, minHeight: '100%' }}>{chartElement}</Panel>
+          </Box>
+        </ChartArea>
+        <OrderbookArea>
+          <Panel title="Order Book & Trades">
+            <OrderBookAndTrades />
+          </Panel>
+        </OrderbookArea>
+        <TicketArea>
+          <Box ref={orderTicketRef} sx={{ width: '100%' }}>
+            <Panel title="Risk Manager & Order Ticket" sx={{ flex: 1 }}>
+              <OrderPlacement />
+            </Panel>
+          </Box>
+          <Panel
+            title="Portfolio Snapshot"
+            sx={{
+              gap: '8px',
+              '& span': { fontFamily: intelayerFonts.body, fontSize: '14px' },
+            }}
+          >
+            {[{
+              label: 'Balance',
+              value: balance ? `$${Number(balance).toFixed(2)}` : '$0.00',
+              tooltip:
+                'Balance is your total account value before unrealized PnL, denominated in the account currency.',
+            },
+            { label: 'uPNL', value: '$0.00', tooltip: 'uPNL (Unrealized PnL) is your current profit or loss on open positions based on mark price.' },
+            { label: 'Equity', value: '$0.00', tooltip: 'Equity is Balance plus Unrealized PnL. It is the effective value of your account right now.' },
+            { label: 'Cross Margin Ratio', value: '$0.00', tooltip: 'Cross Margin Ratio shows how much of your account equity is currently committed to margin across all positions.' },
+            { label: 'Maintenance Margin', value: '$0.00', tooltip: 'Maintenance Margin is the minimum margin level you must maintain to avoid liquidation.' },
+            { label: 'Cross Account Leverage', value: '$0.00', tooltip: 'Cross Account Leverage is your effective leverage across the entire account, using all open positions and equity.' }].map(
+              ({ label, value, tooltip }) => (
+                <FlexItems key={label}>
+                  <Tooltip content={tooltip}>
+                    <span>{label}</span>
+                  </Tooltip>
+                  <span style={label === 'Cross Margin Ratio' ? { color: intelayerColors.green[500] } : undefined}>
+                    {value}
+                  </span>
+                </FlexItems>
+              )
+            )}
+          </Panel>
+          <Panel title="Intelayer Assistant">
+            <ChatComponent />
+          </Panel>
+        </TicketArea>
+        <BottomArea>
+          <Panel title="Positions & History" sx={{ flex: 1 }}>
+            <PositionsOrdersHistory />
+          </Panel>
+        </BottomArea>
+      </TerminalLayout>
+    </OrderTicketProvider>
   );
 };
 
