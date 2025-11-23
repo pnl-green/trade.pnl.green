@@ -1,5 +1,5 @@
 import { TradingViewComponent } from '@/styles/pnl.styles';
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import OrderPlacement from './order-placement-terminal';
 import { FlexItems } from '@/styles/common.styles';
@@ -56,6 +56,8 @@ const PnlComponent = () => {
   const { allTokenPairs, tokenPairData } = usePairTokensContext();
 
   const [ pairs, setPairs ] = useState([])
+  const [syncedHeight, setSyncedHeight] = useState<number | undefined>();
+  const orderTicketRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (pairs.length !== 0) {
       return
@@ -64,6 +66,18 @@ const PnlComponent = () => {
     merged = merged.concat(allTokenPairs);
     setPairs(merged)
   }, [allTokenPairs])
+
+  useEffect(() => {
+    if (!orderTicketRef.current || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver((entries) => {
+      const { height } = entries[0].contentRect;
+      setSyncedHeight(height);
+    });
+
+    observer.observe(orderTicketRef.current);
+    return () => observer.disconnect();
+  }, []);
 
 
     // ====== //
@@ -288,7 +302,16 @@ const PnlComponent = () => {
   return (
     <TerminalLayout topBar={<TokenPairInformation />}>
       <ChartArea>
-        <Panel noPadding sx={{ flex: 1 }}>{chartElement}</Panel>
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+            minHeight: 0,
+            height: syncedHeight ? `${syncedHeight}px` : '100%',
+          }}
+        >
+          <Panel noPadding sx={{ flex: 1, minHeight: '100%' }}>{chartElement}</Panel>
+        </Box>
       </ChartArea>
       <OrderbookArea>
         <Panel title="Order Book & Trades">
@@ -296,9 +319,11 @@ const PnlComponent = () => {
         </Panel>
       </OrderbookArea>
       <TicketArea>
-        <Panel title="Risk Manager & Order Ticket" sx={{ flex: 1 }}>
-          <OrderPlacement />
-        </Panel>
+        <Box ref={orderTicketRef} sx={{ width: '100%' }}>
+          <Panel title="Risk Manager & Order Ticket" sx={{ flex: 1 }}>
+            <OrderPlacement />
+          </Panel>
+        </Box>
         <Panel
           title="Portfolio Snapshot"
           sx={{
