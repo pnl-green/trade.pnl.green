@@ -251,11 +251,6 @@ const ChatComponent = () => {
         <Tooltip content="Route prompts to the best model and sync direction with the ticket.">
           <header>Intelayer Assistant</header>
         </Tooltip>
-        <Tooltip content="Upload or paste a chart screenshot to auto-fill the ticket.">
-          <BtnWithIcon onClick={() => fileInputRef.current?.click()} aria-label="Upload chart">
-            <img src="/uploadIcon.svg" alt="upload" />
-          </BtnWithIcon>
-        </Tooltip>
         <input
           ref={fileInputRef}
           type="file"
