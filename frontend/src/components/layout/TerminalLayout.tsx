@@ -8,11 +8,12 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 const TerminalRoot = styled(Box)(() => ({
   backgroundColor: intelayerColors.page,
   width: '100%',
-  minHeight: 'calc(100vh - 120px)',
+  height: 'calc(100vh - 120px)',
   padding: '24px clamp(16px, 3vw, 32px) 32px',
   display: 'flex',
   flexDirection: 'column',
   gap: '16px',
+  overflow: 'auto',
 }));
 
 const TerminalContainer = styled(PanelGroup)(() => ({
@@ -65,7 +66,7 @@ const areaStyles = {
   minHeight: 0,
   height: '100%',
   minWidth: 0,
-  overflow: 'hidden',
+  overflow: 'visible',
 } as const;
 
 const AreaWrapper = styled('div')(() => ({
@@ -91,37 +92,37 @@ const BottomRowWrapper: React.FC<{ children: React.ReactNode }> = ({ children })
 );
 
 export const ChartArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={40} minSize={20}>
+  <Panel defaultSize={52} minSize={25}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const OrderbookArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={30} minSize={15}>
+  <Panel defaultSize={24} minSize={15}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const TicketArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={30} minSize={15}>
+  <Panel defaultSize={24} minSize={15}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const BottomArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={33.33} minSize={15}>
+  <Panel defaultSize={50} minSize={20}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const AssistantArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={33.33} minSize={15}>
+  <Panel defaultSize={30} minSize={15}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const PortfolioArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={33.33} minSize={15}>
+  <Panel defaultSize={20} minSize={10}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
