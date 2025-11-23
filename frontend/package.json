@@ -22,8 +22,8 @@
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
-    "@thirdweb-dev/react": "^4.6.1",
     "@techstark/opencv-js": "^4.10.0-release.0",
+    "@thirdweb-dev/react": "^4.6.1",
     "@ygoe/msgpack": "^1.0.3",
     "axios": "^1.6.8",
     "big.js": "^6.2.1",
@@ -38,7 +38,7 @@
     "react-no-ssr": "^1.1.0",
     "react-resizable-panels": "^2.1.9",
     "react-tradingview-embed": "^3.0.6",
-    "tesseract.js": "^5.1.0"
+    "tesseract.js": "^5.1.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

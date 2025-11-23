@@ -105,6 +105,8 @@ jobs:
 
       - name: Install and build frontend
         working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_OPENAI_API_KEY: ${{ secrets.NEXT_PUBLIC_OPENAI_API_KEY }}
         run: |
           npm install --legacy-peer-deps
           npm run build

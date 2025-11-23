@@ -1,7 +1,6 @@
-import Tesseract from 'tesseract.js';
-
 type CvRect = import('@techstark/opencv-js').Rect;
 type CvMat = import('@techstark/opencv-js').Mat;
+type TesseractModule = typeof import('tesseract.js');
 
 export type ParsedLevels = {
   direction: 'LONG' | 'SHORT';
@@ -47,6 +46,16 @@ async function loadCV(): Promise<CVFactory> {
   const module = await import('@techstark/opencv-js');
   const cv = (module as { default?: CVFactory }).default || (module as CVFactory);
   return cv;
+}
+
+let tesseractPromise: Promise<TesseractModule> | null = null;
+
+async function loadTesseract(): Promise<TesseractModule> {
+  if (!tesseractPromise) {
+    tesseractPromise = import('tesseract.js');
+  }
+  const module = await tesseractPromise;
+  return (module as { default?: TesseractModule }).default || module;
 }
 
 async function loadImageFromFile(file: File): Promise<HTMLImageElement> {
@@ -214,6 +223,7 @@ export async function isolateTextRegions(
 }
 
 async function performOcr(blob: Blob, whitelist?: string): Promise<string> {
+  const Tesseract = await loadTesseract();
   const baseOptions = whitelist
     ? { tessedit_char_whitelist: whitelist }
     : undefined;
@@ -227,9 +237,9 @@ async function performOcr(blob: Blob, whitelist?: string): Promise<string> {
   return data.text || '';
 }
 
-export async function runOCR(crops: { detection: RectangleDetection; crop: CvMat }[]): Promise<
-  { detection: RectangleDetection; rawText: string }
-[]> {
+export async function runOCR(
+  crops: { detection: RectangleDetection; crop: CvMat }[]
+): Promise<{ detection: RectangleDetection; rawText: string }[]> {
   const cv = await loadCV();
   const results: { detection: RectangleDetection; rawText: string }[] = [];
   // Run OCR sequentially to reduce memory pressure
@@ -250,7 +260,11 @@ function parseNumbers(text: string): number[] {
     .filter((v) => Number.isFinite(v) && v >= 100 && v <= 100000);
 }
 
-export function detectDirection(entryBox?: RectangleDetection, tpBox?: RectangleDetection, slBox?: RectangleDetection):
+export function detectDirection(
+  entryBox?: RectangleDetection,
+  tpBox?: RectangleDetection,
+  slBox?: RectangleDetection
+):
   | 'LONG'
   | 'SHORT'
   | null {
