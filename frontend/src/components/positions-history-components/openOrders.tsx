@@ -1,16 +1,16 @@
 import React from 'react';
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { Paper, Table, TableBody, TableHead } from '@mui/material';
 import { useWebDataContext } from '@/context/webDataContext';
 import { timestampToDateTime } from '../../../utils/toHumanReadableTime';
+import {
+  BodyCell,
+  BodyRow,
+  EmptyState,
+  HeaderCell,
+  HeaderRow,
+  StyledTableContainer,
+  TableShell,
+} from './tableElements';
 
 interface Column {
   id:
@@ -48,98 +48,51 @@ const OpenOrdersComponentTable = () => {
   console.log(openOrdersData)
 
   return (
-    <Paper
-      sx={{
-        width: '100%',
-        overflow: 'hidden',
-        background: 'transparent',
-      }}
-    >
-      <TableContainer sx={{ maxHeight: 300, paddingBottom: '60px' }}>
+    <TableShell component={Paper}>
+      <StyledTableContainer>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
-            <TableRow>
+            <HeaderRow>
               {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  sx={{
-                    background: '#100e0e',
-                    color: 'white',
-                    padding: '10px',
-                    borderBottom: '2px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                >
+                <HeaderCell key={column.id} align={column.align}>
                   {column.label}
-                </TableCell>
+                </HeaderCell>
               ))}
-            </TableRow>
+            </HeaderRow>
           </TableHead>
           <TableBody>
             {loadingWebData2 ? (
-              <Box
-                sx={{
-                  color: '#fff',
-                  fontFamily: 'Sora',
-                  fontWeight: '400',
-                  fontSize: '13px',
-                  p: '10px',
-                }}
-              >
-                loading...
-              </Box>
-            ) : (!loadingWebData2 && webData2.length === 0) ||
-              openOrdersData.length === 0 ? (
-              <Box
-                sx={{
-                  color: '#fff',
-                  fontFamily: 'Sora',
-                  fontWeight: '400',
-                  fontSize: '13px',
-                  p: '10px',
-                }}
-              >
-                No open orders yet
-              </Box>
+              <EmptyState>loading...</EmptyState>
+            ) : (!loadingWebData2 && webData2.length === 0) || openOrdersData.length === 0 ? (
+              <EmptyState>No open orders yet</EmptyState>
             ) : (
               <>
                 {openOrdersData.map((row: any, index: any) => {
                   return (
-                    <TableRow
-                      key={index}
-                      sx={{
-                        td: {
-                          background: 'transparent',
-                          color: 'white',
-                          padding: '8px',
-                          border: 'none',
-                          textAlign: 'center',
-                        },
-                      }}
-                    >
-                      <TableCell>
+                    <BodyRow key={index}>
+                      <BodyCell align="center">
                         {timestampToDateTime(row.timestamp)}
-                      </TableCell>
-                      <TableCell>{row.orderType}</TableCell>
-                      <TableCell>{row.coin}</TableCell>
-                      <TableCell>
+                      </BodyCell>
+                      <BodyCell align="center">{row.orderType}</BodyCell>
+                      <BodyCell align="center">{row.coin}</BodyCell>
+                      <BodyCell align="center">
                         {row.side === 'A' ? 'short' : 'Long'}
-                      </TableCell>
-                      <TableCell>{row.sz}</TableCell>
-                      <TableCell>{row.origSz}</TableCell>
-                      <TableCell>{''}</TableCell>
-                      <TableCell>{row.limitPx}</TableCell>
-                      <TableCell>{row.triggerCondition}</TableCell>
-                      <TableCell>{'--'}</TableCell>
-                    </TableRow>
+                      </BodyCell>
+                      <BodyCell align="center">{row.sz}</BodyCell>
+                      <BodyCell align="center">{row.origSz}</BodyCell>
+                      <BodyCell align="center">{''}</BodyCell>
+                      <BodyCell align="center">{row.limitPx}</BodyCell>
+                      <BodyCell align="center">{row.triggerCondition}</BodyCell>
+                      <BodyCell align="center">{'--'}</BodyCell>
+                    </BodyRow>
                   );
                 })}
               </>
             )}
           </TableBody>
         </Table>
-      </TableContainer>
-    </Paper>
+      </StyledTableContainer>
+    </TableShell>
   );
 };
 

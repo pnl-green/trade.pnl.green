@@ -1,16 +1,15 @@
 import React from 'react';
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { Box, Paper, Table, TableBody, TableHead } from '@mui/material';
 import { useTwapHistoryContext } from '@/context/twapHistoryContext';
-import { timestampToDateTime } from '@/utils/toHumanReadableTime';
+import {
+  BodyCell,
+  BodyRow,
+  EmptyState,
+  HeaderCell,
+  HeaderRow,
+  StyledTableContainer,
+  TableShell,
+} from './tableElements';
 
 interface Column {
   id:
@@ -37,113 +36,56 @@ const columns: Column[] = [
   { id: 'Terminate', label: 'Terminate', align: 'center' },
 ];
 
-const row: any[] = [
-  //   {
-  //     coin: "BTC",
-  //     size: "0.1",
-  //     executedSize: "0.1",
-  //     averagePrice: "0.1",
-  //     runningTimeTotal: "0.1",
-  //     reduceOnly: "0.1",
-  //     creationTime: "0.1",
-  //     Terminate: "0.1",
-  //   },
-];
-
 const TwapComponentTable = () => {
   //------use Context Hooks
   const { twapHistoryData, loadingTwapData } = useTwapHistoryContext();
   return (
-    <Paper
-      sx={{
-        width: '100%',
-        overflow: 'hidden',
-        background: 'transparent',
-      }}
-    >
-      <TableContainer sx={{ maxHeight: 300, paddingBottom: '60px' }}>
+    <TableShell component={Paper}>
+      <StyledTableContainer>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
-            <TableRow>
+            <HeaderRow>
               {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  sx={{
-                    background: '#100e0e',
-                    color: 'white',
-                    padding: '10px',
-                    borderBottom: '2px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                >
+                <HeaderCell key={column.id} align={column.align}>
                   {column.label}
-                </TableCell>
+                </HeaderCell>
               ))}
-            </TableRow>
+            </HeaderRow>
           </TableHead>
           <TableBody>
             {loadingTwapData ? (
-              <Box
-                sx={{
-                  color: '#fff',
-                  fontFamily: 'Sora',
-                  fontWeight: '400',
-                  fontSize: '13px',
-                  p: '10px',
-                }}
-              >
-                loading...
-              </Box>
+              <EmptyState>loading...</EmptyState>
             ) : !loadingTwapData && twapHistoryData.length === 0 ? (
-              <Box
-                sx={{
-                  color: '#fff',
-                  fontFamily: 'Sora',
-                  fontWeight: '400',
-                  fontSize: '13px',
-                  p: '10px',
-                }}
-              >
-                No open position yet
-              </Box>
+              <EmptyState>No open position yet</EmptyState>
             ) : !loadingTwapData && twapHistoryData.length !== 0 ? (
               <>
                 {twapHistoryData.history.map((row: any, index: any) => {
                   return (
-                    <TableRow
-                      key={index}
-                      sx={{
-                        td: {
-                          background: 'transparent',
-                          color: 'white',
-                          padding: '8px',
-                          border: 'none',
-                          textAlign: 'center',
-                        },
-                      }}
-                    >
+                    <BodyRow key={index}>
                       {/* <TableCell>{timestampToDateTime(row.time)}</TableCell> */}
-                      <TableCell>{row.state.coin}</TableCell>
-                      <TableCell>{row.state.sz}</TableCell>
-                      <TableCell>{row.state.executedSz}</TableCell>
-                      <TableCell>{'- -'}</TableCell>
-                      <TableCell>
+                      <BodyCell align="center">{row.state.coin}</BodyCell>
+                      <BodyCell align="center">{row.state.sz}</BodyCell>
+                      <BodyCell align="center">{row.state.executedSz}</BodyCell>
+                      <BodyCell align="center">{'- -'}</BodyCell>
+                      <BodyCell align="center">
                         {row.state.minutes === 60
                           ? '1 hour'
                           : row.state.minutes + ' minutes'}
-                      </TableCell>
-                      <TableCell>{row.state.reduceOnly? 'Yes' : 'No'}</TableCell>
-                      <TableCell>{'- -'}</TableCell>
-                      <TableCell>{'- -'}</TableCell>
-                    </TableRow>
+                      </BodyCell>
+                      <BodyCell align="center">
+                        {row.state.reduceOnly ? 'Yes' : 'No'}
+                      </BodyCell>
+                      <BodyCell align="center">{'- -'}</BodyCell>
+                      <BodyCell align="center">{'- -'}</BodyCell>
+                    </BodyRow>
                   );
                 })}
               </>
             ) : null}
           </TableBody>
         </Table>
-      </TableContainer>
-    </Paper>
+      </StyledTableContainer>
+    </TableShell>
   );
 };
 
