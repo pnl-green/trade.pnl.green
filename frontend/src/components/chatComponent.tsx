@@ -8,6 +8,7 @@ import { intelayerColors } from '@/styles/theme';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import { askLLM } from '@/services/llmRouter';
 import { extractTradeLevelsFromImage } from '@/utils/ocr';
+import Loader from './loaderSpinner';
 
 interface MessageProps {
   id: string;
@@ -141,17 +142,29 @@ const ChatComponent = () => {
     }
   };
 
-  const handlePasteIntoInput = (event: React.ClipboardEvent<HTMLInputElement>) => {
+  const handlePasteIntoInput = (
+    event: React.ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const items = event.clipboardData?.items;
-    if (!items) return;
-    for (const item of items) {
-      if (item.type.startsWith('image/')) {
-        const file = item.getAsFile();
-        if (file) {
-          event.preventDefault();
-          handleImageMessage(file);
-          return;
+    if (items) {
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) {
+            event.preventDefault();
+            handleImageMessage(file);
+            return;
+          }
         }
+      }
+    }
+
+    const files = event.clipboardData?.files;
+    if (files && files.length) {
+      const imageFile = Array.from(files).find((file) => file.type.startsWith('image/'));
+      if (imageFile) {
+        event.preventDefault();
+        handleImageMessage(imageFile);
       }
     }
   };
@@ -178,36 +191,12 @@ const ChatComponent = () => {
         <Box sx={{ position: 'relative' }}>
           <img src={message.imageUrl} alt="uploaded" className="image_bubble" />
           {message.status === 'loading' && (
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: '8px',
-                right: '8px',
-                background: 'rgba(0,0,0,0.7)',
-                color: '#fff',
-                borderRadius: '12px',
-                padding: '2px 8px',
-                fontSize: '12px',
-              }}
-            >
-              Extracting…
+            <Box className="image_status">
+              <Loader message="Extracting…" />
             </Box>
           )}
           {message.status === 'error' && (
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: '8px',
-                right: '8px',
-                background: 'rgba(214,65,65,0.85)',
-                color: '#fff',
-                borderRadius: '12px',
-                padding: '2px 8px',
-                fontSize: '12px',
-              }}
-            >
-              Upload failed
-            </Box>
+            <Box className="image_status image_status-error">Upload failed</Box>
           )}
         </Box>
       );
