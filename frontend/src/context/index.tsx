@@ -8,6 +8,7 @@ import FundingHistoryProvider from './fundingHistoryContext';
 import OrderHistoryProvider from './orderHistoryContext';
 import TwapHistoryProvider from './twapHistoryContext';
 import SwitchAccountProvider from './switchTradingAccContext';
+import { OrderTicketProvider } from './orderTicketContext';
 
 const ContextProviders = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -20,7 +21,9 @@ const ContextProviders = ({ children }: { children: React.ReactNode }) => {
                 <OrderHistoryProvider>
                   <TwapHistoryProvider>
                     <SwitchAccountProvider>
-                      <React.Fragment>{children}</React.Fragment>
+                      <OrderTicketProvider>
+                        <React.Fragment>{children}</React.Fragment>
+                      </OrderTicketProvider>
                     </SwitchAccountProvider>
                   </TwapHistoryProvider>
                 </OrderHistoryProvider>
