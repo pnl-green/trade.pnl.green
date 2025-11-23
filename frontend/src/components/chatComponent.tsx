@@ -2,18 +2,18 @@
 
 import { ChatBox, BtnWithIcon } from '@/styles/pnl.styles';
 import { Box, Button, Typography } from '@mui/material';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Tooltip from './ui/Tooltip';
 import { intelayerColors } from '@/styles/theme';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import { askLLM } from '@/services/llmRouter';
-import { extractTradeLevelsFromImage } from '@/utils/ocr';
+import type { ParsedLevels } from '@/types/tradeLevels';
 import Loader from './loaderSpinner';
 
 interface MessageProps {
   id: string;
   role: 'user' | 'assistant';
-  type: 'text' | 'image' | 'extracted' | 'warning';
+  type: 'text' | 'image' | 'extracted' | 'warning' | 'status';
   content: string;
   imageUrl?: string;
   extracted?: {
@@ -23,7 +23,7 @@ interface MessageProps {
     takeProfits: number[];
   };
   model?: string;
-  status?: 'loading' | 'done' | 'error';
+  status?: 'processing' | 'done' | 'error';
 }
 
 const ChatComponent = () => {
@@ -35,6 +35,22 @@ const ChatComponent = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { setDirection, applyAutofill } = useOrderTicketContext();
+
+  const autofillFromParsedLevels = useCallback(
+    (levels: ParsedLevels) => {
+      const orderDirection = levels.direction === 'SHORT' ? 'sell' : 'buy';
+      applyAutofill({
+        limitPrice: typeof levels.entry === 'number' ? levels.entry.toString() : '',
+        stopLoss: typeof levels.stop === 'number' ? levels.stop.toString() : '',
+        takeProfits: levels.targets.map((tp) => tp.toString()),
+        direction: orderDirection,
+        tpSlEnabled: true,
+        switchToLimit: true,
+      });
+      setDirection(orderDirection);
+    },
+    [applyAutofill, setDirection]
+  );
 
   const scrollToBottom = () => {
     if (chatMessagesRef.current) {
@@ -78,67 +94,104 @@ const ChatComponent = () => {
     await sendPrompt(prompt);
   };
 
-  const handleImageExtraction = async (file: File, previewUrl: string, messageId: string) => {
-    setTyping(true);
+  const uploadScreenshot = async (file: File): Promise<ParsedLevels> => {
+    const formData = new FormData();
+    formData.append('image', file, file.name || 'chart.png');
+    const response = await fetch('/api/parse-trade-screenshot', {
+      method: 'POST',
+      body: formData,
+    });
+
+    let payload: any = null;
     try {
-      const extracted = await extractTradeLevelsFromImage(file);
-      const directionFromImage = extracted.direction === 'long' ? 'buy' : 'sell';
-      setDirection(directionFromImage);
-      applyAutofill({
-        limitPrice: extracted.entries[0]?.toString() || '',
-        stopLoss: extracted.stopLoss != null ? extracted.stopLoss.toString() : '',
-        takeProfits: extracted.takeProfits.map((tp) => tp.toString()),
-        direction: directionFromImage,
-        tpSlEnabled: true,
-        switchToLimit: true,
-      });
-
-      updateMessage(messageId, { status: 'done' });
-      addMessage({
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        type: 'extracted',
-        content: 'Extracted trade levels',
-        extracted,
-      });
-
-      await sendPrompt(
-        `Analyze this chart and summarize the trade setup. Direction: ${extracted.direction}. Entry: ${extracted.entries.join(
-          ', '
-        )}. Stop: ${extracted.stopLoss}. Targets: ${extracted.takeProfits.join(', ')}`
-      );
-    } catch (error) {
-      console.error(error);
-      updateMessage(messageId, { status: 'error', content: 'Upload failed' });
-      addMessage({
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        type: 'warning',
-        content: 'Unable to read the chart. Please upload a clearer screenshot.',
-      });
+      payload = await response.json();
+    } catch {
+      // ignore parsing error; we'll fall back to default message
     }
-    setTyping(false);
+
+    if (!response.ok) {
+      const message = payload?.error || 'Failed to process screenshot. Please try again.';
+      throw new Error(message);
+    }
+
+    return payload as ParsedLevels;
   };
 
-  const handleImageMessage = async (file: File) => {
+  const processScreenshot = async (file: File) => {
     const previewUrl = URL.createObjectURL(file);
     const uploadId = crypto.randomUUID();
+    const statusId = crypto.randomUUID();
+
     addMessage({
       id: uploadId,
       role: 'user',
       type: 'image',
       content: 'Chart uploaded',
       imageUrl: previewUrl,
-      status: 'loading',
+      status: 'processing',
     });
-    await handleImageExtraction(file, previewUrl, uploadId);
+
+    addMessage({
+      id: statusId,
+      role: 'assistant',
+      type: 'status',
+      content: 'Processing screenshot…',
+      status: 'processing',
+    });
+
+    setTyping(true);
+    try {
+      const parsed = await uploadScreenshot(file);
+      updateMessage(uploadId, { status: 'done' });
+      updateMessage(statusId, {
+        content: 'Screenshot processed successfully.',
+        status: 'done',
+      });
+
+      autofillFromParsedLevels(parsed);
+
+      addMessage({
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        type: 'extracted',
+        content: 'Extracted trade levels',
+        extracted: {
+          direction: parsed.direction === 'SHORT' ? 'short' : 'long',
+          entries: parsed.entry != null ? [parsed.entry] : [],
+          stopLoss: parsed.stop,
+          takeProfits: parsed.targets,
+        },
+      });
+
+      await sendPrompt(
+        `Analyze this chart and summarize the trade setup. Direction: ${parsed.direction}. Entry: ${
+          parsed.entry ?? 'unknown'
+        }. Stop: ${parsed.stop ?? 'unknown'}. Targets: ${
+          parsed.targets.length ? parsed.targets.join(', ') : 'unknown'
+        }`
+      );
+    } catch (error) {
+      console.error(error);
+      const message = (error as Error).message || 'Unable to process screenshot.';
+      updateMessage(uploadId, { status: 'error' });
+      updateMessage(statusId, { content: message, status: 'error' });
+      addMessage({
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        type: 'warning',
+        content: message,
+      });
+    } finally {
+      setTyping(false);
+      setTimeout(() => URL.revokeObjectURL(previewUrl), 3000);
+    }
   };
 
   const handleFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const imageFile = Array.from(files).find((file) => file.type.startsWith('image/'));
     if (imageFile) {
-      handleImageMessage(imageFile);
+      processScreenshot(imageFile);
     }
   };
 
@@ -152,7 +205,7 @@ const ChatComponent = () => {
           const file = item.getAsFile();
           if (file) {
             event.preventDefault();
-            handleImageMessage(file);
+            processScreenshot(file);
             return;
           }
         }
@@ -164,40 +217,59 @@ const ChatComponent = () => {
       const imageFile = Array.from(files).find((file) => file.type.startsWith('image/'));
       if (imageFile) {
         event.preventDefault();
-        handleImageMessage(imageFile);
+        processScreenshot(imageFile);
       }
     }
   };
 
-  const dropHandlers = useMemo(
-    () => ({
-      onDragOver: (e: React.DragEvent) => {
-        e.preventDefault();
-        setDragActive(true);
-      },
-      onDragLeave: () => setDragActive(false),
-      onDrop: (e: React.DragEvent) => {
-        e.preventDefault();
-        setDragActive(false);
-        handleFiles(e.dataTransfer.files);
-      },
-    }),
-    []
-  );
+  const dropHandlers = {
+    onDragOver: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragActive(true);
+    },
+    onDragLeave: () => setDragActive(false),
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragActive(false);
+      handleFiles(e.dataTransfer.files);
+    },
+  };
 
   const renderMessage = (message: MessageProps) => {
     if (message.type === 'image' && message.imageUrl) {
       return (
         <Box sx={{ position: 'relative' }}>
           <img src={message.imageUrl} alt="uploaded" className="image_bubble" />
-          {message.status === 'loading' && (
+          {message.status === 'processing' && (
             <Box className="image_status">
-              <Loader message="Extracting…" />
+              <Loader message="Processing…" />
             </Box>
           )}
           {message.status === 'error' && (
-            <Box className="image_status image_status-error">Upload failed</Box>
+            <Box className="image_status image_status-error">Processing failed</Box>
           )}
+        </Box>
+      );
+    }
+    if (message.type === 'status') {
+      const palette =
+        message.status === 'done'
+          ? { bg: 'rgba(14, 240, 157, 0.12)', color: '#0EF09D' }
+          : message.status === 'error'
+            ? { bg: 'rgba(255, 68, 68, 0.15)', color: '#FF7373' }
+            : { bg: 'rgba(255, 255, 255, 0.08)', color: intelayerColors.muted };
+      return (
+        <Box
+          sx={{
+            padding: '10px 14px',
+            borderRadius: '8px',
+            backgroundColor: palette.bg,
+            color: palette.color,
+          }}
+        >
+          <Typography variant="body2" sx={{ color: 'inherit' }}>
+            {message.content}
+          </Typography>
         </Box>
       );
     }

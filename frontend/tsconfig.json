@@ -19,6 +19,7 @@
       "@/pages/*": ["./src/pages/*"],
       "@/styles/*": ["./src/styles/*"],
       "@/types/*": ["./types/*"],
+      "@/server/*": ["./src/server/*"],
       "@/utils/*": ["./utils/*"],
       "@/services/*": ["./src/services/*"],
       "@/hooks/*": ["./src/hooks/*"],
