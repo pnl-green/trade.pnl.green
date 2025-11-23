@@ -12,6 +12,7 @@ import RiskManagerModal from '../Modals/riskManagerModal';
 import LeverageModal from '../Modals/leverageModal';
 import MarginTypeModal from '../Modals/marginTypeModal';
 import SegmentedControl from '../ui/SegmentedControl';
+import { useOrderTicketContext } from '@/context/orderTicketContext';
 
 // Interface to define the shape of the modals state
 interface optionsProps {
@@ -77,7 +78,7 @@ const orderTabOptions = [
 ];
 
 const OrderPlacementTerminal = () => {
-  const [activeTab, setActiveTab] = useState('Market'); // Track the active tab
+  const { activeTab, setActiveTab } = useOrderTicketContext();
   const [activeButton, setActiveButton] = useState<string | null>(null); // Track the active modal button
   // ------Modal Visibility states------
   const [modals, setModals] = useState<optionsProps>({

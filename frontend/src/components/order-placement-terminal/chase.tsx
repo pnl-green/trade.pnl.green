@@ -10,15 +10,16 @@ import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
 import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
+import { useOrderTicketContext } from '@/context/orderTicketContext';
 
 const ChaseOrderTerminal = () => {
   const { tokenPairs } = usePairTokensContext();
   const { webData2 } = useWebDataContext();
+  const { direction, setDirection } = useOrderTicketContext();
 
   const [radioValue, setRadioValue] = useState('');
   const [selectOrderType, setSelectOrderType] = useState('GTC');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
   const [size, setSize] = useState('');
   const [allowedBeforeMarketPurchase, setAllowedBeforeMarketPurchase] =
@@ -35,8 +36,7 @@ const ChaseOrderTerminal = () => {
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
-
-    setIsBuyOrSell(button);
+    setDirection(button as 'buy' | 'sell');
   };
 
   const handleRadioChange = (e: {
@@ -296,7 +296,7 @@ const ChaseOrderTerminal = () => {
           stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
           estLiqPrice={estLiqPrice}
           fee={fee}
-          isBuyOrSell={isBuyOrSell}
+          isBuyOrSell={direction}
         />
       )}
 
