@@ -1,60 +1,45 @@
-import React, { useMemo, useState } from 'react';
-import {
-  OrderBookContainer,
-  OrderBookTabs,
-  OrderBookTabsWrapper,
-  OrderBookTabsHighlight,
-} from '@/styles/orderbook.styles';
+import React, { useState } from 'react';
+import { OrderBookContainer } from '@/styles/orderbook.styles';
 import OrderBook from './orderBook';
 import Trades from './trades';
 import { usePairTokensContext } from '@/context/pairTokensContext';
-import { Box } from '@mui/material';
+import SegmentedControl from '../ui/SegmentedControl';
 
 const OrderBookAndTrades = () => {
   const [spread, setSpread] = useState(1);
   const { pair, setPair } = usePairTokensContext();
+  const [activeTab, setActiveTab] = useState('orderBook');
 
-  const tabs = useMemo(
-    () => [
-      { label: 'Order Book', value: 'orderbook' },
-      { label: 'Trades', value: 'trades' },
-    ],
-    []
-  );
-  const [activeTab, setActiveTab] = useState<string>(tabs[0].value);
+  const tabOptions = [
+    {
+      label: 'Order Book',
+      value: 'orderBook',
+      tooltip: 'View the current order book with bid and ask prices',
+    },
+    {
+      label: 'Recent Trades',
+      value: 'recentTrades',
+      tooltip: 'View recent trades executed on the exchange',
+    },
+  ];
 
   return (
     <OrderBookContainer>
-      <OrderBookTabsWrapper>
-        <OrderBookTabs>
-          {tabs.map((tab, index) => (
-            <Box
-              key={tab.value}
-              component="button"
-              onClick={() => setActiveTab(tab.value)}
-              data-active={activeTab === tab.value}
-            >
-              {tab.label}
-            </Box>
-          ))}
-          <OrderBookTabsHighlight
-            data-active={activeTab === 'trades' ? 'trades' : 'orderbook'}
-          />
-        </OrderBookTabs>
-      </OrderBookTabsWrapper>
-
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        {activeTab === 'orderbook' ? (
-          <OrderBook
-            spread={spread}
-            pair={pair as any}
-            setSpread={setSpread}
-            setPair={setPair}
-          />
-        ) : (
-          <Trades maxHeight="100%" />
-        )}
-      </Box>
+      <SegmentedControl
+        ariaLabel="Order book and trades"
+        options={tabOptions}
+        value={activeTab}
+        onChange={setActiveTab}
+      />
+      {activeTab === 'orderBook' && (
+        <OrderBook
+          spread={spread}
+          pair={pair as any}
+          setSpread={setSpread}
+          setPair={setPair}
+        />
+      )}
+      {activeTab === 'recentTrades' && <Trades maxHeight="100%" />}
     </OrderBookContainer>
   );
 };

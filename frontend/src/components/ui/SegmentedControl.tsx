@@ -20,13 +20,9 @@ interface SegmentedControlProps {
 const ControlRoot = styled('div')<{ centered?: boolean }>(({ centered }) => ({
   display: 'flex',
   gap: '8px',
-  width: '100%',
-  flexWrap: centered ? 'nowrap' : 'wrap',
+  width: centered ? 'auto' : '100%',
+  flexWrap: 'wrap',
   justifyContent: centered ? 'center' : 'flex-start',
-  '@media (max-width: 720px)': {
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-  },
 }));
 
 const ControlButton = styled('button')<{ centered?: boolean }>(({ centered }) => ({
@@ -40,8 +36,9 @@ const ControlButton = styled('button')<{ centered?: boolean }>(({ centered }) =>
   fontWeight: 500,
   cursor: 'pointer',
   transition: 'background-color 0.2s ease, color 0.2s ease, border 0.2s ease',
-  flex: centered ? '0 1 140px' : '1 1 auto',
+  flex: centered ? '0 1 auto' : '1 1 auto',
   textAlign: 'center',
+  minWidth: centered ? 'auto' : '0',
   '&[data-active="true"]': {
     backgroundColor: intelayerColors.green[600],
     color: '#04140B',
@@ -58,7 +55,7 @@ const SegmentedControl: React.FC<SegmentedControlProps> = ({
   value,
   onChange,
   ariaLabel,
-  centered,
+  centered = false,
 }) => {
   return (
     <ControlRoot role="tablist" aria-label={ariaLabel} centered={centered}>

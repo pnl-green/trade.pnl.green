@@ -24,9 +24,11 @@ import {
   unsubscribeFromStream,
 } from '@/components/TVChartContainer/streaming';
 import TerminalLayout, {
+  AssistantArea,
   BottomArea,
   ChartArea,
   OrderbookArea,
+  PortfolioArea,
   TicketArea,
 } from './layout/TerminalLayout';
 import Panel from './ui/Panel';
@@ -302,31 +304,34 @@ const PnlComponent = () => {
   return (
     <TerminalLayout topBar={<TokenPairInformation />}>
       <ChartArea>
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            minHeight: 0,
-            height: syncedHeight ? `${syncedHeight}px` : '100%',
-          }}
-        >
-          <Panel noPadding sx={{ flex: 1, minHeight: '100%' }}>{chartElement}</Panel>
-        </Box>
+        <Panel noPadding sx={{ flex: 1, height: '100%' }}>{chartElement}</Panel>
       </ChartArea>
       <OrderbookArea>
-        <Panel title="Order Book & Trades">
+        <Panel title="Order Book & Trades" sx={{ flex: 1, height: '100%' }}>
           <OrderBookAndTrades />
         </Panel>
       </OrderbookArea>
       <TicketArea>
-        <Box ref={orderTicketRef} sx={{ width: '100%' }}>
-          <Panel title="Risk Manager & Order Ticket" sx={{ flex: 1 }}>
-            <OrderPlacement />
-          </Panel>
-        </Box>
+        <Panel title="Risk Manager & Order Ticket" sx={{ flex: 1, height: '100%' }}>
+          <OrderPlacement />
+        </Panel>
+      </TicketArea>
+      <BottomArea>
+        <Panel title="Positions & History" sx={{ flex: 1, height: '100%' }}>
+          <PositionsOrdersHistory />
+        </Panel>
+      </BottomArea>
+      <AssistantArea>
+        <Panel title="Intelayer Assistant" sx={{ flex: 1, height: '100%' }}>
+          <ChatComponent />
+        </Panel>
+      </AssistantArea>
+      <PortfolioArea>
         <Panel
           title="Portfolio Snapshot"
           sx={{
+            flex: 1,
+            height: '100%',
             gap: '8px',
             '& span': { fontFamily: intelayerFonts.body, fontSize: '14px' },
           }}
@@ -354,15 +359,7 @@ const PnlComponent = () => {
             )
           )}
         </Panel>
-        <Panel title="Intelayer Assistant">
-          <ChatComponent />
-        </Panel>
-      </TicketArea>
-      <BottomArea>
-        <Panel title="Positions & History" sx={{ flex: 1 }}>
-          <PositionsOrdersHistory />
-        </Panel>
-      </BottomArea>
+      </PortfolioArea>
     </TerminalLayout>
   );
 };

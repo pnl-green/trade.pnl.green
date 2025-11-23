@@ -115,17 +115,19 @@ const OrderPlacementTerminal = () => {
 
   return (
     <RiskManagerWrapper id="order-placement-terminal">
-      <SegmentedControl
-        ariaLabel="Risk controls"
-        options={options.map(({ label, type, tooltip }) => ({
-          label,
-          value: type,
-          tooltip,
-        }))}
-        value={activeButton || ''}
-        onChange={(value) => toggleModal(value)}
-        centered
-      />
+      <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom: '8px' }}>
+        <SegmentedControl
+          ariaLabel="Risk controls"
+          centered
+          options={options.map(({ label, type, tooltip }) => ({
+            label,
+            value: type,
+            tooltip,
+          }))}
+          value={activeButton || ''}
+          onChange={(value) => toggleModal(value)}
+        />
+      </Box>
 
       {/* Render modals based on the modals state */}
       {modals.riskManager && (
