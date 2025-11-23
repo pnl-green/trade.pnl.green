@@ -1,15 +1,15 @@
 import React from 'react';
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { Paper, Table, TableBody, TableHead } from '@mui/material';
 import { useWebDataContext } from '@/context/webDataContext';
+import {
+  BodyCell,
+  BodyRow,
+  EmptyState,
+  HeaderCell,
+  HeaderRow,
+  StyledTableContainer,
+  TableShell,
+} from './tableElements';
 
 interface Column {
   id:
@@ -46,96 +46,49 @@ const PositionComponentTable = () => {
   const PositionsData = webData2.clearinghouseState?.assetPositions;
 
   return (
-    <Paper
-      sx={{
-        width: '100%',
-        overflow: 'hidden',
-        background: 'transparent',
-      }}
-    >
-      <TableContainer sx={{ maxHeight: 300, paddingBottom: '60px' }}>
+    <TableShell component={Paper}>
+      <StyledTableContainer>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
-            <TableRow>
+            <HeaderRow>
               {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  sx={{
-                    background: '#100e0e',
-                    color: 'white',
-                    padding: '10px',
-                    borderBottom: '2px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                >
+                <HeaderCell key={column.id} align={column.align}>
                   {column.label}
-                </TableCell>
+                </HeaderCell>
               ))}
-            </TableRow>
+            </HeaderRow>
           </TableHead>
           <TableBody>
             {loadingWebData2 ? (
-              <Box
-                sx={{
-                  color: '#fff',
-                  fontFamily: 'Sora',
-                  fontWeight: '400',
-                  fontSize: '13px',
-                  p: '10px',
-                }}
-              >
-                loading...
-              </Box>
-            ) : (!loadingWebData2 && webData2.length === 0) ||
-              PositionsData.length === 0 ? (
-              <Box
-                sx={{
-                  color: '#fff',
-                  fontFamily: 'Sora',
-                  fontWeight: '400',
-                  fontSize: '13px',
-                  p: '10px',
-                }}
-              >
-                No open position yet
-              </Box>
+              <EmptyState>loading...</EmptyState>
+            ) : (!loadingWebData2 && webData2.length === 0) || PositionsData.length === 0 ? (
+              <EmptyState>No open position yet</EmptyState>
             ) : !loadingWebData2 &&
               webData2?.length !== 0 &&
               PositionsData.length !== 0 ? (
               <>
                 {PositionsData?.map((row: any, index: any) => {
                   return (
-                    <TableRow
-                      key={index}
-                      sx={{
-                        td: {
-                          background: 'transparent',
-                          color: 'white',
-                          padding: '8px',
-                          border: 'none',
-                          textAlign: 'center',
-                        },
-                      }}
-                    >
-                      <TableCell>{row.position.coin}</TableCell>
-                      <TableCell>{row.position.szi}</TableCell>
-                      <TableCell>{row.position.positionValue}</TableCell>
-                      <TableCell>{row.position.entryPx}</TableCell>
-                      <TableCell>{row.position.entryPx}</TableCell>
-                      <TableCell>{row.position.unrealizedPnl}</TableCell>
-                      <TableCell>{row.position.liquidationPx}</TableCell>
-                      <TableCell>{row.position.marginUsed}</TableCell>
-                      <TableCell>{row.position.cumFunding.allTime}</TableCell>
-                      <TableCell>{'--'}</TableCell>
-                    </TableRow>
+                    <BodyRow key={index}>
+                      <BodyCell align="center">{row.position.coin}</BodyCell>
+                      <BodyCell align="center">{row.position.szi}</BodyCell>
+                      <BodyCell align="center">{row.position.positionValue}</BodyCell>
+                      <BodyCell align="center">{row.position.entryPx}</BodyCell>
+                      <BodyCell align="center">{row.position.entryPx}</BodyCell>
+                      <BodyCell align="center">{row.position.unrealizedPnl}</BodyCell>
+                      <BodyCell align="center">{row.position.liquidationPx}</BodyCell>
+                      <BodyCell align="center">{row.position.marginUsed}</BodyCell>
+                      <BodyCell align="center">{row.position.cumFunding.allTime}</BodyCell>
+                      <BodyCell align="center">{'--'}</BodyCell>
+                    </BodyRow>
                   );
                 })}
               </>
             ) : null}
           </TableBody>
         </Table>
-      </TableContainer>
-    </Paper>
+      </StyledTableContainer>
+    </TableShell>
   );
 };
 

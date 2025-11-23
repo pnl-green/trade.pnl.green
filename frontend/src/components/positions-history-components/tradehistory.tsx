@@ -1,16 +1,16 @@
 import React from 'react';
-import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { Paper, Table, TableBody, TableHead } from '@mui/material';
 import { useTradeHistoryContext } from '@/context/tradeHistoryContext';
 import { timestampToDateTime } from '@/utils/toHumanReadableTime';
+import {
+  BodyCell,
+  BodyRow,
+  EmptyState,
+  HeaderCell,
+  HeaderRow,
+  StyledTableContainer,
+  TableShell,
+} from './tableElements';
 
 interface Column {
   id:
@@ -42,91 +42,45 @@ const TradeHistoryComponentTable = () => {
   const { tradeHistoryData, loadingTradeHistoryData } =
     useTradeHistoryContext();
   return (
-    <Paper
-      sx={{
-        width: '100%',
-        overflow: 'hidden',
-        background: 'transparent',
-      }}
-    >
-      <TableContainer sx={{ maxHeight: 300, paddingBottom: '60px' }}>
+    <TableShell component={Paper}>
+      <StyledTableContainer>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
-            <TableRow>
+            <HeaderRow>
               {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  sx={{
-                    background: '#100e0e',
-                    color: 'white',
-                    padding: '10px',
-                    borderBottom: '2px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                >
+                <HeaderCell key={column.id} align={column.align}>
                   {column.label}
-                </TableCell>
+                </HeaderCell>
               ))}
-            </TableRow>
+            </HeaderRow>
           </TableHead>
           <TableBody>
             {loadingTradeHistoryData ? (
-              <Box
-                sx={{
-                  color: '#fff',
-                  fontFamily: 'Sora',
-                  fontWeight: '400',
-                  fontSize: '13px',
-                  p: '10px',
-                }}
-              >
-                loading...
-              </Box>
+              <EmptyState>loading...</EmptyState>
             ) : !loadingTradeHistoryData && tradeHistoryData.length === 0 ? (
-              <Box
-                sx={{
-                  color: '#fff',
-                  fontFamily: 'Sora',
-                  fontWeight: '400',
-                  fontSize: '13px',
-                  p: '10px',
-                }}
-              >
-                No open position yet
-              </Box>
+              <EmptyState>No open position yet</EmptyState>
             ) : !loadingTradeHistoryData && tradeHistoryData.length !== 0 ? (
               <>
                 {tradeHistoryData.fills.map((row: any, index: any) => {
                   return (
-                    <TableRow
-                      key={index}
-                      sx={{
-                        td: {
-                          background: 'transparent',
-                          color: 'white',
-                          padding: '8px',
-                          border: 'none',
-                          textAlign: 'center',
-                        },
-                      }}
-                    >
-                      <TableCell>{timestampToDateTime(row.time)}</TableCell>
-                      <TableCell>{row.coin}</TableCell>
-                      <TableCell>{row.dir}</TableCell>
-                      <TableCell>{row.px}</TableCell>
-                      <TableCell>{row.sz}</TableCell>
-                      <TableCell>{row.tradeValue ? '' : '- -'}</TableCell>
-                      <TableCell>{row.fee}</TableCell>
-                      <TableCell>{row.closedPnl}</TableCell>
-                    </TableRow>
+                    <BodyRow key={index}>
+                      <BodyCell align="center">{timestampToDateTime(row.time)}</BodyCell>
+                      <BodyCell align="center">{row.coin}</BodyCell>
+                      <BodyCell align="center">{row.dir}</BodyCell>
+                      <BodyCell align="center">{row.px}</BodyCell>
+                      <BodyCell align="center">{row.sz}</BodyCell>
+                      <BodyCell align="center">{row.tradeValue ? '' : '- -'}</BodyCell>
+                      <BodyCell align="center">{row.fee}</BodyCell>
+                      <BodyCell align="center">{row.closedPnl}</BodyCell>
+                    </BodyRow>
                   );
                 })}
               </>
             ) : null}
           </TableBody>
         </Table>
-      </TableContainer>
-    </Paper>
+      </StyledTableContainer>
+    </TableShell>
   );
 };
 

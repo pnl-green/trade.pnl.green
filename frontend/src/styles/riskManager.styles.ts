@@ -6,6 +6,7 @@ export const RiskManagerWrapper = styled(Box)(() => ({
   flexDirection: 'column',
   gap: '16px',
   width: '100%',
+  minWidth: '360px',
   minHeight: '680px',
   height: '100%',
   padding: '4px',

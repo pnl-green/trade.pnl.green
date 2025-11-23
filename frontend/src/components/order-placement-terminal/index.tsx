@@ -13,6 +13,7 @@ import LeverageModal from '../Modals/leverageModal';
 import MarginTypeModal from '../Modals/marginTypeModal';
 import SegmentedControl from '../ui/SegmentedControl';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
+import OrderTypeSelector from './OrderTypeSelector';
 
 // Interface to define the shape of the modals state
 interface optionsProps {
@@ -153,8 +154,7 @@ const OrderPlacementTerminal = () => {
         <MarginTypeModal onClose={() => closeModal('marginType')} />
       )}
 
-      <SegmentedControl
-        ariaLabel="Order ticket mode"
+      <OrderTypeSelector
         options={orderTabOptions}
         value={activeTab}
         onChange={handleTabChange}

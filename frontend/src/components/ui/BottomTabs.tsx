@@ -17,26 +17,51 @@ interface BottomTabsProps {
 
 const TabsRoot = styled('div')(() => ({
   display: 'flex',
-  gap: '8px',
-  paddingBottom: '8px',
+  alignItems: 'center',
+  gap: '12px',
+  padding: '0 2px 6px',
   borderBottom: `1px solid ${intelayerColors.panelBorder}`,
   overflowX: 'auto',
 }));
 
 const TabButton = styled('button')(() => ({
+  position: 'relative',
   background: 'transparent',
   border: 'none',
   color: intelayerColors.muted,
   fontFamily: intelayerFonts.body,
   fontSize: '13px',
-  fontWeight: 500,
-  padding: '6px 10px',
-  borderRadius: '8px',
+  fontWeight: 600,
+  padding: '10px 8px 12px',
+  borderRadius: '10px',
   cursor: 'pointer',
+  whiteSpace: 'nowrap',
   transition: 'background 0.2s ease, color 0.2s ease',
-  '&[data-active="true"]': {
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    left: '50%',
+    bottom: '4px',
+    width: '18px',
+    height: '2px',
+    borderRadius: '999px',
+    background: intelayerColors.green[500],
+    transform: 'translateX(-50%) scaleX(0)',
+    transition: 'transform 0.2s ease',
+  },
+  '&:hover': {
     color: intelayerColors.ink,
     backgroundColor: intelayerColors.gray[700],
+  },
+  '&[data-active="true"]': {
+    color: intelayerColors.ink,
+    '&::after': {
+      transform: 'translateX(-50%) scaleX(1)',
+    },
+  },
+  '&:focus-visible': {
+    outline: `2px solid ${intelayerColors.green[500]}`,
+    outlineOffset: '2px',
   },
 }));
 
