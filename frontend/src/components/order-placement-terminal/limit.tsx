@@ -17,6 +17,7 @@ import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { riskValues } from '@/utils/risk';
 import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
+import { useOrderTicketContext } from '@/context/orderTicketContext';
 
 const LimitComponent = () => {
   const { webData2 } = useWebDataContext();
@@ -29,45 +30,60 @@ const LimitComponent = () => {
   );
 
   //------Local State------
+  const {
+    direction,
+    setDirection,
+    tpSlEnabled,
+    setTpSlEnabled,
+    limitPrice,
+    setLimitPrice,
+    stopLoss,
+    setStopLoss,
+    takeProfits,
+    setTakeProfits,
+  } = useOrderTicketContext();
   const [selectOrderType, setSelectOrderType] = useState<
     'Gtc' | 'Ioc' | 'Alo' | 'FrontendMarket'
   >('Gtc');
   const [radioValue, setRadioValue] = useState('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
   const [riskSelectItem, setRiskSelectItem] = useState(`${riskValues[0]}`);
   const [size, setSize] = useState<number>(0.0);
   const [isLoading, setIsLoading] = useState(false);
-  const [limitPx, setLimitPx] = useState<number>(0.0);
   const [establishConnModal, setEstablishedConnModal] = useState(false);
   //Take Profit / Stop Loss
-  const [takeProfitPrice, setTakeProfitPrice] = useState('');
-  const [stopLossPrice, setStopLossPrice] = useState('');
   const [gain, setGain] = useState('');
   const [loss, setLoss] = useState('');
   const [risk, setRisk] = useState<number>(0.0);
   const [estLiqPrice, setEstLiquidationPrice] = useState('');
   const [fee, setFee] = useState('');
 
+  const takeProfitPrice = takeProfits[0] ?? '';
+
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   let szDecimals = tokenPairData[assetId]?.universe.szDecimals;
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
-    setIsBuyOrSell(button);
+    setDirection(button as 'buy' | 'sell');
   };
 
   const handleRadioChange = (e: {
     target: { value: React.SetStateAction<string> };
   }) => {
-    setRadioValue(e.target.value);
+    const value = e.target.value as string;
+    setRadioValue(value);
+    setTpSlEnabled(value === '2');
   };
 
   const handleRadioClick = (e: any) => {
     if (radioValue === e.target.value) {
       setRadioValue('');
+      setTpSlEnabled(false);
+      return;
     }
+    setTpSlEnabled(e.target.value === '2');
   };
 
   const handleRiskInput = (e: {
@@ -106,6 +122,14 @@ const LimitComponent = () => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
 
+  useEffect(() => {
+    if (tpSlEnabled) {
+      setRadioValue('2');
+    } else if (radioValue === '2') {
+      setRadioValue('');
+    }
+  }, [tpSlEnabled]);
+
   //setting the equivalent size in the selected token
   let TokenSize = getUsdSizeEquivalents({
     size: Number(size),
@@ -130,7 +154,7 @@ const LimitComponent = () => {
   const handlePlaceOrder = async () => {
     try {
       setIsLoading(true);
-      let isBuy = isBuyOrSell === 'buy';
+      let isBuy = direction === 'buy';
       let orderType: OrderType = {
         limit: {
           tif: selectOrderType,
@@ -142,7 +166,7 @@ const LimitComponent = () => {
       const { success, data, msg } = await hyperliquid.placeOrder({
         asset: Number(assetId),
         isBuy,
-        limitPx: parsePrice(Number(limitPx)),
+        limitPx: parsePrice(Number(limitPrice)),
         sz: parseSize(sz, szDecimals),
         orderType,
         reduceOnly,
@@ -248,8 +272,8 @@ const LimitComponent = () => {
         tooltip={orderTicketTooltips.price}
         placeholder="0"
         type="number"
-        value={limitPx.toString()}
-        onChange={(e: any) => setLimitPx(e.target.value)}
+        value={limitPrice?.toString() ?? ''}
+        onChange={(e: any) => setLimitPrice(e.target.value)}
         styles={{
           marginTop: '4px',
           gap: 0,
@@ -337,15 +361,15 @@ const LimitComponent = () => {
           }}
         >
           <FlexItems>
-            <RenderInput
-              label="TP Price"
-              placeholder="0"
-              value={takeProfitPrice}
-              onChange={(e: any) => setTakeProfitPrice(e.target.value)}
-              styles={{
-                gap: 0,
-                width: '49%',
-                '.placeholder_box': {
+          <RenderInput
+            label="TP Price"
+            placeholder="0"
+            value={takeProfitPrice}
+            onChange={(e: any) => setTakeProfits([e.target.value])}
+            styles={{
+              gap: 0,
+              width: '49%',
+              '.placeholder_box': {
                   fontSize: '12px',
                 },
                 input: { width: '30%', padding: '0' },
@@ -370,8 +394,8 @@ const LimitComponent = () => {
             <RenderInput
               label="SL Price"
               placeholder="0"
-              value={stopLossPrice}
-              onChange={(e: any) => setStopLossPrice(e.target.value)}
+              value={stopLoss}
+              onChange={(e: any) => setStopLoss(e.target.value)}
               styles={{
                 gap: 0,
                 width: '49%',
@@ -478,13 +502,13 @@ const LimitComponent = () => {
           onConfirm={handlePlaceOrder}
           isLimit={true}
           size={`${parseSize(sz, szDecimals)} ${tokenPairs[0]}`}
-          price={limitPx}
+          price={limitPrice}
           isTpSl={radioValue === '2' ? true : false}
-          takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
-          stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
+          takeProfitPrice={radioValue === '2' ? takeProfits[0] : undefined}
+          stopLossPrice={radioValue === '2' ? stopLoss : undefined}
           estLiqPrice={estLiqPrice}
           fee={fee}
-          isBuyOrSell={isBuyOrSell}
+          isBuyOrSell={direction}
           loading={isLoading}
           setLoading={setIsLoading}
         />

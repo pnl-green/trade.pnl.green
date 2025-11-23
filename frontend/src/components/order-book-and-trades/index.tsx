@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
-import { OrderBookContainer } from '@/styles/orderbook.styles';
+import React, { useMemo, useState } from 'react';
+import {
+  OrderBookContainer,
+  OrderBookTabs,
+  OrderBookTabsWrapper,
+  OrderBookTabsHighlight,
+} from '@/styles/orderbook.styles';
 import OrderBook from './orderBook';
 import Trades from './trades';
 import { usePairTokensContext } from '@/context/pairTokensContext';
@@ -9,19 +14,46 @@ const OrderBookAndTrades = () => {
   const [spread, setSpread] = useState(1);
   const { pair, setPair } = usePairTokensContext();
 
+  const tabs = useMemo(
+    () => [
+      { label: 'Order Book', value: 'orderbook' },
+      { label: 'Trades', value: 'trades' },
+    ],
+    []
+  );
+  const [activeTab, setActiveTab] = useState<string>(tabs[0].value);
+
   return (
     <OrderBookContainer>
-      <OrderBook
-        spread={spread}
-        pair={pair as any}
-        setSpread={setSpread}
-        setPair={setPair}
-      />
-      <Box sx={{ borderTop: `1px solid rgba(28, 38, 53, 0.8)`, paddingTop: '12px' }}>
-        <Box sx={{ fontSize: '13px', marginBottom: '8px', color: 'rgba(230, 241, 255, 0.7)' }}>
-          Recent Trades
-        </Box>
-        <Trades maxHeight="220px" />
+      <OrderBookTabsWrapper>
+        <OrderBookTabs>
+          {tabs.map((tab, index) => (
+            <Box
+              key={tab.value}
+              component="button"
+              onClick={() => setActiveTab(tab.value)}
+              data-active={activeTab === tab.value}
+            >
+              {tab.label}
+            </Box>
+          ))}
+          <OrderBookTabsHighlight
+            data-active={activeTab === 'trades' ? 'trades' : 'orderbook'}
+          />
+        </OrderBookTabs>
+      </OrderBookTabsWrapper>
+
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        {activeTab === 'orderbook' ? (
+          <OrderBook
+            spread={spread}
+            pair={pair as any}
+            setSpread={setSpread}
+            setPair={setPair}
+          />
+        ) : (
+          <Trades maxHeight="100%" />
+        )}
       </Box>
     </OrderBookContainer>
   );

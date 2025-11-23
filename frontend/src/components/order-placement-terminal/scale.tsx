@@ -12,18 +12,19 @@ import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
+import { useOrderTicketContext } from '@/context/orderTicketContext';
 
 const ScaleOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
   const { tokenPairs } = usePairTokensContext();
   const { establishedConnection, handleEstablishConnection } =
     useHyperLiquidContext();
+  const { direction, setDirection } = useOrderTicketContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [radioValue, setRadioValue] = useState('');
   const [selectOrderType, setSelectOrderType] = useState('GTC');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
   const [size, setSize] = useState('');
   const [allowedBeforeMarketPurchase, setAllowedBeforeMarketPurchase] =
@@ -47,8 +48,7 @@ const ScaleOrderTerminal = () => {
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
-
-    setIsBuyOrSell(button);
+    setDirection(button as 'buy' | 'sell');
   };
 
   const handleRadioChange = (e: {
@@ -366,7 +366,7 @@ const ScaleOrderTerminal = () => {
           noOfOrders={totalNoOfOrders}
           skew={sizeSkew}
           fee={fee}
-          isBuyOrSell={isBuyOrSell}
+          isBuyOrSell={direction}
           loading={isLoading}
           setLoading={setIsLoading}
         />

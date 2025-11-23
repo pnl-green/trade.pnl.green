@@ -1,55 +1,39 @@
+"use client";
+
 import { ChatBox, BtnWithIcon } from '@/styles/pnl.styles';
-import { Box, Button, useMediaQuery } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
+import { Box, Button, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Tooltip from './ui/Tooltip';
 import { intelayerColors } from '@/styles/theme';
+import DirectionToggle from './ui/DirectionToggle';
+import { useOrderTicketContext } from '@/context/orderTicketContext';
+import { askLLM } from '@/services/llmRouter';
+import { extractTradeLevelsFromImage } from '@/utils/ocr';
 
 interface MessageProps {
-  author: string;
-  message: string;
+  id: string;
+  role: 'user' | 'assistant';
+  type: 'text' | 'image' | 'extracted' | 'warning';
+  content: string;
+  imageUrl?: string;
+  extracted?: {
+    direction: 'long' | 'short';
+    entries: number[];
+    stopLoss: number;
+    takeProfits: number[];
+  };
+  model?: string;
 }
-
-const messagesData: MessageProps[] = [
-  {
-    author: 'receiver',
-    message: 'Hey, did you see the latest earnings report?',
-  },
-  {
-    author: 'receiver',
-    message: 'Yes, it looks promising. The stock might go up.',
-  },
-  {
-    author: 'receiver',
-    message: "I'm thinking of buying some shares today.",
-  },
-  {
-    author: 'receiver',
-    message: 'Good idea. The market seems bullish.',
-  },
-  {
-    author: 'sender',
-    message: "What's your take on the current market trends?",
-  },
-  {
-    author: 'receiver',
-    message: "I believe it's a good time to invest in tech stocks.",
-  },
-  {
-    author: 'receiver',
-    message: "I'm considering shorting this stock, what do you think?",
-  },
-  {
-    author: 'receiver',
-    message: 'Be careful, it might rebound unexpectedly.',
-  },
-];
 
 const ChatComponent = () => {
   const chatMessagesRef = useRef<HTMLElement | null>(null);
   const [inputMessage, setInputMessage] = useState('');
-  const [messages, setMessages] = useState<MessageProps[]>(messagesData);
-  const isCompact = useMediaQuery('(max-width:1200px)');
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [typing, setTyping] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const { direction, setDirection, applyAutofill } = useOrderTicketContext();
 
   const scrollToBottom = () => {
     if (chatMessagesRef.current) {
@@ -58,160 +42,239 @@ const ChatComponent = () => {
   };
 
   useEffect(() => {
-    // Scroll to bottom when a new message is received
     scrollToBottom();
-  }, [messages]); // Add dependency on messages state
+  }, [messages]);
 
-  useEffect(() => {
-    if (!isCompact) {
-      setDrawerOpen(true);
-    } else {
-      setDrawerOpen(false);
+  const addMessage = (message: MessageProps) => {
+    setMessages((prev) => [...prev, message]);
+  };
+
+  const sendPrompt = async (prompt: string) => {
+    setTyping(true);
+    const { message, model } = await askLLM({ prompt });
+    addMessage({
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      type: 'text',
+      content: message || 'No response',
+      model,
+    });
+    setTyping(false);
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim()) return;
+    const id = crypto.randomUUID();
+    addMessage({ id, role: 'user', type: 'text', content: inputMessage.trim() });
+    const prompt = inputMessage.trim();
+    setInputMessage('');
+    await sendPrompt(prompt);
+  };
+
+  const handleImageExtraction = async (file: File, previewUrl: string) => {
+    addMessage({
+      id: crypto.randomUUID(),
+      role: 'user',
+      type: 'image',
+      content: 'Chart uploaded',
+      imageUrl: previewUrl,
+    });
+
+    setTyping(true);
+    try {
+      const extracted = await extractTradeLevelsFromImage(file);
+      const directionFromImage = extracted.direction === 'long' ? 'buy' : 'sell';
+      setDirection(directionFromImage);
+      applyAutofill({
+        limitPrice: extracted.entries[0]?.toString() || '',
+        stopLoss: extracted.stopLoss ? extracted.stopLoss.toString() : '',
+        takeProfits: extracted.takeProfits.map((tp) => tp.toString()),
+        direction: directionFromImage,
+        tpSlEnabled: true,
+        switchToLimit: true,
+      });
+
+      addMessage({
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        type: 'extracted',
+        content: 'Extracted trade levels',
+        extracted,
+      });
+
+      await sendPrompt(
+        `Analyze this chart and summarize the trade setup. Direction: ${extracted.direction}. Entry: ${extracted.entries.join(
+          ', '
+        )}. Stop: ${extracted.stopLoss}. Targets: ${extracted.takeProfits.join(', ')}`
+      );
+    } catch (error) {
+      console.error(error);
+      addMessage({
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        type: 'warning',
+        content: 'Unable to read the chart. Please upload a clearer screenshot.',
+      });
     }
-  }, [isCompact]);
+    setTyping(false);
+  };
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim() !== '') {
-      // Check if input message is not empty
-      const newMessage = { author: 'sender', message: inputMessage.trim() };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setInputMessage(''); // Clear input field after sending message
+  const handleImageMessage = async (file: File) => {
+    const previewUrl = URL.createObjectURL(file);
+    await handleImageExtraction(file, previewUrl);
+  };
+
+  const handleFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const imageFile = Array.from(files).find((file) => file.type.startsWith('image/'));
+    if (imageFile) {
+      handleImageMessage(imageFile);
+    }
+  };
+
+  const handlePaste = (event: ClipboardEvent) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) {
+          event.preventDefault();
+          handleImageMessage(file);
+          break;
+        }
+      }
     }
   };
 
   useEffect(() => {
-    const handleEnterPress = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        handleSendMessage();
-      }
-    };
-    window.addEventListener('keydown', handleEnterPress);
+    const listener = (e: ClipboardEvent) => handlePaste(e);
+    window.addEventListener('paste', listener);
+    return () => window.removeEventListener('paste', listener);
+  }, []);
 
-    return () => {
-      window.removeEventListener('keydown', handleEnterPress);
-    };
-  }, [inputMessage]);
+  const dropHandlers = useMemo(
+    () => ({
+      onDragOver: (e: React.DragEvent) => {
+        e.preventDefault();
+        setDragActive(true);
+      },
+      onDragLeave: () => setDragActive(false),
+      onDrop: (e: React.DragEvent) => {
+        e.preventDefault();
+        setDragActive(false);
+        handleFiles(e.dataTransfer.files);
+      },
+    }),
+    []
+  );
 
-  const chatBody = (
-    <ChatBox>
+  const renderMessage = (message: MessageProps) => {
+    if (message.type === 'image' && message.imageUrl) {
+      return <img src={message.imageUrl} alt="uploaded" className="image_bubble" />;
+    }
+    if (message.type === 'extracted' && message.extracted) {
+      return (
+        <Box className="extracted_card">
+          <Typography variant="body2" color={intelayerColors.muted}>
+            Parsed levels
+          </Typography>
+          <Box className="extracted_row">
+            <span>Direction</span>
+            <span className={message.extracted.direction === 'long' ? 'pill pill-long' : 'pill pill-short'}>
+              {message.extracted.direction.toUpperCase()}
+            </span>
+          </Box>
+          <Box className="extracted_row">
+            <span>Entry</span>
+            <span>{message.extracted.entries.join(', ') || '—'}</span>
+          </Box>
+          <Box className="extracted_row">
+            <span>Stop</span>
+            <span>{message.extracted.stopLoss || '—'}</span>
+          </Box>
+          <Box className="extracted_row">
+            <span>Targets</span>
+            <span>{message.extracted.takeProfits.join(', ') || '—'}</span>
+          </Box>
+        </Box>
+      );
+    }
+    if (message.type === 'warning') {
+      return <Box className="warning_bubble">{message.content}</Box>;
+    }
+    return (
+      <Box>
+        <Typography variant="body2" color={intelayerColors.ink}>
+          {message.content}
+        </Typography>
+        {message.model && (
+          <Typography variant="caption" color={intelayerColors.muted}>
+            Responded with {message.model}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  return (
+    <ChatBox {...dropHandlers} className={dragActive ? 'drag-active' : ''}>
       <Box className="header_nav">
-        <Tooltip content="New Chat connects you to Intelayer's assistant. Ask strategy questions or generate order instructions in plain language.">
-          <header>New Chat</header>
+        <Tooltip content="Route prompts to the best model and sync direction with the ticket.">
+          <header>Intelayer Assistant</header>
         </Tooltip>
-        <Tooltip content="New Chat connects you to Intelayer's assistant. Ask strategy questions or generate order instructions in plain language.">
-          <BtnWithIcon
-            onClick={() => {
-              if (isCompact) {
-                setDrawerOpen(false);
-              }
-            }}
-            aria-label="Start new chat"
-          >
-            <img src="/newChatIcon.svg" alt="new chat" />
+        <Box sx={{ flex: 1, maxWidth: '260px' }}>
+          <DirectionToggle value={direction} onChange={setDirection} />
+        </Box>
+        <Tooltip content="Upload or paste a chart screenshot to auto-fill the ticket.">
+          <BtnWithIcon onClick={() => fileInputRef.current?.click()} aria-label="Upload chart">
+            <img src="/uploadIcon.svg" alt="upload" />
           </BtnWithIcon>
         </Tooltip>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={(e) => handleFiles(e.target.files)}
+        />
       </Box>
       <Box className="chat_room">
         <Box className="chat_messages" ref={chatMessagesRef}>
-          {messages.map((message, index: number) => (
-            <Box
-              key={index}
-              className={
-                message.author === 'sender' ? 'send_bubble' : 'received_bubble'
-              }
-            >
-              {message.message}
+          {messages.map((message) => (
+            <Box key={message.id} className={message.role === 'user' ? 'send_bubble' : 'received_bubble'}>
+              {renderMessage(message)}
             </Box>
           ))}
+          {typing && <Box className="typing">Thinking…</Box>}
         </Box>
 
-        <Tooltip content="Type your question or trading instruction here. You can paste setups and ask the assistant to translate them into orders.">
-          <Box className="chat_input">
-            <input
-              type="text"
-              placeholder="Type here"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-            />
+        <Box className="chat_input">
+          <input
+            type="text"
+            placeholder="Type, paste, or drop a chart"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSendMessage();
+            }}
+          />
+          <Box sx={{ display: 'flex', gap: '6px' }}>
+            <Button
+              variant="text"
+              onClick={() => fileInputRef.current?.click()}
+              sx={{ color: intelayerColors.muted, textTransform: 'none' }}
+            >
+              Attach
+            </Button>
             <BtnWithIcon onClick={handleSendMessage} aria-label="Send message">
               <img src="/sendIcon.svg" alt="send" />
             </BtnWithIcon>
           </Box>
-        </Tooltip>
+        </Box>
       </Box>
     </ChatBox>
   );
-
-  if (isCompact) {
-    return (
-      <>
-        {!drawerOpen && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              alignItems: 'flex-start',
-            }}
-          >
-            <Box sx={{ color: intelayerColors.muted, fontSize: '14px' }}>
-              Need Intelayer's AI? Open the assistant to chat.
-            </Box>
-            <Button
-              variant="contained"
-              onClick={() => setDrawerOpen(true)}
-              sx={{
-                textTransform: 'none',
-                backgroundColor: intelayerColors.green[600],
-                '&:hover': { backgroundColor: intelayerColors.green[500] },
-              }}
-            >
-              Launch Assistant
-            </Button>
-          </Box>
-        )}
-
-        {drawerOpen && (
-          <Box
-            sx={{
-              position: 'fixed',
-              inset: 0,
-              backgroundColor: 'rgba(2, 4, 8, 0.7)',
-              zIndex: 30,
-              display: 'flex',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <Box
-              sx={{
-                width: 'min(420px, 90vw)',
-                height: '100%',
-                backgroundColor: intelayerColors.surface,
-                borderLeft: `1px solid ${intelayerColors.panelBorder}`,
-                padding: '24px',
-                overflow: 'hidden',
-              }}
-            >
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                <Button
-                  onClick={() => setDrawerOpen(false)}
-                  sx={{
-                    color: intelayerColors.muted,
-                    textTransform: 'none',
-                  }}
-                >
-                  Close
-                </Button>
-              </Box>
-              {chatBody}
-            </Box>
-          </Box>
-        )}
-      </>
-    );
-  }
-
-  return chatBody;
 };
 
 export default ChatComponent;

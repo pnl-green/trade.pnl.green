@@ -13,6 +13,7 @@ import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
+import { useOrderTicketContext } from '@/context/orderTicketContext';
 
 const TwapOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
@@ -26,7 +27,7 @@ const TwapOrderTerminal = () => {
   const [radioValue, setRadioValue] = useState('');
 
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [isBuyOrSell, setIsBuyOrSell] = useState(''); //buy | sell
+  const { direction, setDirection } = useOrderTicketContext();
   const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
   const [size, setSize] = useState('');
 
@@ -44,7 +45,7 @@ const TwapOrderTerminal = () => {
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
-    setIsBuyOrSell(button);
+    setDirection(button as 'buy' | 'sell');
   };
 
   const handleRadioChange = (e: {
@@ -326,7 +327,7 @@ const TwapOrderTerminal = () => {
           stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
           estLiqPrice={estLiqPrice}
           fee={fee}
-          isBuyOrSell={isBuyOrSell}
+          isBuyOrSell={direction}
           loading={isLoading}
           setLoading={setIsLoading}
         />
