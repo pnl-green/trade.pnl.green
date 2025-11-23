@@ -11,8 +11,8 @@ import { Arbitrum, ArbitrumSepolia } from '@thirdweb-dev/chains';
 import { NextPage } from 'next';
 import type { AppProps } from 'next/app';
 import { ReactElement, ReactNode, useEffect, useState } from 'react';
-import NoSSR from 'react-no-ssr';
 import { Toaster } from 'react-hot-toast';
+import NoSSR from 'react-no-ssr';
 import ContextProviders from '../context';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 

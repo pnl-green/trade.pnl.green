@@ -41,7 +41,9 @@ jobs:
           username: ${{ secrets.EC2_SERVER_USERNAME }}
           key: ${{ secrets.EC2_SERVER_KEY }}
           source: backend/backend.tar.gz
-          target: ${{ secrets.EC2_BACKEND_TARGET }}
+          target: /home/ubuntu/deploy/backend
+          strip_components: 0
+          debug: true
 
       - name: Restart backend
         uses: appleboy/ssh-action@master
