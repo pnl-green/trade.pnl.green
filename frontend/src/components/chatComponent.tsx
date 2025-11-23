@@ -19,7 +19,7 @@ interface MessageProps {
   extracted?: {
     direction: 'long' | 'short';
     entries: number[];
-    stopLoss: number;
+    stopLoss: number | null;
     takeProfits: number[];
   };
   model?: string;
@@ -86,7 +86,7 @@ const ChatComponent = () => {
       setDirection(directionFromImage);
       applyAutofill({
         limitPrice: extracted.entries[0]?.toString() || '',
-        stopLoss: extracted.stopLoss ? extracted.stopLoss.toString() : '',
+        stopLoss: extracted.stopLoss != null ? extracted.stopLoss.toString() : '',
         takeProfits: extracted.takeProfits.map((tp) => tp.toString()),
         direction: directionFromImage,
         tpSlEnabled: true,
@@ -219,7 +219,7 @@ const ChatComponent = () => {
           </Box>
           <Box className="extracted_row">
             <span>Stop</span>
-            <span>{message.extracted.stopLoss || '—'}</span>
+            <span>{message.extracted.stopLoss ?? '—'}</span>
           </Box>
           <Box className="extracted_row">
             <span>Targets</span>
