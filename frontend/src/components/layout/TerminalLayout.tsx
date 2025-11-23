@@ -75,7 +75,7 @@ const AreaWrapper = styled('div')(() => ({
 }));
 
 const TopRowWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={50} minSize={30}>
+  <Panel defaultSize={85} minSize={50}>
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', minHeight: 0 }}>
       {children}
     </div>
@@ -83,7 +83,7 @@ const TopRowWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 );
 
 const BottomRowWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={50} minSize={30}>
+  <Panel defaultSize={15} minSize={10}>
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', minHeight: 0 }}>
       {children}
     </div>
