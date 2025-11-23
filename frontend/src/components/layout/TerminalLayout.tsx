@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { Box, styled } from '@mui/material';
 import React from 'react';
@@ -8,34 +8,25 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 const TerminalRoot = styled(Box)(() => ({
   backgroundColor: intelayerColors.page,
   width: '100%',
-  height: 'calc(100vh - 120px)',
+  minHeight: 'calc(100vh - 120px)',
   padding: '24px clamp(16px, 3vw, 32px) 32px',
   display: 'flex',
   flexDirection: 'column',
   gap: '16px',
-  overflow: 'auto',
+  overflow: 'hidden',
 }));
 
-const TerminalContainer = styled(PanelGroup)(() => ({
-  display: 'flex',
-  flexDirection: 'column',
+const TopSection = styled('div')(() => ({
   width: '100%',
-  flex: 1,
-  minHeight: 0,
+  height: 'calc(100vh - 140px)',
+  minHeight: 'calc(100vh - 140px)',
+  display: 'flex',
 }));
 
-const TopRow = styled(PanelGroup)(() => ({
-  display: 'flex',
-  flexDirection: 'row',
+const BottomSection = styled('div')(() => ({
   width: '100%',
-  height: '100%',
-}));
-
-const BottomRow = styled(PanelGroup)(() => ({
+  minHeight: '60vh',
   display: 'flex',
-  flexDirection: 'row',
-  width: '100%',
-  height: '100%',
 }));
 
 const ResizeHandle = styled(PanelResizeHandle)(() => ({
@@ -75,54 +66,43 @@ const AreaWrapper = styled('div')(() => ({
   width: '100%',
 }));
 
-const TopRowWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={85} minSize={50}>
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', minHeight: 0 }}>
-      {children}
-    </div>
-  </Panel>
-);
-
-const BottomRowWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={15} minSize={10}>
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', minHeight: 0 }}>
-      {children}
-    </div>
-  </Panel>
-);
+const createPanel = (defaultSize: number, minSize: number) => ({
+  defaultSize,
+  minSize,
+});
 
 export const ChartArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={52} minSize={25}>
+  <Panel {...createPanel(52, 25)}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const OrderbookArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={24} minSize={15}>
+  <Panel {...createPanel(24, 15)}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const TicketArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={24} minSize={15}>
+  <Panel {...createPanel(24, 15)}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const BottomArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={50} minSize={20}>
+  <Panel {...createPanel(50, 20)}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const AssistantArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={30} minSize={15}>
+  <Panel {...createPanel(30, 15)}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
 
 export const PortfolioArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Panel defaultSize={20} minSize={10}>
+  <Panel {...createPanel(20, 10)}>
     <AreaWrapper>{children}</AreaWrapper>
   </Panel>
 );
@@ -140,29 +120,26 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({ topBar, children }) => 
   return (
     <TerminalRoot>
       <Box sx={{ width: '100%' }}>{topBar}</Box>
-      <TerminalContainer direction="vertical">
-        <TopRowWrapper>
-          <TopRow direction="horizontal">
-            {topRowChildren.map((child, index) => (
-              <React.Fragment key={index}>
-                {child}
-                {index < topRowChildren.length - 1 && <ResizeHandle />}
-              </React.Fragment>
-            ))}
-          </TopRow>
-        </TopRowWrapper>
-        <VerticalResizeHandle />
-        <BottomRowWrapper>
-          <BottomRow direction="horizontal">
-            {bottomRowChildren.map((child, index) => (
-              <React.Fragment key={index}>
-                {child}
-                {index < bottomRowChildren.length - 1 && <ResizeHandle />}
-              </React.Fragment>
-            ))}
-          </BottomRow>
-        </BottomRowWrapper>
-      </TerminalContainer>
+      <TopSection>
+        <PanelGroup direction="horizontal">
+          {topRowChildren.map((child, index) => (
+            <React.Fragment key={index}>
+              {child}
+              {index < topRowChildren.length - 1 && <ResizeHandle />}
+            </React.Fragment>
+          ))}
+        </PanelGroup>
+      </TopSection>
+      <BottomSection>
+        <PanelGroup direction="horizontal">
+          {bottomRowChildren.map((child, index) => (
+            <React.Fragment key={index}>
+              {child}
+              {index < bottomRowChildren.length - 1 && <ResizeHandle />}
+            </React.Fragment>
+          ))}
+        </PanelGroup>
+      </BottomSection>
     </TerminalRoot>
   );
 };
