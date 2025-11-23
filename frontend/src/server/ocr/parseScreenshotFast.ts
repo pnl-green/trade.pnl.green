@@ -20,9 +20,9 @@ interface Segment {
 }
 
 const RIGHT_COLUMN_RATIO = 0.25;
-const SAMPLE_STEP_X = 2;
-const MIN_ROW_RATIO = 0.35;
-const MIN_SEGMENT_HEIGHT = 16;
+const SAMPLE_STEP_X = 1;
+const MIN_ROW_RATIO = 0.2;
+const MIN_SEGMENT_HEIGHT = 12;
 const GAP_TOLERANCE = 2;
 const PAD_X = 8;
 const PAD_Y = 6;
@@ -60,23 +60,27 @@ function rgbToHsl(r: number, g: number, b: number) {
 }
 
 function classifyColor(r: number, g: number, b: number): RegionKind | null {
-  const { h, s, l } = rgbToHsl(r, g, b);
+  const brightness = (r + g + b) / 3;
+  if (brightness < 45) return null;
 
-  if (l < 0.18) {
-    return null;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const spread = max - min;
+  const avg = brightness;
+
+  const greenScore = g - (r + b) / 2;
+  if (greenScore > 20 && g > 90 && spread > 15) {
+    return 'tp';
   }
 
-  if (s < 0.18 && l >= 0.25 && l <= 0.8) {
+  const redScore = r - (g + b) / 2;
+  if (redScore > 18 && r > 90 && spread > 15) {
+    return 'sl';
+  }
+
+  const neutralSpread = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(b - r));
+  if (neutralSpread < 22 && avg >= 70 && avg <= 210) {
     return 'entry';
-  }
-
-  if (s > 0.25) {
-    if (h >= 85 && h <= 155 && l <= 0.8) {
-      return 'tp';
-    }
-    if ((h >= 0 && h <= 25) || h >= 330) {
-      return 'sl';
-    }
   }
 
   return null;
@@ -191,7 +195,8 @@ async function cropSegment(image: Jimp, segment: Segment, startX: number): Promi
 }
 
 async function ocrNumber(crop: Jimp): Promise<number | null> {
-  const buffer = await crop.getBufferAsync(Jimp.MIME_PNG);
+  const processed = crop.clone().greyscale().contrast(0.5).normalize().brightness(0.1);
+  const buffer = await processed.getBufferAsync(Jimp.MIME_PNG);
   const { data } = await Tesseract.recognize(buffer, 'eng', {
     tessedit_pageseg_mode: Tesseract.PSM.SINGLE_LINE,
     tessedit_char_whitelist: '0123456789.',
@@ -236,9 +241,15 @@ export async function parseScreenshotFast(buffer: Buffer): Promise<ParsedLevels>
     throw new Error('No trade annotations detected in screenshot.');
   }
 
-  const entrySegment = pickSegment(segments, 'entry')[0];
-  const slSegment = pickSegment(segments, 'sl')[0];
-  const tpSegments = pickSegment(segments, 'tp', 3);
+  const ranked = [...segments].sort((a, b) => b.score - a.score);
+  const entrySegment = pickSegment(segments, 'entry')[0] ?? ranked[0];
+  const slSegment = pickSegment(segments, 'sl')[0] ?? ranked.find((seg) => seg !== entrySegment);
+  let tpSegments = pickSegment(segments, 'tp', 3);
+  if (!tpSegments.length) {
+    tpSegments = ranked
+      .filter((seg) => seg !== entrySegment && seg !== slSegment)
+      .slice(0, 3);
+  }
 
   if (!entrySegment || !slSegment || !tpSegments.length) {
     throw new Error('Unable to locate entry/stop/targets in screenshot.');
