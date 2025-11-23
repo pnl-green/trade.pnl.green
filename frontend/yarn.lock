@@ -2162,11 +2162,6 @@
   resolved "https://registry.npmjs.org/@tanstack/virtual-core/-/virtual-core-3.2.1.tgz"
   integrity sha512-nO0d4vRzsmpBQCJYyClNHPPoUMI4nXNfrm6IcCRL33ncWMoNVpURh9YebEHPw8KrtsP2VSJIHE4gf4XFGk1OGg==
 
-"@techstark/opencv-js@^4.10.0-release.0":
-  version "4.10.0-release.1"
-  resolved "https://registry.npmjs.org/@techstark/opencv-js/-/opencv-js-4.10.0-release.1.tgz"
-  integrity sha512-S4XELidRiQeA0q1s9VQLo540wCxUo24r1O4C+LqZ6llX+sPCXvZCPv3Ice8dEIr0uavyZ8YZeKXSBdDgMXSXjw==
-
 "@thirdweb-dev/auth@4.1.60":
   version "4.1.60"
   resolved "https://registry.npmjs.org/@thirdweb-dev/auth/-/auth-4.1.60.tgz"

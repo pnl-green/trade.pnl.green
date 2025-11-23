@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import formidable, { type Fields, type Files, type File } from 'formidable';
 import fs from 'fs/promises';
-import { parseTradeScreenshot } from '@/server/ocr/parseTradeScreenshot';
+import { parseScreenshotFast } from '@/server/ocr/parseScreenshotFast';
 import type { ParsedLevels } from '@/types/tradeLevels';
 
 type ErrorResponse = { error: string };
@@ -77,7 +77,7 @@ export default async function handler(
     }
 
     const buffer = await readFileBuffer(file);
-    const result = await withTimeout(parseTradeScreenshot(buffer), 4000);
+    const result = await withTimeout(parseScreenshotFast(buffer), 4000);
     return res.status(200).json(result);
   } catch (error) {
     if ((error as Error).message === 'OCR_TIMEOUT') {

@@ -22,13 +22,13 @@
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.15",
     "@mui/material": "^5.15.15",
-    "@techstark/opencv-js": "^4.10.0-release.0",
     "@thirdweb-dev/react": "^4.6.1",
     "@ygoe/msgpack": "^1.0.3",
-    "jimp": "^0.22.10",
     "axios": "^1.6.8",
     "big.js": "^6.2.1",
     "ethers": "^5.7.2",
+    "formidable": "^3.5.4",
+    "jimp": "^0.22.10",
     "next": "^14.2.5",
     "next-compose-plugins": "^2.2.1",
     "next-transpile-modules": "^10.0.1",
@@ -39,14 +39,13 @@
     "react-no-ssr": "^1.1.0",
     "react-resizable-panels": "^2.1.9",
     "react-tradingview-embed": "^3.0.6",
-    "tesseract.js": "^5.1.1",
-    "formidable": "^3.5.4"
+    "tesseract.js": "^5.1.1"
   },
   "devDependencies": {
+    "@types/formidable": "^3.4.5",
     "@types/node": "^22.0.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@types/formidable": "^3.4.5",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.1",
     "typescript": "^5.5.4"
