@@ -100,7 +100,9 @@ jobs:
           username: ${{ secrets.EC2_SERVER_USERNAME }}
           key: ${{ secrets.EC2_SERVER_KEY }}
           source: frontend/frontend.tar.gz
-          target: ${{ secrets.EC2_FRONTEND_TARGET }}
+          target: /home/ubuntu/deploy/frontend
+          strip_components: 0
+          debug: true
 
       - name: Restart frontend
         uses: appleboy/ssh-action@master
