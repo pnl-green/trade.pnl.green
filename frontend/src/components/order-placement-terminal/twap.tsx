@@ -14,6 +14,7 @@ import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
+import DirectionSelector from './DirectionSelector';
 
 const TwapOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
@@ -79,6 +80,7 @@ const TwapOrderTerminal = () => {
         height: radioValue === '2' ? 'calc(100% + 20px)' : '100%',
       }}
     >
+      <DirectionSelector />
       <Box
         sx={{
           display: 'flex',

@@ -24,6 +24,7 @@ import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
 import { riskValues } from '@/utils/risk';
 import Tooltip from '../ui/Tooltip';
+import DirectionSelector from './DirectionSelector';
 import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 
@@ -328,6 +329,7 @@ const MarketComponent = () => {
         height: radioValue === '2' ? 'calc(100% + 85px)' : '100%',
       }}
     >
+      <DirectionSelector />
       <Box
         sx={{
           display: 'flex',

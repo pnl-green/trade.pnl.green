@@ -5,7 +5,6 @@ import { Box, Button, Typography } from '@mui/material';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Tooltip from './ui/Tooltip';
 import { intelayerColors } from '@/styles/theme';
-import DirectionToggle from './ui/DirectionToggle';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import { askLLM } from '@/services/llmRouter';
 import { extractTradeLevelsFromImage } from '@/utils/ocr';
@@ -23,6 +22,7 @@ interface MessageProps {
     takeProfits: number[];
   };
   model?: string;
+  status?: 'loading' | 'done' | 'error';
 }
 
 const ChatComponent = () => {
@@ -33,7 +33,7 @@ const ChatComponent = () => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { direction, setDirection, applyAutofill } = useOrderTicketContext();
+  const { setDirection, applyAutofill } = useOrderTicketContext();
 
   const scrollToBottom = () => {
     if (chatMessagesRef.current) {
@@ -47,6 +47,12 @@ const ChatComponent = () => {
 
   const addMessage = (message: MessageProps) => {
     setMessages((prev) => [...prev, message]);
+  };
+
+  const updateMessage = (id: string, updater: Partial<MessageProps>) => {
+    setMessages((prev) =>
+      prev.map((message) => (message.id === id ? { ...message, ...updater } : message))
+    );
   };
 
   const sendPrompt = async (prompt: string) => {
@@ -71,15 +77,7 @@ const ChatComponent = () => {
     await sendPrompt(prompt);
   };
 
-  const handleImageExtraction = async (file: File, previewUrl: string) => {
-    addMessage({
-      id: crypto.randomUUID(),
-      role: 'user',
-      type: 'image',
-      content: 'Chart uploaded',
-      imageUrl: previewUrl,
-    });
-
+  const handleImageExtraction = async (file: File, previewUrl: string, messageId: string) => {
     setTyping(true);
     try {
       const extracted = await extractTradeLevelsFromImage(file);
@@ -94,6 +92,7 @@ const ChatComponent = () => {
         switchToLimit: true,
       });
 
+      updateMessage(messageId, { status: 'done' });
       addMessage({
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -109,6 +108,7 @@ const ChatComponent = () => {
       );
     } catch (error) {
       console.error(error);
+      updateMessage(messageId, { status: 'error', content: 'Upload failed' });
       addMessage({
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -121,7 +121,16 @@ const ChatComponent = () => {
 
   const handleImageMessage = async (file: File) => {
     const previewUrl = URL.createObjectURL(file);
-    await handleImageExtraction(file, previewUrl);
+    const uploadId = crypto.randomUUID();
+    addMessage({
+      id: uploadId,
+      role: 'user',
+      type: 'image',
+      content: 'Chart uploaded',
+      imageUrl: previewUrl,
+      status: 'loading',
+    });
+    await handleImageExtraction(file, previewUrl, uploadId);
   };
 
   const handleFiles = (files: FileList | null) => {
@@ -132,7 +141,7 @@ const ChatComponent = () => {
     }
   };
 
-  const handlePaste = (event: ClipboardEvent) => {
+  const handlePasteIntoInput = (event: React.ClipboardEvent<HTMLInputElement>) => {
     const items = event.clipboardData?.items;
     if (!items) return;
     for (const item of items) {
@@ -141,17 +150,11 @@ const ChatComponent = () => {
         if (file) {
           event.preventDefault();
           handleImageMessage(file);
-          break;
+          return;
         }
       }
     }
   };
-
-  useEffect(() => {
-    const listener = (e: ClipboardEvent) => handlePaste(e);
-    window.addEventListener('paste', listener);
-    return () => window.removeEventListener('paste', listener);
-  }, []);
 
   const dropHandlers = useMemo(
     () => ({
@@ -171,7 +174,43 @@ const ChatComponent = () => {
 
   const renderMessage = (message: MessageProps) => {
     if (message.type === 'image' && message.imageUrl) {
-      return <img src={message.imageUrl} alt="uploaded" className="image_bubble" />;
+      return (
+        <Box sx={{ position: 'relative' }}>
+          <img src={message.imageUrl} alt="uploaded" className="image_bubble" />
+          {message.status === 'loading' && (
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: '8px',
+                right: '8px',
+                background: 'rgba(0,0,0,0.7)',
+                color: '#fff',
+                borderRadius: '12px',
+                padding: '2px 8px',
+                fontSize: '12px',
+              }}
+            >
+              Extracting…
+            </Box>
+          )}
+          {message.status === 'error' && (
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: '8px',
+                right: '8px',
+                background: 'rgba(214,65,65,0.85)',
+                color: '#fff',
+                borderRadius: '12px',
+                padding: '2px 8px',
+                fontSize: '12px',
+              }}
+            >
+              Upload failed
+            </Box>
+          )}
+        </Box>
+      );
     }
     if (message.type === 'extracted' && message.extracted) {
       return (
@@ -255,6 +294,7 @@ const ChatComponent = () => {
             placeholder="Type, paste, or drop a chart"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
+            onPaste={handlePasteIntoInput}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSendMessage();
             }}

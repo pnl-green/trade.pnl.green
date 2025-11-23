@@ -18,6 +18,7 @@ import { riskValues } from '@/utils/risk';
 import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
+import DirectionSelector from './DirectionSelector';
 
 const LimitComponent = () => {
   const { webData2 } = useWebDataContext();
@@ -222,6 +223,7 @@ const LimitComponent = () => {
         height: radioValue === '2' ? 'calc(100% + 85px)' : '100%',
       }}
     >
+      <DirectionSelector />
       <Box
         sx={{
           display: 'flex',
