@@ -48,7 +48,6 @@ jobs:
       - name: Restart backend
         uses: appleboy/ssh-action@master
         env:
-          EC2_BACKEND_TARGET: ${{ secrets.EC2_BACKEND_TARGET }}
           EC2_BACKEND_PM2_NAME: ${{ secrets.EC2_BACKEND_PM2_NAME }}
         with:
           host: ${{ secrets.EC2_SERVER_HOST }}
@@ -59,7 +58,7 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
-            cd "${EC2_BACKEND_TARGET:-$HOME}"
+            cd /home/ubuntu/deploy/backend
 
             BACKEND_TAR=$(find . -maxdepth 3 -name "backend.tar.gz" | head -n 1)
             if [ -n "$BACKEND_TAR" ]; then
@@ -107,7 +106,6 @@ jobs:
       - name: Restart frontend
         uses: appleboy/ssh-action@master
         env:
-          EC2_FRONTEND_TARGET: ${{ secrets.EC2_FRONTEND_TARGET }}
           EC2_FRONTEND_PM2_NAME: ${{ secrets.EC2_FRONTEND_PM2_NAME }}
         with:
           host: ${{ secrets.EC2_SERVER_HOST }}
@@ -118,7 +116,7 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
-            cd "${EC2_FRONTEND_TARGET:-$HOME}"
+            cd /home/ubuntu/deploy/frontend
 
             FRONTEND_TAR=$(find . -maxdepth 3 -name "frontend.tar.gz" | head -n 1)
             if [ -n "$FRONTEND_TAR" ]; then
