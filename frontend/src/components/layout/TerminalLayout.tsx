@@ -14,17 +14,17 @@ const TerminalRoot = styled(Box)(() => ({
 
 const TerminalGrid = styled('div')(() => ({
   display: 'grid',
-  gridTemplateColumns: '2.3fr 1.1fr 1.1fr',
-  gridTemplateRows: 'minmax(400px, 1fr) minmax(280px, 0.4fr)',
-  gridTemplateAreas: `"chart orderbook ticket" "bottom bottom ticket"`,
+  gridTemplateColumns: '2.2fr 1.2fr',
+  gridTemplateRows: 'minmax(520px, auto) auto',
+  gridTemplateAreas: `"chart orderbook" "bottom ticket"`,
   gap: '16px',
   width: '100%',
   flex: 1,
   minHeight: 0,
   '@media (max-width: 1200px)': {
-    gridTemplateColumns: '1.6fr 1fr',
-    gridTemplateAreas: `"chart chart" "orderbook ticket" "bottom bottom"`,
-    gridTemplateRows: 'auto auto auto',
+    gridTemplateColumns: '1fr',
+    gridTemplateAreas: `"chart" "orderbook" "ticket" "bottom"`,
+    gridTemplateRows: 'auto',
   },
   '@media (max-width: 900px)': {
     gridTemplateColumns: '1fr',

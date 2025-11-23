@@ -22,10 +22,10 @@ const Trades = ({ maxHeight = '240px' }: TradesProps) => {
   return (
     <Box
       sx={{
-        marginTop: '4px',
         maxHeight,
         overflowY: 'auto',
         overflowX: 'hidden',
+        flex: 1,
       }}
     >
       <StyledTable fontSize="13px">

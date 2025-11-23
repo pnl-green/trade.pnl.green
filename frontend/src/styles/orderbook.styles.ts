@@ -13,15 +13,52 @@ export const OrderBookContainer = styled(Box)(() => ({
   flexDirection: 'column',
   gap: '12px',
   height: '100%',
+  minHeight: 0,
 }));
 
 export const OrderBookTabsWrapper = styled(Box)(() => ({
   display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  gap: '10px',
-  width: '100%',
   alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%',
+  position: 'relative',
+}));
+
+export const OrderBookTabs = styled(Box)(() => ({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '12px',
+  width: '100%',
+  position: 'relative',
+  button: {
+    border: 'none',
+    background: 'transparent',
+    color: intelayerColors.muted,
+    fontFamily: intelayerFonts.heading,
+    fontSize: '15px',
+    fontWeight: 500,
+    padding: '8px 0',
+    cursor: 'pointer',
+    position: 'relative',
+    transition: 'color 0.2s ease',
+    '&[data-active="true"]': {
+      color: intelayerColors.green[500],
+    },
+  },
+}));
+
+export const OrderBookTabsHighlight = styled('span')(() => ({
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  height: '2px',
+  width: '50%',
+  background: intelayerColors.green[500],
+  transition: 'transform 0.25s ease',
+  transform: 'translateX(0%)',
+  '&[data-active="trades"]': {
+    transform: 'translateX(100%)',
+  },
 }));
 
 export const SpreadAndPairSelects = styled(Box)(() => ({

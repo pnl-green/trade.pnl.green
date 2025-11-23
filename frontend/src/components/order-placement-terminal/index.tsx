@@ -124,6 +124,7 @@ const OrderPlacementTerminal = () => {
         }))}
         value={activeButton || ''}
         onChange={(value) => toggleModal(value)}
+        centered
       />
 
       {/* Render modals based on the modals state */}

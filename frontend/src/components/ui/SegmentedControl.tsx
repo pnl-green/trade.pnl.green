@@ -14,16 +14,22 @@ interface SegmentedControlProps {
   value: string;
   onChange: (value: string) => void;
   ariaLabel: string;
+  centered?: boolean;
 }
 
-const ControlRoot = styled('div')(() => ({
+const ControlRoot = styled('div')<{ centered?: boolean }>(({ centered }) => ({
   display: 'flex',
   gap: '8px',
   width: '100%',
-  flexWrap: 'wrap',
+  flexWrap: centered ? 'nowrap' : 'wrap',
+  justifyContent: centered ? 'center' : 'flex-start',
+  '@media (max-width: 720px)': {
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+  },
 }));
 
-const ControlButton = styled('button')(() => ({
+const ControlButton = styled('button')<{ centered?: boolean }>(({ centered }) => ({
   border: `1px solid ${intelayerColors.panelBorder}`,
   backgroundColor: intelayerColors.surface,
   color: intelayerColors.muted,
@@ -34,7 +40,7 @@ const ControlButton = styled('button')(() => ({
   fontWeight: 500,
   cursor: 'pointer',
   transition: 'background-color 0.2s ease, color 0.2s ease, border 0.2s ease',
-  flex: '1 1 auto',
+  flex: centered ? '0 1 140px' : '1 1 auto',
   textAlign: 'center',
   '&[data-active="true"]': {
     backgroundColor: intelayerColors.green[600],
@@ -52,9 +58,10 @@ const SegmentedControl: React.FC<SegmentedControlProps> = ({
   value,
   onChange,
   ariaLabel,
+  centered,
 }) => {
   return (
-    <ControlRoot role="tablist" aria-label={ariaLabel}>
+    <ControlRoot role="tablist" aria-label={ariaLabel} centered={centered}>
       {options.map((option) => {
         const button = (
           <ControlButton
@@ -64,6 +71,7 @@ const SegmentedControl: React.FC<SegmentedControlProps> = ({
             data-active={value === option.value}
             aria-selected={value === option.value}
             onClick={() => onChange(option.value)}
+            centered={centered}
           >
             {option.label}
           </ControlButton>
