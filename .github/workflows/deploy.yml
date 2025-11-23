@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  deploy-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,6 +16,19 @@ jobs:
         with:
           toolchain: "1.79.0"
           targets: x86_64-unknown-linux-gnu
+
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            backend/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('backend/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
       - name: Build backend
         working-directory: ./backend
@@ -31,7 +44,6 @@ jobs:
           echo "LEVEL=${{ secrets.LEVEL }}" >> .env
           echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
           echo "COOKIE_KEY=${{ secrets.COOKIE_KEY }}" >> .env
-
           tar -czf backend.tar.gz .env -C target/x86_64-unknown-linux-gnu/release backend
 
       - name: Deploy backend to EC2
@@ -43,7 +55,6 @@ jobs:
           source: backend/backend.tar.gz
           target: /home/ubuntu/deploy/backend
           strip_components: 0
-          debug: true
 
       - name: Restart backend
         uses: appleboy/ssh-action@master
@@ -57,15 +68,12 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-
             cd /home/ubuntu/deploy/backend
-
             BACKEND_TAR=$(find . -maxdepth 3 -name "backend.tar.gz" | head -n 1)
             if [ -n "$BACKEND_TAR" ]; then
               tar -xf "$BACKEND_TAR" -C .
               rm "$BACKEND_TAR"
             fi
-
             if [ -n "${EC2_BACKEND_PM2_NAME}" ]; then
               if pm2 list | grep -q "${EC2_BACKEND_PM2_NAME}"; then
                 pm2 restart "${EC2_BACKEND_PM2_NAME}"
@@ -76,15 +84,29 @@ jobs:
               echo "EC2_BACKEND_PM2_NAME not set, skipping backend restart."
             fi
 
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install and build frontend
         working-directory: ./frontend
         run: |
-          npm install --legacy-peer-deps
+          npm ci --legacy-peer-deps
           npm run build
 
       - name: Prepare frontend bundle
@@ -101,7 +123,6 @@ jobs:
           source: frontend/frontend.tar.gz
           target: /home/ubuntu/deploy/frontend
           strip_components: 0
-          debug: true
 
       - name: Restart frontend
         uses: appleboy/ssh-action@master
@@ -115,15 +136,12 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-
             cd /home/ubuntu/deploy/frontend
-
             FRONTEND_TAR=$(find . -maxdepth 3 -name "frontend.tar.gz" | head -n 1)
             if [ -n "$FRONTEND_TAR" ]; then
               tar -xf "$FRONTEND_TAR" -C .
               rm "$FRONTEND_TAR"
             fi
-
             if [ -n "${EC2_FRONTEND_PM2_NAME}" ]; then
               if pm2 list | grep -q "${EC2_FRONTEND_PM2_NAME}"; then
                 pm2 restart "${EC2_FRONTEND_PM2_NAME}"
