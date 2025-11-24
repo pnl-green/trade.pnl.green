@@ -315,7 +315,7 @@ const PnlComponent = () => {
       </BottomArea>
 
       <AssistantArea>
-        <Panel title="Intelayer Assistant" sx={{ flex: 1, height: '100%' }}>
+        <Panel sx={{ flex: 1, height: '100%' }}>
           <ChatComponent />
         </Panel>
       </AssistantArea>
