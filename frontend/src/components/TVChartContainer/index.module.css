@@ -12,5 +12,16 @@
 }
 
 .TVChartContainer {
-	height: calc(100vh - 60px);
+        height: 100%;
+        width: 100%;
+        background: #0E131A;
+        isolation: isolate;
+}
+
+.TVChartContainer :global(iframe),
+.TVChartContainer :global(canvas),
+.TVChartContainer :global(.tradingview-widget-container),
+.TVChartContainer :global(.tradingview-chart-widget) {
+        background: #0E131A !important;
+        mix-blend-mode: normal !important;
 }
