@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import formidable, { type Fields, type Files, type File } from 'formidable';
 import fs from 'fs/promises';
 import { parseScreenshotWithOpenAI } from '@/server/ocr/openAiScreenshotParser';
-import type { ParsedLevels } from '@/types/tradeLevels';
+import type { ParseResponse } from '@/types/tradeLevels';
 
 type ErrorResponse = { error: string };
 
@@ -62,7 +62,7 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ParsedLevels | ErrorResponse>
+  res: NextApiResponse<ParseResponse | ErrorResponse>
 ) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
