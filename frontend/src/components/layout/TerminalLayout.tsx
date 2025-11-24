@@ -18,6 +18,10 @@ const TerminalRoot = styled(Box)(() => ({
   rowGap: '16px',
   overflowY: 'auto',
   overflowX: 'hidden',
+  '.is-safari &': {
+    backgroundColor: '#05070b',
+    backgroundImage: 'none',
+  },
   [`@media (min-width: ${MOBILE_BREAKPOINT}px)`]: {
     minHeight: 'calc(100vh - 120px)',
     padding: '24px clamp(16px, 3vw, 32px) 32px',
@@ -33,6 +37,10 @@ const TopSection = styled('div')(() => ({
   display: 'flex',
   flex: '0 0 auto',
   alignItems: 'stretch',
+  '.is-safari &': {
+    backgroundColor: '#05070b',
+    backgroundImage: 'none',
+  },
 }));
 
 const BottomSection = styled('div')(() => ({

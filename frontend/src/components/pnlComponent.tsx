@@ -65,6 +65,9 @@ const ChartWrapper = styled('div')(() => ({
   height: '100%',
   overflow: 'hidden',
   isolation: 'isolate',
+  '.is-safari &': {
+    backgroundColor: '#05070b',
+  },
   '@media (max-width: 1023px)': {
     height: 'auto',
   },
@@ -85,6 +88,16 @@ const DepthOverlay = styled('div')(() => ({
   backdropFilter: 'blur(16px)',
   WebkitBackdropFilter: 'blur(16px)',
   mixBlendMode: 'screen',
+  '.is-safari &': {
+    background: '#05070b',
+    backgroundImage: 'none',
+    backdropFilter: 'none',
+    WebkitBackdropFilter: 'none',
+    mixBlendMode: 'normal',
+    filter: 'none',
+    opacity: 1,
+    display: 'none',
+  },
   '@supports (-webkit-touch-callout: none) or (background: -webkit-named-image(activate))': {
     backdropFilter: 'none',
     WebkitBackdropFilter: 'none',
