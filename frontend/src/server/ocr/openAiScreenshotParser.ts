@@ -112,7 +112,6 @@ async function analyzeNoise(buffer: Buffer): Promise<{ noiseScore: number; band:
 }
 
 async function requestClutterRating(encodedThumb: string, apiKey: string): Promise<number | null> {
-async function requestClutterRating(encodedThumb: string, apiKey: string): Promise<number | null> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
