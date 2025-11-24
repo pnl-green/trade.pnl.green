@@ -9,9 +9,10 @@ import { useOrderTicketContext, type OrderDirection } from '@/context/orderTicke
 import { askLLM } from '@/services/llmRouter';
 import {
   ScreenshotParseCodes,
-  type ParsedTradeLevels,
+  type ParsedLevelsPartial,
   type ScreenshotParseDebugPayload,
   type ScreenshotParseLogEntry,
+  type ScreenshotParseCompleteness,
 } from '@/types/screenshotParsing';
 import Loader from './loaderSpinner';
 
@@ -190,8 +191,20 @@ const ChatComponent = () => {
     return payload;
   };
 
-  const applySimpleAutofill = useCallback(
-    (parsed?: ParsedTradeLevels | null): boolean => {
+  const applyParsedAutofill = useCallback(
+    (
+      parsed?: ParsedLevelsPartial | null,
+      completeness?: ScreenshotParseCompleteness
+    ): {
+      anyApplied: boolean;
+      hasRequired: boolean;
+      allFields: boolean;
+      detectedFields: string[];
+      missingFields: string[];
+    } => {
+      const detectedFields: string[] = [];
+      const missingFields: string[] = [];
+
       if (!parsed) {
         pushClientLog({
           level: 'error',
@@ -199,29 +212,32 @@ const ChatComponent = () => {
           code: ScreenshotParseCodes.AUTOFILL_ERROR,
           message: 'No parsed payload available for autofill',
         });
-        return false;
+
+        return {
+          anyApplied: false,
+          hasRequired: false,
+          allFields: false,
+          detectedFields,
+          missingFields: ['Direction', 'Entry', 'Stop Loss', 'Take Profit'],
+        };
       }
 
-      const { direction, entry, stop, tp } = parsed;
-      if (!direction || entry == null || stop == null || tp == null) {
-        pushClientLog({
-          level: 'warn',
-          phase: 'client-autofill',
-          code: ScreenshotParseCodes.MISSING_FIELDS,
-          message: 'Parsed payload missing required fields for autofill',
-          details: {
-            hasDirection: Boolean(direction),
-            hasEntry: entry != null,
-            hasStop: stop != null,
-            hasTp: tp != null,
-          },
-        });
-        return false;
-      }
+      const resolvedCompleteness: ScreenshotParseCompleteness =
+        completeness ?? {
+          direction: parsed.direction !== null,
+          entry: parsed.entry !== null,
+          stop: parsed.stop !== null,
+          tp: parsed.tp !== null,
+        };
 
-      const orderDirection: OrderDirection = direction === 'SHORT' ? 'sell' : 'buy';
+      const ensureTpSlEnabled = () => {
+        applyAutofill({ tpSlEnabled: true });
+      };
 
-      try {
+      let anyApplied = false;
+
+      if (parsed.direction) {
+        const orderDirection: OrderDirection = parsed.direction === 'SHORT' ? 'sell' : 'buy';
         pushClientLog({
           level: 'info',
           phase: 'client-autofill',
@@ -230,54 +246,75 @@ const ChatComponent = () => {
           details: { direction: orderDirection },
         });
         setDirection(orderDirection);
+        detectedFields.push('Direction');
+        anyApplied = true;
+      }
 
+      if (parsed.entry != null) {
         pushClientLog({
           level: 'info',
           phase: 'client-autofill',
           code: ScreenshotParseCodes.AUTOFILL_SET_ENTRY,
           message: 'Applying entry from screenshot',
-          details: { entry },
+          details: { entry: parsed.entry },
         });
+        applyAutofill({ limitPrice: parsed.entry.toString(), switchToLimit: true });
+        detectedFields.push('Entry');
+        anyApplied = true;
+      }
+
+      if (parsed.stop != null) {
+        ensureTpSlEnabled();
         pushClientLog({
           level: 'info',
           phase: 'client-autofill',
           code: ScreenshotParseCodes.AUTOFILL_SET_STOP,
           message: 'Applying stop from screenshot',
-          details: { stop },
+          details: { stop: parsed.stop },
         });
+        applyAutofill({ stopLoss: parsed.stop.toString(), tpSlEnabled: true, switchToLimit: true });
+        detectedFields.push('Stop Loss');
+        anyApplied = true;
+      }
+
+      if (parsed.tp != null) {
+        ensureTpSlEnabled();
         pushClientLog({
           level: 'info',
           phase: 'client-autofill',
           code: ScreenshotParseCodes.AUTOFILL_SET_TP,
           message: 'Applying take profit from screenshot',
-          details: { tp },
+          details: { tp: parsed.tp },
         });
-
-        applyAutofill({
-          limitPrice: entry.toString(),
-          stopLoss: stop.toString(),
-          takeProfits: [tp.toString()],
-          direction: orderDirection,
-          tpSlEnabled: true,
-          switchToLimit: true,
-        });
-        pushClientLog({
-          level: 'info',
-          phase: 'client-autofill',
-          code: ScreenshotParseCodes.AUTOFILL_SUCCESS,
-          message: 'Autofill applied successfully',
-        });
-        return true;
-      } catch (error) {
-        pushClientLog({
-          level: 'error',
-          phase: 'client-autofill',
-          code: ScreenshotParseCodes.AUTOFILL_ERROR,
-          message: 'Failed to autofill ticket',
-          details: { message: (error as Error)?.message },
-        });
-        return false;
+        applyAutofill({ takeProfits: [parsed.tp.toString()], tpSlEnabled: true, switchToLimit: true });
+        detectedFields.push('Take Profit');
+        anyApplied = true;
       }
+
+      if (!resolvedCompleteness.direction) missingFields.push('Direction');
+      if (!resolvedCompleteness.entry) missingFields.push('Entry');
+      if (!resolvedCompleteness.stop) missingFields.push('Stop Loss');
+      if (!resolvedCompleteness.tp) missingFields.push('Take Profit');
+
+      pushClientLog({
+        level: resolvedCompleteness.direction && resolvedCompleteness.entry ? 'info' : 'warn',
+        phase: 'client-autofill',
+        code: ScreenshotParseCodes.AUTOFILL_SUCCESS,
+        message: 'Applied parsed values to ticket',
+        details: { detectedFields, missingFields },
+      });
+
+      return {
+        anyApplied,
+        hasRequired: resolvedCompleteness.direction && resolvedCompleteness.entry,
+        allFields:
+          resolvedCompleteness.direction &&
+          resolvedCompleteness.entry &&
+          resolvedCompleteness.stop &&
+          resolvedCompleteness.tp,
+        detectedFields,
+        missingFields,
+      };
     },
     [applyAutofill, pushClientLog, setDirection]
   );
@@ -327,23 +364,51 @@ const ChatComponent = () => {
         status,
       });
 
-      if (payload.success) {
-        const autofillSuccess = applySimpleAutofill(payload.parsed);
+      if (payload.success && payload.parsed) {
+        const autofillOutcome = applyParsedAutofill(payload.parsed, payload.completeness);
+
+        const detectedList =
+          autofillOutcome.detectedFields.length > 0
+            ? autofillOutcome.detectedFields.join(', ')
+            : 'None';
+        const missingList =
+          autofillOutcome.missingFields.length > 0
+            ? autofillOutcome.missingFields.join(', ')
+            : 'None';
+
+        const content = autofillOutcome.allFields
+          ? '✅ Filled direction, entry, stop, and take profit from your chart. Please confirm.'
+          : `⚠️ Partially filled from your chart. Detected: ${detectedList}. Missing: ${missingList}. Please review and complete any missing values.`;
+
         addMessage({
           id: crypto.randomUUID(),
           role: 'assistant',
           type: 'status',
-          content: autofillSuccess
-            ? 'Order ticket filled from screenshot.'
-            : 'Parsed screenshot but missing required values for autofill.',
-          status: autofillSuccess ? 'done' : 'error',
+          content,
+          status: 'done',
         });
       } else {
+        const errorMessage = (() => {
+          switch (payload.errorCode) {
+            case ScreenshotParseCodes.JSON_PARSE_ERROR:
+              return '❌ Could not read levels from this screenshot (response was not valid JSON). Please try a clearer screenshot.';
+            case ScreenshotParseCodes.OPENAI_ERROR:
+            case ScreenshotParseCodes.OPENAI_TIMEOUT:
+              return '❌ Our parsing service is unavailable right now. Please try again in a moment.';
+            default:
+              return payload.errorMessage
+                ? `❌ ${payload.errorMessage}`
+                : `❌ Unable to extract trade levels from this screenshot.${
+                    payload.errorCode ? ` (code: ${payload.errorCode})` : ''
+                  }`;
+          }
+        })();
+
         addMessage({
           id: crypto.randomUUID(),
           role: 'assistant',
           type: 'warning',
-          content: payload.errorMessage || 'Unable to extract trade levels from this screenshot.',
+          content: errorMessage,
         });
       }
     } catch (error) {
