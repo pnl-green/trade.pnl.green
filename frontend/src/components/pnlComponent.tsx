@@ -59,57 +59,6 @@ const TOP_PANEL_SX = {
   },
 };
 
-const ChartWrapper = styled('div')(() => ({
-  position: 'relative',
-  width: '100%',
-  height: '100%',
-  overflow: 'hidden',
-  isolation: 'isolate',
-  '.is-safari &': {
-    backgroundColor: '#05070b',
-  },
-  '@media (max-width: 1023px)': {
-    height: 'auto',
-  },
-  '.chart-content': {
-    position: 'relative',
-    zIndex: 1,
-    height: '100%',
-  },
-}));
-
-const DepthOverlay = styled('div')(() => ({
-  pointerEvents: 'none',
-  position: 'absolute',
-  inset: 0,
-  zIndex: 0,
-  background: 'linear-gradient(90deg, rgba(245, 57, 88, 0.2), rgba(21, 211, 128, 0.25))',
-  opacity: 0.45,
-  backdropFilter: 'blur(16px)',
-  WebkitBackdropFilter: 'blur(16px)',
-  mixBlendMode: 'screen',
-  '.is-safari &': {
-    background: '#05070b',
-    backgroundImage: 'none',
-    backdropFilter: 'none',
-    WebkitBackdropFilter: 'none',
-    mixBlendMode: 'normal',
-    filter: 'none',
-    opacity: 1,
-    display: 'none',
-  },
-  '@supports (-webkit-touch-callout: none) or (background: -webkit-named-image(activate))': {
-    backdropFilter: 'none',
-    WebkitBackdropFilter: 'none',
-    mixBlendMode: 'normal',
-    filter: 'none',
-    opacity: 0.55,
-  },
-  '@media (max-width: 1023px)': {
-    height: '100%',
-  },
-}));
-
 const PnlComponent = () => {
   const { webData2 } = useWebDataContext();
   const { tokenPairs } = usePairTokensContext();
@@ -353,12 +302,7 @@ const PnlComponent = () => {
   return (
     <TerminalLayout topBar={<TokenPairInformation />}>
       <ChartArea>
-        <ChartWrapper className="chart-wrapper">
-          <DepthOverlay className="chart-depth-overlay" />
-          <div className="chart-content">
-            <Panel noPadding sx={TOP_PANEL_SX}>{chartElement}</Panel>
-          </div>
-        </ChartWrapper>
+        <Panel noPadding sx={TOP_PANEL_SX}>{chartElement}</Panel>
       </ChartArea>
 
       <OrderbookArea>
