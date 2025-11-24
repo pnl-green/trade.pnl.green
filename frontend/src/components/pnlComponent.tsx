@@ -1,6 +1,5 @@
 import { TradingViewComponent } from '@/styles/pnl.styles';
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { Box } from '@mui/material';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import OrderPlacement from './order-placement-terminal';
 import { FlexItems } from '@/styles/common.styles';
 import PositionsOrdersHistory from './positions-history-components';
@@ -49,14 +48,14 @@ const AdvancedChartMemoized = memo(function AdvancedChartMemoized(props: any) {
   );
 });
 
+const TOP_PANEL_SX = { flex: 1, height: '100%', minHeight: 0 };
+
 const PnlComponent = () => {
   const { webData2 } = useWebDataContext();
   const { tokenPairs } = usePairTokensContext();
   const { allTokenPairs, tokenPairData } = usePairTokensContext();
 
   const [pairs, setPairs] = useState([]);
-  const [syncedHeight, setSyncedHeight] = useState<number | undefined>();
-  const orderTicketRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (pairs.length !== 0) return;
@@ -65,32 +64,7 @@ const PnlComponent = () => {
     setPairs(merged);
   }, [allTokenPairs]);
 
-  useEffect(() => {
-    if (!orderTicketRef.current || typeof ResizeObserver === 'undefined') return;
-
-    const observer = new ResizeObserver((entries) => {
-      const { height } = entries[0].contentRect;
-      setSyncedHeight(height);
-    });
-
-    observer.observe(orderTicketRef.current);
-    return () => observer.disconnect();
-  }, []);
-
   const lastBarsCache = new Map();
-
-  const topPanelDimensions = useMemo(() => {
-    if (!syncedHeight) {
-      return { flex: 1, height: '100%' };
-    }
-
-    const clampedHeight = Math.max(syncedHeight, 400);
-    return {
-      flex: 1,
-      height: `${clampedHeight}px`,
-      minHeight: `${clampedHeight}px`,
-    };
-  }, [syncedHeight]);
 
   const configurationData = {
     supported_resolutions: ['1H', '1D', '1W', '1M'],
@@ -319,21 +293,19 @@ const PnlComponent = () => {
   return (
     <TerminalLayout topBar={<TokenPairInformation />}>
       <ChartArea>
-        <Panel noPadding sx={topPanelDimensions}>{chartElement}</Panel>
+        <Panel noPadding sx={TOP_PANEL_SX}>{chartElement}</Panel>
       </ChartArea>
 
       <OrderbookArea>
-        <Panel title="Order Book & Trades" sx={topPanelDimensions}>
+        <Panel title="Order Book & Trades" sx={TOP_PANEL_SX}>
           <OrderBookAndTrades />
         </Panel>
       </OrderbookArea>
 
       <TicketArea>
-        <Box ref={orderTicketRef} sx={{ width: '100%', height: '100%' }}>
-          <Panel title="Risk Manager & Order Ticket" sx={topPanelDimensions}>
-            <OrderPlacement />
-          </Panel>
-        </Box>
+        <Panel title="Risk Manager & Order Ticket" sx={TOP_PANEL_SX}>
+          <OrderPlacement />
+        </Panel>
       </TicketArea>
 
       <BottomArea>

@@ -20,8 +20,9 @@ const TerminalRoot = styled(Box)(() => ({
 const TopSection = styled('div')(() => ({
   width: '100%',
   minHeight: 'calc(100vh - 140px)',
-  flex: '0 0 calc(100vh - 140px)',
   display: 'flex',
+  flex: '0 0 auto',
+  alignItems: 'stretch',
 }));
 
 const BottomSection = styled('div')(() => ({
