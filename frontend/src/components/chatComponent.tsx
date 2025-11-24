@@ -5,9 +5,14 @@ import { Box, Button, Typography } from '@mui/material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Tooltip from './ui/Tooltip';
 import { intelayerColors } from '@/styles/theme';
-import { useOrderTicketContext } from '@/context/orderTicketContext';
+import { useOrderTicketContext, type OrderDirection } from '@/context/orderTicketContext';
 import { askLLM } from '@/services/llmRouter';
-import type { DirectionValue, ParseResponse } from '@/types/tradeLevels';
+import {
+  ScreenshotParseCodes,
+  type ParsedTradeLevels,
+  type ScreenshotParseDebugPayload,
+  type ScreenshotParseLogEntry,
+} from '@/types/screenshotParsing';
 import Loader from './loaderSpinner';
 
 type MessageType = 'text' | 'image' | 'warning' | 'status';
@@ -28,6 +33,10 @@ const ChatComponent = () => {
   const [typing, setTyping] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [debugLogs, setDebugLogs] = useState<ScreenshotParseLogEntry[]>([]);
+  const [showDebugLogs, setShowDebugLogs] = useState(false);
+  const [activeDebugMessageId, setActiveDebugMessageId] = useState<string | null>(null);
 
   const { setDirection, applyAutofill } = useOrderTicketContext();
 
@@ -79,65 +88,198 @@ const ChatComponent = () => {
     }
   };
 
-  const uploadScreenshot = async (file: File): Promise<ParseResponse> => {
+  const pushClientLog = useCallback(
+    (entry: Omit<ScreenshotParseLogEntry, 'timestamp'>) => {
+      setDebugLogs((prev) => [...prev, { ...entry, timestamp: new Date().toISOString() }]);
+    },
+    []
+  );
+
+  const uploadScreenshot = async (file: File): Promise<ScreenshotParseDebugPayload> => {
     const formData = new FormData();
-    formData.append('image', file, file.name || 'chart.png');
-    logDebug('Uploading screenshot', { name: file.name, size: file.size });
-    const response = await fetch('/api/parse-trade-screenshot', {
-      method: 'POST',
-      body: formData,
-    });
-
-    let payload: any = null;
     try {
-      payload = await response.json();
-    } catch {
-      // ignore parsing error; we'll fall back to default message
+      formData.append('image', file, file.name || 'chart.png');
+      pushClientLog({
+        level: 'info',
+        phase: 'client-encode',
+        code: ScreenshotParseCodes.ENCODE_OK,
+        message: 'Prepared form data for upload',
+        details: { name: file.name, size: file.size },
+      });
+    } catch (error) {
+      pushClientLog({
+        level: 'error',
+        phase: 'client-encode',
+        code: ScreenshotParseCodes.ENCODE_ERROR,
+        message: 'Failed to attach image to form data',
+        details: { message: (error as Error)?.message },
+      });
+      throw error;
     }
 
-    if (!response.ok) {
-      const message = payload?.error || 'Failed to process screenshot. Please try again.';
-      throw new Error(message);
-    }
-
-    if (!payload?.success) {
-      const message = payload?.error || 'Unable to extract trade levels from this screenshot.';
-      throw new Error(message);
-    }
-
-    logDebug('Screenshot parsed', {
-      modelUsed: payload.modelUsed,
-      hasDirectionals: Boolean(payload.directionalRankings?.length),
+    logDebug('Uploading screenshot', { name: file.name, size: file.size });
+    pushClientLog({
+      level: 'info',
+      phase: 'client-request',
+      code: ScreenshotParseCodes.REQUEST_SENT,
+      message: 'Sending screenshot to backend',
+      details: { endpoint: '/api/parse-trade-screenshot', sizeBytes: file.size },
     });
 
-    return payload as ParseResponse;
+    let response: Response;
+    try {
+      response = await fetch('/api/parse-trade-screenshot', {
+        method: 'POST',
+        body: formData,
+      });
+    } catch (error) {
+      pushClientLog({
+        level: 'error',
+        phase: 'client-request',
+        code: ScreenshotParseCodes.CLIENT_NETWORK_ERROR,
+        message: 'Network error sending screenshot',
+        details: { message: (error as Error)?.message },
+      });
+      throw error;
+    }
+
+    pushClientLog({
+      level: 'info',
+      phase: 'client-response',
+      code: ScreenshotParseCodes.RESPONSE_RECEIVED,
+      message: 'Received response from backend',
+      details: { httpStatus: response.status },
+    });
+
+    let payload: ScreenshotParseDebugPayload | null = null;
+    try {
+      payload = (await response.json()) as ScreenshotParseDebugPayload;
+    } catch (error) {
+      pushClientLog({
+        level: 'error',
+        phase: 'client-response',
+        code: ScreenshotParseCodes.JSON_PARSE_ERROR,
+        message: 'Failed to parse JSON response',
+        details: { message: (error as Error)?.message },
+      });
+    }
+
+    if (!payload) {
+      payload = {
+        success: false,
+        errorCode: ScreenshotParseCodes.JSON_PARSE_ERROR,
+        errorMessage: 'Unable to parse response payload',
+        logs: [],
+      };
+    }
+
+    setDebugLogs((prev) => [
+      ...prev,
+      ...(payload.logs || []).map((log) => ({ ...log, level: log.level ?? 'info' })),
+    ]);
+
+    if (!payload.success) {
+      pushClientLog({
+        level: 'error',
+        phase: 'client-response',
+        code: payload.errorCode || ScreenshotParseCodes.UNKNOWN_ERROR,
+        message: payload.errorMessage || 'Unable to extract trade levels from this screenshot.',
+      });
+    }
+
+    return payload;
   };
 
   const applySimpleAutofill = useCallback(
-    (parsed: ParseResponse): boolean => {
-      if (
-        !parsed.success ||
-        !parsed.direction ||
-        parsed.entry == null ||
-        parsed.stop == null ||
-        parsed.tp == null
-      ) {
+    (parsed?: ParsedTradeLevels | null): boolean => {
+      if (!parsed) {
+        pushClientLog({
+          level: 'error',
+          phase: 'client-autofill',
+          code: ScreenshotParseCodes.AUTOFILL_ERROR,
+          message: 'No parsed payload available for autofill',
+        });
         return false;
       }
 
-      const orderDirection = parsed.direction === 'SHORT' ? 'sell' : 'buy';
-      applyAutofill({
-        limitPrice: parsed.entry.toString(),
-        stopLoss: parsed.stop.toString(),
-        takeProfits: [parsed.tp.toString()],
-        direction: orderDirection,
-        tpSlEnabled: true,
-        switchToLimit: true,
-      });
-      setDirection(orderDirection);
-      return true;
+      const { direction, entry, stop, tp } = parsed;
+      if (!direction || entry == null || stop == null || tp == null) {
+        pushClientLog({
+          level: 'warn',
+          phase: 'client-autofill',
+          code: ScreenshotParseCodes.MISSING_FIELDS,
+          message: 'Parsed payload missing required fields for autofill',
+          details: {
+            hasDirection: Boolean(direction),
+            hasEntry: entry != null,
+            hasStop: stop != null,
+            hasTp: tp != null,
+          },
+        });
+        return false;
+      }
+
+      const orderDirection: OrderDirection = direction === 'SHORT' ? 'sell' : 'buy';
+
+      try {
+        pushClientLog({
+          level: 'info',
+          phase: 'client-autofill',
+          code: ScreenshotParseCodes.AUTOFILL_SET_DIRECTION,
+          message: 'Setting ticket direction from screenshot',
+          details: { direction: orderDirection },
+        });
+        setDirection(orderDirection);
+
+        pushClientLog({
+          level: 'info',
+          phase: 'client-autofill',
+          code: ScreenshotParseCodes.AUTOFILL_SET_ENTRY,
+          message: 'Applying entry from screenshot',
+          details: { entry },
+        });
+        pushClientLog({
+          level: 'info',
+          phase: 'client-autofill',
+          code: ScreenshotParseCodes.AUTOFILL_SET_STOP,
+          message: 'Applying stop from screenshot',
+          details: { stop },
+        });
+        pushClientLog({
+          level: 'info',
+          phase: 'client-autofill',
+          code: ScreenshotParseCodes.AUTOFILL_SET_TP,
+          message: 'Applying take profit from screenshot',
+          details: { tp },
+        });
+
+        applyAutofill({
+          limitPrice: entry.toString(),
+          stopLoss: stop.toString(),
+          takeProfits: [tp.toString()],
+          direction: orderDirection,
+          tpSlEnabled: true,
+          switchToLimit: true,
+        });
+        pushClientLog({
+          level: 'info',
+          phase: 'client-autofill',
+          code: ScreenshotParseCodes.AUTOFILL_SUCCESS,
+          message: 'Autofill applied successfully',
+        });
+        return true;
+      } catch (error) {
+        pushClientLog({
+          level: 'error',
+          phase: 'client-autofill',
+          code: ScreenshotParseCodes.AUTOFILL_ERROR,
+          message: 'Failed to autofill ticket',
+          details: { message: (error as Error)?.message },
+        });
+        return false;
+      }
     },
-    [applyAutofill, setDirection]
+    [applyAutofill, pushClientLog, setDirection]
   );
 
   const processScreenshot = async (file: File) => {
@@ -146,6 +288,16 @@ const ChatComponent = () => {
     const statusId = crypto.randomUUID();
 
     logDebug('Processing screenshot start');
+    setDebugLogs([]);
+    setShowDebugLogs(false);
+    setActiveDebugMessageId(uploadId);
+    pushClientLog({
+      level: 'info',
+      phase: 'client-upload',
+      code: ScreenshotParseCodes.FILE_SELECTED,
+      message: 'User provided screenshot for parsing',
+      details: { name: file.name, size: file.size, type: file.type },
+    });
     addMessage({
       id: uploadId,
       role: 'user',
@@ -165,24 +317,44 @@ const ChatComponent = () => {
 
     setTyping(true);
     try {
-      const parsed = await uploadScreenshot(file);
-      updateMessage(uploadId, { status: 'done' });
+      const payload = await uploadScreenshot(file);
+      const status: MessageProps['status'] = payload.success ? 'done' : 'error';
+      updateMessage(uploadId, { status });
       updateMessage(statusId, {
-        content: 'Screenshot processed successfully.',
-        status: 'done',
+        content: payload.success
+          ? 'Screenshot processed successfully.'
+          : payload.errorMessage || 'Unable to process screenshot.',
+        status,
       });
-      const autofillSuccess = applySimpleAutofill(parsed);
-      addMessage({
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        type: 'status',
-        content: autofillSuccess
-          ? 'Order ticket filled from screenshot.'
-          : 'Parsed screenshot but missing required values for autofill.',
-        status: autofillSuccess ? 'done' : 'error',
-      });
+
+      if (payload.success) {
+        const autofillSuccess = applySimpleAutofill(payload.parsed);
+        addMessage({
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          type: 'status',
+          content: autofillSuccess
+            ? 'Order ticket filled from screenshot.'
+            : 'Parsed screenshot but missing required values for autofill.',
+          status: autofillSuccess ? 'done' : 'error',
+        });
+      } else {
+        addMessage({
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          type: 'warning',
+          content: payload.errorMessage || 'Unable to extract trade levels from this screenshot.',
+        });
+      }
     } catch (error) {
       console.error(error);
+      pushClientLog({
+        level: 'error',
+        phase: 'client-unexpected',
+        code: ScreenshotParseCodes.UNKNOWN_ERROR,
+        message: 'Unexpected client-side error processing screenshot',
+        details: { message: (error as Error)?.message },
+      });
       const message = (error as Error).message || 'Unable to process screenshot.';
       updateMessage(uploadId, { status: 'error' });
       updateMessage(statusId, { content: message, status: 'error' });
@@ -259,6 +431,63 @@ const ChatComponent = () => {
           )}
           {message.status === 'error' && (
             <Box className="image_status image_status-error">Processing failed</Box>
+          )}
+          {message.id === activeDebugMessageId && debugLogs.length > 0 && (
+            <Box sx={{ marginTop: '10px' }}>
+              <Button
+                variant="text"
+                size="small"
+                onClick={() => setShowDebugLogs((prev) => !prev)}
+                sx={{
+                  color: intelayerColors.muted,
+                  textTransform: 'none',
+                  fontSize: '12px',
+                  padding: 0,
+                }}
+              >
+                ⚙️ Debug: Screenshot parsing logs ({debugLogs.length}) {showDebugLogs ? '[Hide]' : '[Show]'}
+              </Button>
+              {showDebugLogs && (
+                <Box
+                  sx={{
+                    marginTop: '6px',
+                    padding: '8px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(255,255,255,0.06)',
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    color: intelayerColors.muted,
+                    maxHeight: '280px',
+                    overflowY: 'auto',
+                  }}
+                >
+                  {debugLogs.map((log, index) => (
+                    <Box key={`${log.timestamp}-${log.code}-${index}`} sx={{ marginBottom: '6px' }}>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '12px' }}>
+                        [{log.timestamp}] {log.level} {log.phase} {log.code} – {log.message}
+                      </Typography>
+                      {log.details && (
+                        <Box
+                          component="pre"
+                          sx={{
+                            whiteSpace: 'pre-wrap',
+                            margin: 0,
+                            fontFamily: 'monospace',
+                            fontSize: '11px',
+                            color: intelayerColors.ink,
+                            backgroundColor: 'rgba(0,0,0,0.15)',
+                            padding: '6px',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          {JSON.stringify(log.details, null, 2)}
+                        </Box>
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </Box>
           )}
         </Box>
       );
