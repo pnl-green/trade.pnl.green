@@ -10,14 +10,27 @@ export const TradingViewComponent = styled(Box)(() => ({
   overflow: 'hidden',
   backgroundColor: intelayerColors.surface,
   border: `1px solid ${intelayerColors.panelBorder}`,
+  position: 'relative',
+  isolation: 'isolate',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: intelayerColors.surface,
+    zIndex: 0,
+  },
   '> div': {
     width: '100%',
     height: '100%',
+    position: 'relative',
+    zIndex: 1,
     iframe: {
       border: 'none',
       width: '100%',
       height: '100%',
       backgroundColor: intelayerColors.surface,
+      mixBlendMode: 'normal',
+      backgroundImage: 'none',
     },
   },
   '@media (max-width: 1023px)': {
