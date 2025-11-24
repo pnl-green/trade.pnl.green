@@ -8,25 +8,28 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 const TerminalRoot = styled(Box)(() => ({
   backgroundColor: intelayerColors.page,
   width: '100%',
-  minHeight: 'calc(100vh - 120px)',
+  height: 'calc(100vh - 120px)',
   padding: '24px clamp(16px, 3vw, 32px) 32px',
   display: 'flex',
   flexDirection: 'column',
   gap: '16px',
-  overflow: 'hidden',
+  overflowY: 'auto',
+  overflowX: 'hidden',
 }));
 
 const TopSection = styled('div')(() => ({
   width: '100%',
-  height: 'calc(100vh - 140px)',
   minHeight: 'calc(100vh - 140px)',
+  flex: '0 0 calc(100vh - 140px)',
   display: 'flex',
 }));
 
 const BottomSection = styled('div')(() => ({
   width: '100%',
   minHeight: '60vh',
+  flex: '0 0 auto',
   display: 'flex',
+  paddingBottom: '48px',
 }));
 
 const ResizeHandle = styled(PanelResizeHandle)(() => ({

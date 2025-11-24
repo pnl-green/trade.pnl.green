@@ -111,10 +111,18 @@ jobs:
           npm install --legacy-peer-deps
           npm run build
 
+      - name: Create runtime env file
+        working-directory: ./frontend
+        run: |
+          cat <<EOF > .env.production
+OPENAI_API_KEY=${{ secrets.NEXT_PUBLIC_OPENAI_API_KEY }}
+NEXT_PUBLIC_OPENAI_API_KEY=${{ secrets.NEXT_PUBLIC_OPENAI_API_KEY }}
+EOF
+
       - name: Prepare frontend bundle
         working-directory: ./frontend
         run: |
-          tar -czf frontend.tar.gz .next public package.json next.config.*
+          tar -czf frontend.tar.gz .next public package.json next.config.* .env.production
 
       - name: Deploy frontend to EC2
         uses: appleboy/scp-action@v0.1.4
