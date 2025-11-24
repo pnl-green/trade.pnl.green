@@ -4,6 +4,10 @@
  */
 
 import type { DirectionValue, ParseResponse } from '@/types/tradeLevels';
+import {
+  ScreenshotParseCodes,
+  type ScreenshotParseLogEntry,
+} from '@/types/screenshotParsing';
 
 type RawOpenAiResponse = {
   choices?: Array<{
@@ -35,55 +39,110 @@ function sanitizeNumber(value: unknown): number | null {
 
 async function callOpenAI(
   encoded: string,
-  apiKey: string
+  apiKey: string,
+  pushLog?: (entry: Omit<ScreenshotParseLogEntry, 'timestamp'>) => void
 ): Promise<{ direction?: DirectionValue; entry?: number; stop?: number; tp?: number; error?: string }> {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      temperature: 0,
-      response_format: { type: 'json_object' },
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a precise trading assistant. Extract direction (LONG/SHORT), entry price, stop loss, and primary take profit from TradingView screenshots. Reply ONLY with JSON matching {"success":true,"direction":"LONG","entry":1234.56,"stop":1230.1,"tp":1248.9}. Use null when uncertain.',
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: 'Identify the trade plan and respond with success flag plus direction, entry, stop, and take profit.',
-            },
-            { type: 'image_url', image_url: { url: `data:image/png;base64,${encoded}` } },
-          ],
-        },
-      ],
-    }),
+  pushLog?.({
+    level: 'info',
+    phase: 'server-model-call',
+    code: ScreenshotParseCodes.OPENAI_REQUEST_READY,
+    message: 'Prepared OpenAI vision request',
+    details: { model: 'gpt-4o', imageSizeBytes: encoded.length / 1.37 },
   });
+
+  let response: Response;
+  try {
+    response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        temperature: 0,
+        response_format: { type: 'json_object' },
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a precise trading assistant. Extract direction (LONG/SHORT), entry price, stop loss, and primary take profit from TradingView screenshots. Reply ONLY with JSON matching {"success":true,"direction":"LONG","entry":1234.56,"stop":1230.1,"tp":1248.9}. Use null when uncertain.',
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Identify the trade plan and respond with success flag plus direction, entry, stop, and take profit.',
+              },
+              { type: 'image_url', image_url: { url: `data:image/png;base64,${encoded}` } },
+            ],
+          },
+        ],
+      }),
+    });
+  } catch (error) {
+    pushLog?.({
+      level: 'error',
+      phase: 'server-model-call',
+      code: ScreenshotParseCodes.OPENAI_ERROR,
+      message: 'Failed to reach OpenAI',
+      details: { message: (error as Error)?.message },
+    });
+    throw error;
+  }
 
   if (!response.ok) {
     const errorPayload = await response.text();
+    pushLog?.({
+      level: 'error',
+      phase: 'server-model-call',
+      code: ScreenshotParseCodes.OPENAI_ERROR,
+      message: 'OpenAI returned a non-200 response',
+      details: { status: response.status, statusText: response.statusText },
+    });
     throw new Error(
       `OpenAI request failed (${response.status} ${response.statusText}): ${errorPayload}`
     );
   }
 
   const json = (await response.json()) as RawOpenAiResponse;
+  pushLog?.({
+    level: 'info',
+    phase: 'server-model-call',
+    code: ScreenshotParseCodes.OPENAI_RESPONSE_OK,
+    message: 'OpenAI responded successfully',
+    details: { status: response.status },
+  });
+
   const content = pickContent(json);
   if (!content) {
+    pushLog?.({
+      level: 'warn',
+      phase: 'server-parse-response',
+      code: ScreenshotParseCodes.JSON_EMPTY,
+      message: 'OpenAI returned empty content',
+    });
     throw new Error('OpenAI returned an empty response.');
   }
 
   let parsed: any;
   try {
     parsed = JSON.parse(content);
+    pushLog?.({
+      level: 'info',
+      phase: 'server-parse-response',
+      code: ScreenshotParseCodes.JSON_PARSE_OK,
+      message: 'Parsed JSON from OpenAI response',
+    });
   } catch (error) {
+    pushLog?.({
+      level: 'error',
+      phase: 'server-parse-response',
+      code: ScreenshotParseCodes.JSON_PARSE_ERROR,
+      message: 'Failed to parse JSON from OpenAI',
+      details: { snippet: content.slice(0, 200), length: content.length },
+    });
     throw new Error('OpenAI response was not valid JSON.');
   }
 
@@ -97,7 +156,10 @@ async function callOpenAI(
   };
 }
 
-export async function parseScreenshotWithOpenAI(buffer: Buffer): Promise<ParseResponse> {
+export async function parseScreenshotWithOpenAI(
+  buffer: Buffer,
+  pushLog?: (entry: Omit<ScreenshotParseLogEntry, 'timestamp'>) => void
+): Promise<ParseResponse> {
   const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
   if (!apiKey) {
     throw new Error('Missing OpenAI API key. Set OPENAI_API_KEY in the environment.');
@@ -107,8 +169,16 @@ export async function parseScreenshotWithOpenAI(buffer: Buffer): Promise<ParseRe
     throw new Error('Empty screenshot buffer.');
   }
 
+  pushLog?.({
+    level: 'info',
+    phase: 'server-model-call',
+    code: ScreenshotParseCodes.OPENAI_REQUEST_READY,
+    message: 'Encoding screenshot for OpenAI request',
+    details: { sizeBytes: buffer.length },
+  });
+
   const encoded = buffer.toString('base64');
-  const result = await callOpenAI(encoded, apiKey);
+  const result = await callOpenAI(encoded, apiKey, pushLog);
 
   return {
     success: Boolean(result.direction && result.entry != null && result.stop != null && result.tp != null),

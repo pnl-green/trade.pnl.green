@@ -2,9 +2,11 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import formidable, { type Fields, type Files, type File } from 'formidable';
 import fs from 'fs/promises';
 import { parseScreenshotWithOpenAI } from '@/server/ocr/openAiScreenshotParser';
-import type { ParseResponse } from '@/types/tradeLevels';
-
-type ApiResponse = ParseResponse | { success: false; error: string; details?: string };
+import {
+  ScreenshotParseCodes,
+  type ScreenshotParseDebugPayload,
+  type ScreenshotParseLogEntry,
+} from '@/types/screenshotParsing';
 
 export const config = {
   api: {
@@ -30,7 +32,7 @@ function parseForm(req: NextApiRequest) {
 }
 
 function extractFile(files: Files): File | null {
-  const uploaded = files.image;
+  const uploaded = (files as any).image || (files as any).file || files.image;
   if (!uploaded) return null;
   if (Array.isArray(uploaded)) {
     return uploaded[0];
@@ -62,41 +64,164 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ApiResponse>
+  res: NextApiResponse<ScreenshotParseDebugPayload>
 ) {
+  const logs: ScreenshotParseLogEntry[] = [];
+  const pushLog = (entry: Omit<ScreenshotParseLogEntry, 'timestamp'>) => {
+    logs.push({ ...entry, timestamp: new Date().toISOString() });
+  };
+
+  pushLog({
+    level: 'info',
+    phase: 'server-receive',
+    code: ScreenshotParseCodes.REQUEST_START,
+    message: 'Incoming screenshot parse request',
+    details: { method: req.method },
+  });
+
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
+    pushLog({
+      level: 'error',
+      phase: 'server-validate',
+      code: ScreenshotParseCodes.METHOD_NOT_ALLOWED,
+      message: 'Only POST is supported for this endpoint',
+      details: { method: req.method },
+    });
+    return res.status(200).json({
+      success: false,
+      errorCode: ScreenshotParseCodes.METHOD_NOT_ALLOWED,
+      errorMessage: 'Method Not Allowed',
+      logs,
+    });
   }
 
   try {
-    const { files } = await parseForm(req);
+    const { files } = await parseForm(req).catch((error) => {
+      pushLog({
+        level: 'error',
+        phase: 'server-validate',
+        code: ScreenshotParseCodes.PARSE_FORM_ERROR,
+        message: 'Failed to parse multipart form',
+        details: { message: (error as Error)?.message },
+      });
+      throw error;
+    });
+    pushLog({
+      level: 'info',
+      phase: 'server-validate',
+      code: ScreenshotParseCodes.REQUEST_BODY_OK,
+      message: 'Form parsed successfully',
+    });
     const file = extractFile(files);
     if (!file) {
-      return res.status(400).json({ success: false, error: 'Image file is required' });
+      pushLog({
+        level: 'error',
+        phase: 'server-validate',
+        code: ScreenshotParseCodes.NO_FILE,
+        message: 'No image file provided',
+      });
+      return res.status(200).json({
+        success: false,
+        errorCode: ScreenshotParseCodes.NO_FILE,
+        errorMessage: 'Image file is required',
+        logs,
+      });
+    }
+
+    if (!file.mimetype || !file.mimetype.startsWith('image/')) {
+      pushLog({
+        level: 'error',
+        phase: 'server-validate',
+        code: ScreenshotParseCodes.UNSUPPORTED_MIME,
+        message: 'Unsupported file type',
+        details: { mimetype: file.mimetype },
+      });
+      return res.status(200).json({
+        success: false,
+        errorCode: ScreenshotParseCodes.UNSUPPORTED_MIME,
+        errorMessage: 'Unsupported file type',
+        logs,
+      });
     }
 
     const buffer = await readFileBuffer(file);
-    if (process.env.NODE_ENV !== 'production') {
-      console.info('[parse-trade-screenshot] Received upload', {
-        size: buffer.length,
-        mimetype: file.mimetype,
-      });
-    }
-    const result = await withTimeout(parseScreenshotWithOpenAI(buffer), 10000);
-    return res.status(200).json(result);
+    pushLog({
+      level: 'info',
+      phase: 'server-receive',
+      code: ScreenshotParseCodes.FILE_READ_OK,
+      message: 'Image file read into buffer',
+      details: { size: buffer.length, mimetype: file.mimetype },
+    });
+
+    const result = await withTimeout(parseScreenshotWithOpenAI(buffer, pushLog), 10000);
+    const parsedPayload = {
+      direction: result.direction,
+      entry: result.entry,
+      stop: result.stop,
+      tp: result.tp,
+    };
+
+    const hasAllFields = Boolean(
+      parsedPayload.direction &&
+        parsedPayload.entry != null &&
+        parsedPayload.stop != null &&
+        parsedPayload.tp != null
+    );
+
+    pushLog({
+      level: hasAllFields ? 'info' : 'warn',
+      phase: 'server-build-json',
+      code: hasAllFields ? ScreenshotParseCodes.MAPPING_OK : ScreenshotParseCodes.MISSING_FIELDS,
+      message: hasAllFields
+        ? 'Mapped parsed values successfully'
+        : 'Parsed response missing required fields',
+      details: {
+        hasDirection: Boolean(parsedPayload.direction),
+        hasEntry: parsedPayload.entry != null,
+        hasStop: parsedPayload.stop != null,
+        hasTp: parsedPayload.tp != null,
+      },
+    });
+
+    return res.status(200).json({
+      success: hasAllFields,
+      parsed: parsedPayload,
+      logs,
+    });
   } catch (error) {
     if ((error as Error).message === 'OCR_TIMEOUT') {
-      return res
-        .status(504)
-        .json({ success: false, error: 'Screenshot parsing took too long. Please try again.' });
+      pushLog({
+        level: 'error',
+        phase: 'server-model-call',
+        code: ScreenshotParseCodes.OPENAI_TIMEOUT,
+        message: 'Screenshot parsing timed out',
+      });
+      return res.status(200).json({
+        success: false,
+        errorCode: ScreenshotParseCodes.OPENAI_TIMEOUT,
+        errorMessage: 'Screenshot parsing took too long. Please try again.',
+        logs,
+      });
     }
+
+    pushLog({
+      level: 'error',
+      phase: 'server-unexpected' as any,
+      code: ScreenshotParseCodes.UNHANDLED_EXCEPTION,
+      message: 'Unhandled error in screenshot parsing route',
+      details: {
+        name: (error as Error)?.name,
+        message: (error as Error)?.message,
+        stack: (error as Error)?.stack?.slice(0, 400),
+      },
+    });
     console.error('parse-trade-screenshot failed', error);
-    return res.status(500).json({
+    return res.status(200).json({
       success: false,
-      error: 'Failed to parse screenshot',
-      details: error instanceof Error ? error.message : undefined,
+      errorCode: ScreenshotParseCodes.UNHANDLED_EXCEPTION,
+      errorMessage: (error as Error).message || 'Failed to parse screenshot',
+      logs,
     });
   }
 }
-
