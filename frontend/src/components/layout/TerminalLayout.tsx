@@ -11,6 +11,7 @@ const TerminalRoot = styled(Box)(() => ({
   backgroundColor: intelayerColors.page,
   width: '100%',
   minHeight: '100vh',
+  height: 'auto',
   padding: '16px clamp(12px, 3vw, 32px) 28px',
   display: 'grid',
   gridTemplateColumns: '1fr',
@@ -18,9 +19,14 @@ const TerminalRoot = styled(Box)(() => ({
   rowGap: '16px',
   overflowY: 'auto',
   overflowX: 'hidden',
+  position: 'relative',
+  isolation: 'isolate',
   '.is-safari &': {
     backgroundColor: '#05070b',
     backgroundImage: 'none',
+  },
+  '@supports (-webkit-touch-callout: none)': {
+    minHeight: 'calc(100vh - 88px)',
   },
   [`@media (min-width: ${MOBILE_BREAKPOINT}px)`]: {
     minHeight: 'calc(100vh - 120px)',
@@ -49,6 +55,9 @@ const BottomSection = styled('div')(() => ({
   flex: '0 0 auto',
   display: 'flex',
   paddingBottom: '48px',
+  '@media (max-width: 1024px)': {
+    minHeight: 'auto',
+  },
 }));
 
 const ResizeHandle = styled(PanelResizeHandle)(() => ({

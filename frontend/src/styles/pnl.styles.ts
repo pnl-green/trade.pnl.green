@@ -5,6 +5,7 @@ export const TradingViewComponent = styled(Box)(() => ({
   display: 'flex',
   width: '100%',
   height: '100%',
+  minHeight: '420px',
   borderRadius: '12px',
   overflow: 'hidden',
   backgroundColor: intelayerColors.surface,
@@ -22,6 +23,7 @@ export const TradingViewComponent = styled(Box)(() => ({
   '@media (max-width: 1023px)': {
     position: 'relative',
     height: 'auto',
+    minHeight: 0,
     paddingTop: '60%',
     '> div': {
       position: 'absolute',
