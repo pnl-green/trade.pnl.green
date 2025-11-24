@@ -17,6 +17,7 @@ type RawOpenAiResponse = {
 };
 
 type NoiseBand = 'low' | 'medium' | 'high';
+type VisionModel = 'gpt-4o' | 'gpt-4o-mini';
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
@@ -111,6 +112,7 @@ async function analyzeNoise(buffer: Buffer): Promise<{ noiseScore: number; band:
 }
 
 async function requestClutterRating(encodedThumb: string, apiKey: string): Promise<number | null> {
+async function requestClutterRating(encodedThumb: string, apiKey: string): Promise<number | null> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -148,13 +150,13 @@ async function requestClutterRating(encodedThumb: string, apiKey: string): Promi
   }
 }
 
-function chooseModel(noiseBand: NoiseBand, clutterRating?: number | null): 'gpt-4.1' | 'gpt-4.1-mini' {
-  if (noiseBand === 'high') return 'gpt-4.1';
-  if (noiseBand === 'low') return 'gpt-4.1-mini';
+function chooseModel(noiseBand: NoiseBand, clutterRating?: number | null): VisionModel {
+  if (noiseBand === 'high') return 'gpt-4o';
+  if (noiseBand === 'low') return 'gpt-4o-mini';
   if (clutterRating != null) {
-    return clutterRating >= 3 ? 'gpt-4.1' : 'gpt-4.1-mini';
+    return clutterRating >= 3 ? 'gpt-4o' : 'gpt-4o-mini';
   }
-  return 'gpt-4.1';
+  return 'gpt-4o';
 }
 
 type RawParsedPayload = {
@@ -256,11 +258,7 @@ function isLowConfidence(candidates: ParsedCandidates): boolean {
   return [topDir, topEntry, topStop, topTp].some((c) => !c) || (topDir?.confidence ?? 0) < 0.45;
 }
 
-async function callOpenAI(
-  model: 'gpt-4.1' | 'gpt-4.1-mini',
-  encoded: string,
-  apiKey: string
-): Promise<ParsedCandidates> {
+async function callOpenAI(model: VisionModel, encoded: string, apiKey: string): Promise<ParsedCandidates> {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -327,12 +325,12 @@ export async function parseScreenshotWithOpenAI(buffer: Buffer): Promise<ParseRe
   const initialModel = chooseModel(band, clutterRating);
 
   const encoded = buffer.toString('base64');
-  let modelUsed: 'gpt-4.1' | 'gpt-4.1-mini' = initialModel;
+  let modelUsed: VisionModel = initialModel;
   let candidates = await callOpenAI(initialModel, encoded, apiKey);
 
-  if (initialModel === 'gpt-4.1-mini' && isLowConfidence(candidates)) {
-    modelUsed = 'gpt-4.1';
-    candidates = await callOpenAI('gpt-4.1', encoded, apiKey);
+  if (initialModel === 'gpt-4o-mini' && isLowConfidence(candidates)) {
+    modelUsed = 'gpt-4o';
+    candidates = await callOpenAI('gpt-4o', encoded, apiKey);
   }
 
   const directionalRankings: DirectionalRanking[] = [
@@ -341,6 +339,7 @@ export async function parseScreenshotWithOpenAI(buffer: Buffer): Promise<ParseRe
   ];
 
   return {
+    success: true,
     modelUsed,
     candidates,
     directionalRankings,

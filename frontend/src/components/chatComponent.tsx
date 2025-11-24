@@ -94,9 +94,16 @@ const ChatComponent = () => {
     await sendPrompt(prompt);
   };
 
+  const logDebug = (...args: any[]) => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('[ChatComponent]', ...args);
+    }
+  };
+
   const uploadScreenshot = async (file: File): Promise<ParseResponse> => {
     const formData = new FormData();
     formData.append('image', file, file.name || 'chart.png');
+    logDebug('Uploading screenshot', { name: file.name, size: file.size });
     const response = await fetch('/api/parse-trade-screenshot', {
       method: 'POST',
       body: formData,
@@ -114,6 +121,16 @@ const ChatComponent = () => {
       throw new Error(message);
     }
 
+    if (!payload?.success) {
+      const message = payload?.error || 'Unable to extract trade levels from this screenshot.';
+      throw new Error(message);
+    }
+
+    logDebug('Screenshot parsed', {
+      modelUsed: payload.modelUsed,
+      hasDirectionals: Boolean(payload.directionalRankings?.length),
+    });
+
     return payload as ParseResponse;
   };
 
@@ -122,6 +139,7 @@ const ChatComponent = () => {
     const uploadId = crypto.randomUUID();
     const statusId = crypto.randomUUID();
 
+    logDebug('Processing screenshot start');
     addMessage({
       id: uploadId,
       role: 'user',
@@ -196,6 +214,7 @@ const ChatComponent = () => {
     } finally {
       setTyping(false);
       setTimeout(() => URL.revokeObjectURL(previewUrl), 3000);
+      logDebug('Processing screenshot end');
     }
   };
 

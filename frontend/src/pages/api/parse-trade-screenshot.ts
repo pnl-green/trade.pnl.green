@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import { parseScreenshotWithOpenAI } from '@/server/ocr/openAiScreenshotParser';
 import type { ParseResponse } from '@/types/tradeLevels';
 
-type ErrorResponse = { error: string };
+type ApiResponse = ParseResponse | { success: false; error: string; details?: string };
 
 export const config = {
   api: {
@@ -62,29 +62,41 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ParseResponse | ErrorResponse>
+  res: NextApiResponse<ApiResponse>
 ) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
 
   try {
     const { files } = await parseForm(req);
     const file = extractFile(files);
     if (!file) {
-      return res.status(400).json({ error: 'Image file is required' });
+      return res.status(400).json({ success: false, error: 'Image file is required' });
     }
 
     const buffer = await readFileBuffer(file);
+    if (process.env.NODE_ENV !== 'production') {
+      console.info('[parse-trade-screenshot] Received upload', {
+        size: buffer.length,
+        mimetype: file.mimetype,
+      });
+    }
     const result = await withTimeout(parseScreenshotWithOpenAI(buffer), 10000);
     return res.status(200).json(result);
   } catch (error) {
     if ((error as Error).message === 'OCR_TIMEOUT') {
-      return res.status(504).json({ error: 'Screenshot parsing took too long. Please try again.' });
+      return res
+        .status(504)
+        .json({ success: false, error: 'Screenshot parsing took too long. Please try again.' });
     }
     console.error('parse-trade-screenshot failed', error);
-    return res.status(500).json({ error: 'Failed to parse screenshot' });
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to parse screenshot',
+      details: error instanceof Error ? error.message : undefined,
+    });
   }
 }
 

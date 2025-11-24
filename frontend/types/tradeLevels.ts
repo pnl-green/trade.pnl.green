@@ -25,9 +25,12 @@ export type DirectionalRanking = {
 };
 
 export type ParseResponse = {
-  modelUsed: 'gpt-4.1' | 'gpt-4.1-mini';
+  success: boolean;
+  modelUsed: 'gpt-4o' | 'gpt-4o-mini';
   candidates: ParsedCandidates;
   directionalRankings: DirectionalRanking[];
   noiseScore?: number;
+  error?: string;
+  details?: string | null;
 };
 
