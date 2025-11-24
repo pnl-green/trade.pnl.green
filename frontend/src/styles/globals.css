@@ -64,24 +64,26 @@ input[type='number'] {
   -moz-appearance: textfield; /* Display as text field */
 }
 
-/* Safari-only overrides for chart overlays and top trading content */
+/* Safari-only overrides to disable the red/green gradient & effects */
+body.is-safari,
+body.is-safari html {
+  background: #05070b !important;
+  background-image: none !important;
+}
+
 body.is-safari .chart-depth-overlay {
+  background: #05070b !important;
+  background-image: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   mix-blend-mode: normal !important;
   filter: none !important;
-  background-attachment: scroll !important;
-  opacity: 0.35 !important;
-  background: linear-gradient(
-    90deg,
-    rgba(245, 57, 88, 0.2),
-    rgba(21, 211, 128, 0.2)
-  ) !important;
-  z-index: 0 !important;
+  opacity: 1 !important;
   position: absolute !important;
   inset: 0;
   height: 100% !important;
   pointer-events: none;
+  display: none !important;
 }
 
 body.is-safari .chart-wrapper,
@@ -92,5 +94,18 @@ body.is-safari .chart-wrapper .tradingview-chart,
 body.is-safari .chart-wrapper iframe {
   position: relative;
   z-index: 1;
-  background-color: rgba(11, 14, 18, 0.92);
+  background-color: #05070b !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+}
+
+body.is-safari .chart-wrapper::before,
+body.is-safari .chart-wrapper::after,
+body.is-safari .chart-depth-overlay::before,
+body.is-safari .chart-depth-overlay::after {
+  content: none !important;
+  background: none !important;
 }
