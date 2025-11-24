@@ -63,3 +63,34 @@ input[type='number']::-webkit-inner-spin-button {
 input[type='number'] {
   -moz-appearance: textfield; /* Display as text field */
 }
+
+/* Safari-only overrides for chart overlays and top trading content */
+body.is-safari .chart-depth-overlay {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  mix-blend-mode: normal !important;
+  filter: none !important;
+  background-attachment: scroll !important;
+  opacity: 0.35 !important;
+  background: linear-gradient(
+    90deg,
+    rgba(245, 57, 88, 0.2),
+    rgba(21, 211, 128, 0.2)
+  ) !important;
+  z-index: 0 !important;
+  position: absolute !important;
+  inset: 0;
+  height: 100% !important;
+  pointer-events: none;
+}
+
+body.is-safari .chart-wrapper,
+body.is-safari .chart-wrapper .chart-content,
+body.is-safari .chart-wrapper .TradingViewComponent,
+body.is-safari .chart-wrapper .tv-chart-container,
+body.is-safari .chart-wrapper .tradingview-chart,
+body.is-safari .chart-wrapper iframe {
+  position: relative;
+  z-index: 1;
+  background-color: rgba(11, 14, 18, 0.92);
+}

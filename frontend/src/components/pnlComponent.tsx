@@ -340,7 +340,7 @@ const PnlComponent = () => {
   return (
     <TerminalLayout topBar={<TokenPairInformation />}>
       <ChartArea>
-        <ChartWrapper>
+        <ChartWrapper className="chart-wrapper">
           <DepthOverlay className="chart-depth-overlay" />
           <div className="chart-content">
             <Panel noPadding sx={TOP_PANEL_SX}>{chartElement}</Panel>

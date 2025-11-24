@@ -15,6 +15,7 @@ import { Toaster } from 'react-hot-toast';
 import NoSSR from 'react-no-ssr';
 import ContextProviders from '../context';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { isSafari } from '@/utils/isSafari';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -30,6 +31,16 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   useEffect(() => {
     setIsRendered(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    if (isSafari) {
+      document.body.classList.add('is-safari');
+    } else {
+      document.body.classList.remove('is-safari');
+    }
   }, []);
 
   if (!isRendered) {
