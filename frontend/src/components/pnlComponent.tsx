@@ -1,6 +1,5 @@
 import { TradingViewComponent } from '@/styles/pnl.styles';
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import { Box } from '@mui/material';
 import OrderPlacement from './order-placement-terminal';
 import { FlexItems } from '@/styles/common.styles';
 import PositionsOrdersHistory from './positions-history-components';
@@ -48,6 +47,8 @@ const AdvancedChartMemoized = memo(function AdvancedChartMemoized(props: any) {
     </TradingViewComponent>
   );
 });
+
+const TOP_PANEL_SX = { flex: 1, height: '100%', minHeight: 0 };
 
 const PnlComponent = () => {
   const { webData2 } = useWebDataContext();
@@ -292,21 +293,19 @@ const PnlComponent = () => {
   return (
     <TerminalLayout topBar={<TokenPairInformation />}>
       <ChartArea>
-        <Panel noPadding sx={{ flex: 1, height: '100%' }}>{chartElement}</Panel>
+        <Panel noPadding sx={TOP_PANEL_SX}>{chartElement}</Panel>
       </ChartArea>
 
       <OrderbookArea>
-        <Panel title="Order Book & Trades" sx={{ flex: 1, height: '100%' }}>
+        <Panel title="Order Book & Trades" sx={TOP_PANEL_SX}>
           <OrderBookAndTrades />
         </Panel>
       </OrderbookArea>
 
       <TicketArea>
-        <Box sx={{ width: '100%', height: '100%' }}>
-          <Panel title="Risk Manager & Order Ticket" sx={{ flex: 1, height: '100%' }}>
-            <OrderPlacement />
-          </Panel>
-        </Box>
+        <Panel title="Risk Manager & Order Ticket" sx={TOP_PANEL_SX}>
+          <OrderPlacement />
+        </Panel>
       </TicketArea>
 
       <BottomArea>

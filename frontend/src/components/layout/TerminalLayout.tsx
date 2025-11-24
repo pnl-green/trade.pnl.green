@@ -1,7 +1,7 @@
  "use client";
 
 import { Box, styled } from '@mui/material';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { intelayerColors } from '@/styles/theme';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
@@ -20,8 +20,9 @@ const TerminalRoot = styled(Box)(() => ({
 const TopSection = styled('div')(() => ({
   width: '100%',
   minHeight: 'calc(100vh - 140px)',
-  flex: '0 0 calc(100vh - 140px)',
   display: 'flex',
+  flex: '0 0 auto',
+  alignItems: 'stretch',
 }));
 
 const BottomSection = styled('div')(() => ({
@@ -74,6 +75,8 @@ const createPanel = (defaultSize: number, minSize: number) => ({
   minSize,
 });
 
+const defaultColumnLayout = [52, 24, 24] as const;
+
 export const ChartArea: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Panel {...createPanel(52, 25)}>
     <AreaWrapper>{children}</AreaWrapper>
@@ -116,6 +119,19 @@ interface TerminalLayoutProps {
 }
 
 const TerminalLayout: React.FC<TerminalLayoutProps> = ({ topBar, children }) => {
+  const [columnLayout, setColumnLayout] = useState<number[]>([...defaultColumnLayout]);
+
+  const handleColumnLayout = useCallback((sizes: number[]) => {
+    setColumnLayout((prev) => {
+      if (!prev || prev.length !== sizes.length) {
+        return [...sizes];
+      }
+
+      const hasChanged = sizes.some((size, index) => Math.abs(size - prev[index]) > 0.1);
+      return hasChanged ? [...sizes] : prev;
+    });
+  }, []);
+
   const childrenArray = React.Children.toArray(children);
   const topRowChildren = childrenArray.slice(0, 3);
   const bottomRowChildren = childrenArray.slice(3);
@@ -124,7 +140,11 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({ topBar, children }) => 
     <TerminalRoot>
       <Box sx={{ width: '100%' }}>{topBar}</Box>
       <TopSection>
-        <PanelGroup direction="horizontal">
+        <PanelGroup
+          direction="horizontal"
+          layout={columnLayout}
+          onLayout={handleColumnLayout}
+        >
           {topRowChildren.map((child, index) => (
             <React.Fragment key={index}>
               {child}
@@ -134,7 +154,11 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({ topBar, children }) => 
         </PanelGroup>
       </TopSection>
       <BottomSection>
-        <PanelGroup direction="horizontal">
+        <PanelGroup
+          direction="horizontal"
+          layout={columnLayout}
+          onLayout={handleColumnLayout}
+        >
           {bottomRowChildren.map((child, index) => (
             <React.Fragment key={index}>
               {child}
