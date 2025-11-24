@@ -6,6 +6,8 @@ import {
   ScreenshotParseCodes,
   type ScreenshotParseDebugPayload,
   type ScreenshotParseLogEntry,
+  type ParsedLevelsPartial,
+  type ScreenshotParseCompleteness,
 } from '@/types/screenshotParsing';
 
 export const config = {
@@ -155,38 +157,54 @@ export default async function handler(
     });
 
     const result = await withTimeout(parseScreenshotWithOpenAI(buffer, pushLog), 10000);
-    const parsedPayload = {
-      direction: result.direction,
-      entry: result.entry,
-      stop: result.stop,
-      tp: result.tp,
+
+    const parsedPayload: ParsedLevelsPartial = {
+      direction: result.direction ?? null,
+      entry: result.entry ?? null,
+      stop: result.stop ?? null,
+      tp: result.tp ?? null,
+      confidence: result.confidence ?? null,
     };
 
-    const hasAllFields = Boolean(
-      parsedPayload.direction &&
-        parsedPayload.entry != null &&
-        parsedPayload.stop != null &&
-        parsedPayload.tp != null
-    );
+    const completeness: ScreenshotParseCompleteness = {
+      direction: parsedPayload.direction !== null,
+      entry: parsedPayload.entry !== null,
+      stop: parsedPayload.stop !== null,
+      tp: parsedPayload.tp !== null,
+    };
+
+    const isSoftSuccess = completeness.direction && completeness.entry;
 
     pushLog({
-      level: hasAllFields ? 'info' : 'warn',
+      level: isSoftSuccess ? 'info' : 'warn',
       phase: 'server-build-json',
-      code: hasAllFields ? ScreenshotParseCodes.MAPPING_OK : ScreenshotParseCodes.MISSING_FIELDS,
-      message: hasAllFields
+      code: isSoftSuccess ? ScreenshotParseCodes.MAPPING_OK : ScreenshotParseCodes.MISSING_FIELDS,
+      message: isSoftSuccess
         ? 'Mapped parsed values successfully'
-        : 'Parsed response missing required fields',
+        : 'Parsed response missing required direction or entry',
       details: {
-        hasDirection: Boolean(parsedPayload.direction),
-        hasEntry: parsedPayload.entry != null,
-        hasStop: parsedPayload.stop != null,
-        hasTp: parsedPayload.tp != null,
+        hasDirection: completeness.direction,
+        hasEntry: completeness.entry,
+        hasStop: completeness.stop,
+        hasTp: completeness.tp,
       },
     });
 
+    if (!isSoftSuccess) {
+      return res.status(200).json({
+        success: false,
+        errorCode: ScreenshotParseCodes.MISSING_FIELDS,
+        errorMessage: 'Unable to detect trade direction and entry from the screenshot.',
+        parsed: parsedPayload,
+        completeness,
+        logs,
+      });
+    }
+
     return res.status(200).json({
-      success: hasAllFields,
+      success: true,
       parsed: parsedPayload,
+      completeness,
       logs,
     });
   } catch (error) {
@@ -201,6 +219,25 @@ export default async function handler(
         success: false,
         errorCode: ScreenshotParseCodes.OPENAI_TIMEOUT,
         errorMessage: 'Screenshot parsing took too long. Please try again.',
+        logs,
+      });
+    }
+
+    const errorCode = (error as any)?.code as string | undefined;
+
+    if (errorCode) {
+      pushLog({
+        level: 'error',
+        phase: 'server-parse-response',
+        code: errorCode,
+        message: 'Screenshot parsing failed',
+        details: { message: (error as Error)?.message },
+      });
+
+      return res.status(200).json({
+        success: false,
+        errorCode,
+        errorMessage: (error as Error).message,
         logs,
       });
     }

@@ -20,18 +20,27 @@ export type ScreenshotParseLogEntry = {
   details?: any;
 };
 
-export type ParsedTradeLevels = {
-  direction?: 'LONG' | 'SHORT';
-  entry?: number;
-  stop?: number;
-  tp?: number;
+export type ParsedLevelsPartial = {
+  direction: 'LONG' | 'SHORT' | null;
+  entry: number | null;
+  stop: number | null;
+  tp: number | null;
+  confidence: number | null;
+};
+
+export type ScreenshotParseCompleteness = {
+  direction: boolean;
+  entry: boolean;
+  stop: boolean;
+  tp: boolean;
 };
 
 export type ScreenshotParseDebugPayload = {
   success: boolean;
   errorCode?: string;
   errorMessage?: string;
-  parsed?: ParsedTradeLevels;
+  parsed?: ParsedLevelsPartial;
+  completeness?: ScreenshotParseCompleteness;
   logs: ScreenshotParseLogEntry[];
 };
 
