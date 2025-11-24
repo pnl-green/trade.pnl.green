@@ -33,6 +33,7 @@ import TerminalLayout, {
 import Panel from './ui/Panel';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import Tooltip from './ui/Tooltip';
+import { styled } from '@mui/material';
 
 const TVChartContainer = dynamic(
   () =>
@@ -57,6 +58,44 @@ const TOP_PANEL_SX = {
     minHeight: 0,
   },
 };
+
+const ChartWrapper = styled('div')(() => ({
+  position: 'relative',
+  width: '100%',
+  height: '100%',
+  overflow: 'hidden',
+  isolation: 'isolate',
+  '@media (max-width: 1023px)': {
+    height: 'auto',
+  },
+  '.chart-content': {
+    position: 'relative',
+    zIndex: 1,
+    height: '100%',
+  },
+}));
+
+const DepthOverlay = styled('div')(() => ({
+  pointerEvents: 'none',
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+  background: 'linear-gradient(90deg, rgba(245, 57, 88, 0.2), rgba(21, 211, 128, 0.25))',
+  opacity: 0.45,
+  backdropFilter: 'blur(16px)',
+  WebkitBackdropFilter: 'blur(16px)',
+  mixBlendMode: 'screen',
+  '@supports (-webkit-touch-callout: none) or (background: -webkit-named-image(activate))': {
+    backdropFilter: 'none',
+    WebkitBackdropFilter: 'none',
+    mixBlendMode: 'normal',
+    filter: 'none',
+    opacity: 0.55,
+  },
+  '@media (max-width: 1023px)': {
+    height: '100%',
+  },
+}));
 
 const PnlComponent = () => {
   const { webData2 } = useWebDataContext();
@@ -301,7 +340,12 @@ const PnlComponent = () => {
   return (
     <TerminalLayout topBar={<TokenPairInformation />}>
       <ChartArea>
-        <Panel noPadding sx={TOP_PANEL_SX}>{chartElement}</Panel>
+        <ChartWrapper>
+          <DepthOverlay className="chart-depth-overlay" />
+          <div className="chart-content">
+            <Panel noPadding sx={TOP_PANEL_SX}>{chartElement}</Panel>
+          </div>
+        </ChartWrapper>
       </ChartArea>
 
       <OrderbookArea>
