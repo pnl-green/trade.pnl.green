@@ -1,44 +1,25 @@
 "use client";
 
 import { ChatBox, BtnWithIcon } from '@/styles/pnl.styles';
-import { Box, Button, IconButton, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Tooltip from './ui/Tooltip';
 import { intelayerColors } from '@/styles/theme';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import { askLLM } from '@/services/llmRouter';
-import type {
-  DirectionValue,
-  ParseResponse,
-  DirectionalRanking,
-} from '@/types/tradeLevels';
+import type { DirectionValue, ParseResponse } from '@/types/tradeLevels';
 import Loader from './loaderSpinner';
-import ThumbUpIcon from '@mui/icons-material/ThumbUpAlt';
-import ThumbDownIcon from '@mui/icons-material/ThumbDownAlt';
+
+type MessageType = 'text' | 'image' | 'warning' | 'status';
 
 interface MessageProps {
   id: string;
   role: 'user' | 'assistant';
-  type: 'text' | 'image' | 'parsed' | 'warning' | 'status';
+  type: MessageType;
   content: string;
   imageUrl?: string;
-  parseId?: string;
-  model?: string;
   status?: 'processing' | 'done' | 'error';
 }
-
-type FieldKey = 'entry' | 'stop' | 'tp';
-
-type ParsedSessionState = {
-  parseId: string;
-  response: ParseResponse;
-  activeDirection: DirectionValue;
-  directionIndex: number;
-  fieldIndices: Record<FieldKey, number>;
-  confirmed: Record<FieldKey | 'direction', boolean>;
-  applied: boolean;
-  exhausted: Partial<Record<FieldKey, boolean>>;
-};
 
 const ChatComponent = () => {
   const chatMessagesRef = useRef<HTMLElement | null>(null);
@@ -49,8 +30,6 @@ const ChatComponent = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { setDirection, applyAutofill } = useOrderTicketContext();
-
-  const [parsedSessions, setParsedSessions] = useState<Record<string, ParsedSessionState>>({});
 
   const scrollToBottom = () => {
     if (chatMessagesRef.current) {
@@ -134,6 +113,33 @@ const ChatComponent = () => {
     return payload as ParseResponse;
   };
 
+  const applySimpleAutofill = useCallback(
+    (parsed: ParseResponse): boolean => {
+      if (
+        !parsed.success ||
+        !parsed.direction ||
+        parsed.entry == null ||
+        parsed.stop == null ||
+        parsed.tp == null
+      ) {
+        return false;
+      }
+
+      const orderDirection = parsed.direction === 'SHORT' ? 'sell' : 'buy';
+      applyAutofill({
+        limitPrice: parsed.entry.toString(),
+        stopLoss: parsed.stop.toString(),
+        takeProfits: [parsed.tp.toString()],
+        direction: orderDirection,
+        tpSlEnabled: true,
+        switchToLimit: true,
+      });
+      setDirection(orderDirection);
+      return true;
+    },
+    [applyAutofill, setDirection]
+  );
+
   const processScreenshot = async (file: File) => {
     const previewUrl = URL.createObjectURL(file);
     const uploadId = crypto.randomUUID();
@@ -165,41 +171,16 @@ const ChatComponent = () => {
         content: 'Screenshot processed successfully.',
         status: 'done',
       });
-      const parseId = crypto.randomUUID();
-      const topDirection = parsed.candidates.directionCandidates[0]?.value ?? 'LONG';
-      const initialSession: ParsedSessionState = {
-        parseId,
-        response: parsed,
-        activeDirection: topDirection,
-        directionIndex: 0,
-        fieldIndices: { entry: 0, stop: 0, tp: 0 },
-        confirmed: { direction: false, entry: false, stop: false, tp: false },
-        applied: false,
-        exhausted: {},
-      };
-      setParsedSessions((prev) => ({ ...prev, [parseId]: initialSession }));
-
+      const autofillSuccess = applySimpleAutofill(parsed);
       addMessage({
         id: crypto.randomUUID(),
         role: 'assistant',
-        type: 'parsed',
-        content: 'Parsed trade candidates',
-        parseId,
-        model: parsed.modelUsed,
+        type: 'status',
+        content: autofillSuccess
+          ? 'Order ticket filled from screenshot.'
+          : 'Parsed screenshot but missing required values for autofill.',
+        status: autofillSuccess ? 'done' : 'error',
       });
-
-      const rankingForSummary = parsed.directionalRankings.find(
-        (rank) => rank.direction === topDirection
-      );
-      const entryGuess = rankingForSummary?.entryCandidates[0]?.value;
-      const stopGuess = rankingForSummary?.stopCandidates[0]?.value;
-      const tpGuess = rankingForSummary?.tpCandidates[0]?.value;
-
-      await sendPrompt(
-        `Analyze this chart and summarize the trade setup. Direction: ${topDirection}. Entry: ${
-          entryGuess ?? 'unknown'
-        }. Stop: ${stopGuess ?? 'unknown'}. Targets: ${tpGuess ?? 'unknown'}`
-      );
     } catch (error) {
       console.error(error);
       const message = (error as Error).message || 'Unable to process screenshot.';
@@ -266,247 +247,6 @@ const ChatComponent = () => {
     },
   };
 
-  const getRankingForDirection = useCallback(
-    (parseId: string, direction: DirectionValue): DirectionalRanking | undefined => {
-      const session = parsedSessions[parseId];
-      return session?.response.directionalRankings.find((rank) => rank.direction === direction);
-    },
-    [parsedSessions]
-  );
-
-  const attemptApplyToTicket = useCallback(
-    (session: ParsedSessionState) => {
-      if (
-        !session.confirmed.direction ||
-        !session.confirmed.entry ||
-        !session.confirmed.stop ||
-        !session.confirmed.tp ||
-        session.applied
-      ) {
-        return;
-      }
-
-      const ranking = getRankingForDirection(session.parseId, session.activeDirection);
-      if (!ranking) return;
-
-      const entryValue = ranking.entryCandidates[session.fieldIndices.entry]?.value;
-      const stopValue = ranking.stopCandidates[session.fieldIndices.stop]?.value;
-      const tpValue = ranking.tpCandidates[session.fieldIndices.tp]?.value;
-      if (entryValue == null || stopValue == null || tpValue == null) return;
-
-      const orderDirection = session.activeDirection === 'SHORT' ? 'sell' : 'buy';
-
-      applyAutofill({
-        limitPrice: entryValue.toString(),
-        stopLoss: stopValue.toString(),
-        takeProfits: [tpValue.toString()],
-        direction: orderDirection,
-        tpSlEnabled: true,
-        switchToLimit: true,
-      });
-      setDirection(orderDirection);
-
-      setParsedSessions((prev) => ({
-        ...prev,
-        ...(prev[session.parseId]
-          ? { [session.parseId]: { ...prev[session.parseId], applied: true } }
-          : {}),
-      }));
-    },
-    [applyAutofill, getRankingForDirection, setDirection]
-  );
-
-  useEffect(() => {
-    Object.values(parsedSessions).forEach((session) => {
-      attemptApplyToTicket(session);
-    });
-  }, [parsedSessions, attemptApplyToTicket]);
-
-  const renderParsedCard = useCallback(
-    (message: MessageProps) => {
-      if (!message.parseId) return null;
-      const session = parsedSessions[message.parseId];
-      if (!session) return null;
-
-      const ranking = getRankingForDirection(session.parseId, session.activeDirection);
-      if (!ranking) return null;
-
-      const directionCandidates = session.response.candidates.directionCandidates;
-      const currentDirection = session.activeDirection;
-      const entryCandidate = ranking.entryCandidates[session.fieldIndices.entry];
-      const stopCandidate = ranking.stopCandidates[session.fieldIndices.stop];
-      const tpCandidate = ranking.tpCandidates[session.fieldIndices.tp];
-
-      const rotateDirection = () => {
-        setParsedSessions((prev) => {
-          const next = { ...prev };
-          const current = next[session.parseId];
-          if (!current) return prev;
-          const hasAlternate = current.directionIndex + 1 < directionCandidates.length;
-          const nextIndex = hasAlternate
-            ? current.directionIndex + 1
-            : Math.min(current.directionIndex + 1, directionCandidates.length - 1);
-          const nextDirection = hasAlternate
-            ? directionCandidates[nextIndex]?.value
-            : current.activeDirection === 'LONG'
-              ? 'SHORT'
-              : 'LONG';
-
-          next[session.parseId] = {
-            ...current,
-            activeDirection: nextDirection,
-            directionIndex: nextIndex,
-            confirmed: { direction: false, entry: false, stop: false, tp: false },
-            fieldIndices: { entry: 0, stop: 0, tp: 0 },
-            applied: false,
-            exhausted: {},
-          };
-          return next;
-        });
-      };
-
-      const confirmDirection = () => {
-        setParsedSessions((prev) => {
-          const next = { ...prev };
-          const current = next[session.parseId];
-          if (!current) return prev;
-          next[session.parseId] = {
-            ...current,
-            confirmed: { ...current.confirmed, direction: true },
-          };
-          return next;
-        });
-      };
-
-      const rotateField = (field: FieldKey) => {
-        setParsedSessions((prev) => {
-          const current = prev[session.parseId];
-          if (!current) return prev;
-          const targetRanking = getRankingForDirection(current.parseId, current.activeDirection);
-          if (!targetRanking) return prev;
-
-          const candidates =
-            field === 'entry'
-              ? targetRanking.entryCandidates
-              : field === 'stop'
-                ? targetRanking.stopCandidates
-                : targetRanking.tpCandidates;
-          const nextIndex = Math.min(current.fieldIndices[field] + 1, candidates.length - 1);
-          const exhausted = nextIndex === current.fieldIndices[field];
-
-          return {
-            ...prev,
-            [session.parseId]: {
-              ...current,
-              fieldIndices: { ...current.fieldIndices, [field]: nextIndex },
-              confirmed: { ...current.confirmed, [field]: false },
-              applied: false,
-              exhausted: exhausted
-                ? { ...current.exhausted, [field]: true }
-                : { ...current.exhausted, [field]: false },
-            },
-          };
-        });
-      };
-
-      const confirmField = (field: FieldKey) => {
-        setParsedSessions((prev) => {
-          const current = prev[session.parseId];
-          if (!current) return prev;
-          const updated = {
-            ...current,
-            confirmed: { ...current.confirmed, [field]: true },
-          };
-          return { ...prev, [session.parseId]: updated };
-        });
-      };
-
-      const renderRow = (label: string, value: number | undefined, field: FieldKey) => (
-        <Box className="extracted_row" sx={{ alignItems: 'center', gap: '8px' }}>
-          <span>{label}</span>
-          <span>{value != null ? value : '—'}</span>
-          <Box sx={{ marginLeft: 'auto', display: 'flex', gap: '6px' }}>
-            <IconButton
-              aria-label={`Confirm ${label}`}
-              size="small"
-              onClick={() => confirmField(field)}
-              color={session.confirmed[field] ? 'success' : 'default'}
-            >
-              <ThumbUpIcon fontSize="inherit" />
-            </IconButton>
-            <IconButton
-              aria-label={`Cycle ${label}`}
-              size="small"
-              onClick={() => rotateField(field)}
-            >
-              <ThumbDownIcon fontSize="inherit" />
-            </IconButton>
-          </Box>
-          {session.exhausted[field] && (
-            <Typography variant="caption" color={intelayerColors.muted} sx={{ marginLeft: 'auto' }}>
-              No more alternatives
-            </Typography>
-          )}
-        </Box>
-      );
-
-      return (
-        <Box className="extracted_card">
-          <Typography variant="body2" color={intelayerColors.muted} sx={{ marginBottom: '6px' }}>
-            Parsed levels
-          </Typography>
-          <Box
-            className="extracted_row"
-            sx={{ alignItems: 'center', gap: '8px', marginBottom: '8px' }}
-          >
-            <span>Direction</span>
-            <span className={
-              currentDirection === 'LONG' ? 'pill pill-long' : 'pill pill-short'
-            }>
-              {currentDirection}
-            </span>
-            <Box sx={{ marginLeft: 'auto', display: 'flex', gap: '6px' }}>
-              <IconButton
-                aria-label="Confirm direction"
-                size="small"
-                onClick={confirmDirection}
-                color={session.confirmed.direction ? 'success' : 'default'}
-              >
-                <ThumbUpIcon fontSize="inherit" />
-              </IconButton>
-              <IconButton aria-label="Swap direction" size="small" onClick={rotateDirection}>
-                <ThumbDownIcon fontSize="inherit" />
-              </IconButton>
-            </Box>
-          </Box>
-          {renderRow('Entry', entryCandidate?.value, 'entry')}
-          {renderRow('Stop', stopCandidate?.value, 'stop')}
-          {renderRow('Targets', tpCandidate?.value, 'tp')}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-            <Typography variant="caption" color={intelayerColors.muted}>
-              Model: {message.model || session.response.modelUsed}
-            </Typography>
-            <Button
-              size="small"
-              variant="contained"
-              disabled={
-                !session.confirmed.direction ||
-                !session.confirmed.entry ||
-                !session.confirmed.stop ||
-                !session.confirmed.tp ||
-                session.applied
-              }
-              onClick={() => attemptApplyToTicket(session)}
-            >
-              Apply to order ticket
-            </Button>
-          </Box>
-        </Box>
-      );
-    },
-    [attemptApplyToTicket, getRankingForDirection, parsedSessions]
-  );
-
   const renderMessage = (message: MessageProps) => {
     if (message.type === 'image' && message.imageUrl) {
       return (
@@ -545,9 +285,6 @@ const ChatComponent = () => {
         </Box>
       );
     }
-    if (message.type === 'parsed') {
-      return renderParsedCard(message);
-    }
     if (message.type === 'warning') {
       return <Box className="warning_bubble">{message.content}</Box>;
     }
@@ -556,11 +293,6 @@ const ChatComponent = () => {
         <Typography variant="body2" color={intelayerColors.ink}>
           {message.content}
         </Typography>
-        {message.model && (
-          <Typography variant="caption" color={intelayerColors.muted}>
-            Responded with {message.model}
-          </Typography>
-        )}
       </Box>
     );
   };

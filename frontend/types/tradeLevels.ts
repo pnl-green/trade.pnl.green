@@ -1,36 +1,22 @@
 export type DirectionValue = 'LONG' | 'SHORT';
 
-export type DirectionCandidate = {
-  value: DirectionValue;
-  confidence: number;
-};
+/*
+ * TODO: Re-enable advanced multi-candidate parsing once heuristics are stable.
+ * type DirectionCandidate = { ... }
+ * type NumericCandidate = { ... }
+ * type ParsedCandidates = { ... }
+ * type DirectionalRanking = { ... }
+ */
 
-export type NumericCandidate = {
-  value: number;
-  confidence: number;
-};
-
-export type ParsedCandidates = {
-  directionCandidates: DirectionCandidate[];
-  entryCandidates: NumericCandidate[];
-  stopCandidates: NumericCandidate[];
-  tpCandidates: NumericCandidate[];
-};
-
-export type DirectionalRanking = {
-  direction: DirectionValue;
-  entryCandidates: NumericCandidate[];
-  stopCandidates: NumericCandidate[];
-  tpCandidates: NumericCandidate[];
-};
-
-export type ParseResponse = {
+export type SimpleParseResponse = {
   success: boolean;
-  modelUsed: 'gpt-4o' | 'gpt-4o-mini';
-  candidates: ParsedCandidates;
-  directionalRankings: DirectionalRanking[];
-  noiseScore?: number;
+  direction?: DirectionValue;
+  entry?: number;
+  stop?: number;
+  tp?: number;
+  modelUsed?: 'gpt-4o';
   error?: string;
-  details?: string | null;
 };
+
+export type ParseResponse = SimpleParseResponse;
 
