@@ -79,6 +79,19 @@ const PnlComponent = () => {
 
   const lastBarsCache = new Map();
 
+  const topPanelDimensions = useMemo(() => {
+    if (!syncedHeight) {
+      return { flex: 1, height: '100%' };
+    }
+
+    const clampedHeight = Math.max(syncedHeight, 400);
+    return {
+      flex: 1,
+      height: `${clampedHeight}px`,
+      minHeight: `${clampedHeight}px`,
+    };
+  }, [syncedHeight]);
+
   const configurationData = {
     supported_resolutions: ['1H', '1D', '1W', '1M'],
     exchanges: [
@@ -306,18 +319,18 @@ const PnlComponent = () => {
   return (
     <TerminalLayout topBar={<TokenPairInformation />}>
       <ChartArea>
-        <Panel noPadding sx={{ flex: 1, height: '100%' }}>{chartElement}</Panel>
+        <Panel noPadding sx={topPanelDimensions}>{chartElement}</Panel>
       </ChartArea>
 
       <OrderbookArea>
-        <Panel title="Order Book & Trades" sx={{ flex: 1, height: '100%' }}>
+        <Panel title="Order Book & Trades" sx={topPanelDimensions}>
           <OrderBookAndTrades />
         </Panel>
       </OrderbookArea>
 
       <TicketArea>
         <Box ref={orderTicketRef} sx={{ width: '100%', height: '100%' }}>
-          <Panel title="Risk Manager & Order Ticket" sx={{ flex: 1, height: '100%' }}>
+          <Panel title="Risk Manager & Order Ticket" sx={topPanelDimensions}>
             <OrderPlacement />
           </Panel>
         </Box>
