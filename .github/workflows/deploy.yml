@@ -114,10 +114,9 @@ jobs:
       - name: Create runtime env file
         working-directory: ./frontend
         run: |
-          cat <<EOF > .env.production
-OPENAI_API_KEY=${{ secrets.NEXT_PUBLIC_OPENAI_API_KEY }}
-NEXT_PUBLIC_OPENAI_API_KEY=${{ secrets.NEXT_PUBLIC_OPENAI_API_KEY }}
-EOF
+          printf "OPENAI_API_KEY=%s\nNEXT_PUBLIC_OPENAI_API_KEY=%s\n" \
+            "${{ secrets.NEXT_PUBLIC_OPENAI_API_KEY }}" \
+            "${{ secrets.NEXT_PUBLIC_OPENAI_API_KEY }}" > .env.production
 
       - name: Prepare frontend bundle
         working-directory: ./frontend
