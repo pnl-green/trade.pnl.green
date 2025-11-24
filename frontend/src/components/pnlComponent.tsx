@@ -48,7 +48,15 @@ const AdvancedChartMemoized = memo(function AdvancedChartMemoized(props: any) {
   );
 });
 
-const TOP_PANEL_SX = { flex: 1, height: '100%', minHeight: 0 };
+const TOP_PANEL_SX = {
+  flex: 1,
+  height: '100%',
+  minHeight: 0,
+  '@media (max-width: 1023px)': {
+    height: 'auto',
+    minHeight: 0,
+  },
+};
 
 const PnlComponent = () => {
   const { webData2 } = useWebDataContext();
@@ -309,13 +317,16 @@ const PnlComponent = () => {
       </TicketArea>
 
       <BottomArea>
-        <Panel title="Positions & History" sx={{ flex: 1, height: '100%' }}>
+        <Panel
+          title="Positions & History"
+          sx={{ flex: 1, height: '100%', '@media (max-width: 1023px)': { height: 'auto' } }}
+        >
           <PositionsOrdersHistory />
         </Panel>
       </BottomArea>
 
       <AssistantArea>
-        <Panel sx={{ flex: 1, height: '100%' }}>
+        <Panel sx={{ flex: 1, height: '100%', '@media (max-width: 1023px)': { height: 'auto' } }}>
           <ChatComponent />
         </Panel>
       </AssistantArea>
@@ -327,6 +338,9 @@ const PnlComponent = () => {
             flex: 1,
             height: '100%',
             gap: '8px',
+            '@media (max-width: 1023px)': {
+              height: 'auto',
+            },
             '& span': {
               fontFamily: intelayerFonts.body,
               fontSize: '14px',

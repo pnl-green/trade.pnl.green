@@ -19,6 +19,16 @@ export const TradingViewComponent = styled(Box)(() => ({
       backgroundColor: intelayerColors.surface,
     },
   },
+  '@media (max-width: 1023px)': {
+    position: 'relative',
+    height: 'auto',
+    paddingTop: '60%',
+    '> div': {
+      position: 'absolute',
+      inset: 0,
+      height: '100%',
+    },
+  },
 }));
 
 export const ChatBox = styled(Box)(() => ({
