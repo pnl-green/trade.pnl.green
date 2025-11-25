@@ -12,11 +12,11 @@ const TerminalRoot = styled(Box)(() => ({
   width: '100%',
   minHeight: '100svh',
   padding: '16px clamp(12px, 3vw, 32px) 28px',
-  display: 'grid',
-  gridTemplateColumns: '1fr',
-  gridAutoRows: 'auto',
-  rowGap: '16px',
-  overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px',
+  overflowY: 'auto',
+  overflowX: 'hidden',
   position: 'relative',
   isolation: 'isolate',
   '.is-safari &': {
@@ -28,9 +28,6 @@ const TerminalRoot = styled(Box)(() => ({
   },
   [`@media (min-width: ${MOBILE_BREAKPOINT}px)`]: {
     padding: '24px clamp(16px, 3vw, 32px) 32px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
   },
 }));
 
