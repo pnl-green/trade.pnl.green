@@ -14,10 +14,7 @@ import {
   ResolutionString,
 } from "@/public/static/charting_library";
 
-import {
-  generateSymbol,
-  parseFullSymbol,
-} from '@/components/TVChartContainer/helpers';
+import { parseFullSymbol } from '@/components/TVChartContainer/helpers';
 import {
   subscribeOnStream,
   unsubscribeFromStream,
@@ -27,6 +24,17 @@ import PanelCard from './ui/PanelCard';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import Tooltip from './ui/Tooltip';
 import { styled } from '@mui/material';
+
+const normalizePairName = (pair?: string) => {
+  if (!pair) return '';
+
+  const [base, quote] = pair.split('-');
+  const upperQuote = quote?.toUpperCase();
+  const normalizedQuote =
+    upperQuote === 'USDCC' || upperQuote === 'USD' ? 'USDC' : upperQuote;
+
+  return quote ? `${base}-${normalizedQuote}` : base;
+};
 
 const TVChartContainer = dynamic(
   () =>
@@ -53,8 +61,12 @@ const PnlComponent = () => {
     if (pairs.length !== 0) return;
     let merged = tokenPairData;
     merged = merged.concat(allTokenPairs);
-    setPairs(merged);
-  }, [allTokenPairs]);
+    const normalizedPairs = merged.map((item: any) => ({
+      ...item,
+      pairs: normalizePairName(item.pairs),
+    }));
+    setPairs(normalizedPairs);
+  }, [allTokenPairs, pairs.length, tokenPairData]);
 
   const lastBarsCache = new Map();
 
@@ -77,7 +89,8 @@ const PnlComponent = () => {
 
   function getAllSymbols() {
     let allSymbols = pairs.map((item: any) => {
-      let formatted_pair = item.pairs.replaceAll("-", "/");
+      const normalizedPair = normalizePairName(item.pairs);
+      let formatted_pair = normalizedPair.replaceAll("-", "/");
       return {
         symbol: formatted_pair,
         full_name: `Hyperliquid:${formatted_pair}`,
@@ -168,20 +181,26 @@ const PnlComponent = () => {
       const { from, to, firstDataRequest } = periodParams;
       console.log('[getBars]: Method call', symbolInfo, resolution, from, to);
       const parsedSymbol: any = parseFullSymbol(symbolInfo.full_name);
+      if (!parsedSymbol) {
+        onErrorCallback('Invalid symbol');
+        return;
+      }
+
+      const quoteSymbol = parsedSymbol.toSymbol?.toUpperCase();
       try {
         let headers = new Headers();
         headers.append("Content-Type", "application/json");
 
         let raw = JSON.stringify({
           endpoint: "info",
-          type: parsedSymbol.toSymbol === "USDC" ? "candleSnapshot" : "pairCandleSnapshot",
+          type: quoteSymbol === "USDC" ? "candleSnapshot" : "pairCandleSnapshot",
           req: {
             coin: parsedSymbol.fromSymbol,
             interval: "1h",
             startTime: from * 1000,
             endTime: to * 1000,
           },
-          pair_coin: parsedSymbol.toSymbol,
+          pair_coin: quoteSymbol,
         });
 
         let requestOptions = {
@@ -191,7 +210,7 @@ const PnlComponent = () => {
         };
 
         let url =
-          parsedSymbol.toSymbol === "USDC"
+          quoteSymbol === "USDC"
             ? "https://api.hyperliquid.xyz/info"
             : "https://trade.intelayer.com/hyperliquid";
 
@@ -199,8 +218,7 @@ const PnlComponent = () => {
           response.json()
         );
         let bars: any[] = [];
-        let response =
-          parsedSymbol.toSymbol === "USDC" ? data : data.data;
+        let response = quoteSymbol === "USDC" ? data : data.data;
 
         response.forEach((bar: any) => {
           if (bar.t >= from * 1000 && bar.T < to * 1000) {
@@ -269,9 +287,10 @@ const PnlComponent = () => {
     fullscreen: false,
     autosize: true,
     theme: "dark",
-    symbol: tokenPairs
-      ? `Hyperliquid:${tokenPairs[0]}/${tokenPairs[1]}`
-      : '',
+    symbol:
+      tokenPairs && tokenPairs.length >= 2
+        ? `Hyperliquid:${tokenPairs[0]}/${tokenPairs[1]}`
+        : '',
   };
 
   const chartElement = useMemo(

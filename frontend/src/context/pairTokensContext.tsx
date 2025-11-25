@@ -1,7 +1,7 @@
 //usecontext to pass common pair tokens across
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ActiveAssetData, PairData, tokenPairs } from '../../types/hyperliquid';
+import { ActiveAssetData, PairData } from '../../types/hyperliquid';
 import { useHyperLiquidContext } from './hyperLiquidContext';
 import { useAddress, useChainId } from '@thirdweb-dev/react';
 
@@ -29,7 +29,7 @@ const defaultDummyTokenData: PairData | any = {
 };
 
 interface PairTokensProps {
-  tokenPairs: tokenPairs[];
+  tokenPairs: string[];
   selectedPairsTokenData: PairData | any;
   setSelectPairsTokenData: React.Dispatch<
     React.SetStateAction<PairData | null>
@@ -58,6 +58,25 @@ export const usePairTokensContext = () => {
   return context;
 };
 
+const normalizeQuote = (quote?: string) => {
+  const upperQuote = (quote || '').toUpperCase();
+
+  if (upperQuote === 'USDCC' || upperQuote === 'USD') {
+    return 'USDC';
+  }
+
+  return upperQuote;
+};
+
+const normalizePairName = (pair?: string | null) => {
+  if (!pair) return pair || '';
+
+  const [base, quote] = pair.split('-');
+  const normalizedQuote = normalizeQuote(quote);
+
+  return quote ? `${base}-${normalizedQuote}` : base;
+};
+
 const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   //------Hooks------
   const userAddress = useAddress();
@@ -70,7 +89,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedPairsTokenData, setSelectPairsTokenData] =
     useState<PairData | null>(defaultDummyTokenData);
   //single token pair data
-  const [tokenPairs, setTokenPairs] = useState<tokenPairs | any>({}); //token pairs eg [BTC,USD]
+  const [tokenPairs, setTokenPairs] = useState<string[]>([]); //token pairs eg [BTC,USD]
   const [pair, setPair] = useState<string>(''); //token pair eg BTC-USDC
   const [assetId, setAssetId] = useState<string | number>(0); //asset id
   const [activeAssetData, setActiveAssetData] =
@@ -86,8 +105,13 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   const splitTokenPairs = () => {
     try {
       if (selectedPairsTokenData) {
-        const splitPairs = selectedPairsTokenData?.pairs?.split('-');
-        setTokenPairs(splitPairs);
+        const normalizedPair = normalizePairName(selectedPairsTokenData?.pairs);
+        const splitPairs = normalizedPair?.split('-');
+        const [base, quote] = splitPairs || [];
+
+        setTokenPairs(
+          [base, normalizeQuote(quote)].filter(Boolean) as string[]
+        );
 
         return splitPairs;
       }
@@ -97,7 +121,9 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    setPair(`${tokenPairs[0]}`);
+    if (tokenPairs?.length) {
+      setPair(`${tokenPairs[0]}${tokenPairs[1] ? `-${tokenPairs[1]}` : ''}`);
+    }
   }, [tokenPairs]);
 
   useEffect(() => {
@@ -137,9 +163,8 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
           hyperliquid
             .metaAndAssetCtxs(data.meta, data.assetCtxs)
             .then((result) => {
-              const tokens = result.map( (r: any) => r.universe.name );
               const tokenPair = result.map((tokenData: any) => ({
-                pairs: `${tokenData.universe.name}-USDC`,
+                pairs: normalizePairName(`${tokenData.universe.name}-USDC`),
                 ...tokenData,
               }));
 
@@ -219,8 +244,10 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
       setAssetId(savedAssetId);
       try {
         const parsed = JSON.parse(savedSelectPairsTokenData);
-        const updatedPairs = parsed?.pairs?.replace('-USD', '-USDC') ?? parsed?.pairs;
-        setSelectPairsTokenData(updatedPairs ? { ...parsed, pairs: updatedPairs } : parsed);
+        const updatedPairs = normalizePairName(parsed?.pairs);
+        setSelectPairsTokenData(
+          updatedPairs ? { ...parsed, pairs: updatedPairs } : parsed
+        );
       } catch (error) {
         console.error('Failed to parse stored pair data', error);
       }
