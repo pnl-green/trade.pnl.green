@@ -22,15 +22,8 @@ import {
   subscribeOnStream,
   unsubscribeFromStream,
 } from '@/components/TVChartContainer/streaming';
-import TerminalLayout, {
-  AssistantArea,
-  BottomArea,
-  ChartArea,
-  OrderbookArea,
-  PortfolioArea,
-  TicketArea,
-} from './layout/TerminalLayout';
-import Panel from './ui/Panel';
+import TerminalLayout from './layout/TerminalLayout';
+import PanelCard from './ui/PanelCard';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import Tooltip from './ui/Tooltip';
 import { styled } from '@mui/material';
@@ -48,16 +41,6 @@ const AdvancedChartMemoized = memo(function AdvancedChartMemoized(props: any) {
     </TradingViewComponent>
   );
 });
-
-const TOP_PANEL_SX = {
-  flex: 1,
-  height: '100%',
-  minHeight: 0,
-  '@media (max-width: 1023px)': {
-    height: 'auto',
-    minHeight: 0,
-  },
-};
 
 const PnlComponent = () => {
   const { webData2 } = useWebDataContext();
@@ -300,48 +283,45 @@ const PnlComponent = () => {
   );
 
   return (
-    <TerminalLayout topBar={<TokenPairInformation />}>
-      <ChartArea>
-        <Panel noPadding sx={TOP_PANEL_SX}>{chartElement}</Panel>
-      </ChartArea>
-
-      <OrderbookArea>
-        <Panel title="Order Book & Trades" sx={TOP_PANEL_SX}>
-          <OrderBookAndTrades />
-        </Panel>
-      </OrderbookArea>
-
-      <TicketArea>
-        <Panel title="Risk Manager & Order Ticket" sx={TOP_PANEL_SX}>
-          <OrderPlacement />
-        </Panel>
-      </TicketArea>
-
-      <BottomArea>
-        <Panel
-          title="Positions & History"
-          sx={{ flex: 1, height: '100%', '@media (max-width: 1023px)': { height: 'auto' } }}
+    <TerminalLayout
+      chart={
+        <PanelCard
+          title={<TokenPairInformation />}
+          sx={{ height: '100%', minHeight: '520px' }}
         >
+          {chartElement}
+        </PanelCard>
+      }
+      orderbook={
+        <PanelCard title="Order Book & Trades" sx={{ height: '100%', minHeight: 0 }}>
+          <OrderBookAndTrades />
+        </PanelCard>
+      }
+      ticket={
+        <PanelCard
+          title="Risk Manager & Order Ticket"
+          sx={{ height: '100%', minHeight: 0 }}
+        >
+          <OrderPlacement />
+        </PanelCard>
+      }
+      positions={
+        <PanelCard title="Positions & History" sx={{ height: '100%', minHeight: 0 }}>
           <PositionsOrdersHistory />
-        </Panel>
-      </BottomArea>
-
-      <AssistantArea>
-        <Panel sx={{ flex: 1, height: '100%', '@media (max-width: 1023px)': { height: 'auto' } }}>
+        </PanelCard>
+      }
+      assistant={
+        <PanelCard title="Intelayer Assistant" sx={{ height: '100%', minHeight: 0 }}>
           <ChatComponent />
-        </Panel>
-      </AssistantArea>
-
-      <PortfolioArea>
-        <Panel
+        </PanelCard>
+      }
+      portfolio={
+        <PanelCard
           title="Portfolio Snapshot"
           sx={{
-            flex: 1,
             height: '100%',
-            gap: '8px',
-            '@media (max-width: 1023px)': {
-              height: 'auto',
-            },
+            minHeight: 0,
+            gap: '10px',
             '& span': {
               fontFamily: intelayerFonts.body,
               fontSize: '14px',
@@ -401,9 +381,9 @@ const PnlComponent = () => {
               </span>
             </FlexItems>
           ))}
-        </Panel>
-      </PortfolioArea>
-    </TerminalLayout>
+        </PanelCard>
+      }
+    />
   );
 };
 
