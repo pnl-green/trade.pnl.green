@@ -139,9 +139,9 @@ const MarketComponent = () => {
     setSelectItem(`${tokenPairs[0]}`);
   }, [tokenPairs]);
 
-  //get the size equivalent in USD
+  //get the size equivalent in USDC
   let sz =
-    selectItem.toUpperCase() === 'USD'
+    selectItem.toUpperCase() === 'USDC'
       ? size / Number(currentMarketPrice)
       : size;
 
@@ -393,7 +393,7 @@ const MarketComponent = () => {
           <HandleSelectItems
             selectItem={selectItem}
             setSelectItem={setSelectItem}
-            selectDataItems={[`${tokenPairs[0]}`, `USD`]}
+            selectDataItems={[`${tokenPairs[0]}`, `USDC`]}
           />
         </SelectItemsBox>
 

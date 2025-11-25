@@ -89,7 +89,7 @@ const MarginTypeModal: React.FC<ModalProps> = ({ onClose }) => {
                   fontFamily: 'Sora',
                 }}
               >
-                APE-USD Margin Mode
+                APE-USDC Margin Mode
               </Box>
               <Box
                 sx={{

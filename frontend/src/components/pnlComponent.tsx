@@ -174,7 +174,7 @@ const PnlComponent = () => {
 
         let raw = JSON.stringify({
           endpoint: "info",
-          type: parsedSymbol.toSymbol === "USD" ? "candleSnapshot" : "pairCandleSnapshot",
+          type: parsedSymbol.toSymbol === "USDC" ? "candleSnapshot" : "pairCandleSnapshot",
           req: {
             coin: parsedSymbol.fromSymbol,
             interval: "1h",
@@ -191,7 +191,7 @@ const PnlComponent = () => {
         };
 
         let url =
-          parsedSymbol.toSymbol === "USD"
+          parsedSymbol.toSymbol === "USDC"
             ? "https://api.hyperliquid.xyz/info"
             : "https://trade.intelayer.com/hyperliquid";
 
@@ -200,7 +200,7 @@ const PnlComponent = () => {
         );
         let bars: any[] = [];
         let response =
-          parsedSymbol.toSymbol === "USD" ? data : data.data;
+          parsedSymbol.toSymbol === "USDC" ? data : data.data;
 
         response.forEach((bar: any) => {
           if (bar.t >= from * 1000 && bar.T < to * 1000) {
