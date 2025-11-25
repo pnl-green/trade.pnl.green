@@ -1,68 +1,34 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { SpreadAndPairSelects } from '@/styles/orderbook.styles';
 import { Box } from '@mui/material';
 import HandleSelectItems from '../handleSelectItems';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
-import { SizeEquivalentsProps } from '@/utils/usdEquivalents';
 import { Order } from '@/context/orderBookTradesContext';
 import DepthTable from '../ui/DepthTable';
-
-enum Pair {
-  USD = 'USD',
-  ETH = 'ETH',
-  BTC = 'BTC',
-}
 
 // Props for OrderBook component
 interface OrderBookProps {
   spread: number;
-  pair: Pair;
+  pair: string;
   setSpread: (spread: number) => void;
-  setPair: (pair: Pair) => void;
+  setPair: (pair: string) => void;
 }
 
 // Calculate bar width as a percentage
 const calculateBarWidth = (total: number, max: number) => {
+  if (!max) return 0;
   return (total / max) * 100;
 };
 
-// Get USD value if token is USD
-export const getUsdEquivalentOnly = ({
-  size,
-  currentMarkPrice,
-  token,
-}: SizeEquivalentsProps) => {
-  if (token.toUpperCase() === 'USD') {
-    return Math.trunc(size * currentMarkPrice);
-  } else {
-    return size;
-  }
-};
-
 // Calculate total size for each order
-const calculateTotal = (
-  orders: Order[],
-  pair: Pair,
-  reverse: boolean = false
-) => {
+const calculateTotal = (orders: Order[], reverse: boolean = false) => {
   let cumulativeTotal = 0;
   const ordersCopy = reverse ? [...orders].reverse() : [...orders];
   const ordersWithTotal = ordersCopy.map((order) => {
     const orderSize = order.sz;
-    const orderPx = order.px;
-    let sizeEquivalent =
-      pair.toUpperCase() === 'USD'
-        ? getUsdEquivalentOnly({
-            size: orderSize,
-            currentMarkPrice: orderPx,
-            token: pair,
-          })
-        : orderSize;
-
-    cumulativeTotal += sizeEquivalent;
-
-    const roundedTotal = Number(cumulativeTotal.toFixed(2));
+    cumulativeTotal += orderSize;
+    const roundedTotal = Number(cumulativeTotal.toFixed(4));
     return { ...order, total: roundedTotal };
   });
   return reverse ? ordersWithTotal.reverse() : ordersWithTotal;
@@ -72,9 +38,9 @@ const calculateTotal = (
 const calculateSpreadPercentage = (asks: Order[], bids: Order[]) => {
   if (asks.length === 0 || bids.length === 0) return 0;
   const highestBid = bids[0].px;
-  const lowestAsk = asks[asks.length - 1].px;
+  const lowestAsk = asks[0].px;
   const spread = lowestAsk - highestBid;
-  const spreadPercentage = parseFloat(((spread / lowestAsk) * 100).toFixed(2));
+  const spreadPercentage = parseFloat(((spread / lowestAsk) * 100).toFixed(3));
   return spreadPercentage;
 };
 
@@ -87,12 +53,18 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
   // Get asks and bids data
   //
   // @TODO investigate how sort orders with step: 1/2/5/10/100/1000
-  function getBookData() {
-    let limit = 10;
-    const asks = bookData.asks.slice(0, limit).sort((a, b) => b.px - a.px);
-    const bids = bookData.bids.slice(0, limit).sort((a, b) => b.px - a.px);
+  const getBookData = useCallback(() => {
+    const limit = 25;
+    const asks = bookData.asks
+      .slice(0, limit)
+      .map((order) => ({ ...order, px: Number(order.px), sz: Number(order.sz) }))
+      .sort((a, b) => a.px - b.px);
+    const bids = bookData.bids
+      .slice(0, limit)
+      .map((order) => ({ ...order, px: Number(order.px), sz: Number(order.sz) }))
+      .sort((a, b) => b.px - a.px);
     return { asks, bids };
-  }
+  }, [bookData]);
 
   // Update spread percentage when book data changes
   useEffect(() => {
@@ -102,14 +74,14 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
         setSpreadPercentage(calculateSpreadPercentage(asks, bids));
       }
     }
-  }, [bookData, loadingBookData]);
+  }, [bookData, getBookData, loadingBookData]);
 
-  const pairLabel = pair?.toString() ?? 'USD';
+  const pairLabel = pair?.toString() || tokenPairs?.[0] || 'USDC';
   const { asks, bids } = getBookData();
 
   const formattedRows = useMemo(() => {
-    const asksWithTotal = calculateTotal(asks, pair, true);
-    const bidsWithTotal = calculateTotal(bids, pair, false);
+    const asksWithTotal = calculateTotal(asks, true);
+    const bidsWithTotal = calculateTotal(bids, false);
     const combinedTotals = [...asksWithTotal, ...bidsWithTotal].map(
       (order) => order.total
     );
@@ -117,45 +89,26 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
       ? Math.max(...combinedTotals)
       : 1;
 
-    const formatValue = (order: any) =>
-      pair.toUpperCase() === 'USD'
-        ? Math.trunc(
-            getUsdEquivalentOnly({
-              size: order.sz,
-              currentMarkPrice: order.px,
-              token: pair,
-            })
-          ).toLocaleString()
-        : getUsdEquivalentOnly({
-            size: order.sz,
-            currentMarkPrice: order.px,
-            token: pair,
-          })
-            .toFixed(2)
-            .toString();
-
-    const formatTotal = (total: number) =>
-      pair.toUpperCase() === 'USD'
-        ? Math.trunc(total).toLocaleString()
-        : total.toString();
+    const formatValue = (value: number) => Number(value).toFixed(4);
+    const formatTotal = (total: number) => Number(total).toFixed(4);
 
     return {
       asks: asksWithTotal.map((order) => ({
         price: order.px.toFixed(2),
-        size: formatValue(order),
+        size: formatValue(order.sz),
         total: formatTotal(order.total),
         widthPct: calculateBarWidth(order.total, maxTotal),
         side: 'ask' as const,
       })),
       bids: bidsWithTotal.map((order) => ({
         price: order.px.toFixed(2),
-        size: formatValue(order),
+        size: formatValue(order.sz),
         total: formatTotal(order.total),
         widthPct: calculateBarWidth(order.total, maxTotal),
         side: 'bid' as const,
       })),
     };
-  }, [asks, bids, pair]);
+  }, [asks, bids]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -172,13 +125,7 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
           <HandleSelectItems
             selectItem={pair}
             setSelectItem={setPair}
-            selectDataItems={
-              Array.isArray(tokenPairs)
-                ? tokenPairs.map((tokenPair) => {
-                    return tokenPair ? tokenPair.toString() : '';
-                  })
-                : []
-            }
+            selectDataItems={tokenPairs?.[0] ? [tokenPairs[0].toString()] : []}
             variant="elev"
           />
         </div>

@@ -45,24 +45,33 @@ const Trades = ({ maxHeight = '240px' }: TradesProps) => {
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(tradesData) &&
-            tradesData.map((trade, index) => (
-              <TradesRows
-                key={index}
-                className="first-column"
-                side={trade.side}
-              >
-                <td className="first-column">{trade.px}</td>
-                <td>{trade.sz}</td>
-                <td>{trade.time}</td>
-                <td
-                  className="details-icon"
-                  onClick={() => handleDetailsClick(index)}
-                >
-                  <img src="/linkIcon.svg" alt="link" />
-                </td>
-              </TradesRows>
-            ))}
+          {Array.isArray(tradesData) && tradesData.length > 0 ? (
+            tradesData.map((trade, index) => {
+              const formattedPrice = Number(trade.px).toFixed(4);
+              const formattedSize = Number(trade.sz).toFixed(4);
+              const formattedTime = trade.displayTime ?? new Date(trade.time).toLocaleTimeString();
+
+              return (
+                <TradesRows key={index} className="first-column" side={trade.side}>
+                  <td className="first-column">{formattedPrice}</td>
+                  <td>{formattedSize}</td>
+                  <td>{formattedTime}</td>
+                  <td
+                    className="details-icon"
+                    onClick={() => handleDetailsClick(index)}
+                  >
+                    <img src="/linkIcon.svg" alt="link" />
+                  </td>
+                </TradesRows>
+              );
+            })
+          ) : (
+            <tr>
+              <td colSpan={4} style={{ padding: '8px 12px', color: '#A3B3C2' }}>
+                No recent trades available
+              </td>
+            </tr>
+          )}
         </tbody>
       </StyledTable>
     </Box>

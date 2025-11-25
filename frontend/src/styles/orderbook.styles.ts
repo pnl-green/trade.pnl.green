@@ -114,7 +114,10 @@ export const Tablerows = styled('tr')<TablerowsProps>(() => ({}));
 
 export const TradesRows = styled('tr')<TablerowsProps>((props) => ({
   '.first-column': {
-    color: props.side === 'A' ? intelayerColors.green[500] : intelayerColors.red[500],
+    color:
+      props.side?.toUpperCase() === 'B'
+        ? intelayerColors.green[500]
+        : intelayerColors.red[500],
   },
   '.details-icon': {
     padding: '4px 8px 4px 5px',

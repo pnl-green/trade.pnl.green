@@ -5,9 +5,11 @@ import { BookDataProps, WsTrades } from '@/types/hyperliquid';
 import { usePairTokensContext } from './pairTokensContext';
 import { useChainId } from '@thirdweb-dev/react';
 
+type TradeWithDisplay = WsTrades & { displayTime?: string };
+
 interface OrderBookTradesProps {
   bookData: BookDataProps;
-  tradesData: WsTrades[];
+  tradesData: TradeWithDisplay[];
   loadingBookData: boolean;
 }
 
@@ -40,7 +42,7 @@ const OrderBookTradesProvider = ({
     bids: [],
   });
 
-  const [tradesData, setTradesData] = useState<WsTrades | any>({});
+  const [tradesData, setTradesData] = useState<TradeWithDisplay[]>([]);
   const [loadingBookData, setLoadingBookData] = useState<boolean>(true);
 
   const chainId = useChainId();
@@ -75,8 +77,7 @@ const OrderBookTradesProvider = ({
 
       if (message.channel === 'trades') {
         if (data) {
-          // Format the time to HH:MM:SS
-          const tradesData = data.map((trade: WsTrades) => {
+          const tradesData = (data as WsTrades[]).map((trade: WsTrades) => {
             const date = new Date(trade.time);
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -84,16 +85,21 @@ const OrderBookTradesProvider = ({
             const newTime = `${hours}:${minutes}:${seconds}`;
 
             return {
-              ...trade, //maintain the rest of the data
-              time: newTime, // Replace the timestamp with the formatted time
+              ...trade,
+              px: Number(trade.px),
+              sz: Number(trade.sz),
+              displayTime: newTime,
             };
           });
 
-          setTradesData(tradesData);
+          setTradesData((prev) => {
+            const merged = [...tradesData, ...prev].sort((a, b) => b.time - a.time);
+            return merged.slice(0, 50);
+          });
         }
       } else if (message.channel === 'error') {
         console.error('Error:', message.data);
-        setTradesData(null);
+        setTradesData([]);
       }
     };
 

@@ -146,9 +146,9 @@ const LimitComponent = () => {
     }
   }, [selectItem]);
 
-  //get the size equivalent in USD
+  //get the size equivalent in USDC
   let sz =
-    selectItem.toUpperCase() === 'USD'
+    selectItem.toUpperCase() === 'USDC'
       ? size / Number(currentMarketPrice)
       : size;
   //

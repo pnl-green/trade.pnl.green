@@ -7,7 +7,7 @@ import { useAddress, useChainId } from '@thirdweb-dev/react';
 
 //default dummy token data
 const defaultDummyTokenData: PairData | any = {
-  pairs: 'SOL-USD',
+  pairs: 'SOL-USDC',
   assetId: '--',
   universe: {
     maxLeverage: '--',
@@ -71,7 +71,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
     useState<PairData | null>(defaultDummyTokenData);
   //single token pair data
   const [tokenPairs, setTokenPairs] = useState<tokenPairs | any>({}); //token pairs eg [BTC,USD]
-  const [pair, setPair] = useState<string>(''); //token pair eg BTC-USD
+  const [pair, setPair] = useState<string>(''); //token pair eg BTC-USDC
   const [assetId, setAssetId] = useState<string | number>(0); //asset id
   const [activeAssetData, setActiveAssetData] =
     useState<ActiveAssetData | null>(null); //active asset data
@@ -138,27 +138,13 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
             .metaAndAssetCtxs(data.meta, data.assetCtxs)
             .then((result) => {
               const tokens = result.map( (r: any) => r.universe.name );
-              const tokenPair = tokens.flatMap( (token, i) => 
-                tokens
-                  .filter( (otherToken) => otherToken !== token )
-                  .map( (otherToken) => {
-                  const tokenData = result.find((r: any) => r.universe.name === token);
-                    return {
-                      pairs: `${token}-${otherToken}`,
-                      ...tokenData
-                    }
-                  })
-              )
+              const tokenPair = result.map((tokenData: any) => ({
+                pairs: `${tokenData.universe.name}-USDC`,
+                ...tokenData,
+              }));
 
-              const newData = result.map((res: any) => {
-                return {
-                  pairs: `${res.universe.name}-USD`,
-                  ...res,
-                };
-              });
-              
               setAllTokenPairs(tokenPair as any);
-              setTokenPairData(newData as any);
+              setTokenPairData(tokenPair as any);
             });
         }
       } else if (message.channel === 'error') {
@@ -231,24 +217,27 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (savedAssetId && savedSelectPairsTokenData) {
       setAssetId(savedAssetId);
-      setSelectPairsTokenData(JSON.parse(savedSelectPairsTokenData));
+      try {
+        const parsed = JSON.parse(savedSelectPairsTokenData);
+        const updatedPairs = parsed?.pairs?.replace('-USD', '-USDC') ?? parsed?.pairs;
+        setSelectPairsTokenData(updatedPairs ? { ...parsed, pairs: updatedPairs } : parsed);
+      } catch (error) {
+        console.error('Failed to parse stored pair data', error);
+      }
     }
   }, [savedAssetId, savedSelectPairsTokenData]);
 
   // Set default token pair data on first load
   useEffect(() => {
-    if (!loadingWebData2 && (!savedAssetId || !savedSelectPairsTokenData)) {
-      // setSelectPairsTokenData(tokenPairData[0]); // Single token pair data
-      // setAssetId(0); // Asset id
-
-      //store to local storage on first load
+    if (!loadingWebData2 && (!savedAssetId || !savedSelectPairsTokenData) && tokenPairData[0]) {
       sessionStorage.setItem('assetId', JSON.stringify(0));
       sessionStorage.setItem(
         'selectPairsTokenData',
         JSON.stringify(tokenPairData[0])
       );
+      setSelectPairsTokenData(tokenPairData[0]);
     }
-  }, [loadingWebData2, savedAssetId, savedSelectPairsTokenData]);
+  }, [loadingWebData2, savedAssetId, savedSelectPairsTokenData, tokenPairData]);
 
   return (
     <PairTokensContext.Provider
