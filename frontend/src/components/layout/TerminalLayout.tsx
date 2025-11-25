@@ -161,7 +161,12 @@ export const PortfolioArea: React.FC<AreaProps> = ({ children, stacked }) =>
 
 interface TerminalLayoutProps {
   topBar?: React.ReactNode;
-  children: React.ReactNode;
+  chart: React.ReactNode;
+  orderbook: React.ReactNode;
+  ticket: React.ReactNode;
+  positions: React.ReactNode;
+  assistant: React.ReactNode;
+  portfolio: React.ReactNode;
 }
 
 const StackedLayout = styled('div')(() => ({
@@ -176,7 +181,15 @@ const StackedLayout = styled('div')(() => ({
   },
 }));
 
-const TerminalLayout: React.FC<TerminalLayoutProps> = ({ topBar, children }) => {
+const TerminalLayout: React.FC<TerminalLayoutProps> = ({
+  topBar,
+  chart,
+  orderbook,
+  ticket,
+  positions,
+  assistant,
+  portfolio,
+}) => {
   const [columnLayout, setColumnLayout] = useState<number[]>([...defaultColumnLayout]);
   const isDesktop = useMediaQuery(`(min-width:${MOBILE_BREAKPOINT}px)`, { noSsr: true });
 
@@ -191,30 +204,39 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({ topBar, children }) => 
     });
   }, []);
 
-  const childrenArray = React.Children.toArray(children) as React.ReactElement[];
+  const sections = useMemo(
+    () => [
+      <ChartArea key="chart">{chart}</ChartArea>,
+      <OrderbookArea key="orderbook">{orderbook}</OrderbookArea>,
+      <TicketArea key="ticket">{ticket}</TicketArea>,
+      <BottomArea key="positions">{positions}</BottomArea>,
+      <AssistantArea key="assistant">{assistant}</AssistantArea>,
+      <PortfolioArea key="portfolio">{portfolio}</PortfolioArea>,
+    ],
+    [chart, orderbook, ticket, positions, assistant, portfolio]
+  );
 
   const desktopChildren = useMemo(
     () =>
-      childrenArray.map((child, index) =>
-        React.isValidElement(child)
-          ? React.cloneElement(child, { stacked: false, key: `desktop-${index}` })
-          : child
+      sections.map((section, index) =>
+        React.isValidElement(section)
+          ? React.cloneElement(section, { stacked: false, key: `desktop-${index}` })
+          : section
       ),
-    [childrenArray]
+    [sections]
   );
 
   const stackedChildren = useMemo(() => {
     const mobileOrder = [0, 2, 1, 3, 5, 4];
-
     return mobileOrder
-      .map((index) => childrenArray[index])
+      .map((index) => sections[index])
       .filter(Boolean)
-      .map((child, index) =>
-        React.isValidElement(child)
-          ? React.cloneElement(child, { stacked: true, key: `stacked-${index}` })
-          : child
+      .map((section, index) =>
+        React.isValidElement(section)
+          ? React.cloneElement(section, { stacked: true, key: `stacked-${index}` })
+          : section
       );
-  }, [childrenArray]);
+  }, [sections]);
 
   const topRowChildren = desktopChildren.slice(0, 3);
   const bottomRowChildren = desktopChildren.slice(3);
