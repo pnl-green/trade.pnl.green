@@ -27,6 +27,8 @@ const Table = styled('div')(() => ({
   gap: '4px',
   fontFamily: intelayerFonts.body,
   fontSize: '12px',
+  maxHeight: '100%',
+  overflowY: 'auto',
 }));
 
 const HeaderRow = styled('div')(() => ({

@@ -34,6 +34,41 @@ const calculateTotal = (orders: Order[], reverse: boolean = false) => {
   return reverse ? ordersWithTotal.reverse() : ordersWithTotal;
 };
 
+// Aggregate orders by price level to merge duplicate entries
+const aggregateOrdersByPrice = (orders: Order[]) => {
+  const aggregated = new Map<number, Order>();
+
+  orders.forEach((order) => {
+    const price = Number(order.px);
+    const size = Number(order.sz);
+    const count = Number(order.n || 0);
+    const existing = aggregated.get(price);
+
+    if (existing) {
+      aggregated.set(price, {
+        px: price,
+        sz: existing.sz + size,
+        n: existing.n + count,
+      });
+    } else {
+      aggregated.set(price, { px: price, sz: size, n: count });
+    }
+  });
+
+  return Array.from(aggregated.values());
+};
+
+const MAX_LEVELS_PER_SIDE = 15;
+
+// Trim orders to the closest levels around best bid/ask
+const trimOrderLevels = (orders: Order[], side: 'ask' | 'bid') => {
+  const sorted = [...orders].sort((a, b) =>
+    side === 'ask' ? a.px - b.px : b.px - a.px
+  );
+
+  return sorted.slice(0, MAX_LEVELS_PER_SIDE);
+};
+
 // Calculate spread percentage
 const calculateSpreadPercentage = (asks: Order[], bids: Order[]) => {
   if (asks.length === 0 || bids.length === 0) return 0;
@@ -54,15 +89,14 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
   //
   // @TODO investigate how sort orders with step: 1/2/5/10/100/1000
   const getBookData = useCallback(() => {
-    const limit = 25;
-    const asks = bookData.asks
-      .slice(0, limit)
-      .map((order) => ({ ...order, px: Number(order.px), sz: Number(order.sz) }))
-      .sort((a, b) => a.px - b.px);
-    const bids = bookData.bids
-      .slice(0, limit)
-      .map((order) => ({ ...order, px: Number(order.px), sz: Number(order.sz) }))
-      .sort((a, b) => b.px - a.px);
+    const asks = trimOrderLevels(
+      aggregateOrdersByPrice(bookData.asks),
+      'ask'
+    );
+    const bids = trimOrderLevels(
+      aggregateOrdersByPrice(bookData.bids),
+      'bid'
+    );
     return { asks, bids };
   }, [bookData]);
 
@@ -76,7 +110,10 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
     }
   }, [bookData, getBookData, loadingBookData]);
 
-  const pairLabel = pair?.toString() || tokenPairs?.[0] || 'USDC';
+  const pairLabel =
+    tokenPairs?.length >= 2
+      ? `${tokenPairs[0]}-${tokenPairs[1]}`
+      : pair?.toString() || 'USDC';
   const { asks, bids } = getBookData();
 
   const formattedRows = useMemo(() => {
