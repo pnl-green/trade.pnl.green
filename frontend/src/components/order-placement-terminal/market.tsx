@@ -2,14 +2,8 @@ import { SelectItemsBox } from '@/styles/riskManager.styles';
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
-import {
-  ButtonStyles,
-  BuySellBtn,
-  CurrentMarketPriceAsk,
-  CurrentMarketPriceBid,
-  CurrentMarketPriceWidget,
-  FlexItems,
-} from '@/styles/common.styles';
+import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
+import { intelayerColors } from '@/styles/theme';
 import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
@@ -22,14 +16,14 @@ import { useWebDataContext } from '@/context/webDataContext';
 import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
 import EstablishConnectionModal from '../Modals/establishConnectionModal';
 import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
-import { riskValues } from '@/utils/risk';
 import Tooltip from '../ui/Tooltip';
 import DirectionSelector from './DirectionSelector';
 import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
+import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 
 const MarketComponent = () => {
-  const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
+  const { tokenPairs, tokenPairData, assetId, pair } = usePairTokensContext();
   const { hyperliquid, establishedConnection, handleEstablishConnection } =
     useHyperLiquidContext();
   const { webData2 } = useWebDataContext();
@@ -42,66 +36,49 @@ const MarketComponent = () => {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const { direction, setDirection } = useOrderTicketContext();
   const isBuyOrSell = direction;
-  const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
-  const [riskSelectItem, setRiskSelectItem] = useState(`${riskValues[0]}`);
+  const { base, quote } = derivePairSymbols(tokenPairs, pair);
+  const currentPositionSize = getCurrentPositionSize(webData2, base);
+  const [selectItem, setSelectItem] = useState(base || `${tokenPairs[0]}`);
   const [takeProfitPrice, setTakeProfitPrice] = useState('');
   const [stopLossPrice, setStopLossPrice] = useState('');
   const [gain, setGain] = useState('');
   const [loss, setLoss] = useState('');
   const [size, setSize] = useState<number>(0.0);
-  const [risk, setRisk] = useState<number>(0.0);
   const [establishConnModal, setEstablishedConnModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [liveMarketPrice, setLiveMarketPrice] = useState<number | null>(null);
+  const [livePriceSide, setLivePriceSide] = useState<'bid' | 'ask' | null>(null);
 
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   const { bookData, loadingBookData } = useOrderBookTradesContext();
-  function getBookData() {
-    let limit = 10;
-    const asks = bookData.asks.slice(0, limit).sort((a, b) => b.px - a.px);
-    const bids = bookData.bids.slice(0, limit).sort((a, b) => b.px - a.px);
-    return { asks, bids };
-  }
-  let orders = getBookData();
-
+  const isBuy = direction === 'buy';
   let szDecimals = tokenPairData[assetId]?.universe.szDecimals;
+
+  useEffect(() => {
+    const updateLivePrice = () => {
+      const bestAsk = [...bookData.asks].sort((a, b) => a.px - b.px)[0]?.px;
+      const bestBid = [...bookData.bids].sort((a, b) => b.px - a.px)[0]?.px;
+
+      if (isBuy) {
+        setLiveMarketPrice(bestAsk ?? null);
+        setLivePriceSide('ask');
+      } else {
+        setLiveMarketPrice(bestBid ?? null);
+        setLivePriceSide('bid');
+      }
+    };
+
+    updateLivePrice();
+    const intervalId = setInterval(updateLivePrice, 500);
+
+    return () => clearInterval(intervalId);
+  }, [bookData.asks, bookData.bids, isBuy]);
 
   const handleSizeInput = (e: {
     target: { value: React.SetStateAction<number> };
   }) => {
     const value = e.target.value;
     setSize(value);
-  };
-
-  const handleRiskInput = (e: {
-    target: { value: React.SetStateAction<number> };
-  }) => {
-    const value = e.target.value;
-    setRisk(value);
-  };
-
-  const handleRiskSelectItem = (value: string) => {
-    setRisk(0);
-    setRiskSelectItem(value);
-  };
-
-  const formatRiskValue = (
-    balance: number,
-    risk: string | number,
-    riskSelectItem: string
-  ) => {
-    if (!risk || isNaN(+risk)) {
-      return 0;
-    }
-
-    let riskValue = +parseSize(+risk, szDecimals);
-    if (riskSelectItem === 'Percent') {
-      riskValue = (balance * +parseSize(+risk, szDecimals)) / 100;
-    }
-    if (isNaN(+riskValue)) {
-      return 0;
-    }
-
-    return riskValue;
   };
 
   //setting the equivalent size in the selected token
@@ -136,28 +113,35 @@ const MarketComponent = () => {
   };
 
   useEffect(() => {
-    setSelectItem(`${tokenPairs[0]}`);
-  }, [tokenPairs]);
+    setSelectItem(base || `${tokenPairs[0]}`);
+  }, [base, tokenPairs]);
+
+  const rawReference = Number(
+    Number.isFinite(liveMarketPrice) && liveMarketPrice !== null
+      ? liveMarketPrice
+      : currentMarketPrice
+  );
+  const priceReference = Number.isFinite(rawReference) ? rawReference : 0;
 
   //get the size equivalent in USDC
   let sz =
     selectItem.toUpperCase() === 'USDC'
-      ? size / Number(currentMarketPrice)
+      ? size / (priceReference || 1)
       : size;
 
-  let isBuy = direction === 'buy';
   let orderType: OrderType = {
     limit: {
       tif: 'FrontendMarket',
     },
   };
   let reduceOnly = radioValue === '1';
-  const riskIncluded = radioValue === '3';
 
   // Calculate limit price based on buy or sell
+  const normalizedReference = priceReference || Number(currentMarketPrice) || 0;
+
   let normalLimitPx = isBuy
-    ? Number(currentMarketPrice) * 1.03
-    : Number(currentMarketPrice) * 0.97;
+    ? Number(normalizedReference) * 1.03
+    : Number(normalizedReference) * 0.97;
 
   //place order with no Take Profit/Stop Loss
   const handlePlaceOrder = async () => {
@@ -350,31 +334,37 @@ const MarketComponent = () => {
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
             <span>Current position size</span>
           </Tooltip>
-          <span>0.0 APE</span>
+          <span>
+            {currentPositionSize.toFixed(
+              Number.isFinite(szDecimals) ? szDecimals : 4
+            )}{' '}
+            {base || quote || '—'}
+          </span>
+        </FlexItems>
+        <FlexItems>
+          <Tooltip content={orderTicketTooltips.currentMarketPrice}>
+            <span>Current Market Price</span>
+          </Tooltip>
+          <span
+            style={{
+              color:
+                livePriceSide === 'bid'
+                  ? intelayerColors.green[500]
+                  : livePriceSide === 'ask'
+                  ? intelayerColors.red[400]
+                  : intelayerColors.ink,
+            }}
+          >
+            {liveMarketPrice !== null
+              ? `${Number(liveMarketPrice).toFixed(2)} ${quote || 'USDC'}`
+              : '--'}
+          </span>
         </FlexItems>
       </Box>
 
       <Box
         sx={{ display: 'flex', flexDirection: 'column', gap: '6px', mt: '6px' }}
       >
-        <SelectItemsBox sx={{ '&:hover': { border: 'none' }, m: 0 }}>
-          <Tooltip content={orderTicketTooltips.currentMarketPrice}>
-            <span>Current Market Price</span>
-          </Tooltip>
-          <CurrentMarketPriceWidget>
-            {/* @Todo investigato how get currentMarketPrice directly from ws, not order book */}
-            {/* Quick fix, i will rewrite it */}
-            <CurrentMarketPriceAsk>
-              {orders.asks.length !== 0
-                ? orders.asks[orders.asks.length - 1].px.toFixed(2)
-                : ''}
-            </CurrentMarketPriceAsk>
-            <CurrentMarketPriceBid>
-              {orders.bids.length !== 0 ? orders.bids[0].px.toFixed(2) : ''}
-            </CurrentMarketPriceBid>
-          </CurrentMarketPriceWidget>
-        </SelectItemsBox>
-
         <SelectItemsBox sx={{ m: 0 }}>
           <RenderInput
             label={'Size'}
@@ -393,15 +383,8 @@ const MarketComponent = () => {
           <HandleSelectItems
             selectItem={selectItem}
             setSelectItem={setSelectItem}
-            selectDataItems={[`${tokenPairs[0]}`, `USDC`]}
+            selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
           />
-        </SelectItemsBox>
-
-        <SelectItemsBox sx={{ '&:hover': { border: 'none' }, m: 0 }}>
-          <Tooltip content={orderTicketTooltips.price}>
-            <span> Price</span>
-          </Tooltip>
-          <span>$</span>
         </SelectItemsBox>
       </Box>
 
@@ -446,22 +429,6 @@ const MarketComponent = () => {
           </label>
           <Tooltip content={orderTicketTooltips.takeProfitStopLoss}>
             <span>Take Profit / Stop Loss</span>
-          </Tooltip>
-        </FlexItems>
-
-        <FlexItems sx={{ justifyContent: 'flex-start' }}>
-          <label>
-            <input
-              type="radio"
-              name="radio"
-              value="3"
-              checked={radioValue === '3'}
-              onChange={handleRadioChange}
-              onClick={handleRadioClick}
-            />
-          </label>
-          <Tooltip content={orderTicketTooltips.addRisk}>
-            <span>Add Risk</span>
           </Tooltip>
         </FlexItems>
       </Box>
@@ -541,29 +508,6 @@ const MarketComponent = () => {
             />
           </FlexItems>
         </Box>
-      )}
-
-      {radioValue === '3' && (
-        <SelectItemsBox sx={{ mt: '10px' }}>
-          <RenderInput
-            label={'Risk'}
-            placeholder="|"
-            type="number"
-            value={risk.toString()}
-            onChange={(e: any) => handleRiskInput(e)}
-            styles={{
-              background: 'transparent',
-              ':hover': {
-                border: 'none !important',
-              },
-            }}
-          />
-          <HandleSelectItems
-            selectItem={riskSelectItem}
-            setSelectItem={handleRiskSelectItem}
-            selectDataItems={[`${riskValues[0]}`, `${riskValues[1]}`]}
-          />
-        </SelectItemsBox>
       )}
 
       {!establishedConnection ? (

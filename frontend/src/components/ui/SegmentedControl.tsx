@@ -29,10 +29,10 @@ const ControlRoot = styled('div')<{ centered?: boolean }>(({ centered }) => ({
 
 const ControlButton = styled('button')<{ centered?: boolean }>(({ centered }) => ({
   border: `1px solid ${intelayerColors.panelBorder}`,
-  backgroundColor: intelayerColors.surface,
-  color: intelayerColors.muted,
-  borderRadius: '8px',
-  padding: '8px 14px',
+  backgroundColor: intelayerColors.gray[700],
+  color: intelayerColors.ink,
+  borderRadius: '10px',
+  padding: '9px 14px',
   fontFamily: intelayerFonts.body,
   fontSize: '13px',
   fontWeight: 500,
@@ -41,10 +41,15 @@ const ControlButton = styled('button')<{ centered?: boolean }>(({ centered }) =>
   flex: centered ? '0 1 auto' : '1 1 auto',
   textAlign: 'center',
   minWidth: centered ? 'auto' : '0',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.35)',
+  '&:hover': {
+    backgroundColor: intelayerColors.gray[600],
+  },
   '&[data-active="true"]': {
     backgroundColor: intelayerColors.green[600],
-    color: '#04140B',
-    borderColor: intelayerColors.green[500],
+    color: intelayerColors.page,
+    borderColor: intelayerColors.green[400],
+    boxShadow: '0 0 0 1px rgba(4, 146, 96, 0.4)',
   },
   '&:focus-visible': {
     outline: `2px solid ${intelayerColors.green[500]}`,

@@ -10,9 +10,12 @@ interface SingleTokenPairInfoProps {
   toggleTablePairs: () => void;
 }
 
-const PairDetail = ({ label, value, isRed }: any) => (
+const PairDetail = ({ label, subLabel, value, isRed }: any) => (
   <Box className="metric">
-    <span className="label">{label}</span>
+    <span className="label">
+      {label}
+      {subLabel && <span className="sublabel">{subLabel}</span>}
+    </span>
     {React.isValidElement(value) ? (
       value
     ) : (
@@ -53,7 +56,8 @@ const SingleTokenPairInfo = ({
         "Oracle Price is the external reference price provided by the venue's oracle. It is used for funding and risk checks, not necessarily for order execution.",
     },
     {
-      label: '24hr change (in % and $)',
+      label: '24hr Change',
+      subLabel: '(in % and $)',
       value: pairDataInformation()?.hr24change
         ? pairDataInformation()?.hr24change
         : '--',
@@ -73,7 +77,8 @@ const SingleTokenPairInfo = ({
         'OI (Open Interest) is the notional value of all open positions in this market. It is a proxy for market activity and crowding.',
     },
     {
-      label: 'Funding / Funding Countdown',
+      label: 'Funding',
+      subLabel: 'Countdown',
       value: (
         <span className="value">
           <span id="toGreen">{pairDataInformation()?.funding}&nbsp;&nbsp;</span>
@@ -94,14 +99,19 @@ const SingleTokenPairInfo = ({
         </div>
       </Box>
 
-      <Box className="metrics" component="div">
-        {metrics.map(({ label, value, tooltip, isRed }) => (
-          <Tooltip key={label} content={tooltip}>
-            <PairDetail label={label} value={value} isRed={isRed} />
-          </Tooltip>
-        ))}
-      </Box>
-    </TokenPairsWrapper>
+        <Box className="metrics" component="div">
+          {metrics.map(({ label, subLabel, value, tooltip, isRed }) => (
+            <Tooltip key={label} content={tooltip}>
+              <PairDetail
+                label={label}
+                subLabel={subLabel}
+                value={value}
+                isRed={isRed}
+              />
+            </Tooltip>
+          ))}
+        </Box>
+      </TokenPairsWrapper>
   );
 };
 

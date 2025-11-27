@@ -21,27 +21,31 @@ const LeverageModal: React.FC<ModalProps> = ({ onClose, onConfirm }) => {
     useHyperLiquidContext();
 
   const marginType = activeAssetData?.leverage.type ?? '';
-  let maxLeverage = Number(tokenPairData[assetId]?.universe.maxLeverage);
-  let currentLeverage = Number(activeAssetData?.leverage.value);
+  const rawMaxLeverage = Number(tokenPairData[assetId]?.universe.maxLeverage);
+  const maxLeverage =
+    Number.isFinite(rawMaxLeverage) && rawMaxLeverage > 0 ? rawMaxLeverage : 1;
+  const rawCurrentLeverage = Number(activeAssetData?.leverage.value);
+  const currentLeverage =
+    Number.isFinite(rawCurrentLeverage) && rawCurrentLeverage > 0
+      ? rawCurrentLeverage
+      : 1;
 
   const [sliderValue, setSliderValue] = useState<number>(currentLeverage);
   const [establishConnModal, setEstablishedConnModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSliderChange = (event: any, newValue: number | number[]) => {
-    if (
-      typeof newValue === 'number' &&
-      newValue >= 0 &&
-      newValue <= maxLeverage
-    ) {
-      setSliderValue(newValue);
+    if (typeof newValue === 'number') {
+      const nextValue = Math.min(Math.max(newValue, 1), maxLeverage);
+      setSliderValue(nextValue);
     }
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value === '' ? 0 : Number(event.target.value);
-    if (typeof value === 'number' && value >= 0 && value <= maxLeverage) {
-      setSliderValue(value);
+    const value = event.target.value === '' ? 1 : Number(event.target.value);
+    if (typeof value === 'number') {
+      const clamped = Math.min(Math.max(value, 1), maxLeverage);
+      setSliderValue(clamped);
     }
   };
 
@@ -50,7 +54,8 @@ const LeverageModal: React.FC<ModalProps> = ({ onClose, onConfirm }) => {
       setIsLoading(true);
       let asset = Number(assetId);
       let isCross = marginType === 'cross';
-      let leverage = sliderValue;
+      const leverage =
+        Number.isFinite(sliderValue) && sliderValue > 0 ? sliderValue : 1;
 
       const { data, msg, success } = await hyperliquid.updateLeverage(
         asset,
@@ -190,6 +195,7 @@ const LeverageModal: React.FC<ModalProps> = ({ onClose, onConfirm }) => {
                       onChange={handleSliderChange}
                       aria-label="custom thumb label"
                       valueLabelDisplay="off"
+                      min={1}
                       max={maxLeverage}
                       sx={{
                         '.MuiSlider-thumb': {
