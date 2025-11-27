@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { styled } from '@mui/material';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 
@@ -49,12 +49,14 @@ const DepthRow = styled('div')(() => ({
   display: 'grid',
   gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
   gap: '8px',
-  padding: '4px 8px',
+  padding: '0 8px',
   borderRadius: '6px',
   fontVariantNumeric: 'tabular-nums',
   textAlign: 'right',
   overflow: 'hidden',
   transition: 'background 0.2s ease',
+  height: '32px',
+  alignItems: 'center',
   '&:hover': {
     backgroundColor: 'rgba(20, 26, 35, 0.6)',
   },
@@ -72,7 +74,7 @@ const Body = styled('div')(() => ({
 const DepthBar = styled('span')<{ side: 'bid' | 'ask'; widthPct: number }>(
   ({ side, widthPct }) => ({
     position: 'absolute',
-    inset: '2px',
+    inset: 0,
     width: `${Math.min(widthPct, 100)}%`,
     left: side === 'bid' ? 'auto' : 0,
     right: side === 'bid' ? 0 : 'auto',
@@ -92,10 +94,14 @@ const Cell = styled('span')(() => ({
 }));
 
 const SpreadRow = styled('div')(() => ({
-  padding: '4px 8px',
+  padding: '0 8px',
   textAlign: 'right',
   color: intelayerColors.muted,
   fontSize: '11px',
+  height: '32px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
 }));
 
 const EmptyState = styled('div')(() => ({
@@ -115,6 +121,19 @@ const DepthTable: React.FC<DepthTableProps> = ({
   loading,
   emptyMessage = 'No order book data',
 }) => {
+  const centerRef = useRef<HTMLDivElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (centerRef.current && bodyRef.current) {
+      const body = bodyRef.current;
+      const center = centerRef.current;
+      const offset =
+        center.offsetTop - body.clientHeight / 2 + center.clientHeight / 2;
+      body.scrollTop = Math.max(offset, 0);
+    }
+  }, [asks.length, bids.length]);
+
   if (loading) {
     return <EmptyState>Loading order book…</EmptyState>;
   }
@@ -130,7 +149,7 @@ const DepthTable: React.FC<DepthTableProps> = ({
         <span>{sizeLabel}</span>
         <span>{totalLabel}</span>
       </HeaderRow>
-      <Body>
+      <Body ref={bodyRef}>
         {asks.map((row, index) => (
           <DepthRow key={`ask-${index}`}>
             <DepthBar side="ask" widthPct={row.widthPct} />
@@ -139,7 +158,7 @@ const DepthTable: React.FC<DepthTableProps> = ({
             <Cell>{row.total}</Cell>
           </DepthRow>
         ))}
-        <SpreadRow>
+        <SpreadRow ref={centerRef}>
           Spread: {spreadValue} ({spreadPercent}%)
         </SpreadRow>
         {bids.map((row, index) => (

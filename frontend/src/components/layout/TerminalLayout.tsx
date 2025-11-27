@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, styled, useMediaQuery } from '@mui/material';
+import { Box, styled, useMediaQuery } from '@mui/material';
 import React, {
   useCallback,
   useEffect,
@@ -14,7 +14,7 @@ const MOBILE_BREAKPOINT = 1024;
 const GRID_COLS = 12;
 const GRID_ROW_HEIGHT = 36;
 const GRID_GAP = 16;
-const LAYOUT_STORAGE_KEY = 'pnl_terminal_layout_v2';
+export const LAYOUT_STORAGE_KEY = 'pnl_terminal_layout_v2';
 
 type PanelId =
   | 'chart'
@@ -301,12 +301,18 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
     [isDesktop, layout]
   );
 
-  const resetLayout = () => {
+  const resetLayout = useCallback(() => {
     saveLayout(defaultLayout);
     if (typeof window !== 'undefined') {
       localStorage.removeItem(LAYOUT_STORAGE_KEY);
     }
-  };
+  }, [saveLayout]);
+
+  useEffect(() => {
+    const handleReset = () => resetLayout();
+    window.addEventListener('pnl-reset-layout', handleReset);
+    return () => window.removeEventListener('pnl-reset-layout', handleReset);
+  }, [resetLayout]);
 
   const sections = useMemo(
     () => ({
@@ -340,25 +346,6 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
         }}
       >
         {topBar && <Box sx={{ flex: 1, minWidth: 0 }}>{topBar}</Box>}
-        {isDesktop && (
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={resetLayout}
-            sx={{
-              color: intelayerColors.subtle,
-              borderColor: intelayerColors.panelBorder,
-              fontFamily: intelayerFonts.body,
-              textTransform: 'none',
-              '&:hover': {
-                borderColor: intelayerColors.green[500],
-                color: intelayerColors.green[500],
-              },
-            }}
-          >
-            Reset layout
-          </Button>
-        )}
       </Box>
       <LayoutBody>
         {isDesktop ? (
