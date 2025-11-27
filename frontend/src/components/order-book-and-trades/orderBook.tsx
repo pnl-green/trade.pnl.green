@@ -152,7 +152,7 @@ const OrderBook = () => {
     let asksSorted = trimOrderLevels(aggregatedAsks, 'ask');
     const bidsSorted = trimOrderLevels(aggregatedBids, 'bid');
 
-    const bestAsk = asksSorted[0]?.px;
+    let bestAsk = asksSorted[0]?.px;
     const bestBid = bidsSorted[0]?.px;
 
     if (bestAsk !== undefined && bestBid !== undefined && bestBid >= bestAsk) {
@@ -161,6 +161,7 @@ const OrderBook = () => {
         { ...asksSorted[0], px: adjustedBestAsk },
         ...asksSorted.slice(1),
       ].sort((a, b) => a.px - b.px);
+      bestAsk = asksSorted[0]?.px;
     }
 
     const asksWithUnits = computeLevelValues(asksSorted);
@@ -199,12 +200,12 @@ const OrderBook = () => {
       side: 'bid' as const,
     }));
 
-    const bestAsk = asksSorted[0]?.px;
-    const bestBid = bidsSorted[0]?.px;
     const spreadValue =
-      bestAsk && bestBid ? Number((bestAsk - bestBid).toFixed(priceDecimals)) : 0;
+      bestAsk !== undefined && bestBid !== undefined
+        ? Number((bestAsk - bestBid).toFixed(priceDecimals))
+        : 0;
     const spreadPercent =
-      bestAsk && bestBid
+      bestAsk !== undefined && bestBid !== undefined && bestAsk !== 0
         ? Number((((bestAsk - bestBid) / bestAsk) * 100).toFixed(3))
         : 0;
 
