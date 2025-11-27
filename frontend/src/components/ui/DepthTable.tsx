@@ -13,7 +13,8 @@ interface DepthRow {
 interface DepthTableProps {
   asks: DepthRow[];
   bids: DepthRow[];
-  pairLabel: string;
+  sizeLabel: string;
+  totalLabel: string;
   spreadValue: number;
   spreadPercent: number;
   loading?: boolean;
@@ -24,11 +25,12 @@ const Table = styled('div')(() => ({
   width: '100%',
   display: 'flex',
   flexDirection: 'column',
-  gap: '4px',
+  gap: '8px',
   fontFamily: intelayerFonts.body,
   fontSize: '12px',
-  maxHeight: '100%',
-  overflowY: 'auto',
+  flex: 1,
+  height: '100%',
+  minHeight: 0,
 }));
 
 const HeaderRow = styled('div')(() => ({
@@ -56,6 +58,15 @@ const DepthRow = styled('div')(() => ({
   '&:hover': {
     backgroundColor: 'rgba(20, 26, 35, 0.6)',
   },
+}));
+
+const Body = styled('div')(() => ({
+  flex: 1,
+  minHeight: 0,
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
 }));
 
 const DepthBar = styled('span')<{ side: 'bid' | 'ask'; widthPct: number }>(
@@ -97,7 +108,8 @@ const EmptyState = styled('div')(() => ({
 const DepthTable: React.FC<DepthTableProps> = ({
   asks,
   bids,
-  pairLabel,
+  sizeLabel,
+  totalLabel,
   spreadValue,
   spreadPercent,
   loading,
@@ -115,28 +127,30 @@ const DepthTable: React.FC<DepthTableProps> = ({
     <Table>
       <HeaderRow>
         <span>Price</span>
-        <span>{`Size (${pairLabel})`}</span>
-        <span>{`Total (${pairLabel})`}</span>
+        <span>{sizeLabel}</span>
+        <span>{totalLabel}</span>
       </HeaderRow>
-      {asks.map((row, index) => (
-        <DepthRow key={`ask-${index}`}>
-          <DepthBar side="ask" widthPct={row.widthPct} />
-          <Cell style={{ color: intelayerColors.red[500] }}>{row.price}</Cell>
-          <Cell>{row.size}</Cell>
-          <Cell>{row.total}</Cell>
-        </DepthRow>
-      ))}
-      <SpreadRow>
-        Spread: {spreadValue} ({spreadPercent}%)
-      </SpreadRow>
-      {bids.map((row, index) => (
-        <DepthRow key={`bid-${index}`}>
-          <DepthBar side="bid" widthPct={row.widthPct} />
-          <Cell style={{ color: intelayerColors.green[500] }}>{row.price}</Cell>
-          <Cell>{row.size}</Cell>
-          <Cell>{row.total}</Cell>
-        </DepthRow>
-      ))}
+      <Body>
+        {asks.map((row, index) => (
+          <DepthRow key={`ask-${index}`}>
+            <DepthBar side="ask" widthPct={row.widthPct} />
+            <Cell style={{ color: intelayerColors.red[500] }}>{row.price}</Cell>
+            <Cell>{row.size}</Cell>
+            <Cell>{row.total}</Cell>
+          </DepthRow>
+        ))}
+        <SpreadRow>
+          Spread: {spreadValue} ({spreadPercent}%)
+        </SpreadRow>
+        {bids.map((row, index) => (
+          <DepthRow key={`bid-${index}`}>
+            <DepthBar side="bid" widthPct={row.widthPct} />
+            <Cell style={{ color: intelayerColors.green[500] }}>{row.price}</Cell>
+            <Cell>{row.size}</Cell>
+            <Cell>{row.total}</Cell>
+          </DepthRow>
+        ))}
+      </Body>
     </Table>
   );
 };

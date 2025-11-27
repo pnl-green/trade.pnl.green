@@ -6,7 +6,6 @@ import { usePairTokensContext } from '@/context/pairTokensContext';
 import SegmentedControl from '../ui/SegmentedControl';
 
 const OrderBookAndTrades = () => {
-  const [spread, setSpread] = useState(1);
   const { pair, setPair } = usePairTokensContext();
   const [activeTab, setActiveTab] = useState('orderBook');
 
@@ -32,12 +31,7 @@ const OrderBookAndTrades = () => {
         onChange={setActiveTab}
       />
       {activeTab === 'orderBook' && (
-        <OrderBook
-          spread={spread}
-          pair={pair as any}
-          setSpread={setSpread}
-          setPair={setPair}
-        />
+        <OrderBook pair={pair as any} setPair={setPair} />
       )}
       {activeTab === 'recentTrades' && <Trades maxHeight="100%" />}
     </OrderBookContainer>

@@ -1,66 +1,86 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { SpreadAndPairSelects } from '@/styles/orderbook.styles';
 import { Box } from '@mui/material';
 import HandleSelectItems from '../handleSelectItems';
 import { usePairTokensContext } from '@/context/pairTokensContext';
-import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
-import { Order } from '@/context/orderBookTradesContext';
+import { useOrderBookTradesContext, Order } from '@/context/orderBookTradesContext';
 import DepthTable from '../ui/DepthTable';
 
-// Props for OrderBook component
+type SizeUnit = 'SOL' | 'USDC';
+
 interface OrderBookProps {
-  spread: number;
   pair: string;
-  setSpread: (spread: number) => void;
   setPair: (pair: string) => void;
 }
 
-// Calculate bar width as a percentage
+interface EnhancedOrder extends Order {
+  sizeSol: number;
+  sizeUsdc: number;
+  total?: number;
+}
+
+const MAX_LEVELS_PER_SIDE = 15;
+
 const calculateBarWidth = (total: number, max: number) => {
   if (!max) return 0;
   return (total / max) * 100;
 };
 
-// Calculate total size for each order
-const calculateTotal = (orders: Order[], reverse: boolean = false) => {
-  let cumulativeTotal = 0;
-  const ordersCopy = reverse ? [...orders].reverse() : [...orders];
-  const ordersWithTotal = ordersCopy.map((order) => {
-    const orderSize = order.sz;
-    cumulativeTotal += orderSize;
-    const roundedTotal = Number(cumulativeTotal.toFixed(4));
-    return { ...order, total: roundedTotal };
-  });
-  return reverse ? ordersWithTotal.reverse() : ordersWithTotal;
+const getDecimalPlaces = (value: number) => {
+  const valueString = value.toString();
+  if (valueString.includes('e-')) {
+    const [, exponent] = valueString.split('e-');
+    return Number(exponent);
+  }
+  const [, decimals] = valueString.split('.');
+  return decimals ? decimals.length : 0;
 };
 
-// Aggregate orders by price level to merge duplicate entries
-const aggregateOrdersByPrice = (orders: Order[]) => {
+const formatNumber = (value: number, decimals: number) =>
+  value.toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+
+const getTickConfigForAsset = (symbol: string) => {
+  if (symbol === 'BTC') {
+    return { baseTick: 1, allowedIncrements: [1, 2, 5, 10, 50, 100] };
+  }
+  if (symbol === 'ETH') {
+    return { baseTick: 0.1, allowedIncrements: [0.1, 0.5, 1, 5, 10] };
+  }
+  if (symbol === 'SOL') {
+    return { baseTick: 0.01, allowedIncrements: [0.01, 0.05, 0.1, 0.5, 1] };
+  }
+  return {
+    baseTick: 0.000001,
+    allowedIncrements: [0.000001, 0.00001, 0.0001, 0.001, 0.01],
+  };
+};
+
+const aggregateByIncrement = (orders: Order[], increment: number): Order[] => {
   const aggregated = new Map<number, Order>();
 
   orders.forEach((order) => {
-    const price = Number(order.px);
+    const bucket = Math.round(Number(order.px) / increment) * increment;
     const size = Number(order.sz);
     const count = Number(order.n || 0);
-    const existing = aggregated.get(price);
+    const existing = aggregated.get(bucket);
 
     if (existing) {
-      aggregated.set(price, {
-        px: price,
+      aggregated.set(bucket, {
+        px: bucket,
         sz: existing.sz + size,
         n: existing.n + count,
       });
     } else {
-      aggregated.set(price, { px: price, sz: size, n: count });
+      aggregated.set(bucket, { px: bucket, sz: size, n: count });
     }
   });
 
   return Array.from(aggregated.values());
 };
 
-const MAX_LEVELS_PER_SIDE = 15;
-
-// Trim orders to the closest levels around best bid/ask
 const trimOrderLevels = (orders: Order[], side: 'ask' | 'bid') => {
   const sorted = [...orders].sort((a, b) =>
     side === 'ask' ? a.px - b.px : b.px - a.px
@@ -69,96 +89,150 @@ const trimOrderLevels = (orders: Order[], side: 'ask' | 'bid') => {
   return sorted.slice(0, MAX_LEVELS_PER_SIDE);
 };
 
-// Calculate spread percentage
-const calculateSpreadPercentage = (asks: Order[], bids: Order[]) => {
-  if (asks.length === 0 || bids.length === 0) return 0;
-  const highestBid = bids[0].px;
-  const lowestAsk = asks[0].px;
-  const spread = lowestAsk - highestBid;
-  const spreadPercentage = parseFloat(((spread / lowestAsk) * 100).toFixed(3));
-  return spreadPercentage;
+const computeLevelValues = (orders: Order[]): EnhancedOrder[] =>
+  orders.map((order) => {
+    const sizeSol = Number(order.sz);
+    const sizeUsdc = sizeSol * Number(order.px);
+
+    return {
+      ...order,
+      sizeSol,
+      sizeUsdc,
+    };
+  });
+
+const addCumulativeTotals = (
+  bids: EnhancedOrder[],
+  asks: EnhancedOrder[],
+  unit: SizeUnit
+) => {
+  const key = unit === 'SOL' ? 'sizeSol' : 'sizeUsdc';
+
+  let running = 0;
+  const bidsWithTotal = bids.map((level) => {
+    running += level[key];
+    return { ...level, total: running };
+  });
+
+  running = 0;
+  const asksWithTotal = asks.map((level) => {
+    running += level[key];
+    return { ...level, total: running };
+  });
+
+  return { bidsWithTotal, asksWithTotal };
 };
 
-// Main component for order book
-const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
+const OrderBook = ({ pair, setPair }: OrderBookProps) => {
   const { tokenPairs } = usePairTokensContext();
   const { bookData, loadingBookData } = useOrderBookTradesContext();
-  const [spreadPercentage, setSpreadPercentage] = React.useState(0);
+  const [sizeUnit, setSizeUnit] = useState<SizeUnit>('SOL');
+  const [priceIncrement, setPriceIncrement] = useState<number>(1);
+  const [incrementOptions, setIncrementOptions] = useState<number[]>([]);
 
-  // Get asks and bids data
-  //
-  // @TODO investigate how sort orders with step: 1/2/5/10/100/1000
-  const getBookData = useCallback(() => {
-    const asks = trimOrderLevels(
-      aggregateOrdersByPrice(bookData.asks),
-      'ask'
-    );
-    const bids = trimOrderLevels(
-      aggregateOrdersByPrice(bookData.bids),
-      'bid'
-    );
-    return { asks, bids };
-  }, [bookData]);
+  const baseSymbol = tokenPairs?.[0] || 'SOL';
 
-  // Update spread percentage when book data changes
   useEffect(() => {
-    if (!loadingBookData) {
-      const { asks, bids } = getBookData();
-      if (asks.length > 0 && bids.length > 0) {
-        setSpreadPercentage(calculateSpreadPercentage(asks, bids));
-      }
-    }
-  }, [bookData, getBookData, loadingBookData]);
+    const { baseTick, allowedIncrements } = getTickConfigForAsset(baseSymbol);
+    setIncrementOptions(allowedIncrements);
+    setPriceIncrement((current) => {
+      const numeric = Number(current) || baseTick;
+      return numeric < baseTick ? baseTick : numeric;
+    });
+  }, [baseSymbol]);
+
+  const processedBook = useMemo(() => {
+    const increment = priceIncrement || getTickConfigForAsset(baseSymbol).baseTick;
+    const aggregatedAsks = aggregateByIncrement(bookData.asks, increment);
+    const aggregatedBids = aggregateByIncrement(bookData.bids, increment);
+
+    const asksSorted = trimOrderLevels(aggregatedAsks, 'ask');
+    const bidsSorted = trimOrderLevels(aggregatedBids, 'bid');
+
+    const asksWithUnits = computeLevelValues(asksSorted);
+    const bidsWithUnits = computeLevelValues(bidsSorted);
+
+    const { bidsWithTotal, asksWithTotal } = addCumulativeTotals(
+      bidsWithUnits,
+      asksWithUnits,
+      sizeUnit
+    );
+
+    const totals = [...bidsWithTotal, ...asksWithTotal].map(
+      (order) => order.total || 0
+    );
+    const maxTotal = totals.length ? Math.max(...totals) : 1;
+
+    const priceDecimals = Math.min(Math.max(getDecimalPlaces(increment), 2), 8);
+    const valueDecimals = sizeUnit === 'SOL' ? 4 : 2;
+    const sizeKey = sizeUnit === 'SOL' ? 'sizeSol' : 'sizeUsdc';
+
+    const asksVisual = [...asksWithTotal].reverse();
+
+    const asksRows = asksVisual.map((order) => ({
+      price: formatNumber(order.px, priceDecimals),
+      size: formatNumber(order[sizeKey], valueDecimals),
+      total: formatNumber(order.total || 0, valueDecimals),
+      widthPct: calculateBarWidth(order.total || 0, maxTotal),
+      side: 'ask' as const,
+    }));
+
+    const bidsRows = bidsWithTotal.map((order) => ({
+      price: formatNumber(order.px, priceDecimals),
+      size: formatNumber(order[sizeKey], valueDecimals),
+      total: formatNumber(order.total || 0, valueDecimals),
+      widthPct: calculateBarWidth(order.total || 0, maxTotal),
+      side: 'bid' as const,
+    }));
+
+    const bestAsk = asksSorted[0]?.px;
+    const bestBid = bidsSorted[0]?.px;
+    const spreadValue =
+      bestAsk && bestBid ? Number((bestAsk - bestBid).toFixed(priceDecimals)) : 0;
+    const spreadPercent =
+      bestAsk && bestBid
+        ? Number((((bestAsk - bestBid) / bestAsk) * 100).toFixed(3))
+        : 0;
+
+    return {
+      asksRows,
+      bidsRows,
+      spreadValue,
+      spreadPercent,
+    };
+  }, [
+    baseSymbol,
+    bookData.asks,
+    bookData.bids,
+    priceIncrement,
+    sizeUnit,
+  ]);
 
   const pairLabel =
     tokenPairs?.length >= 2
       ? `${tokenPairs[0]}-${tokenPairs[1]}`
       : pair?.toString() || 'USDC';
-  const { asks, bids } = getBookData();
-
-  const formattedRows = useMemo(() => {
-    const asksWithTotal = calculateTotal(asks, true);
-    const bidsWithTotal = calculateTotal(bids, false);
-    const combinedTotals = [...asksWithTotal, ...bidsWithTotal].map(
-      (order) => order.total
-    );
-    const maxTotal = combinedTotals.length
-      ? Math.max(...combinedTotals)
-      : 1;
-
-    const formatValue = (value: number) => Number(value).toFixed(4);
-    const formatTotal = (total: number) => Number(total).toFixed(4);
-
-    return {
-      asks: asksWithTotal.map((order) => ({
-        price: order.px.toFixed(2),
-        size: formatValue(order.sz),
-        total: formatTotal(order.total),
-        widthPct: calculateBarWidth(order.total, maxTotal),
-        side: 'ask' as const,
-      })),
-      bids: bidsWithTotal.map((order) => ({
-        price: order.px.toFixed(2),
-        size: formatValue(order.sz),
-        total: formatTotal(order.total),
-        widthPct: calculateBarWidth(order.total, maxTotal),
-        side: 'bid' as const,
-      })),
-    };
-  }, [asks, bids]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
       <SpreadAndPairSelects>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: '120px' }}>
           <HandleSelectItems
-            selectItem={spread}
-            setSelectItem={setSpread}
-            selectDataItems={['1', '2', '5', '10', '100', '1000']}
+            selectItem={priceIncrement}
+            setSelectItem={(value) => setPriceIncrement(Number(value))}
+            selectDataItems={incrementOptions.map((value) => value.toString())}
             variant="elev"
           />
         </div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: '120px' }}>
+          <HandleSelectItems
+            selectItem={sizeUnit}
+            setSelectItem={(value) => setSizeUnit(value as SizeUnit)}
+            selectDataItems={['SOL', 'USDC']}
+            variant="elev"
+          />
+        </div>
+        <div style={{ flex: 1, minWidth: '120px' }}>
           <HandleSelectItems
             selectItem={pair}
             setSelectItem={setPair}
@@ -169,11 +243,12 @@ const OrderBook = ({ spread, pair, setSpread, setPair }: OrderBookProps) => {
       </SpreadAndPairSelects>
 
       <DepthTable
-        asks={formattedRows.asks}
-        bids={formattedRows.bids}
-        pairLabel={pairLabel}
-        spreadValue={spread}
-        spreadPercent={spreadPercentage}
+        asks={processedBook.asksRows}
+        bids={processedBook.bidsRows}
+        sizeLabel={`Size (${sizeUnit})`}
+        totalLabel={`Total (${sizeUnit})`}
+        spreadValue={processedBook.spreadValue}
+        spreadPercent={processedBook.spreadPercent}
         loading={loadingBookData}
         emptyMessage={`No data Available for ${pairLabel}`}
       />
