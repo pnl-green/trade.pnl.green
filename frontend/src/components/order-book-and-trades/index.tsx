@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { OrderBookContainer } from '@/styles/orderbook.styles';
 import OrderBook from './orderBook';
 import Trades from './trades';
-import { usePairTokensContext } from '@/context/pairTokensContext';
 import SegmentedControl from '../ui/SegmentedControl';
 
 const OrderBookAndTrades = () => {
-  const { pair, setPair } = usePairTokensContext();
   const [activeTab, setActiveTab] = useState('orderBook');
 
   const tabOptions = [
@@ -30,9 +28,7 @@ const OrderBookAndTrades = () => {
         value={activeTab}
         onChange={setActiveTab}
       />
-      {activeTab === 'orderBook' && (
-        <OrderBook pair={pair as any} setPair={setPair} />
-      )}
+      {activeTab === 'orderBook' && <OrderBook />}
       {activeTab === 'recentTrades' && <Trades maxHeight="100%" />}
     </OrderBookContainer>
   );

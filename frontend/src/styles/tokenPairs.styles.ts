@@ -7,32 +7,41 @@ interface TokenPairsProps {
 
 export const TokenPairsWrapper = styled(Box)<TokenPairsProps>(({ tableISOpen }) => ({
   display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'flex-start',
   alignItems: 'center',
-  padding: '14px 20px',
+  padding: '8px 16px',
   width: '100%',
-  minHeight: '64px',
+  minHeight: '44px',
   borderRadius: '12px',
   backgroundColor: intelayerColors.surface,
   gap: '24px',
   border: `1px solid ${intelayerColors.panelBorder}`,
   flexWrap: 'wrap',
 
-  '.pair_tokens': {
+  '.pair-section': {
     display: 'flex',
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    minWidth: '100px',
-    height: '100%',
+    justifyContent: 'center',
+    gap: '8px',
+    minWidth: '120px',
     fontFamily: intelayerFonts.heading,
     fontSize: '16px',
     fontWeight: 600,
     cursor: 'pointer',
-    span: {
-      marginRight: '10px',
-    },
+  },
+
+  '.pair-symbol': {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+
+  '.metrics': {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '24px',
+    flexWrap: 'wrap',
+    flex: 1,
+    minWidth: 0,
   },
 
   '.upDownIcon': {
@@ -46,15 +55,15 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>(({ tableISOpen }) 
     },
   },
 
-  '.pairDetails': {
+  '.metric': {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    gap: '4px',
-    minWidth: '120px',
+    gap: '2px',
+    minWidth: '110px',
 
-    span: {
+    '.label': {
       fontFamily: intelayerFonts.body,
       fontSize: '12px',
       fontWeight: 500,

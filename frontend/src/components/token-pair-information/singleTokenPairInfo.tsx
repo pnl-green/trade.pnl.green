@@ -11,8 +11,8 @@ interface SingleTokenPairInfoProps {
 }
 
 const PairDetail = ({ label, value, isRed }: any) => (
-  <Box className="pairDetails">
-    <span>{label}</span>
+  <Box className="metric">
+    <span className="label">{label}</span>
     {React.isValidElement(value) ? (
       value
     ) : (
@@ -87,18 +87,20 @@ const SingleTokenPairInfo = ({
 
   return (
     <TokenPairsWrapper tableISOpen={tableISOpen}>
-      <Box className="pair_tokens" onClick={toggleTablePairs}>
-        <span>{pairDataInformation()?.pairs}</span>
+      <Box className="pair-section" onClick={toggleTablePairs}>
+        <span className="pair-symbol">{pairDataInformation()?.pairs}</span>
         <div className="upDownIcon">
           <UpDownIcon />
         </div>
       </Box>
 
-      {metrics.map(({ label, value, tooltip, isRed }) => (
-        <Tooltip key={label} content={tooltip}>
-          <PairDetail label={label} value={value} isRed={isRed} />
-        </Tooltip>
-      ))}
+      <Box className="metrics" component="div">
+        {metrics.map(({ label, value, tooltip, isRed }) => (
+          <Tooltip key={label} content={tooltip}>
+            <PairDetail label={label} value={value} isRed={isRed} />
+          </Tooltip>
+        ))}
+      </Box>
     </TokenPairsWrapper>
   );
 };

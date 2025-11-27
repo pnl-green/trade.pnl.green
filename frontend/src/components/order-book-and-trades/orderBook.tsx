@@ -8,11 +8,6 @@ import DepthTable from '../ui/DepthTable';
 
 type SizeUnit = 'SOL' | 'USDC';
 
-interface OrderBookProps {
-  pair: string;
-  setPair: (pair: string) => void;
-}
-
 interface EnhancedOrder extends Order {
   sizeSol: number;
   sizeUsdc: number;
@@ -58,11 +53,19 @@ const getTickConfigForAsset = (symbol: string) => {
   };
 };
 
-const aggregateByIncrement = (orders: Order[], increment: number): Order[] => {
+const aggregateByIncrement = (
+  orders: Order[],
+  increment: number,
+  side: 'ask' | 'bid'
+): Order[] => {
   const aggregated = new Map<number, Order>();
 
   orders.forEach((order) => {
-    const bucket = Math.round(Number(order.px) / increment) * increment;
+    const price = Number(order.px);
+    const bucket =
+      side === 'bid'
+        ? Math.floor(price / increment) * increment
+        : Math.ceil(price / increment) * increment;
     const size = Number(order.sz);
     const count = Number(order.n || 0);
     const existing = aggregated.get(bucket);
@@ -123,8 +126,8 @@ const addCumulativeTotals = (
   return { bidsWithTotal, asksWithTotal };
 };
 
-const OrderBook = ({ pair, setPair }: OrderBookProps) => {
-  const { tokenPairs } = usePairTokensContext();
+const OrderBook = () => {
+  const { tokenPairs, pair } = usePairTokensContext();
   const { bookData, loadingBookData } = useOrderBookTradesContext();
   const [sizeUnit, setSizeUnit] = useState<SizeUnit>('SOL');
   const [priceIncrement, setPriceIncrement] = useState<number>(1);
@@ -143,11 +146,22 @@ const OrderBook = ({ pair, setPair }: OrderBookProps) => {
 
   const processedBook = useMemo(() => {
     const increment = priceIncrement || getTickConfigForAsset(baseSymbol).baseTick;
-    const aggregatedAsks = aggregateByIncrement(bookData.asks, increment);
-    const aggregatedBids = aggregateByIncrement(bookData.bids, increment);
+    const aggregatedAsks = aggregateByIncrement(bookData.asks, increment, 'ask');
+    const aggregatedBids = aggregateByIncrement(bookData.bids, increment, 'bid');
 
-    const asksSorted = trimOrderLevels(aggregatedAsks, 'ask');
+    let asksSorted = trimOrderLevels(aggregatedAsks, 'ask');
     const bidsSorted = trimOrderLevels(aggregatedBids, 'bid');
+
+    const bestAsk = asksSorted[0]?.px;
+    const bestBid = bidsSorted[0]?.px;
+
+    if (bestAsk !== undefined && bestBid !== undefined && bestBid >= bestAsk) {
+      const adjustedBestAsk = bestBid + increment;
+      asksSorted = [
+        { ...asksSorted[0], px: adjustedBestAsk },
+        ...asksSorted.slice(1),
+      ].sort((a, b) => a.px - b.px);
+    }
 
     const asksWithUnits = computeLevelValues(asksSorted);
     const bidsWithUnits = computeLevelValues(bidsSorted);
@@ -229,14 +243,6 @@ const OrderBook = ({ pair, setPair }: OrderBookProps) => {
             selectItem={sizeUnit}
             setSelectItem={(value) => setSizeUnit(value as SizeUnit)}
             selectDataItems={['SOL', 'USDC']}
-            variant="elev"
-          />
-        </div>
-        <div style={{ flex: 1, minWidth: '120px' }}>
-          <HandleSelectItems
-            selectItem={pair}
-            setSelectItem={setPair}
-            selectDataItems={tokenPairs?.[0] ? [tokenPairs[0].toString()] : []}
             variant="elev"
           />
         </div>

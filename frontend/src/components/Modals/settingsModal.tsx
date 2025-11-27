@@ -1,6 +1,7 @@
 import { SettingsModalWrapper, StyledCheckBox } from '@/styles/navbar.styles';
 import { Box, ClickAwayListener } from '@mui/material';
 import React, { useState } from 'react';
+import { LAYOUT_STORAGE_KEY } from '../layout/TerminalLayout';
 
 interface settingsProps {
   onClose: () => void;
@@ -30,7 +31,6 @@ const SettingsModal: React.FC<settingsProps> = ({ onClose }) => {
     displayVerboseErrors: false,
     displayNotification: false,
     showWarnings: false,
-    returnDefault: false,
   });
 
   const handleSettingChange =
@@ -42,6 +42,11 @@ const SettingsModal: React.FC<settingsProps> = ({ onClose }) => {
     };
 
   const resetToDefault = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(LAYOUT_STORAGE_KEY);
+      window.dispatchEvent(new CustomEvent('pnl-reset-layout'));
+    }
+
     setSettings({
       skipOrderOpen: false,
       skipOrderClose: false,
@@ -51,8 +56,8 @@ const SettingsModal: React.FC<settingsProps> = ({ onClose }) => {
       displayVerboseErrors: false,
       displayNotification: false,
       showWarnings: false,
-      returnDefault: true,
     });
+    onClose();
   };
 
   const SettingItem: React.FC<{
@@ -80,9 +85,9 @@ const SettingsModal: React.FC<settingsProps> = ({ onClose }) => {
               onChange={handleSettingChange(option.id)}
             />
           ))}
-          <Box sx={{ padding: '2px 0' }} onClick={resetToDefault}>
+          <Box sx={{ padding: '6px 0', cursor: 'pointer' }} onClick={resetToDefault}>
             <label>
-              <span>Return to Default Layout</span>
+              <span>Reset trading layout</span>
             </label>
           </Box>
         </Box>

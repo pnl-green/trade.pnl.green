@@ -306,7 +306,7 @@ const PnlComponent = () => {
       chart={
         <PanelCard
           title={<TokenPairInformation />}
-          sx={{ height: '100%', minHeight: '520px' }}
+          sx={{ height: '100%', minHeight: 0 }}
         >
           {chartElement}
         </PanelCard>
