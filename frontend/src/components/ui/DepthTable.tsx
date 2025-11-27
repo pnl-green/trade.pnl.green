@@ -55,8 +55,10 @@ const DepthRow = styled('div')(() => ({
   textAlign: 'right',
   overflow: 'hidden',
   transition: 'background 0.2s ease',
-  height: '32px',
+  height: '34px',
+  minHeight: '34px',
   alignItems: 'center',
+  flex: '0 0 34px',
   '&:hover': {
     backgroundColor: 'rgba(20, 26, 35, 0.6)',
   },
@@ -98,10 +100,12 @@ const SpreadRow = styled('div')(() => ({
   textAlign: 'right',
   color: intelayerColors.muted,
   fontSize: '11px',
-  height: '32px',
+  height: '34px',
+  minHeight: '34px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
+  flex: '0 0 34px',
 }));
 
 const EmptyState = styled('div')(() => ({

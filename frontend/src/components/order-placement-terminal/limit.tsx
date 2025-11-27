@@ -19,16 +19,19 @@ import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import DirectionSelector from './DirectionSelector';
+import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 
 const LimitComponent = () => {
   const { webData2 } = useWebDataContext();
   const { hyperliquid, establishedConnection, handleEstablishConnection } =
     useHyperLiquidContext();
-  const { tokenPairs, tokenPairData, assetId } = usePairTokensContext();
+  const { tokenPairs, tokenPairData, assetId, pair } = usePairTokensContext();
 
   const balance = Number(
     webData2.clearinghouseState?.marginSummary.accountValue
   );
+  const { base, quote } = derivePairSymbols(tokenPairs, pair);
+  const currentPositionSize = getCurrentPositionSize(webData2, base);
 
   //------Local State------
   const {
@@ -48,7 +51,7 @@ const LimitComponent = () => {
   >('Gtc');
   const [radioValue, setRadioValue] = useState('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
+  const [selectItem, setSelectItem] = useState(base || `${tokenPairs[0]}`);
   const [riskSelectItem, setRiskSelectItem] = useState(`${riskValues[0]}`);
   const [size, setSize] = useState<number>(0.0);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,8 +123,8 @@ const LimitComponent = () => {
   };
 
   useEffect(() => {
-    setSelectItem(`${tokenPairs[0]}`);
-  }, [tokenPairs]);
+    setSelectItem(base || `${tokenPairs[0]}`);
+  }, [base, tokenPairs]);
 
   useEffect(() => {
     if (tpSlEnabled) {
@@ -242,10 +245,15 @@ const LimitComponent = () => {
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Current position size</span>
-          </Tooltip>
-          <span>0.0 APE</span>
-        </FlexItems>
+          <span>Current position size</span>
+        </Tooltip>
+        <span>
+          {currentPositionSize.toFixed(
+            Number.isFinite(szDecimals) ? szDecimals : 4
+          )}{' '}
+          {base || quote || '—'}
+        </span>
+      </FlexItems>
       </Box>
 
       <SelectItemsBox>
@@ -265,7 +273,7 @@ const LimitComponent = () => {
         <HandleSelectItems
           selectItem={selectItem}
           setSelectItem={setSelectItem}
-          selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
+          selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
         />
       </SelectItemsBox>
 

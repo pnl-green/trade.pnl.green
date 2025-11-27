@@ -8,23 +8,23 @@ interface TokenPairsProps {
 export const TokenPairsWrapper = styled(Box)<TokenPairsProps>(({ tableISOpen }) => ({
   display: 'flex',
   alignItems: 'center',
-  padding: '8px 16px',
+  padding: '6px 12px',
   width: '100%',
-  minHeight: '44px',
+  minHeight: '38px',
   borderRadius: '12px',
   backgroundColor: intelayerColors.surface,
-  gap: '24px',
+  gap: '16px',
   border: `1px solid ${intelayerColors.panelBorder}`,
-  flexWrap: 'wrap',
+  flexWrap: 'nowrap',
 
   '.pair-section': {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
-    minWidth: '120px',
+    gap: '6px',
+    minWidth: '110px',
     fontFamily: intelayerFonts.heading,
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: 600,
     cursor: 'pointer',
   },
@@ -37,9 +37,9 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>(({ tableISOpen }) 
 
   '.metrics': {
     display: 'flex',
-    alignItems: 'center',
-    gap: '24px',
-    flexWrap: 'wrap',
+    alignItems: 'stretch',
+    gap: '16px',
+    flexWrap: 'nowrap',
     flex: 1,
     minWidth: 0,
   },
@@ -60,14 +60,22 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>(({ tableISOpen }) 
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    gap: '2px',
-    minWidth: '110px',
+    gap: '4px',
+    minWidth: '118px',
 
     '.label': {
+      display: 'flex',
+      flexDirection: 'column',
       fontFamily: intelayerFonts.body,
       fontSize: '12px',
-      fontWeight: 500,
+      fontWeight: 600,
       color: intelayerColors.subtle,
+    },
+
+    '.sublabel': {
+      fontSize: '10px',
+      fontWeight: 500,
+      color: intelayerColors.muted,
     },
 
     '#toRed': {
@@ -86,8 +94,9 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>(({ tableISOpen }) 
     },
   },
   '@media (max-width: 768px)': {
-    gap: '16px',
-    padding: '12px 16px',
+    gap: '12px',
+    padding: '10px 14px',
+    flexWrap: 'wrap',
   },
 }));
 

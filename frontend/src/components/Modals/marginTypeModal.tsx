@@ -6,6 +6,7 @@ import { usePairTokensContext } from '@/context/pairTokensContext';
 import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
 import EstablishConnectionModal from './establishConnectionModal';
 import Loader from '../loaderSpinner';
+import { derivePairSymbols } from '@/utils';
 import toast from 'react-hot-toast';
 
 interface ModalProps {
@@ -14,9 +15,12 @@ interface ModalProps {
 
 const MarginTypeModal: React.FC<ModalProps> = ({ onClose }) => {
   //------Hooks------
-  const { assetId, activeAssetData } = usePairTokensContext();
+  const { assetId, activeAssetData, tokenPairs, pair } = usePairTokensContext();
   const { establishedConnection, handleEstablishConnection, hyperliquid } =
     useHyperLiquidContext();
+
+  const { base, quote } = derivePairSymbols(tokenPairs, pair);
+  const pairLabel = [base, quote || 'USDC'].filter(Boolean).join('-');
 
   const marginType = activeAssetData?.leverage.type ?? '';
   const [activeTab, setActiveTab] = useState(
@@ -89,7 +93,7 @@ const MarginTypeModal: React.FC<ModalProps> = ({ onClose }) => {
                   fontFamily: 'Sora',
                 }}
               >
-                APE-USDC Margin Mode
+                {pairLabel || 'Margin Mode'} Margin Mode
               </Box>
               <Box
                 sx={{

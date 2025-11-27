@@ -12,16 +12,19 @@ import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import DirectionSelector from './DirectionSelector';
+import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 
 const ChaseOrderTerminal = () => {
-  const { tokenPairs } = usePairTokensContext();
+  const { tokenPairs, pair } = usePairTokensContext();
   const { webData2 } = useWebDataContext();
   const { direction, setDirection } = useOrderTicketContext();
+  const { base, quote } = derivePairSymbols(tokenPairs, pair);
+  const currentPositionSize = getCurrentPositionSize(webData2, base);
 
   const [radioValue, setRadioValue] = useState('');
   const [selectOrderType, setSelectOrderType] = useState('GTC');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
+  const [selectItem, setSelectItem] = useState(base || `${tokenPairs[0]}`);
   const [size, setSize] = useState('');
   const [allowedBeforeMarketPurchase, setAllowedBeforeMarketPurchase] =
     useState('');
@@ -53,8 +56,8 @@ const ChaseOrderTerminal = () => {
   };
 
   useEffect(() => {
-    setSelectItem(`${tokenPairs[0]}`);
-  }, [tokenPairs]);
+    setSelectItem(base || `${tokenPairs[0]}`);
+  }, [base, tokenPairs]);
 
   return (
     <Box
@@ -84,7 +87,9 @@ const ChaseOrderTerminal = () => {
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
             <span>Current position size</span>
           </Tooltip>
-          <span>0.0 APE</span>
+          <span>
+            {currentPositionSize.toFixed(4)} {base || quote || '—'}
+          </span>
         </FlexItems>
       </Box>
 
@@ -124,7 +129,7 @@ const ChaseOrderTerminal = () => {
         <HandleSelectItems
           selectItem={selectItem}
           setSelectItem={setSelectItem}
-          selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
+          selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
         />
       </SelectItemsBox>
 

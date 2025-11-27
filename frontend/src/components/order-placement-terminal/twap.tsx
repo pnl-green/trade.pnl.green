@@ -15,10 +15,13 @@ import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import DirectionSelector from './DirectionSelector';
+import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 
 const TwapOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
-  const { tokenPairs } = usePairTokensContext();
+  const { tokenPairs, pair } = usePairTokensContext();
+  const { base, quote } = derivePairSymbols(tokenPairs, pair);
+  const currentPositionSize = getCurrentPositionSize(webData2, base);
   const { establishedConnection, handleEstablishConnection } =
     useHyperLiquidContext();
 
@@ -29,7 +32,7 @@ const TwapOrderTerminal = () => {
 
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const { direction, setDirection } = useOrderTicketContext();
-  const [selectItem, setSelectItem] = useState(`${tokenPairs[0]}`);
+  const [selectItem, setSelectItem] = useState(base || `${tokenPairs[0]}`);
   const [size, setSize] = useState('');
 
   const [establishConnModal, setEstablishedConnModal] = useState(false);
@@ -61,8 +64,8 @@ const TwapOrderTerminal = () => {
   };
 
   useEffect(() => {
-    setSelectItem(`${tokenPairs[0]}`);
-  }, [tokenPairs]);
+    setSelectItem(base || `${tokenPairs[0]}`);
+  }, [base, tokenPairs]);
 
   const handlePlaceTwapOrder = () => {
     try {
@@ -101,7 +104,9 @@ const TwapOrderTerminal = () => {
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
             <span>Current position size</span>
           </Tooltip>
-          <span>0.0 APE</span>
+          <span>
+            {currentPositionSize.toFixed(4)} {base || quote || '—'}
+          </span>
         </FlexItems>
       </Box>
 
@@ -155,7 +160,7 @@ const TwapOrderTerminal = () => {
         <HandleSelectItems
           selectItem={selectItem}
           setSelectItem={setSelectItem}
-          selectDataItems={[`${tokenPairs[0]}`, `${tokenPairs[1]}`]}
+          selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
         />
       </SelectItemsBox>
 
