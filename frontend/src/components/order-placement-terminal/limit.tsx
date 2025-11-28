@@ -1,7 +1,7 @@
 import { Box, Slider, styled } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
-import { BuySellBtn, FlexItems } from '@/styles/common.styles';
+import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import ConfirmationModal from '../Modals/confirmationModals';
 import LiquidationContent from './liquidationContent';
@@ -405,34 +405,46 @@ const LimitComponent = () => {
         </Box>
       )}
 
-      {!establishedConnection ? (
-        <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
-          <Tooltip content={orderTicketTooltips.enableTrading}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto' },
+          gap: '12px',
+          alignItems: 'center',
+          mt: '12px',
+        }}
+      >
+        <LiquidationContent />
+
+        {!establishedConnection ? (
+          <Box sx={{ ...ButtonStyles, justifyContent: 'flex-end' }}>
+            <Tooltip content={orderTicketTooltips.enableTrading}>
+              <BuySellBtn
+                className="buyBtn"
+                sx={{ width: '100%' }}
+                onClick={() => setEstablishedConnModal(true)}
+              >
+                Enable trading
+              </BuySellBtn>
+            </Tooltip>
+          </Box>
+        ) : (
+          <Box sx={{ ...ButtonStyles, justifyContent: 'flex-end' }}>
             <BuySellBtn
               className="buyBtn"
-              sx={{ width: '100%' }}
-              onClick={() => setEstablishedConnModal(true)}
+              onClick={() => toggleConfirmModal('buy')}
             >
-              Enable trading
+              Buy {base}
             </BuySellBtn>
-          </Tooltip>
-        </Box>
-      ) : (
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-          <BuySellBtn
-            className="buyBtn"
-            onClick={() => toggleConfirmModal('buy')}
-          >
-            Buy {base}
-          </BuySellBtn>
-          <BuySellBtn
-            className="sellBtn"
-            onClick={() => toggleConfirmModal('sell')}
-          >
-            Sell {base}
-          </BuySellBtn>
-        </Box>
-      )}
+            <BuySellBtn
+              className="sellBtn"
+              onClick={() => toggleConfirmModal('sell')}
+            >
+              Sell {base}
+            </BuySellBtn>
+          </Box>
+        )}
+      </Box>
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -463,7 +475,6 @@ const LimitComponent = () => {
         />
       )}
 
-      <LiquidationContent />
     </Box>
   );
 };

@@ -386,26 +386,38 @@ const TwapOrderTerminal = () => {
         )}
       </Box>
 
-      {!establishedConnection ? (
-        <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
-          <Tooltip content={orderTicketTooltips.enableTrading}>
-            <BuySellBtn
-              className="buyBtn"
-              sx={{ width: '100%' }}
-              onClick={() => setEstablishedConnModal(true)}
-            >
-              Enable trading
-            </BuySellBtn>
-          </Tooltip>
-        </Box>
-      ) : (
-        <BuySellBtn
-          className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
-          onClick={() => setConfirmModalOpen(true)}
-        >
-          {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
-        </BuySellBtn>
-      )}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto' },
+          gap: '12px',
+          alignItems: 'center',
+          mt: '12px',
+        }}
+      >
+        <LiquidationContent />
+
+        {!establishedConnection ? (
+          <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
+            <Tooltip content={orderTicketTooltips.enableTrading}>
+              <BuySellBtn
+                className="buyBtn"
+                sx={{ width: '100%' }}
+                onClick={() => setEstablishedConnModal(true)}
+              >
+                Enable trading
+              </BuySellBtn>
+            </Tooltip>
+          </Box>
+        ) : (
+          <BuySellBtn
+            className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
+            onClick={() => setConfirmModalOpen(true)}
+          >
+            {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
+          </BuySellBtn>
+        )}
+      </Box>
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -439,7 +451,6 @@ const TwapOrderTerminal = () => {
         />
       )}
 
-      <LiquidationContent />
     </Box>
   );
 };

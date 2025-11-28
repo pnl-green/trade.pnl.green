@@ -48,10 +48,10 @@ export const OutlinedBtn = styled(Button)(() => ({
 export const ButtonStyles = {
   display: 'flex',
   flexDirection: 'row',
-  justifyContent: 'space-evenly',
+  justifyContent: 'flex-end',
+  alignItems: 'center',
+  gap: '10px',
   width: '100%',
-  position: 'absolute',
-  bottom: '142px',
 };
 
 export const BuySellBtn = styled(Button)(() => ({

@@ -1,7 +1,7 @@
 import { Box, Slider, styled } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
-import { BuySellBtn, FlexItems } from '@/styles/common.styles';
+import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
@@ -440,26 +440,38 @@ const ScaleOrderTerminal = () => {
         )}
       </Box>
 
-      {establishedConnection ? (
-        <BuySellBtn
-          className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
-          onClick={() => setConfirmModalOpen(true)}
-        >
-          {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
-        </BuySellBtn>
-      ) : (
-        <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
-          <Tooltip content={orderTicketTooltips.enableTrading}>
-            <BuySellBtn
-              className="buyBtn"
-              sx={{ width: '100%' }}
-              onClick={() => setEstablishedConnModal(true)}
-            >
-              Enable trading
-            </BuySellBtn>
-          </Tooltip>
-        </Box>
-      )}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto' },
+          gap: '12px',
+          alignItems: 'center',
+          mt: '12px',
+        }}
+      >
+        <LiquidationContent />
+
+        {establishedConnection ? (
+          <BuySellBtn
+            className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
+            onClick={() => setConfirmModalOpen(true)}
+          >
+            {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
+          </BuySellBtn>
+        ) : (
+          <Box sx={{ ...ButtonStyles, justifyContent: 'flex-end' }}>
+            <Tooltip content={orderTicketTooltips.enableTrading}>
+              <BuySellBtn
+                className="buyBtn"
+                sx={{ width: '100%' }}
+                onClick={() => setEstablishedConnModal(true)}
+              >
+                Enable trading
+              </BuySellBtn>
+            </Tooltip>
+          </Box>
+        )}
+      </Box>
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -492,8 +504,6 @@ const ScaleOrderTerminal = () => {
           isLoading={isLoading}
         />
       )}
-
-      <LiquidationContent />
     </Box>
   );
 };

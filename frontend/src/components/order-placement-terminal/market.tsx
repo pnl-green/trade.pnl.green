@@ -569,48 +569,60 @@ const MarketComponent = () => {
         </Box>
       )}
 
-      {!establishedConnection ? (
-        <Box sx={{ ...ButtonStyles }}>
-          <Tooltip content={orderTicketTooltips.enableTrading}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto' },
+          gap: '12px',
+          alignItems: 'center',
+          mt: '12px',
+        }}
+      >
+        <LiquidationContent />
+
+        {!establishedConnection ? (
+          <Box sx={{ ...ButtonStyles, justifyContent: 'flex-end' }}>
+            <Tooltip content={orderTicketTooltips.enableTrading}>
+              <BuySellBtn
+                className="buyBtn"
+                sx={{ width: '100%' }}
+                onClick={() => setEstablishedConnModal(true)}
+              >
+                Enable trading
+              </BuySellBtn>
+            </Tooltip>
+          </Box>
+        ) : (
+          <Box sx={{ ...ButtonStyles, justifyContent: 'flex-end' }}>
             <BuySellBtn
+              sx={{
+                minWidth: '112px',
+                ':disabled': {
+                  cursor: 'none',
+                },
+              }}
               className="buyBtn"
-              sx={{ width: '100%' }}
-              onClick={() => setEstablishedConnModal(true)}
+              onClick={() => toggleConfirmModal('buy')}
+              disabled={size <= 0}
             >
-              Enable trading
+              Buy
             </BuySellBtn>
-          </Tooltip>
-        </Box>
-      ) : (
-        <Box sx={{ ...ButtonStyles }}>
-          <BuySellBtn
-            sx={{
-              width: '112px',
-              ':disabled': {
-                cursor: 'none',
-              },
-            }}
-            className="buyBtn"
-            onClick={() => toggleConfirmModal('buy')}
-            disabled={size <= 0}
-          >
-            Buy
-          </BuySellBtn>
-          <BuySellBtn
-            sx={{
-              width: '112px',
-              ':disabled': {
-                cursor: 'none',
-              },
-            }}
-            className="sellBtn"
-            onClick={() => toggleConfirmModal('sell')}
-            disabled={size <= 0}
-          >
-            Sell
-          </BuySellBtn>
-        </Box>
-      )}
+            <BuySellBtn
+              sx={{
+                minWidth: '112px',
+                ':disabled': {
+                  cursor: 'none',
+                },
+              }}
+              className="sellBtn"
+              onClick={() => toggleConfirmModal('sell')}
+              disabled={size <= 0}
+            >
+              Sell
+            </BuySellBtn>
+          </Box>
+        )}
+      </Box>
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -643,14 +655,6 @@ const MarketComponent = () => {
         />
       )}
 
-      <LiquidationContent
-      //TODO: Add props
-
-      // liquidationPrice={}
-      // orderValue={}
-      // marginRequired={}
-      // fees={}
-      />
     </Box>
   );
 };
