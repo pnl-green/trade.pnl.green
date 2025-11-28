@@ -2,19 +2,13 @@ import express from 'express';
 import ccxt from 'ccxt';
 
 const SYMBOL_MAP = {
-  'BTC-PERP': {
-    hyperliquid: 'BTC/USDC:USDC',
-    coinbase: 'BTC-USD-PERP',
-  },
-  'ETH-PERP': {
-    hyperliquid: 'ETH/USDC:USDC',
-    coinbase: 'ETH-USD-PERP',
-  },
+  hyperliquid: {},
+  coinbase: {},
 };
 
 const defaultType = process.env.DEFAULT_MARKET_TYPE || 'swap';
 
-function createExchange(id, { apiKey, secret, password }) {
+function createExchange(id, { apiKey, secret, password, options = {} }) {
   const exchangeClass = ccxt[id];
   if (!exchangeClass) {
     throw new Error(`Exchange ${id} is not supported by ccxt`);
@@ -24,7 +18,7 @@ function createExchange(id, { apiKey, secret, password }) {
     apiKey,
     secret,
     password,
-    options: { defaultType },
+    options: { defaultType, ...options },
     enableRateLimit: true,
   });
 }
@@ -36,34 +30,56 @@ function buildExchanges() {
       secret: process.env.HL_SECRET,
       password: process.env.HL_PASSWORD,
     }),
-    coinbase: createExchange(process.env.COINBASE_ID || 'coinbase', {
+    coinbase: createExchange(process.env.COINBASE_ID || 'coinbaseinternational', {
       apiKey: process.env.CB_KEY,
       secret: process.env.CB_SECRET,
       password: process.env.CB_PASSPHRASE,
+      options: { defaultType: process.env.COINBASE_DEFAULT_TYPE || 'swap' },
     }),
   };
 }
 
 const exchanges = buildExchanges();
 
-function getExchange(exchangeId) {
+async function getExchange(exchangeId) {
   const exchange = exchanges[exchangeId];
   if (!exchange) {
     throw new Error(`Unknown exchange ${exchangeId}`);
   }
+
+  if (!exchange.markets) {
+    await exchange.loadMarkets();
+  }
+
   return exchange;
 }
 
-function mapSymbol(logicalSymbol, exchangeId) {
-  const mapping = SYMBOL_MAP[logicalSymbol];
-  if (!mapping) {
-    throw new Error(`Unknown logical symbol ${logicalSymbol}`);
+function buildSymbolMap(logicalSymbol, exchangeId, exchange) {
+  if (SYMBOL_MAP[exchangeId][logicalSymbol]) {
+    return SYMBOL_MAP[exchangeId][logicalSymbol];
   }
-  const symbol = mapping[exchangeId];
-  if (!symbol) {
-    throw new Error(`Symbol mapping missing for ${exchangeId}`);
+
+  const [base, quoted] = logicalSymbol.split('-');
+  const targetQuote = quoted === 'PERP' ? undefined : quoted;
+
+  const market = Object.values(exchange.markets || {}).find((m) => {
+    const isDeriv = ['swap', 'future'].includes(m.type);
+    const matchesBase = m.base === base;
+    const matchesQuote = targetQuote ? m.quote === targetQuote : true;
+    return isDeriv && matchesBase && matchesQuote;
+  });
+
+  if (!market) {
+    throw new Error(`Symbol mapping missing for ${exchangeId}:${logicalSymbol}`);
   }
-  return symbol;
+
+  SYMBOL_MAP[exchangeId][logicalSymbol] = market.symbol;
+  return market.symbol;
+}
+
+async function mapSymbol(logicalSymbol, exchangeId) {
+  const exchange = await getExchange(exchangeId);
+  return buildSymbolMap(logicalSymbol, exchangeId, exchange);
 }
 
 function formatError(err) {
@@ -81,8 +97,7 @@ app.use((req, _res, next) => {
 
 app.get('/api/:exchange/markets', async (req, res) => {
   try {
-    const exchange = getExchange(req.params.exchange);
-    await exchange.loadMarkets();
+    const exchange = await getExchange(req.params.exchange);
     const markets = Object.values(exchange.markets).filter((m) =>
       ['swap', 'future'].includes(m.type)
     );
@@ -96,8 +111,8 @@ app.get('/api/:exchange/markets', async (req, res) => {
 app.get('/api/:exchange/candles', async (req, res) => {
   const { symbol, tf = '1m', since, limit } = req.query;
   try {
-    const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = mapSymbol(symbol, req.params.exchange);
+    const exchange = await getExchange(req.params.exchange);
+    const resolvedSymbol = await mapSymbol(symbol, req.params.exchange);
     const candles = await exchange.fetchOHLCV(
       resolvedSymbol,
       tf,
@@ -114,8 +129,8 @@ app.get('/api/:exchange/candles', async (req, res) => {
 app.get('/api/:exchange/orderbook', async (req, res) => {
   const { symbol, limit } = req.query;
   try {
-    const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = mapSymbol(symbol, req.params.exchange);
+    const exchange = await getExchange(req.params.exchange);
+    const resolvedSymbol = await mapSymbol(symbol, req.params.exchange);
     const book = await exchange.fetchOrderBook(
       resolvedSymbol,
       limit ? Number(limit) : undefined
@@ -133,8 +148,8 @@ app.get('/api/:exchange/orderbook', async (req, res) => {
 app.get('/api/:exchange/trades', async (req, res) => {
   const { symbol, limit, since } = req.query;
   try {
-    const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = mapSymbol(symbol, req.params.exchange);
+    const exchange = await getExchange(req.params.exchange);
+    const resolvedSymbol = await mapSymbol(symbol, req.params.exchange);
     const trades = await exchange.fetchTrades(
       resolvedSymbol,
       since ? Number(since) : undefined,
@@ -155,9 +170,42 @@ app.get('/api/:exchange/trades', async (req, res) => {
   }
 });
 
+app.get('/api/coinbase/asset-info', async (req, res) => {
+  const { symbol } = req.query;
+  try {
+    const exchange = await getExchange('coinbase');
+    const resolvedSymbol = await mapSymbol(symbol, 'coinbase');
+    const [ticker, markets] = await Promise.all([
+      exchange.fetchTicker(resolvedSymbol),
+      exchange.fetchMarkets(),
+    ]);
+
+    const market = markets.find((m) => m.symbol === resolvedSymbol);
+
+    res.json({
+      success: true,
+      data: {
+        symbol,
+        marketId: resolvedSymbol,
+        last: ticker.last,
+        percentage: ticker.percentage,
+        change: ticker.change,
+        baseVolume: ticker.baseVolume ?? ticker.info?.base_volume,
+        quoteVolume: ticker.quoteVolume ?? ticker.info?.quote_volume,
+        funding: ticker.fundingRate ?? ticker.info?.funding_rate,
+        info: ticker.info,
+        meta: market ? { type: market.type, contractSize: market.contractSize } : undefined,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(formatError(err));
+  }
+});
+
 app.get('/api/:exchange/portfolio', async (req, res) => {
   try {
-    const exchange = getExchange(req.params.exchange);
+    const exchange = await getExchange(req.params.exchange);
     const balance = await exchange.fetchBalance();
     res.json({ success: true, data: balance });
   } catch (err) {
@@ -169,8 +217,10 @@ app.get('/api/:exchange/portfolio', async (req, res) => {
 app.get('/api/:exchange/positions', async (req, res) => {
   const { symbol } = req.query;
   try {
-    const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = symbol ? mapSymbol(symbol, req.params.exchange) : undefined;
+    const exchange = await getExchange(req.params.exchange);
+    const resolvedSymbol = symbol
+      ? await mapSymbol(symbol, req.params.exchange)
+      : undefined;
     const positions = await exchange.fetchPositions(
       resolvedSymbol ? [resolvedSymbol] : undefined
     );
@@ -194,8 +244,10 @@ app.get('/api/:exchange/positions', async (req, res) => {
 app.get('/api/:exchange/position-history', async (req, res) => {
   const { symbol, since, limit } = req.query;
   try {
-    const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = symbol ? mapSymbol(symbol, req.params.exchange) : undefined;
+    const exchange = await getExchange(req.params.exchange);
+    const resolvedSymbol = symbol
+      ? await mapSymbol(symbol, req.params.exchange)
+      : undefined;
     const trades = await exchange.fetchMyTrades(
       resolvedSymbol,
       since ? Number(since) : undefined,
@@ -211,8 +263,8 @@ app.get('/api/:exchange/position-history', async (req, res) => {
 app.post('/api/:exchange/order', async (req, res) => {
   const { symbol, type, side, size, price, params = {} } = req.body || {};
   try {
-    const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = mapSymbol(symbol, req.params.exchange);
+    const exchange = await getExchange(req.params.exchange);
+    const resolvedSymbol = await mapSymbol(symbol, req.params.exchange);
     const order = await exchange.createOrder(
       resolvedSymbol,
       type,
@@ -232,8 +284,10 @@ app.delete('/api/:exchange/order/:id', async (req, res) => {
   const { id } = req.params;
   const { symbol, params = {} } = req.query;
   try {
-    const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = symbol ? mapSymbol(symbol, req.params.exchange) : undefined;
+    const exchange = await getExchange(req.params.exchange);
+    const resolvedSymbol = symbol
+      ? await mapSymbol(symbol, req.params.exchange)
+      : undefined;
     const result = await exchange.cancelOrder(id, resolvedSymbol, params);
     res.json({ success: true, data: result });
   } catch (err) {

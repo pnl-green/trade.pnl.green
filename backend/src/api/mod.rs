@@ -6,10 +6,12 @@
 
 mod ccxt;
 mod hyperliquid;
+mod hyperliquid_public;
 mod not_found;
 mod status;
 
 pub use ccxt::proxy as ccxt_proxy;
 pub use hyperliquid::hyperliquid;
+pub use hyperliquid_public::hl_scope;
 pub use not_found::not_found;
 pub use status::status;

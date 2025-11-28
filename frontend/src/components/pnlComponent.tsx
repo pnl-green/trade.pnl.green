@@ -213,24 +213,29 @@ const PnlComponent = () => {
           limit: '500',
         });
 
-        const url = `/ccxt/${currentExchangeId}/candles?${params.toString()}`;
+        const url =
+          currentExchangeId === 'hyperliquid'
+            ? `/hl/${logicalSymbol}/candles?${params.toString()}`
+            : `/ccxt/${currentExchangeId}/candles?${params.toString()}`;
         const response = await fetch(url).then((res) => res.json());
-        if (!response?.success || !Array.isArray(response.data)) {
-          onErrorCallback(response?.error || 'No data');
+
+        const data = currentExchangeId === 'hyperliquid' ? response.candles : response.data;
+        if (!Array.isArray(data)) {
+          onErrorCallback('No data');
           return;
         }
 
-        const bars = response.data
-          .filter((bar) => Array.isArray(bar) && bar.length >= 6)
-          .map((bar) => ({
-            time: Number(bar[0]),
-            open: Number(bar[1]),
-            high: Number(bar[2]),
-            low: Number(bar[3]),
-            close: Number(bar[4]),
-            volume: Number(bar[5]),
+        const bars = data
+          .filter((bar: any) => Array.isArray(bar) || bar?.time)
+          .map((bar: any) => ({
+            time: Number(bar[0] ?? bar.time),
+            open: Number(bar[1] ?? bar.open),
+            high: Number(bar[2] ?? bar.high),
+            low: Number(bar[3] ?? bar.low),
+            close: Number(bar[4] ?? bar.close),
+            volume: Number(bar[5] ?? bar.volume ?? 0),
           }))
-          .filter((bar) => bar.time >= from * 1000 && bar.time <= to * 1000);
+          .filter((bar: any) => bar.time >= from * 1000 && bar.time <= to * 1000);
 
         if (firstDataRequest && bars.length > 0) {
           lastBarsCache.set(symbolInfo.full_name, {
