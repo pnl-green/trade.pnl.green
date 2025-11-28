@@ -9,6 +9,7 @@ import OrderHistoryProvider from './orderHistoryContext';
 import TwapHistoryProvider from './twapHistoryContext';
 import SwitchAccountProvider from './switchTradingAccContext';
 import { OrderTicketProvider } from './orderTicketContext';
+import { ChartInteractionProvider } from './chartInteractionContext';
 
 const ContextProviders = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -22,7 +23,9 @@ const ContextProviders = ({ children }: { children: React.ReactNode }) => {
                   <TwapHistoryProvider>
                     <SwitchAccountProvider>
                       <OrderTicketProvider>
-                        <React.Fragment>{children}</React.Fragment>
+                        <ChartInteractionProvider>
+                          <React.Fragment>{children}</React.Fragment>
+                        </ChartInteractionProvider>
                       </OrderTicketProvider>
                     </SwitchAccountProvider>
                   </TwapHistoryProvider>

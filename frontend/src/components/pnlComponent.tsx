@@ -24,6 +24,7 @@ import PanelCard from './ui/PanelCard';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import Tooltip from './ui/Tooltip';
 import { styled } from '@mui/material';
+import { useChartInteractionContext } from '@/context/chartInteractionContext';
 
 const normalizePairName = (pair?: string) => {
   if (!pair) return '';
@@ -54,6 +55,7 @@ const PnlComponent = () => {
   const { webData2 } = useWebDataContext();
   const { tokenPairs } = usePairTokensContext();
   const { allTokenPairs, tokenPairData } = usePairTokensContext();
+  const { selectionMode, handleChartPricePick } = useChartInteractionContext();
 
   const [pairs, setPairs] = useState([]);
 
@@ -279,26 +281,40 @@ const PnlComponent = () => {
   const balance = webData2.clearinghouseState?.marginSummary.accountValue;
   const renderAdvancedChart = tokenPairs.length > 1;
 
-  const defaultWidgetProps: Partial<ChartingLibraryWidgetOptions> = {
-    interval: "1H" as ResolutionString,
-    datafeed: datafeed,
-    library_path: "/static/charting_library/charting_library/",
-    locale: "en",
-    fullscreen: false,
-    autosize: true,
-    theme: "dark",
-    symbol:
-      tokenPairs && tokenPairs.length >= 2
-        ? `Hyperliquid:${tokenPairs[0]}/${tokenPairs[1]}`
-        : '',
-  };
+  const defaultWidgetProps: Partial<ChartingLibraryWidgetOptions> = useMemo(
+    () => ({
+      interval: "1H" as ResolutionString,
+      datafeed: datafeed,
+      library_path: "/static/charting_library/charting_library/",
+      locale: "en",
+      fullscreen: false,
+      autosize: true,
+      theme: "dark",
+      symbol:
+        tokenPairs && tokenPairs.length >= 2
+          ? `Hyperliquid:${tokenPairs[0]}/${tokenPairs[1]}`
+          : '',
+    }),
+    [pairs, tokenPairs]
+  );
 
   const chartElement = useMemo(
     () =>
       renderAdvancedChart ? (
-        <AdvancedChartMemoized {...defaultWidgetProps} />
+        <AdvancedChartMemoized
+          {...defaultWidgetProps}
+          selectionMode={selectionMode}
+          onPriceFromChart={handleChartPricePick}
+        />
       ) : null,
-    [renderAdvancedChart, tokenPairs, pairs]
+    [
+      defaultWidgetProps,
+      handleChartPricePick,
+      pairs,
+      renderAdvancedChart,
+      selectionMode,
+      tokenPairs,
+    ]
   );
 
   return (
