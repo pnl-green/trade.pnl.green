@@ -28,6 +28,7 @@ const RESIZE_HITBOX = 10;
 
 type PanelId =
   | 'chart'
+  | 'assetInfo'
   | 'orderbook'
   | 'ticket'
   | 'positions'
@@ -66,10 +67,11 @@ const scaleLayout = (layout: PanelLayout[], factor: number): PanelLayout[] =>
   }));
 
 const baseLayout: PanelLayout[] = [
-  { i: 'chart', x: 0, y: 0, w: 6, h: 12, minW: 4, minH: 8 },
+  { i: 'assetInfo', x: 0, y: 0, w: 6, h: 3, minW: 4, minH: 3 },
+  { i: 'chart', x: 0, y: 3, w: 6, h: 12, minW: 4, minH: 8 },
   { i: 'orderbook', x: 6, y: 0, w: 3, h: 12, minW: 3, minH: 6 },
   { i: 'ticket', x: 9, y: 0, w: 3, h: 12, minW: 3, minH: 8 },
-  { i: 'positions', x: 0, y: 12, w: 6, h: 10, minW: 4, minH: 6 },
+  { i: 'positions', x: 0, y: 15, w: 6, h: 10, minW: 4, minH: 6 },
   { i: 'assistant', x: 6, y: 12, w: 3, h: 10, minW: 3, minH: 6 },
   { i: 'portfolio', x: 9, y: 12, w: 3, h: 10, minW: 3, minH: 4 },
 ];
@@ -78,6 +80,12 @@ const defaultLayout: PanelLayout[] = scaleLayout(baseLayout, GRID_MULTIPLIER);
 
 const cloneLayout = (layout: PanelLayout[]): PanelLayout[] =>
   layout.map((item) => ({ ...item }));
+
+const ensureDefaultPanels = (layout: PanelLayout[]): PanelLayout[] => {
+  const existing = new Set(layout.map((item) => item.i));
+  const missing = defaultLayout.filter((item) => !existing.has(item.i));
+  return [...layout, ...missing.map((item) => ({ ...item }))];
+};
 
 const TerminalRoot = styled(Box)(() => ({
   backgroundColor: intelayerColors.page,
@@ -150,6 +158,7 @@ const StackedLayout = styled('div')(() => ({
 
 interface TerminalLayoutProps {
   topBar?: React.ReactNode;
+  assetInfo: React.ReactNode;
   chart: React.ReactNode;
   orderbook: React.ReactNode;
   ticket: React.ReactNode;
@@ -290,7 +299,7 @@ const loadLayout = (): PanelLayout[] => {
     if (Array.isArray(parsed) && parsed.every((item) => item.i && item.w && item.h)) {
       const needsScaling = parsed.some((item) => item.w <= BASE_GRID_COLS && item.h <= baseLayout[0].h);
       const normalized = needsScaling ? scaleLayout(parsed, GRID_MULTIPLIER) : parsed;
-      return cloneLayout(normalized);
+      return cloneLayout(ensureDefaultPanels(normalized));
     }
   } catch (error) {
     console.error('Failed to parse stored layout', error);
@@ -301,6 +310,7 @@ const loadLayout = (): PanelLayout[] => {
 const TerminalLayout: React.FC<TerminalLayoutProps> = ({
   topBar,
   chart,
+  assetInfo,
   orderbook,
   ticket,
   positions,
@@ -462,13 +472,14 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
   const sections = useMemo(
     () => ({
       chart,
+      assetInfo,
       orderbook,
       ticket,
       positions,
       assistant,
       portfolio,
     }),
-    [chart, orderbook, ticket, positions, assistant, portfolio]
+    [assetInfo, chart, orderbook, ticket, positions, assistant, portfolio]
   );
 
   const resizeHandles = useMemo(
@@ -570,7 +581,15 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
     [layout]
   );
 
-  const stackedOrder: PanelId[] = ['chart', 'ticket', 'orderbook', 'positions', 'assistant', 'portfolio'];
+  const stackedOrder: PanelId[] = [
+    'assetInfo',
+    'chart',
+    'ticket',
+    'orderbook',
+    'positions',
+    'assistant',
+    'portfolio',
+  ];
 
   return (
     <TerminalRoot>
