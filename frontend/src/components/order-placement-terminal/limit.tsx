@@ -1,5 +1,5 @@
 import { Box, Slider, styled } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
 import { BuySellBtn, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
@@ -19,7 +19,7 @@ import { useOrderTicketContext } from '@/context/orderTicketContext';
 import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
-import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
+import { useChartInteractionContext } from '@/context/chartInteractionContext';
 
 const PresetButton = styled('button')(() => ({
   border: `1px solid ${intelayerColors.panelBorder}`,
@@ -34,6 +34,11 @@ const PresetButton = styled('button')(() => ({
   '&:hover': {
     borderColor: intelayerColors.green[500],
     color: intelayerColors.green[500],
+  },
+  '&.active': {
+    borderColor: intelayerColors.green[500],
+    color: intelayerColors.green[500],
+    background: 'rgba(14, 240, 157, 0.08)',
   },
 }));
 
@@ -58,7 +63,7 @@ const LimitComponent = () => {
   const { hyperliquid, establishedConnection, handleEstablishConnection } =
     useHyperLiquidContext();
   const { tokenPairs, tokenPairData, assetId, pair } = usePairTokensContext();
-  const { bookData } = useOrderBookTradesContext();
+  const { selectionMode, toggleSelectionMode } = useChartInteractionContext();
 
   const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
   const { base, quote } = derivePairSymbols(tokenPairs, pair);
@@ -95,34 +100,9 @@ const LimitComponent = () => {
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
 
-  const bestBid = useMemo(
-    () => [...bookData.bids].sort((a, b) => b.px - a.px)[0]?.px,
-    [bookData.bids]
-  );
-  const bestAsk = useMemo(
-    () => [...bookData.asks].sort((a, b) => a.px - b.px)[0]?.px,
-    [bookData.asks]
-  );
-  const midPrice = useMemo(() => {
-    if (!bestBid || !bestAsk) return undefined;
-    return (Number(bestBid) + Number(bestAsk)) / 2;
-  }, [bestAsk, bestBid]);
-
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
     setDirection(button as 'buy' | 'sell');
-  };
-
-  const pricePresets = {
-    mid: midPrice,
-    bid: bestBid,
-    ask: bestAsk,
-  };
-
-  const setPriceFromPreset = (value?: number) => {
-    if (!value || Number.isNaN(value)) return;
-    const decimals = Math.max(2, szDecimals ?? 2);
-    setLimitPrice(value.toFixed(decimals));
   };
 
   useEffect(() => {
@@ -259,25 +239,27 @@ const LimitComponent = () => {
       <Box>
         <SectionLabel>Price (USDC)</SectionLabel>
         <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <RenderInput
-              label=""
-              tooltip={orderTicketTooltips.price}
-              placeholder="0"
-              type="number"
-              value={limitPrice?.toString() ?? ''}
-              onChange={(e: any) => setLimitPrice(e.target.value)}
-              styles={{
-                flex: 1,
-                marginTop: 0,
-                gap: 0,
-                width: '100%',
-              }}
-            />
-          <Box sx={{ display: 'flex', gap: '6px' }}>
-            <PresetButton onClick={() => setPriceFromPreset(pricePresets.bid)}>Best Bid</PresetButton>
-            <PresetButton onClick={() => setPriceFromPreset(pricePresets.mid)}>Mid</PresetButton>
-            <PresetButton onClick={() => setPriceFromPreset(pricePresets.ask)}>Best Ask</PresetButton>
-          </Box>
+          <RenderInput
+            label=""
+            tooltip={orderTicketTooltips.price}
+            placeholder="0"
+            type="number"
+            value={limitPrice?.toString() ?? ''}
+            onChange={(e: any) => setLimitPrice(e.target.value)}
+            styles={{
+              flex: 1,
+              marginTop: 0,
+              gap: 0,
+              width: '100%',
+            }}
+          />
+          <PresetButton
+            className={selectionMode === 'limit-price-from-chart' ? 'active' : ''}
+            onClick={() => toggleSelectionMode('limit-price-from-chart')}
+            aria-pressed={selectionMode === 'limit-price-from-chart'}
+          >
+            Click on Chart
+          </PresetButton>
         </Box>
       </Box>
 
