@@ -234,17 +234,11 @@ const TwapOrderTerminal = () => {
             <RenderInput
               label=""
               tooltip={orderTicketTooltips.size}
-              placeholder="|"
+              placeholder="0"
               type="number"
               value={size}
               onChange={(e: any) => handleSizeInput(e.target.value)}
-              styles={{
-                background: 'transparent',
-                flex: 1,
-                ':hover': {
-                  border: 'none !important',
-                },
-              }}
+              styles={{ flex: 1 }}
             />
             <HandleSelectItems
               selectItem={selectItem}
@@ -269,17 +263,11 @@ const TwapOrderTerminal = () => {
                 color="success"
               />
               <RenderInput
-                label="%"
+                label=""
                 placeholder="0"
                 value={sizePercent.toString()}
                 onChange={(e: any) => percentInputChange(e.target.value)}
-                styles={{
-                  width: '80px',
-                  '.placeholder_box': {
-                    width: '60%',
-                  },
-                  input: { width: '100%', padding: 0 },
-                }}
+                styles={{ width: '80px' }}
               />
             </Box>
           </Box>
@@ -296,39 +284,39 @@ const TwapOrderTerminal = () => {
               gap: '8px',
             }}
           >
-            <RenderInput
-              label="Hour(s)"
-              placeholder="0"
-              type="number"
-              value={runtimeHours}
-              onChange={(e: any) => setRuntimeHours(e.target.value)}
-              styles={{
-                '.placeholder_box': { fontSize: '12px' },
-                input: { width: '100%' },
-              }}
-            />
-            <RenderInput
-              label="Minute(s)"
-              placeholder="5"
-              type="number"
-              value={runtimeMinutes}
-              onChange={(e: any) => setRuntimeMinutes(e.target.value)}
-              styles={{
-                '.placeholder_box': { fontSize: '12px' },
-                input: { width: '100%' },
-              }}
-            />
-            <RenderInput
-              label="Orders"
-              placeholder="5"
-              type="number"
-              value={totalNoOfOrders}
-              onChange={(e: any) => setTotalNoOfOrders(e.target.value)}
-              styles={{
-                '.placeholder_box': { fontSize: '12px' },
-                input: { width: '100%' },
-              }}
-            />
+            <Box>
+              <SectionLabel>Hour(s)</SectionLabel>
+              <RenderInput
+                label=""
+                placeholder="0"
+                type="number"
+                value={runtimeHours}
+                onChange={(e: any) => setRuntimeHours(e.target.value)}
+                styles={{ width: '100%' }}
+              />
+            </Box>
+            <Box>
+              <SectionLabel>Minute(s)</SectionLabel>
+              <RenderInput
+                label=""
+                placeholder="5"
+                type="number"
+                value={runtimeMinutes}
+                onChange={(e: any) => setRuntimeMinutes(e.target.value)}
+                styles={{ width: '100%' }}
+              />
+            </Box>
+            <Box>
+              <SectionLabel>Orders</SectionLabel>
+              <RenderInput
+                label=""
+                placeholder="5"
+                type="number"
+                value={totalNoOfOrders}
+                onChange={(e: any) => setTotalNoOfOrders(e.target.value)}
+                styles={{ width: '100%' }}
+              />
+            </Box>
           </Box>
         </Box>
 
@@ -365,12 +353,7 @@ const TwapOrderTerminal = () => {
         </CheckboxLabel>
 
         {tpSlEnabled && (
-          <Box
-            sx={{
-              display: 'grid',
-              gap: '8px',
-            }}
-          >
+          <Box sx={{ display: 'grid', gap: '8px' }}>
             <Box
               sx={{
                 display: 'grid',
@@ -379,34 +362,28 @@ const TwapOrderTerminal = () => {
                 gap: '8px',
               }}
             >
-              <RenderInput
-                label="TP Price"
-                placeholder="0"
-                type="number"
-                value={takeProfitPrice}
-                onChange={(e: any) => setTakeProfitPrice(e.target.value)}
-                styles={{
-                  gap: 0,
-                  '.placeholder_box': {
-                    fontSize: '12px',
-                  },
-                  input: { width: '100%', padding: '0' },
-                }}
-              />
+              <Box>
+                <SectionLabel>TP Price</SectionLabel>
+                <RenderInput
+                  label=""
+                  placeholder="0"
+                  type="number"
+                  value={takeProfitPrice}
+                  onChange={(e: any) => setTakeProfitPrice(e.target.value)}
+                  styles={{ width: '100%' }}
+                />
+              </Box>
 
-              <RenderInput
-                label="Gain"
-                placeholder="$"
-                value={gain}
-                onChange={(e: any) => setGain(e.target.value)}
-                styles={{
-                  gap: 0,
-                  '.placeholder_box': {
-                    fontSize: '12px',
-                  },
-                  input: { width: '100%', padding: '0' },
-                }}
-              />
+              <Box>
+                <SectionLabel>Gain</SectionLabel>
+                <RenderInput
+                  label=""
+                  placeholder="$"
+                  value={gain}
+                  onChange={(e: any) => setGain(e.target.value)}
+                  styles={{ width: '100%' }}
+                />
+              </Box>
             </Box>
 
             <Box
@@ -417,34 +394,28 @@ const TwapOrderTerminal = () => {
                 gap: '8px',
               }}
             >
-              <RenderInput
-                label="SL Price"
-                placeholder="0"
-                type="number"
-                value={stopLossPrice}
-                onChange={(e: any) => setStopLossPrice(e.target.value)}
-                styles={{
-                  gap: 0,
-                  '.placeholder_box': {
-                    fontSize: '12px',
-                  },
-                  input: { width: '100%', padding: '0' },
-                }}
-              />
+              <Box>
+                <SectionLabel>SL Price</SectionLabel>
+                <RenderInput
+                  label=""
+                  placeholder="0"
+                  type="number"
+                  value={stopLossPrice}
+                  onChange={(e: any) => setStopLossPrice(e.target.value)}
+                  styles={{ width: '100%' }}
+                />
+              </Box>
 
-              <RenderInput
-                label="Loss"
-                placeholder="$"
-                value={loss}
-                onChange={(e: any) => setLoss(e.target.value)}
-                styles={{
-                  gap: 0,
-                  '.placeholder_box': {
-                    fontSize: '12px',
-                  },
-                  input: { width: '100%', padding: '0' },
-                }}
-              />
+              <Box>
+                <SectionLabel>Loss</SectionLabel>
+                <RenderInput
+                  label=""
+                  placeholder="$"
+                  value={loss}
+                  onChange={(e: any) => setLoss(e.target.value)}
+                  styles={{ width: '100%' }}
+                />
+              </Box>
             </Box>
           </Box>
         )}

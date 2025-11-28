@@ -259,24 +259,20 @@ const LimitComponent = () => {
       <Box>
         <SectionLabel>Price (USDC)</SectionLabel>
         <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <RenderInput
-            label=""
-            tooltip={orderTicketTooltips.price}
-            placeholder="0"
-            type="number"
-            value={limitPrice?.toString() ?? ''}
-            onChange={(e: any) => setLimitPrice(e.target.value)}
-            styles={{
-              flex: 1,
-              marginTop: 0,
-              gap: 0,
-              width: '100%',
-              '.placeholder_box': {
-                fontSize: '12px',
-              },
-              input: { width: '100%', padding: '0' },
-            }}
-          />
+            <RenderInput
+              label=""
+              tooltip={orderTicketTooltips.price}
+              placeholder="0"
+              type="number"
+              value={limitPrice?.toString() ?? ''}
+              onChange={(e: any) => setLimitPrice(e.target.value)}
+              styles={{
+                flex: 1,
+                marginTop: 0,
+                gap: 0,
+                width: '100%',
+              }}
+            />
           <Box sx={{ display: 'flex', gap: '6px' }}>
             <PresetButton onClick={() => setPriceFromPreset(pricePresets.bid)}>Best Bid</PresetButton>
             <PresetButton onClick={() => setPriceFromPreset(pricePresets.mid)}>Mid</PresetButton>
@@ -299,16 +295,10 @@ const LimitComponent = () => {
             <RenderInput
               label=""
               tooltip={orderTicketTooltips.size}
-              placeholder="|"
+              placeholder="0"
               value={size.toString()}
               onChange={(e: any) => handleSizeInput(Number(e.target.value))}
-              styles={{
-                background: 'transparent',
-                flex: 1,
-                ':hover': {
-                  border: 'none !important',
-                },
-              }}
+              styles={{ flex: 1 }}
             />
             <HandleSelectItems
               selectItem={selectItem}
@@ -333,17 +323,11 @@ const LimitComponent = () => {
                 color="success"
               />
               <RenderInput
-                label="%"
+                label=""
                 placeholder="0"
                 value={sizePercent.toString()}
                 onChange={(e: any) => handleSliderChange({}, Number(e.target.value))}
-                styles={{
-                  width: '80px',
-                  '.placeholder_box': {
-                    width: '60%',
-                  },
-                  input: { width: '100%', padding: 0 },
-                }}
+                styles={{ width: '80px' }}
               />
             </Box>
           </Box>
@@ -384,73 +368,54 @@ const LimitComponent = () => {
       </CheckboxLabel>
 
       {tpSlEnabled && (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-          }}
-        >
-          <FlexItems>
-            <RenderInput
-              label="TP Price"
-              placeholder="0"
-              value={takeProfitPrice}
-              onChange={(e: any) => setTakeProfits([e.target.value])}
-              styles={{
-                gap: 0,
-                width: '49%',
-                '.placeholder_box': {
-                  fontSize: '12px',
-                },
-                input: { width: '30%', padding: '0' },
-              }}
-            />
+        <Box sx={{ display: 'grid', gap: '8px' }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '8px',
+            }}
+          >
+            <Box>
+              <SectionLabel>TP Price</SectionLabel>
+              <RenderInput
+                label=""
+                placeholder="0"
+                value={takeProfitPrice}
+                onChange={(e: any) => setTakeProfits([e.target.value])}
+                styles={{ width: '100%' }}
+              />
+            </Box>
 
-            <RenderInput
-              label="Gain"
-              placeholder="$"
-              styles={{
-                gap: 0,
-                width: '49%',
-                '.placeholder_box': {
-                  fontSize: '12px',
-                },
-                input: { width: '30%', padding: '0' },
-              }}
-            />
-          </FlexItems>
+            <Box>
+              <SectionLabel>Gain</SectionLabel>
+              <RenderInput label="" placeholder="$" styles={{ width: '100%' }} />
+            </Box>
+          </Box>
 
-          <FlexItems>
-            <RenderInput
-              label="SL Price"
-              placeholder="0"
-              value={stopLoss}
-              onChange={(e: any) => setStopLoss(e.target.value)}
-              styles={{
-                gap: 0,
-                width: '49%',
-                '.placeholder_box': {
-                  width: '90% !important',
-                  fontSize: '12px',
-                },
-                input: { width: '20%', padding: '0' },
-              }}
-            />
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '8px',
+            }}
+          >
+            <Box>
+              <SectionLabel>SL Price</SectionLabel>
+              <RenderInput
+                label=""
+                placeholder="0"
+                value={stopLoss}
+                onChange={(e: any) => setStopLoss(e.target.value)}
+                styles={{ width: '100%' }}
+              />
+            </Box>
 
-            <RenderInput
-              label="Loss"
-              placeholder="$"
-              styles={{
-                gap: 0,
-                width: '49%',
-                '.placeholder_box': {
-                  fontSize: '12px',
-                },
-                input: { width: '30%', padding: '0' },
-              }}
-            />
-          </FlexItems>
+            <Box>
+              <SectionLabel>Loss</SectionLabel>
+              <RenderInput label="" placeholder="$" styles={{ width: '100%' }} />
+            </Box>
+          </Box>
         </Box>
       )}
 

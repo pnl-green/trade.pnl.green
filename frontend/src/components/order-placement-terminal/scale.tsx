@@ -212,20 +212,11 @@ const ScaleOrderTerminal = () => {
               <RenderInput
                 label=""
                 tooltip={orderTicketTooltips.size}
-                placeholder="|"
+                placeholder="0"
                 type="number"
                 value={size}
                 onChange={(e: any) => handleSizeInput(e.target.value)}
-                styles={{
-                  background: 'transparent',
-                  flex: 1,
-                  '.placeholder_box': {
-                    fontSize: '12px',
-                  },
-                  ':hover': {
-                    border: 'none !important',
-                  },
-                }}
+                styles={{ flex: 1 }}
               />
               <HandleSelectItems
                 selectItem={selectItem}
@@ -250,18 +241,11 @@ const ScaleOrderTerminal = () => {
                   color="success"
                 />
                 <RenderInput
-                  label="%"
+                  label=""
                   placeholder="0"
                   value={sizePercent.toString()}
                   onChange={(e: any) => percentInputChange(e.target.value)}
-                  styles={{
-                    width: '80px',
-                    '.placeholder_box': {
-                      width: '60%',
-                      fontSize: '12px',
-                    },
-                    input: { width: '100%', padding: 0 },
-                  }}
+                  styles={{ width: '80px' }}
                 />
               </Box>
             </Box>
@@ -275,32 +259,28 @@ const ScaleOrderTerminal = () => {
             gap: '8px',
           }}
         >
-          <RenderInput
-            label="Start (USDC)"
-            placeholder="0"
-            type="number"
-            value={startPrice}
-            onChange={(e: any) => setStartPrice(e.target.value)}
-            styles={{
-              '.placeholder_box': {
-                fontSize: '12px',
-              },
-              input: { width: '100%', padding: '0' },
-            }}
-          />
-          <RenderInput
-            label="End (USDC)"
-            placeholder="0"
-            type="number"
-            value={endPrice}
-            onChange={(e: any) => setEndPrice(e.target.value)}
-            styles={{
-              '.placeholder_box': {
-                fontSize: '12px',
-              },
-              input: { width: '100%', padding: '0' },
-            }}
-          />
+          <Box>
+            <SectionLabel>Start (USDC)</SectionLabel>
+            <RenderInput
+              label=""
+              placeholder="0"
+              type="number"
+              value={startPrice}
+              onChange={(e: any) => setStartPrice(e.target.value)}
+              styles={{ width: '100%' }}
+            />
+          </Box>
+          <Box>
+            <SectionLabel>End (USDC)</SectionLabel>
+            <RenderInput
+              label=""
+              placeholder="0"
+              type="number"
+              value={endPrice}
+              onChange={(e: any) => setEndPrice(e.target.value)}
+              styles={{ width: '100%' }}
+            />
+          </Box>
         </Box>
 
         <Box
@@ -310,32 +290,28 @@ const ScaleOrderTerminal = () => {
             gap: '8px',
           }}
         >
-          <RenderInput
-            label="Total Orders"
-            placeholder="0"
-            type="number"
-            value={totalNoOfOrders}
-            onChange={(e: any) => setTotalNoOfOrders(e.target.value)}
-            styles={{
-              '.placeholder_box': {
-                fontSize: '12px',
-              },
-              input: { width: '100%', padding: '0' },
-            }}
-          />
-          <RenderInput
-            label="Size Skew"
-            placeholder="1.00"
-            type="number"
-            value={sizeSkew}
-            onChange={(e: any) => setSizeSkew(e.target.value)}
-            styles={{
-              '.placeholder_box': {
-                fontSize: '12px',
-              },
-              input: { width: '100%', padding: '0' },
-            }}
-          />
+          <Box>
+            <SectionLabel>Total Orders</SectionLabel>
+            <RenderInput
+              label=""
+              placeholder="0"
+              type="number"
+              value={totalNoOfOrders}
+              onChange={(e: any) => setTotalNoOfOrders(e.target.value)}
+              styles={{ width: '100%' }}
+            />
+          </Box>
+          <Box>
+            <SectionLabel>Size Skew</SectionLabel>
+            <RenderInput
+              label=""
+              placeholder="1.00"
+              type="number"
+              value={sizeSkew}
+              onChange={(e: any) => setSizeSkew(e.target.value)}
+              styles={{ width: '100%' }}
+            />
+          </Box>
         </Box>
 
         <Box
@@ -384,32 +360,28 @@ const ScaleOrderTerminal = () => {
                 gap: '8px',
               }}
             >
-              <RenderInput
-                label="TP Price"
-                placeholder="0"
-                type="number"
-                value={takeProfitPrice}
-                onChange={(e: any) => setTakeProfitPrice(e.target.value)}
-                styles={{
-                  '.placeholder_box': {
-                    fontSize: '12px',
-                  },
-                  input: { width: '100%', padding: '0' },
-                }}
-              />
-              <RenderInput
-                label="Gain"
-                placeholder="$"
-                type="number"
-                value={gain}
-                onChange={(e: any) => setGain(e.target.value)}
-                styles={{
-                  '.placeholder_box': {
-                    fontSize: '12px',
-                  },
-                  input: { width: '100%', padding: '0' },
-                }}
-              />
+              <Box>
+                <SectionLabel>TP Price</SectionLabel>
+                <RenderInput
+                  label=""
+                  placeholder="0"
+                  type="number"
+                  value={takeProfitPrice}
+                  onChange={(e: any) => setTakeProfitPrice(e.target.value)}
+                  styles={{ width: '100%' }}
+                />
+              </Box>
+              <Box>
+                <SectionLabel>Gain</SectionLabel>
+                <RenderInput
+                  label=""
+                  placeholder="$"
+                  type="number"
+                  value={gain}
+                  onChange={(e: any) => setGain(e.target.value)}
+                  styles={{ width: '100%' }}
+                />
+              </Box>
             </Box>
 
             <Box
@@ -419,32 +391,28 @@ const ScaleOrderTerminal = () => {
                 gap: '8px',
               }}
             >
-              <RenderInput
-                label="SL Price"
-                placeholder="0"
-                type="number"
-                value={stopLossPrice}
-                onChange={(e: any) => setStopLossPrice(e.target.value)}
-                styles={{
-                  '.placeholder_box': {
-                    fontSize: '12px',
-                  },
-                  input: { width: '100%', padding: '0' },
-                }}
-              />
-              <RenderInput
-                label="Loss"
-                placeholder="$"
-                type="number"
-                value={loss}
-                onChange={(e: any) => setLoss(e.target.value)}
-                styles={{
-                  '.placeholder_box': {
-                    fontSize: '12px',
-                  },
-                  input: { width: '100%', padding: '0' },
-                }}
-              />
+              <Box>
+                <SectionLabel>SL Price</SectionLabel>
+                <RenderInput
+                  label=""
+                  placeholder="0"
+                  type="number"
+                  value={stopLossPrice}
+                  onChange={(e: any) => setStopLossPrice(e.target.value)}
+                  styles={{ width: '100%' }}
+                />
+              </Box>
+              <Box>
+                <SectionLabel>Loss</SectionLabel>
+                <RenderInput
+                  label=""
+                  placeholder="$"
+                  type="number"
+                  value={loss}
+                  onChange={(e: any) => setLoss(e.target.value)}
+                  styles={{ width: '100%' }}
+                />
+              </Box>
             </Box>
           </Box>
         )}
