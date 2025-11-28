@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 /// Strongly typed view over the environment variables required to boot the backend. Environment
 /// loading happens at runtime so the same struct can be reused for different deployment targets.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Config {
     server_host: String,
     server_port: u16,
@@ -20,6 +20,11 @@ pub struct Config {
 
     /// Secret used to sign session cookies.
     pub cookie_key: String,
+
+    /// Base URL for the ccxt sidecar service. Defaults to `http://localhost:4001` when not
+    /// provided so local development can run without extra configuration.
+    #[serde(default = "default_ccxt_service_url")]
+    pub ccxt_service_url: String,
 }
 
 impl Config {
@@ -62,6 +67,11 @@ impl Config {
     pub fn set_port(&mut self, port: u16) {
         self.server_port = port;
     }
+
+    /// Resolve the configured ccxt service URL, falling back to the local default.
+    pub fn ccxt_service_url(&self) -> String {
+        self.ccxt_service_url.clone()
+    }
 }
 
 impl Config {
@@ -92,4 +102,8 @@ impl Config {
 
         Ok(())
     }
+}
+
+fn default_ccxt_service_url() -> String {
+    "http://localhost:4001".to_string()
 }
