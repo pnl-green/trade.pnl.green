@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { SpreadAndPairSelects } from '@/styles/orderbook.styles';
 import { Box } from '@mui/material';
 import HandleSelectItems from '../handleSelectItems';
@@ -150,6 +150,8 @@ const OrderBook = () => {
   const [sizeUnit, setSizeUnit] = useState<SizeUnit>('SOL');
   const [priceIncrement, setPriceIncrement] = useState<number>(1);
   const [incrementOptions, setIncrementOptions] = useState<number[]>([]);
+  const [hasUserSelectedIncrement, setHasUserSelectedIncrement] = useState(false);
+  const previousBaseSymbol = useRef<string>();
 
   const baseSymbol = tokenPairs?.[0] || 'SOL';
 
@@ -159,8 +161,22 @@ const OrderBook = () => {
       selectedPairsTokenData || undefined
     );
     setIncrementOptions(allowedIncrements);
-    setPriceIncrement(baseTick);
-  }, [baseSymbol, selectedPairsTokenData]);
+
+    const baseChanged = previousBaseSymbol.current !== baseSymbol;
+    previousBaseSymbol.current = baseSymbol;
+
+    if (baseChanged) {
+      setHasUserSelectedIncrement(false);
+      setPriceIncrement(baseTick);
+    } else if (!hasUserSelectedIncrement) {
+      setPriceIncrement(baseTick);
+    }
+  }, [baseSymbol, selectedPairsTokenData, hasUserSelectedIncrement]);
+
+  const handleIncrementSelect = (value: string | number) => {
+    setHasUserSelectedIncrement(true);
+    setPriceIncrement(Number(value));
+  };
 
   const processedBook = useMemo(() => {
     const increment = priceIncrement || getTickConfigForAsset(baseSymbol, selectedPairsTokenData).baseTick;
@@ -252,7 +268,7 @@ const OrderBook = () => {
         <div style={{ flex: 1, minWidth: '120px' }}>
           <HandleSelectItems
             selectItem={priceIncrement}
-            setSelectItem={(value) => setPriceIncrement(Number(value))}
+            setSelectItem={handleIncrementSelect}
             selectDataItems={incrementOptions.map((value) => value.toString())}
             variant="elev"
           />
