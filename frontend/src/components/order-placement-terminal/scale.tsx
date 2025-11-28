@@ -71,7 +71,9 @@ const ScaleOrderTerminal = () => {
   const [size, setSize] = useState<number>(0);
   const [sizePercent, setSizePercent] = useState<number>(0);
   const [reduceOnly, setReduceOnly] = useState(false);
-  const [selectOrderType, setSelectOrderType] = useState<'Gtc' | 'Ioc' | 'Fok'>('Gtc');
+  const [selectOrderType, setSelectOrderType] = useState<'Gtc' | 'Ioc' | 'Fok'>(
+    'Gtc'
+  );
   const [tpSlEnabled, setTpSlEnabled] = useState(false);
 
   const [establishConnModal, setEstablishedConnModal] = useState(false);
@@ -89,7 +91,8 @@ const ScaleOrderTerminal = () => {
   const [estLiqPrice, setEstLiquidationPrice] = useState('100');
   const [fee, setFee] = useState('100');
 
-  const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
+  const availableToTrade =
+    Number(webData2.clearinghouseState?.withdrawable) || 0;
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
   const priceReference = Number(currentMarketPrice) || 0;
@@ -98,7 +101,10 @@ const ScaleOrderTerminal = () => {
     setSelectItem(base || `${tokenPairs[0]}`);
   }, [base, tokenPairs]);
 
-  const handleSliderChange = (_: Event | React.SyntheticEvent, value: number | number[]) => {
+  const handleSliderChange = (
+    _: Event | React.SyntheticEvent,
+    value: number | number[]
+  ) => {
     const percent = Array.isArray(value) ? value[0] : value;
     const normalizedPercent = Math.min(100, Math.max(0, percent));
     setSizePercent(normalizedPercent);
@@ -124,11 +130,16 @@ const ScaleOrderTerminal = () => {
       selectItem.toUpperCase() === 'USDC'
         ? numeric
         : numeric * Number(priceReference || 0);
+
     if (selectItem.toUpperCase() !== 'USDC' && !priceReference) {
       setSizePercent(0);
       return;
     }
-    const pct = Math.min(100, Math.max(0, (usdNotional / availableToTrade) * 100));
+
+    const pct = Math.min(
+      100,
+      Math.max(0, (usdNotional / availableToTrade) * 100)
+    );
     setSizePercent(Number(pct.toFixed(2)));
   };
 
@@ -144,16 +155,6 @@ const ScaleOrderTerminal = () => {
     handleSliderChange({} as any, numeric);
   };
 
-  const handlePlaceScaleOrder = () => {
-    try {
-      setConfirmModalOpen(false);
-      toast.success('Submitted scale order');
-    } catch (error) {
-      console.log(error);
-      toast.error('Error placing order, please try again later.');
-    }
-  };
-
   const sizeNotional = useMemo(() => {
     const numericSize = Number(size) || 0;
     if (selectItem.toUpperCase() === 'USDC') return numericSize;
@@ -161,10 +162,25 @@ const ScaleOrderTerminal = () => {
     return numericSize * priceReference;
   }, [priceReference, selectItem, size]);
 
-  const summaryOrderValue = sizeNotional ? `${sizeNotional.toFixed(2)} USDC` : '—';
+  const summaryOrderValue = sizeNotional
+    ? `${sizeNotional.toFixed(2)} USDC`
+    : '—';
   const summaryStartPrice = startPrice ? `${startPrice} USDC` : '—';
   const summaryEndPrice = endPrice ? `${endPrice} USDC` : '—';
-  const summaryMarginRequired = sizeNotional ? `${(sizeNotional * 0.1).toFixed(2)} USDC` : '—';
+  const summaryMarginRequired = sizeNotional
+    ? `${(sizeNotional * 0.1).toFixed(2)} USDC`
+    : '—';
+
+  const handlePlaceScaleOrder = () => {
+    try {
+      setConfirmModalOpen(false);
+      // TODO: hook this up to actual scale order placement logic
+      toast.success('Submitted scale order');
+    } catch (error) {
+      console.error(error);
+      toast.error('Error placing order, please try again later.');
+    }
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -188,7 +204,10 @@ const ScaleOrderTerminal = () => {
             <span>Current Position</span>
           </Tooltip>
           <span>
-            {currentPositionSize.toFixed(Number.isFinite(szDecimals) ? szDecimals : 4)} {base || quote || '—'}
+            {currentPositionSize.toFixed(
+              Number.isFinite(szDecimals) ? szDecimals : 4
+            )}{' '}
+            {base || quote || '—'}
           </span>
         </InlineStat>
       </Box>
@@ -252,7 +271,13 @@ const ScaleOrderTerminal = () => {
           </Box>
         </Box>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+            gap: '8px',
+          }}
+        >
           <RenderInput
             label="Start (USDC)"
             placeholder="0"
@@ -281,7 +306,13 @@ const ScaleOrderTerminal = () => {
           />
         </Box>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px' }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+            gap: '8px',
+          }}
+        >
           <RenderInput
             label="Total Orders"
             placeholder="0"
@@ -310,7 +341,14 @@ const ScaleOrderTerminal = () => {
           />
         </Box>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px', alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+            gap: '8px',
+            alignItems: 'center',
+          }}
+        >
           <CheckboxLabel>
             <input
               type="checkbox"
@@ -342,7 +380,13 @@ const ScaleOrderTerminal = () => {
 
         {tpSlEnabled && (
           <Box sx={{ display: 'grid', gap: '8px' }}>
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '8px',
+              }}
+            >
               <RenderInput
                 label="TP Price"
                 placeholder="0"
@@ -371,7 +415,13 @@ const ScaleOrderTerminal = () => {
               />
             </Box>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '8px',
+              }}
+            >
               <RenderInput
                 label="SL Price"
                 placeholder="0"
@@ -404,7 +454,10 @@ const ScaleOrderTerminal = () => {
       </Box>
 
       {establishedConnection ? (
-        <BuySellBtn className={direction === 'buy' ? 'buyBtn' : 'sellBtn'} onClick={() => setConfirmModalOpen(true)}>
+        <BuySellBtn
+          className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
+          onClick={() => setConfirmModalOpen(true)}
+        >
           {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
         </BuySellBtn>
       ) : (

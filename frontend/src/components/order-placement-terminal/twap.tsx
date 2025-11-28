@@ -59,17 +59,17 @@ const SummaryRow = styled(Box)(() => ({
 const TwapOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
   const { tokenPairs, pair, tokenPairData, assetId } = usePairTokensContext();
-  const { base, quote } = derivePairSymbols(tokenPairs, pair);
-  const currentPositionSize = getCurrentPositionSize(webData2, base);
   const { establishedConnection, handleEstablishConnection } =
     useHyperLiquidContext();
+  const { direction } = useOrderTicketContext();
+  const { base, quote } = derivePairSymbols(tokenPairs, pair);
+  const currentPositionSize = getCurrentPositionSize(webData2, base);
 
   const [isLoading, setIsLoading] = useState(false);
   const [reduceOnly, setReduceOnly] = useState(false);
   const [randomize, setRandomize] = useState(false);
   const [tpSlEnabled, setTpSlEnabled] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const { direction } = useOrderTicketContext();
   const [selectItem, setSelectItem] = useState(base || `${tokenPairs[0]}`);
   const [size, setSize] = useState<number>(0);
   const [sizePercent, setSizePercent] = useState<number>(0);
@@ -87,17 +87,20 @@ const TwapOrderTerminal = () => {
   const [estLiqPrice, setEstLiquidationPrice] = useState('100');
   const [fee, setFee] = useState('100');
 
-  const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
+  const availableToTrade =
+    Number(webData2.clearinghouseState?.withdrawable) || 0;
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
-
   const priceReference = Number(currentMarketPrice) || 0;
 
   useEffect(() => {
     setSelectItem(base || `${tokenPairs[0]}`);
   }, [base, tokenPairs]);
 
-  const handleSliderChange = (_: Event | React.SyntheticEvent, value: number | number[]) => {
+  const handleSliderChange = (
+    _: Event | React.SyntheticEvent,
+    value: number | number[]
+  ) => {
     const percent = Array.isArray(value) ? value[0] : value;
     const normalizedPercent = Math.min(100, Math.max(0, percent));
     setSizePercent(normalizedPercent);
@@ -123,11 +126,16 @@ const TwapOrderTerminal = () => {
       selectItem.toUpperCase() === 'USDC'
         ? numeric
         : numeric * Number(priceReference || 0);
+
     if (selectItem.toUpperCase() !== 'USDC' && !priceReference) {
       setSizePercent(0);
       return;
     }
-    const pct = Math.min(100, Math.max(0, (usdNotional / availableToTrade) * 100));
+
+    const pct = Math.min(
+      100,
+      Math.max(0, (usdNotional / availableToTrade) * 100)
+    );
     setSizePercent(Number(pct.toFixed(2)));
   };
 
@@ -137,20 +145,21 @@ const TwapOrderTerminal = () => {
     syncPercentWithSize(rawValue);
   };
 
+  const percentInputChange = (value: string) => {
+    const numeric = Number(value);
+    if (Number.isNaN(numeric)) return;
+    handleSliderChange({} as any, numeric);
+  };
+
   const handlePlaceTwapOrder = () => {
     try {
       setConfirmModalOpen(false);
+      // TODO: hook into real TWAP placement logic
       toast.success('Submitted TWAP order');
     } catch (error) {
       console.log(error);
       toast.error('Error placing order, please try again later.');
     }
-  };
-
-  const percentInputChange = (value: string) => {
-    const numeric = Number(value);
-    if (Number.isNaN(numeric)) return;
-    handleSliderChange({} as any, numeric);
   };
 
   const runtimeInMinutes = useMemo(() => {
@@ -159,7 +168,10 @@ const TwapOrderTerminal = () => {
     return Math.max(0, hours * 60 + minutes);
   }, [runtimeHours, runtimeMinutes]);
 
-  const ordersCount = useMemo(() => Math.max(0, Number(totalNoOfOrders) || 0), [totalNoOfOrders]);
+  const ordersCount = useMemo(
+    () => Math.max(0, Number(totalNoOfOrders) || 0),
+    [totalNoOfOrders]
+  );
 
   const frequencySeconds = useMemo(() => {
     if (!ordersCount || !runtimeInMinutes) return 0;
@@ -170,7 +182,7 @@ const TwapOrderTerminal = () => {
     if (!minutes) return '—';
     const hrs = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    const parts = [];
+    const parts: string[] = [];
     if (hrs) parts.push(`${hrs}h`);
     if (mins) parts.push(`${mins}m`);
     return parts.length ? parts.join(' ') : '0m';
@@ -189,7 +201,9 @@ const TwapOrderTerminal = () => {
   }, [ordersCount, size]);
 
   const sizeDecimals = Number.isFinite(szDecimals) ? szDecimals : 4;
-  const sizeSummaryLabel = ordersCount ? `${sizePerOrder.toFixed(sizeDecimals)} ${selectItem}` : '—';
+  const sizeSummaryLabel = ordersCount
+    ? `${sizePerOrder.toFixed(sizeDecimals)} ${selectItem}`
+    : '—';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -213,7 +227,10 @@ const TwapOrderTerminal = () => {
             <span>Current Position</span>
           </Tooltip>
           <span>
-            {currentPositionSize.toFixed(Number.isFinite(szDecimals) ? szDecimals : 4)} {base || quote || '—'}
+            {currentPositionSize.toFixed(
+              Number.isFinite(szDecimals) ? szDecimals : 4
+            )}{' '}
+            {base || quote || '—'}
           </span>
         </InlineStat>
       </Box>
@@ -275,7 +292,13 @@ const TwapOrderTerminal = () => {
       <Box sx={{ display: 'grid', gap: '10px' }}>
         <Box>
           <SectionLabel>Running Time (5m - 24h)</SectionLabel>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px' }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+              gap: '8px',
+            }}
+          >
             <RenderInput
               label="Hour(s)"
               placeholder="0"
@@ -351,7 +374,14 @@ const TwapOrderTerminal = () => {
               gap: '8px',
             }}
           >
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns:
+                  'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '8px',
+              }}
+            >
               <RenderInput
                 label="TP Price"
                 placeholder="0"
@@ -382,7 +412,14 @@ const TwapOrderTerminal = () => {
               />
             </Box>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns:
+                  'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '8px',
+              }}
+            >
               <RenderInput
                 label="SL Price"
                 placeholder="0"
@@ -429,7 +466,10 @@ const TwapOrderTerminal = () => {
           </Tooltip>
         </Box>
       ) : (
-        <BuySellBtn className={direction === 'buy' ? 'buyBtn' : 'sellBtn'} onClick={() => setConfirmModalOpen(true)}>
+        <BuySellBtn
+          className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
+          onClick={() => setConfirmModalOpen(true)}
+        >
           {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
         </BuySellBtn>
       )}
