@@ -9,11 +9,13 @@ import { useAddress } from '@thirdweb-dev/react';
 import UpDownIcon from '../../../public/upDownIcon';
 import SwitchTradingAccountModal from '../Modals/switchTradingAccountModal';
 import { useSwitchTradingAccount } from '@/context/switchTradingAccContext';
+import { useExchange } from '@/context/exchangeContext';
 
 const Navbar = () => {
   //------Hooks------
   const userAddress = useAddress();
   const { currentAccount, switchAccountHandler } = useSwitchTradingAccount();
+  const { currentExchangeId, setCurrentExchangeId } = useExchange();
 
   //------Router------
   const router = useRouter();
@@ -43,6 +45,22 @@ const Navbar = () => {
         <TextBtn>Twitter</TextBtn>
         <TextBtn>Discord</TextBtn>
         <TextBtn>Original Frontend</TextBtn>
+        <select
+          value={currentExchangeId}
+          onChange={(event) =>
+            setCurrentExchangeId(event.target.value as 'hyperliquid' | 'coinbase')
+          }
+          style={{
+            background: 'transparent',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '4px',
+            padding: '6px 8px',
+          }}
+        >
+          <option value="hyperliquid">Hyperliquid</option>
+          <option value="coinbase">Coinbase</option>
+        </select>
       </Box>
 
       <Box className="user-config">

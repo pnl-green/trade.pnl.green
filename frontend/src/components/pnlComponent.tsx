@@ -25,6 +25,7 @@ import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import Tooltip from './ui/Tooltip';
 import { styled } from '@mui/material';
 import { useChartInteractionContext } from '@/context/chartInteractionContext';
+import { useExchange } from '@/context/exchangeContext';
 
 const normalizePairName = (pair?: string) => {
   if (!pair) return '';
@@ -56,6 +57,7 @@ const PnlComponent = () => {
   const { tokenPairs } = usePairTokensContext();
   const { allTokenPairs, tokenPairData } = usePairTokensContext();
   const { selectionMode, handleChartPricePick } = useChartInteractionContext();
+  const { currentExchangeId } = useExchange();
 
   const [pairs, setPairs] = useState([]);
 
@@ -80,6 +82,11 @@ const PnlComponent = () => {
         name: 'Hyperliquid',
         desc: 'Hyperliquid',
       },
+      {
+        value: 'Coinbase',
+        name: 'Coinbase',
+        desc: 'Coinbase',
+      },
     ],
     symbols_types: [
       {
@@ -95,9 +102,9 @@ const PnlComponent = () => {
       let formatted_pair = normalizedPair.replaceAll("-", "/");
       return {
         symbol: formatted_pair,
-        full_name: `Hyperliquid:${formatted_pair}`,
+        full_name: `${currentExchangeId}:${formatted_pair}`,
         description: formatted_pair,
-        exchange: "Hyperliquid",
+        exchange: currentExchangeId,
         type: 'crypto',
       };
     });
@@ -188,56 +195,44 @@ const PnlComponent = () => {
         return;
       }
 
-      const quoteSymbol = parsedSymbol.toSymbol?.toUpperCase();
+      const logicalSymbol = `${parsedSymbol.fromSymbol.toUpperCase()}-PERP`;
+      const resolutionMap = (res: string) => {
+        const normalized = res.toString().toUpperCase();
+        if (normalized.endsWith('H')) return `${normalized.replace('H', '')}h`;
+        if (normalized.endsWith('D')) return `${normalized.replace('D', '')}d`;
+        if (normalized.endsWith('W')) return `${normalized.replace('W', '')}w`;
+        if (normalized.endsWith('M')) return `${normalized.replace('M', '')}M`;
+        return '1m';
+      };
+
       try {
-        let headers = new Headers();
-        headers.append("Content-Type", "application/json");
-
-        let raw = JSON.stringify({
-          endpoint: "info",
-          type: quoteSymbol === "USDC" ? "candleSnapshot" : "pairCandleSnapshot",
-          req: {
-            coin: parsedSymbol.fromSymbol,
-            interval: "1h",
-            startTime: from * 1000,
-            endTime: to * 1000,
-          },
-          pair_coin: quoteSymbol,
+        const params = new URLSearchParams({
+          symbol: logicalSymbol,
+          tf: resolutionMap(resolution),
+          since: String(from * 1000),
+          limit: '500',
         });
 
-        let requestOptions = {
-          method: 'POST',
-          headers: headers,
-          body: raw,
-        };
+        const url = `/ccxt/${currentExchangeId}/candles?${params.toString()}`;
+        const response = await fetch(url).then((res) => res.json());
+        if (!response?.success || !Array.isArray(response.data)) {
+          onErrorCallback(response?.error || 'No data');
+          return;
+        }
 
-        let url =
-          quoteSymbol === "USDC"
-            ? "https://api.hyperliquid.xyz/info"
-            : "https://trade.intelayer.com/hyperliquid";
+        const bars = response.data
+          .filter((bar) => Array.isArray(bar) && bar.length >= 6)
+          .map((bar) => ({
+            time: Number(bar[0]),
+            open: Number(bar[1]),
+            high: Number(bar[2]),
+            low: Number(bar[3]),
+            close: Number(bar[4]),
+            volume: Number(bar[5]),
+          }))
+          .filter((bar) => bar.time >= from * 1000 && bar.time <= to * 1000);
 
-        let data = await fetch(url, requestOptions).then((response) =>
-          response.json()
-        );
-        let bars: any[] = [];
-        let response = quoteSymbol === "USDC" ? data : data.data;
-
-        response.forEach((bar: any) => {
-          if (bar.t >= from * 1000 && bar.T < to * 1000) {
-            bars = [
-              ...bars,
-              {
-                time: Number(bar.t),
-                low: Number(bar.l),
-                high: Number(bar.h),
-                open: Number(bar.o),
-                close: Number(bar.c),
-              },
-            ];
-          }
-        });
-
-        if (firstDataRequest) {
+        if (firstDataRequest && bars.length > 0) {
           lastBarsCache.set(symbolInfo.full_name, {
             ...bars[bars.length - 1],
           });
@@ -292,10 +287,10 @@ const PnlComponent = () => {
       theme: "dark",
       symbol:
         tokenPairs && tokenPairs.length >= 2
-          ? `Hyperliquid:${tokenPairs[0]}/${tokenPairs[1]}`
+          ? `${currentExchangeId}:${tokenPairs[0]}/${tokenPairs[1]}`
           : '',
     }),
-    [pairs, tokenPairs]
+    [currentExchangeId, pairs, tokenPairs]
   );
 
   const chartElement = useMemo(

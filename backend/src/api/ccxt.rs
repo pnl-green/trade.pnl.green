@@ -11,7 +11,18 @@ pub async fn proxy(
     body: web::Bytes,
     config: web::Data<Config>,
 ) -> Result<HttpResponse> {
-    let mut url = format!("{}/api/{}", config.ccxt_service_url(), path.into_inner());
+    let tail = path.into_inner();
+    let mut segments = tail.split('/');
+    let exchange = segments
+        .next()
+        .ok_or_else(|| Error::BadRequestError("Missing exchange".into()))?;
+
+    match exchange {
+        "hyperliquid" | "coinbase" => {}
+        _ => return Err(Error::BadRequestError("Unsupported exchange".into())),
+    }
+
+    let mut url = format!("{}/api/{}", config.ccxt_service_url(), tail);
 
     if !req.query_string().is_empty() {
         url.push('?');

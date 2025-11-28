@@ -264,7 +264,7 @@ async fn main() -> anyhow::Result<()> {
             .wrap(sm)
             .app_data(config_data.clone())
             .route("/hyperliquid", web::post().to(api::hyperliquid))
-            .route("/api/{tail:.*}", web::to(api::ccxt_proxy))
+            .route("/ccxt/{tail:.*}", web::to(api::ccxt_proxy))
             .route("/status", web::get().to(api::status))
             .default_service(web::to(api::not_found))
             .app_data(chain.clone())
