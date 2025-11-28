@@ -21,18 +21,6 @@ import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
 
-const InlineStat = styled(Box)(() => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '10px 12px',
-  background: 'rgba(255, 255, 255, 0.02)',
-  borderRadius: '10px',
-  border: `1px solid ${intelayerColors.panelBorder}`,
-  fontFamily: intelayerFonts.body,
-  fontSize: '13px',
-}));
-
 const PresetButton = styled('button')(() => ({
   border: `1px solid ${intelayerColors.panelBorder}`,
   background: 'rgba(255, 255, 255, 0.02)',
@@ -99,6 +87,9 @@ const LimitComponent = () => {
   const [establishConnModal, setEstablishedConnModal] = useState(false);
   const [reduceOnly, setReduceOnly] = useState(false);
   const [sizePercent, setSizePercent] = useState<number>(0);
+  const isBaseOrQuoteSelected =
+    selectItem?.toUpperCase() === base?.toUpperCase() ||
+    selectItem?.toUpperCase() === quote?.toUpperCase();
 
   const takeProfitPrice = takeProfits[0] ?? '';
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
@@ -248,44 +239,40 @@ const LimitComponent = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       <DirectionSelector />
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-        <InlineStat>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px', mt: '4px' }}>
+        <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available to Trade</span>
+            <span>Available</span>
           </Tooltip>
-          <span>{availableToTrade.toFixed(2)} USDC</span>
-        </InlineStat>
-        <InlineStat>
+          <span>{availableToTrade.toFixed(2)} {quote || 'USDC'}</span>
+        </FlexItems>
+        <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Current Position</span>
+            <span>Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(Number.isFinite(szDecimals) ? szDecimals : 4)} {base || quote || '—'}
           </span>
-        </InlineStat>
+        </FlexItems>
       </Box>
 
       <Box>
         <SectionLabel>Price (USDC)</SectionLabel>
         <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <RenderInput
-            label=""
-            tooltip={orderTicketTooltips.price}
-            placeholder="0"
-            type="number"
-            value={limitPrice?.toString() ?? ''}
-            onChange={(e: any) => setLimitPrice(e.target.value)}
-            styles={{
-              flex: 1,
-              marginTop: 0,
-              gap: 0,
-              width: '100%',
-              '.placeholder_box': {
-                fontSize: '12px',
-              },
-              input: { width: '100%', padding: '0' },
-            }}
-          />
+            <RenderInput
+              label=""
+              tooltip={orderTicketTooltips.price}
+              placeholder="0"
+              type="number"
+              value={limitPrice?.toString() ?? ''}
+              onChange={(e: any) => setLimitPrice(e.target.value)}
+              styles={{
+                flex: 1,
+                marginTop: 0,
+                gap: 0,
+                width: '100%',
+              }}
+            />
           <Box sx={{ display: 'flex', gap: '6px' }}>
             <PresetButton onClick={() => setPriceFromPreset(pricePresets.bid)}>Best Bid</PresetButton>
             <PresetButton onClick={() => setPriceFromPreset(pricePresets.mid)}>Mid</PresetButton>
@@ -294,57 +281,57 @@ const LimitComponent = () => {
         </Box>
       </Box>
 
-      <Box>
-        <SectionLabel>Size</SectionLabel>
-        <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <RenderInput
-            label=""
-            tooltip={orderTicketTooltips.size}
-            placeholder="|"
-            value={size.toString()}
-            onChange={(e: any) => handleSizeInput(Number(e.target.value))}
-            styles={{
-              background: 'transparent',
-              flex: 1,
-              ':hover': {
-                border: 'none !important',
-              },
-            }}
-          />
-          <HandleSelectItems
-            selectItem={selectItem}
-            setSelectItem={setSelectItem}
-            selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
-          />
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.4fr)',
+          gap: '12px',
+          alignItems: 'flex-end',
+        }}
+      >
+        <Box>
+          <SectionLabel>Size</SectionLabel>
+          <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <RenderInput
+              label=""
+              tooltip={orderTicketTooltips.size}
+              placeholder="0"
+              value={size.toString()}
+              onChange={(e: any) => handleSizeInput(Number(e.target.value))}
+              styles={{ flex: 1 }}
+            />
+            <HandleSelectItems
+              selectItem={selectItem}
+              setSelectItem={setSelectItem}
+              selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
+            />
+          </Box>
         </Box>
-      </Box>
 
-      <Box>
-        <SectionLabel>Size Slider</SectionLabel>
-        <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <Slider
-            min={0}
-            max={100}
-            step={1}
-            value={sizePercent}
-            onChange={handleSliderChange}
-            sx={{ flex: 1 }}
-            valueLabelDisplay="auto"
-          />
-          <RenderInput
-            label="%"
-            placeholder="0"
-            value={sizePercent.toString()}
-            onChange={(e: any) => handleSliderChange({}, Number(e.target.value))}
-            styles={{
-              width: '80px',
-              '.placeholder_box': {
-                width: '60%',
-              },
-              input: { width: '100%', padding: 0 },
-            }}
-          />
-        </Box>
+        {isBaseOrQuoteSelected && (
+          <Box>
+            <SectionLabel>Size Slider</SectionLabel>
+            <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Slider
+                min={0}
+                max={100}
+                step={1}
+                value={sizePercent}
+                onChange={handleSliderChange}
+                sx={{ flex: 1, '& .MuiSlider-thumb': { boxShadow: 'none' } }}
+                valueLabelDisplay="auto"
+                color="success"
+              />
+              <RenderInput
+                label=""
+                placeholder="0"
+                value={sizePercent.toString()}
+                onChange={(e: any) => handleSliderChange({}, Number(e.target.value))}
+                styles={{ width: '80px' }}
+              />
+            </Box>
+          </Box>
+        )}
       </Box>
 
       <FlexItems sx={{ gap: '10px' }}>
@@ -381,73 +368,54 @@ const LimitComponent = () => {
       </CheckboxLabel>
 
       {tpSlEnabled && (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-          }}
-        >
-          <FlexItems>
-            <RenderInput
-              label="TP Price"
-              placeholder="0"
-              value={takeProfitPrice}
-              onChange={(e: any) => setTakeProfits([e.target.value])}
-              styles={{
-                gap: 0,
-                width: '49%',
-                '.placeholder_box': {
-                  fontSize: '12px',
-                },
-                input: { width: '30%', padding: '0' },
-              }}
-            />
+        <Box sx={{ display: 'grid', gap: '8px' }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '8px',
+            }}
+          >
+            <Box>
+              <SectionLabel>TP Price</SectionLabel>
+              <RenderInput
+                label=""
+                placeholder="0"
+                value={takeProfitPrice}
+                onChange={(e: any) => setTakeProfits([e.target.value])}
+                styles={{ width: '100%' }}
+              />
+            </Box>
 
-            <RenderInput
-              label="Gain"
-              placeholder="$"
-              styles={{
-                gap: 0,
-                width: '49%',
-                '.placeholder_box': {
-                  fontSize: '12px',
-                },
-                input: { width: '30%', padding: '0' },
-              }}
-            />
-          </FlexItems>
+            <Box>
+              <SectionLabel>Gain</SectionLabel>
+              <RenderInput label="" placeholder="$" styles={{ width: '100%' }} />
+            </Box>
+          </Box>
 
-          <FlexItems>
-            <RenderInput
-              label="SL Price"
-              placeholder="0"
-              value={stopLoss}
-              onChange={(e: any) => setStopLoss(e.target.value)}
-              styles={{
-                gap: 0,
-                width: '49%',
-                '.placeholder_box': {
-                  width: '90% !important',
-                  fontSize: '12px',
-                },
-                input: { width: '20%', padding: '0' },
-              }}
-            />
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '8px',
+            }}
+          >
+            <Box>
+              <SectionLabel>SL Price</SectionLabel>
+              <RenderInput
+                label=""
+                placeholder="0"
+                value={stopLoss}
+                onChange={(e: any) => setStopLoss(e.target.value)}
+                styles={{ width: '100%' }}
+              />
+            </Box>
 
-            <RenderInput
-              label="Loss"
-              placeholder="$"
-              styles={{
-                gap: 0,
-                width: '49%',
-                '.placeholder_box': {
-                  fontSize: '12px',
-                },
-                input: { width: '30%', padding: '0' },
-              }}
-            />
-          </FlexItems>
+            <Box>
+              <SectionLabel>Loss</SectionLabel>
+              <RenderInput label="" placeholder="$" styles={{ width: '100%' }} />
+            </Box>
+          </Box>
         </Box>
       )}
 
