@@ -1,5 +1,5 @@
 import { SelectItemsBox } from '@/styles/riskManager.styles';
-import { Box } from '@mui/material';
+import { Box, Slider, styled } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
 import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
@@ -13,12 +13,21 @@ import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
+import { intelayerColors, intelayerFonts } from '@/styles/theme';
+
+const SectionLabel = styled('div')(() => ({
+  fontSize: '12px',
+  color: intelayerColors.subtle,
+  fontFamily: intelayerFonts.mono,
+  marginBottom: '6px',
+}));
 
 const ChaseOrderTerminal = () => {
   const { tokenPairs, pair, tokenPairData, assetId } = usePairTokensContext();
   const { webData2 } = useWebDataContext();
   const { direction, setDirection } = useOrderTicketContext();
   const { base, quote } = derivePairSymbols(tokenPairs, pair);
+  const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
   const currentPositionSize = getCurrentPositionSize(webData2, base);
   const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
 
@@ -26,7 +35,8 @@ const ChaseOrderTerminal = () => {
   const [selectOrderType, setSelectOrderType] = useState('GTC');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [selectItem, setSelectItem] = useState(base || `${tokenPairs[0]}`);
-  const [size, setSize] = useState('');
+  const [size, setSize] = useState<number>(0);
+  const [sizePercent, setSizePercent] = useState<number>(0);
   const [allowedBeforeMarketPurchase, setAllowedBeforeMarketPurchase] =
     useState('');
 
@@ -54,6 +64,51 @@ const ChaseOrderTerminal = () => {
     if (radioValue === e.target.value) {
       setRadioValue('');
     }
+  };
+
+  const priceReference = tokenPairData[assetId]?.assetCtx.markPx;
+  const isBaseOrQuoteSelected =
+    selectItem?.toUpperCase() === base?.toUpperCase() ||
+    selectItem?.toUpperCase() === quote?.toUpperCase();
+
+  const syncPercentWithSize = (nextSize: number) => {
+    if (!priceReference || !availableToTrade) {
+      setSizePercent(0);
+      return;
+    }
+
+    const usdNotional =
+      selectItem.toUpperCase() === 'USDC'
+        ? nextSize
+        : nextSize * Number(priceReference);
+
+    const nextPercent = Math.min(100, Math.max(0, (usdNotional / availableToTrade) * 100));
+    setSizePercent(Number.isFinite(nextPercent) ? Number(nextPercent.toFixed(2)) : 0);
+  };
+
+  const handleSizeInput = (value: number) => {
+    setSize(value);
+    syncPercentWithSize(value);
+  };
+
+  const handleSliderChange = (_: Event | React.SyntheticEvent, value: number | number[]) => {
+    const percent = Array.isArray(value) ? value[0] : value;
+    const normalizedPercent = Math.min(100, Math.max(0, percent));
+    setSizePercent(normalizedPercent);
+
+    const usdTarget = (availableToTrade * normalizedPercent) / 100;
+    const nextSize =
+      selectItem.toUpperCase() === 'USDC' || !priceReference
+        ? usdTarget
+        : usdTarget / Number(priceReference);
+
+    const decimals = Number.isFinite(szDecimals) ? szDecimals : 4;
+    setSize(Number(nextSize.toFixed(decimals)));
+  };
+
+  const percentInputChange = (value: string) => {
+    const normalized = Number(value);
+    handleSliderChange({}, Number.isFinite(normalized) ? normalized : 0);
   };
 
   useEffect(() => {
@@ -116,27 +171,72 @@ const ChaseOrderTerminal = () => {
         }}
       />
 
-      <SelectItemsBox>
-        <RenderInput
-          label={'Size'}
-          tooltip={orderTicketTooltips.size}
-          placeholder="|"
-          type="number"
-          value={size}
-          onChange={(e: any) => setSize(e.target.value)}
-          styles={{
-            background: 'transparent',
-            ':hover': {
-              border: 'none !important',
-            },
-          }}
-        />
-        <HandleSelectItems
-          selectItem={selectItem}
-          setSelectItem={setSelectItem}
-          selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
-        />
-      </SelectItemsBox>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.4fr)',
+          gap: '12px',
+          alignItems: 'flex-end',
+          mt: '10px',
+        }}
+      >
+        <Box>
+          <SectionLabel>Size</SectionLabel>
+          <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <RenderInput
+              label={''}
+              tooltip={orderTicketTooltips.size}
+              placeholder="|"
+              type="number"
+              value={size.toString()}
+              onChange={(e: any) => handleSizeInput(Number(e.target.value))}
+              styles={{
+                background: 'transparent',
+                flex: 1,
+                ':hover': {
+                  border: 'none !important',
+                },
+              }}
+            />
+            <HandleSelectItems
+              selectItem={selectItem}
+              setSelectItem={setSelectItem}
+              selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
+            />
+          </Box>
+        </Box>
+
+        {isBaseOrQuoteSelected && (
+          <Box>
+            <SectionLabel>Size Slider</SectionLabel>
+            <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Slider
+                min={0}
+                max={100}
+                step={1}
+                value={sizePercent}
+                onChange={handleSliderChange}
+                sx={{ flex: 1, '& .MuiSlider-thumb': { boxShadow: 'none' } }}
+                valueLabelDisplay="auto"
+                color="success"
+              />
+              <RenderInput
+                label="%"
+                placeholder="0"
+                value={sizePercent.toString()}
+                onChange={(e: any) => percentInputChange(e.target.value)}
+                styles={{
+                  width: '80px',
+                  '.placeholder_box': {
+                    width: '60%',
+                  },
+                  input: { width: '100%', padding: 0 },
+                }}
+              />
+            </Box>
+          </Box>
+        )}
+      </Box>
 
       <Box
         sx={{

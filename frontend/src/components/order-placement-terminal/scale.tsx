@@ -198,66 +198,75 @@ const ScaleOrderTerminal = () => {
       </Box>
 
       <Box sx={{ display: 'grid', gap: '10px' }}>
-        <Box>
-          <SectionLabel>Size</SectionLabel>
-          <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <RenderInput
-              label=""
-              tooltip={orderTicketTooltips.size}
-              placeholder="|"
-              type="number"
-              value={size}
-              onChange={(e: any) => handleSizeInput(e.target.value)}
-              styles={{
-                background: 'transparent',
-                flex: 1,
-                '.placeholder_box': {
-                  fontSize: '12px',
-                },
-                ':hover': {
-                  border: 'none !important',
-                },
-              }}
-            />
-            <HandleSelectItems
-              selectItem={selectItem}
-              setSelectItem={setSelectItem}
-              selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
-            />
-          </Box>
-        </Box>
-
-        {isBaseOrQuoteSelected && (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.4fr)',
+            gap: '12px',
+            alignItems: 'flex-end',
+          }}
+        >
           <Box>
-            <SectionLabel>Size Slider</SectionLabel>
-            <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <Slider
-                min={0}
-                max={100}
-                step={1}
-                value={sizePercent}
-                onChange={handleSliderChange}
-                sx={{ flex: 1, '& .MuiSlider-thumb': { boxShadow: 'none' } }}
-                valueLabelDisplay="auto"
-                color="success"
-              />
+            <SectionLabel>Size</SectionLabel>
+            <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <RenderInput
-                label="%"
-                placeholder="0"
-                value={sizePercent.toString()}
-                onChange={(e: any) => percentInputChange(e.target.value)}
+                label=""
+                tooltip={orderTicketTooltips.size}
+                placeholder="|"
+                type="number"
+                value={size}
+                onChange={(e: any) => handleSizeInput(e.target.value)}
                 styles={{
-                  width: '80px',
+                  background: 'transparent',
+                  flex: 1,
                   '.placeholder_box': {
-                    width: '60%',
                     fontSize: '12px',
                   },
-                  input: { width: '100%', padding: 0 },
+                  ':hover': {
+                    border: 'none !important',
+                  },
                 }}
+              />
+              <HandleSelectItems
+                selectItem={selectItem}
+                setSelectItem={setSelectItem}
+                selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
               />
             </Box>
           </Box>
-        )}
+
+          {isBaseOrQuoteSelected && (
+            <Box>
+              <SectionLabel>Size Slider</SectionLabel>
+              <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <Slider
+                  min={0}
+                  max={100}
+                  step={1}
+                  value={sizePercent}
+                  onChange={handleSliderChange}
+                  sx={{ flex: 1, '& .MuiSlider-thumb': { boxShadow: 'none' } }}
+                  valueLabelDisplay="auto"
+                  color="success"
+                />
+                <RenderInput
+                  label="%"
+                  placeholder="0"
+                  value={sizePercent.toString()}
+                  onChange={(e: any) => percentInputChange(e.target.value)}
+                  styles={{
+                    width: '80px',
+                    '.placeholder_box': {
+                      width: '60%',
+                      fontSize: '12px',
+                    },
+                    input: { width: '100%', padding: 0 },
+                  }}
+                />
+              </Box>
+            </Box>
+          )}
+        </Box>
 
         <Box
           sx={{
