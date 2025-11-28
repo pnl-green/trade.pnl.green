@@ -1,7 +1,7 @@
 import { Box, Slider, styled } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
-import { BuySellBtn } from '@/styles/common.styles';
+import { BuySellBtn, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
@@ -16,18 +16,6 @@ import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import toast from 'react-hot-toast';
-
-const InlineStat = styled(Box)(() => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '10px 12px',
-  background: 'rgba(255, 255, 255, 0.02)',
-  borderRadius: '10px',
-  border: `1px solid ${intelayerColors.panelBorder}`,
-  fontFamily: intelayerFonts.body,
-  fontSize: '13px',
-}));
 
 const SectionLabel = styled('div')(() => ({
   fontSize: '12px',
@@ -96,6 +84,9 @@ const ScaleOrderTerminal = () => {
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
   const priceReference = Number(currentMarketPrice) || 0;
+  const isBaseOrQuoteSelected =
+    selectItem?.toUpperCase() === base?.toUpperCase() ||
+    selectItem?.toUpperCase() === quote?.toUpperCase();
 
   useEffect(() => {
     setSelectItem(base || `${tokenPairs[0]}`);
@@ -186,22 +177,16 @@ const ScaleOrderTerminal = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       <DirectionSelector />
 
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '8px',
-        }}
-      >
-        <InlineStat>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px', mt: '4px' }}>
+        <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available to Trade</span>
+            <span>Available</span>
           </Tooltip>
-          <span>{availableToTrade.toFixed(2)} USDC</span>
-        </InlineStat>
-        <InlineStat>
+          <span>{availableToTrade.toFixed(2)} {quote || 'USDC'}</span>
+        </FlexItems>
+        <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Current Position</span>
+            <span>Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(
@@ -209,7 +194,7 @@ const ScaleOrderTerminal = () => {
             )}{' '}
             {base || quote || '—'}
           </span>
-        </InlineStat>
+        </FlexItems>
       </Box>
 
       <Box sx={{ display: 'grid', gap: '10px' }}>
@@ -242,34 +227,37 @@ const ScaleOrderTerminal = () => {
           </Box>
         </Box>
 
-        <Box>
-          <SectionLabel>Size Slider</SectionLabel>
-          <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <Slider
-              min={0}
-              max={100}
-              step={1}
-              value={sizePercent}
-              onChange={handleSliderChange}
-              sx={{ flex: 1 }}
-              valueLabelDisplay="auto"
-            />
-            <RenderInput
-              label="%"
-              placeholder="0"
-              value={sizePercent.toString()}
-              onChange={(e: any) => percentInputChange(e.target.value)}
-              styles={{
-                width: '80px',
-                '.placeholder_box': {
-                  width: '60%',
-                  fontSize: '12px',
-                },
-                input: { width: '100%', padding: 0 },
-              }}
-            />
+        {isBaseOrQuoteSelected && (
+          <Box>
+            <SectionLabel>Size Slider</SectionLabel>
+            <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Slider
+                min={0}
+                max={100}
+                step={1}
+                value={sizePercent}
+                onChange={handleSliderChange}
+                sx={{ flex: 1, '& .MuiSlider-thumb': { boxShadow: 'none' } }}
+                valueLabelDisplay="auto"
+                color="success"
+              />
+              <RenderInput
+                label="%"
+                placeholder="0"
+                value={sizePercent.toString()}
+                onChange={(e: any) => percentInputChange(e.target.value)}
+                styles={{
+                  width: '80px',
+                  '.placeholder_box': {
+                    width: '60%',
+                    fontSize: '12px',
+                  },
+                  input: { width: '100%', padding: 0 },
+                }}
+              />
+            </Box>
           </Box>
-        </Box>
+        )}
 
         <Box
           sx={{

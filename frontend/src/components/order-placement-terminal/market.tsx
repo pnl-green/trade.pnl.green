@@ -324,15 +324,16 @@ const MarketComponent = () => {
       >
         <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available balance</span>
+            <span>Available</span>
           </Tooltip>
           <span>
-            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
+            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}{' '}
+            {quote || 'USDC'}
           </span>
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Current position size</span>
+            <span>Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(
