@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { BookDataProps, WsTrades } from '@/types/hyperliquid';
 import { usePairTokensContext } from './pairTokensContext';
 import { useChainId } from '@thirdweb-dev/react';
+import { useExchange } from './exchangeContext';
 
 type TradeWithDisplay = WsTrades & { displayTime?: string };
 
@@ -37,6 +38,7 @@ const OrderBookTradesProvider = ({
   children: React.ReactNode;
 }) => {
   const { pair, tokenPairs } = usePairTokensContext();
+  const { currentExchangeId } = useExchange();
   const [bookData, setBookData] = useState<BookDataProps>({
     asks: [],
     bids: [],
@@ -47,136 +49,105 @@ const OrderBookTradesProvider = ({
 
   const chainId = useChainId();
 
-  //Subscribe to trades for a specific coin:
-  //{ "method": "subscribe", "subscription": { "type": "trades", "coin": "<coin_symbol>" } }
-
   useEffect(() => {
-    // Create a new WebSocket connection
-    const ws = new WebSocket(
-      chainId === 42161
-        ? 'wss://api.hyperliquid.xyz/ws'
-        : 'wss://api.hyperliquid-testnet.xyz/ws'
-    );
+    const controller = new AbortController();
 
-    // When the WebSocket connection is open, send the subscribe message
-    ws.onopen = () => {
-      const message = JSON.stringify({
-        method: 'subscribe',
-        subscription: {
-          type: 'trades',
-          coin: `${tokenPairs[0]}`,
-        },
-      });
-      ws.send(message);
-    };
+    const fetchTrades = async () => {
+      try {
+        let url = '';
+        if (currentExchangeId === 'hyperliquid') {
+          url = `/hl/${pair}/trades`;
+        } else {
+          const params = new URLSearchParams({ symbol: pair, limit: '50' });
+          url = `/ccxt/${currentExchangeId}/trades?${params.toString()}`;
+        }
 
-    // Listen for messages from the WebSocket server
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      const data = message.data;
+        const response = await fetch(url, { signal: controller.signal }).then((r) => r.json());
+        const trades = currentExchangeId === 'hyperliquid' ? response.trades : response.data;
 
-      if (message.channel === 'trades') {
-        if (data) {
-          const tradesData = (data as WsTrades[]).map((trade: WsTrades) => {
-            const date = new Date(trade.time);
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
+        if (Array.isArray(trades)) {
+          const mapped = trades.map((trade: any) => {
+            const timestamp = trade.time || trade.timestamp;
+            const date = new Date(timestamp);
+            const hours = String(date.getUTCHours()).padStart(2, '0');
+            const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+            const seconds = String(date.getUTCSeconds()).padStart(2, '0');
             const newTime = `${hours}:${minutes}:${seconds}`;
 
             return {
               ...trade,
-              px: Number(trade.px),
-              sz: Number(trade.sz),
+              px: Number(trade.px ?? trade.price),
+              sz: Number(trade.sz ?? trade.amount),
+              time: timestamp,
               displayTime: newTime,
             };
           });
 
-          setTradesData((prev) => {
-            const merged = [...tradesData, ...prev].sort((a, b) => b.time - a.time);
-            return merged.slice(0, 50);
-          });
+          setTradesData(mapped.slice(0, 50));
         }
-      } else if (message.channel === 'error') {
-        console.error('Error:', message.data);
-        setTradesData([]);
+      } catch (error) {
+        if ((error as any).name !== 'AbortError') {
+          console.error('Failed to fetch trades', error);
+        }
       }
     };
 
-    // Handle WebSocket errors
-    ws.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-    };
+    fetchTrades();
+    const interval = setInterval(fetchTrades, 3_000);
 
-    // Clean up the WebSocket connection when the component unmounts
     return () => {
-      ws.close();
+      controller.abort();
+      clearInterval(interval);
     };
-  }, [pair]);
+  }, [pair, currentExchangeId, chainId]);
 
   useEffect(() => {
-    // Create a new WebSocket connection
+    const controller = new AbortController();
 
-    const ws = new WebSocket(
-      chainId === 42161
-        ? 'wss://api.hyperliquid.xyz/ws'
-        : 'wss://api.hyperliquid-testnet.xyz/ws'
-    );
-
-    // When the WebSocket connection is open, send the subscribe message
-    ws.onopen = () => {
-      const message = JSON.stringify({
-        method: 'subscribe',
-        subscription: {
-          type: 'l2Book',
-          coin: `${tokenPairs[0]}`,
-          nSigFigs: 5,
-        },
-      });
-      ws.send(message);
-    };
-
-    // Listen for messages from the WebSocket server
-    ws.onmessage = (event) => {
+    const fetchOrderBook = async () => {
       setLoadingBookData(true);
-      const message = JSON.parse(event.data);
-      const data = message.data.levels;
+      try {
+        let url = '';
+        if (currentExchangeId === 'hyperliquid') {
+          url = `/hl/${pair}/orderbook`;
+        } else {
+          const params = new URLSearchParams({ symbol: pair, limit: '50' });
+          url = `/ccxt/${currentExchangeId}/orderbook?${params.toString()}`;
+        }
 
-      if (message.channel === 'l2Book') {
-        if (data) {
-          const data_parsed: Array<Order[]> = data.map((ordersArr: Order[]) => 
-            ordersArr.map((order: Order) => {
-              return {
-                px: Number(order.px),
-                sz: Number(order.sz),
-                n: Number(order.n)
-              }
-            })
-          )
+        const response = await fetch(url, { signal: controller.signal }).then((r) => r.json());
+        const data = currentExchangeId === 'hyperliquid' ? response : response.data;
 
-          const bids: Order[] = data_parsed[0];
-          const asks: Order[] = data_parsed[1];
+        const parseSide = (levels: any[] = []) =>
+          levels.map((level) => {
+            if (Array.isArray(level)) {
+              return { px: Number(level[0]), sz: Number(level[1]), n: Number(level[2] || 0) } as Order;
+            }
+            return { px: Number(level.px), sz: Number(level.sz), n: Number(level.n || 0) } as Order;
+          });
 
-          setBookData({ asks, bids });
+        const asks = parseSide(data?.asks);
+        const bids = parseSide(data?.bids);
+
+        setBookData({ asks, bids });
+        setLoadingBookData(false);
+      } catch (error) {
+        if ((error as any).name !== 'AbortError') {
+          console.error('Failed to fetch orderbook', error);
+          setBookData({ asks: [], bids: [] });
           setLoadingBookData(false);
         }
-      } else if (message.channel === 'error') {
-        setLoadingBookData(false);
-        console.error('Error:', message.data);
-        setBookData({ asks: [], bids: [] });
       }
     };
 
-    // Handle WebSocket errors
-    ws.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-    };
+    fetchOrderBook();
+    const interval = setInterval(fetchOrderBook, 2_000);
 
-    // Clean up the WebSocket connection when the component unmounts
     return () => {
-      ws.close();
+      controller.abort();
+      clearInterval(interval);
     };
-  }, [pair]);
+  }, [pair, currentExchangeId, tokenPairs, chainId]);
 
   return (
     <OrderBookTradesContext.Provider
