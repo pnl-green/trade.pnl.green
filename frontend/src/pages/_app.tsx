@@ -16,6 +16,7 @@ import NoSSR from 'react-no-ssr';
 import ContextProviders from '../context';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { isSafari } from '@/utils/isSafari';
+import { InstallPrompt } from '@/components/InstallPrompt';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -40,6 +41,17 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
       document.body.classList.add('is-safari');
     } else {
       document.body.classList.remove('is-safari');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').catch((error) => {
+          console.error('Service worker registration failed:', error);
+        });
+      });
     }
   }, []);
 
@@ -79,6 +91,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
                 },
               }}
             />
+            <InstallPrompt />
             {getLayout(<Component {...pageProps} />)}
           </ContextProviders>
         </ThirdwebProvider>
