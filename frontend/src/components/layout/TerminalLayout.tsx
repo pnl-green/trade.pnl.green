@@ -67,10 +67,10 @@ const scaleLayout = (layout: PanelLayout[], factor: number): PanelLayout[] =>
   }));
 
 const baseLayout: PanelLayout[] = [
-  { i: 'assetInfo', x: 0, y: 0, w: 8, h: 2, minW: 6, minH: 2 },
-  { i: 'chart', x: 0, y: 2, w: 8, h: 18, minW: 6, minH: 12 },
-  { i: 'orderbook', x: 8, y: 0, w: 2, h: 16, minW: 2, minH: 8 },
-  { i: 'ticket', x: 10, y: 0, w: 2, h: 18, minW: 2, minH: 12 },
+  { i: 'assetInfo', x: 0, y: 0, w: 7, h: 2, minW: 6, minH: 2 },
+  { i: 'chart', x: 0, y: 2, w: 7, h: 18, minW: 6, minH: 12 },
+  { i: 'orderbook', x: 7, y: 0, w: 2, h: 16, minW: 2, minH: 8 },
+  { i: 'ticket', x: 9, y: 0, w: 3, h: 18, minW: 2, minH: 12 },
   { i: 'positions', x: 0, y: 22, w: 6, h: 10, minW: 4, minH: 6 },
   { i: 'assistant', x: 6, y: 22, w: 3, h: 10, minW: 2, minH: 6 },
   { i: 'portfolio', x: 9, y: 22, w: 3, h: 10, minW: 2, minH: 4 },
@@ -91,7 +91,7 @@ const TerminalRoot = styled(Box)(() => ({
   backgroundColor: intelayerColors.page,
   width: '100%',
   minHeight: '100svh',
-  padding: '10px clamp(8px, 1.8vw, 24px) 18px',
+  padding: '10px clamp(6px, 1.4vw, 18px) 18px',
   display: 'flex',
   flexDirection: 'column',
   gap: '10px',
@@ -107,7 +107,7 @@ const TerminalRoot = styled(Box)(() => ({
     minHeight: '-webkit-fill-available',
   },
   [`@media (min-width: ${MOBILE_BREAKPOINT}px)`]: {
-    padding: '16px clamp(12px, 2.2vw, 28px) 22px',
+    padding: '16px clamp(10px, 1.8vw, 22px) 22px',
   },
 }));
 

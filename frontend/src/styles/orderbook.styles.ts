@@ -83,15 +83,15 @@ export const StyledTable = styled('table')<TablerowsProps>((props) => ({
     width: '100%',
     textAlign: 'left',
     th: {
-      padding: '3px 4px',
+      padding: '3px 3px',
     },
   },
   th: {
-    padding: '3px 4px',
+    padding: '3px 3px',
   },
   td: {
     position: 'relative',
-    padding: '3px 4px',
+    padding: '3px 3px',
   },
   tbody: {
     textAlign: 'left',

@@ -356,7 +356,7 @@ const PnlComponent = () => {
           title="Order Book & Trades"
           hideHeader
           compact
-          sx={{ height: '100%', minHeight: 0 }}
+          sx={{ height: '100%', minHeight: 0, padding: '10px 8px' }}
         >
           <OrderBookAndTrades />
         </PanelCard>
@@ -366,7 +366,7 @@ const PnlComponent = () => {
           title="Risk Manager & Order Ticket"
           hideHeader
           compact
-          sx={{ height: '100%', minHeight: 0 }}
+          sx={{ height: '100%', minHeight: 0, padding: '10px 8px' }}
         >
           <OrderPlacement />
         </PanelCard>
