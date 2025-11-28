@@ -16,6 +16,7 @@ import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import toast from 'react-hot-toast';
+import { useChartInteractionContext } from '@/context/chartInteractionContext';
 
 const SectionLabel = styled('div')(() => ({
   fontSize: '12px',
@@ -44,6 +45,27 @@ const SummaryRow = styled(Box)(() => ({
   fontSize: '12px',
 }));
 
+const ChartSelectButton = styled('button')(() => ({
+  border: `1px solid ${intelayerColors.panelBorder}`,
+  background: 'rgba(255, 255, 255, 0.02)',
+  color: intelayerColors.muted,
+  borderRadius: '8px',
+  padding: '6px 10px',
+  cursor: 'pointer',
+  fontFamily: intelayerFonts.body,
+  fontSize: '12px',
+  transition: 'all 0.15s ease',
+  '&:hover': {
+    borderColor: intelayerColors.green[500],
+    color: intelayerColors.green[500],
+  },
+  '&.active': {
+    borderColor: intelayerColors.green[500],
+    color: intelayerColors.green[500],
+    background: 'rgba(14, 240, 157, 0.08)',
+  },
+}));
+
 const ScaleOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
   const { tokenPairs, pair, tokenPairData, assetId } = usePairTokensContext();
@@ -52,6 +74,14 @@ const ScaleOrderTerminal = () => {
   const { direction } = useOrderTicketContext();
   const { base, quote } = derivePairSymbols(tokenPairs, pair);
   const currentPositionSize = getCurrentPositionSize(webData2, base);
+  const {
+    selectionMode,
+    toggleSelectionMode,
+    scaleStartPrice,
+    setScaleStartPrice,
+    scaleEndPrice,
+    setScaleEndPrice,
+  } = useChartInteractionContext();
 
   const [isLoading, setIsLoading] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -71,8 +101,6 @@ const ScaleOrderTerminal = () => {
   const [gain, setGain] = useState('');
   const [loss, setLoss] = useState('');
 
-  const [startPrice, setStartPrice] = useState<string>('');
-  const [endPrice, setEndPrice] = useState<string>('');
   const [totalNoOfOrders, setTotalNoOfOrders] = useState<string>('');
   const [sizeSkew, setSizeSkew] = useState<string>('1.00');
 
@@ -156,8 +184,8 @@ const ScaleOrderTerminal = () => {
   const summaryOrderValue = sizeNotional
     ? `${sizeNotional.toFixed(2)} USDC`
     : '—';
-  const summaryStartPrice = startPrice ? `${startPrice} USDC` : '—';
-  const summaryEndPrice = endPrice ? `${endPrice} USDC` : '—';
+  const summaryStartPrice = scaleStartPrice ? `${scaleStartPrice} USDC` : '—';
+  const summaryEndPrice = scaleEndPrice ? `${scaleEndPrice} USDC` : '—';
   const summaryMarginRequired = sizeNotional
     ? `${(sizeNotional * 0.1).toFixed(2)} USDC`
     : '—';
@@ -261,25 +289,43 @@ const ScaleOrderTerminal = () => {
         >
           <Box>
             <SectionLabel>Start (USDC)</SectionLabel>
-            <RenderInput
-              label=""
-              placeholder="0"
-              type="number"
-              value={startPrice}
-              onChange={(e: any) => setStartPrice(e.target.value)}
-              styles={{ width: '100%' }}
-            />
+            <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <RenderInput
+                label=""
+                placeholder="0"
+                type="number"
+                value={scaleStartPrice}
+                onChange={(e: any) => setScaleStartPrice(e.target.value)}
+                styles={{ width: '100%' }}
+              />
+              <ChartSelectButton
+                className={selectionMode === 'scale-start-from-chart' ? 'active' : ''}
+                onClick={() => toggleSelectionMode('scale-start-from-chart')}
+                aria-pressed={selectionMode === 'scale-start-from-chart'}
+              >
+                Click on Chart (Start)
+              </ChartSelectButton>
+            </Box>
           </Box>
           <Box>
             <SectionLabel>End (USDC)</SectionLabel>
-            <RenderInput
-              label=""
-              placeholder="0"
-              type="number"
-              value={endPrice}
-              onChange={(e: any) => setEndPrice(e.target.value)}
-              styles={{ width: '100%' }}
-            />
+            <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <RenderInput
+                label=""
+                placeholder="0"
+                type="number"
+                value={scaleEndPrice}
+                onChange={(e: any) => setScaleEndPrice(e.target.value)}
+                styles={{ width: '100%' }}
+              />
+              <ChartSelectButton
+                className={selectionMode === 'scale-end-from-chart' ? 'active' : ''}
+                onClick={() => toggleSelectionMode('scale-end-from-chart')}
+                aria-pressed={selectionMode === 'scale-end-from-chart'}
+              >
+                Click on Chart (End)
+              </ChartSelectButton>
+            </Box>
           </Box>
         </Box>
 
