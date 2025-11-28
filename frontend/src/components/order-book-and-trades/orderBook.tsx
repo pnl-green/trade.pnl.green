@@ -37,19 +37,37 @@ const formatNumber = (value: number, decimals: number) =>
     maximumFractionDigits: decimals,
   });
 
-const getTickConfigForAsset = (symbol: string) => {
-  if (symbol === 'BTC') {
-    return { baseTick: 1, allowedIncrements: [1, 2, 5, 10, 50, 100] };
-  }
-  if (symbol === 'ETH') {
-    return { baseTick: 0.1, allowedIncrements: [0.1, 0.5, 1, 5, 10] };
-  }
-  if (symbol === 'SOL') {
-    return { baseTick: 0.01, allowedIncrements: [0.01, 0.05, 0.1, 0.5, 1] };
-  }
+const FALLBACK_TICK = 0.000001;
+const buildIncrementOptions = (baseTick: number) => {
+  const multipliers = [1, 2, 5, 10, 25, 50, 100];
+  const decimals = getDecimalPlaces(baseTick);
+
+  const options = multipliers
+    .map((multiplier) => Number((baseTick * multiplier).toFixed(decimals)))
+    .filter((value, index, self) => value > 0 && self.indexOf(value) === index);
+
+  return options.length ? options : [baseTick];
+};
+
+const getTickConfigForAsset = (
+  symbol: string,
+  selectedPairsTokenData?: { universe?: { tickSize?: number; szDecimals?: number; pxDecimals?: number } }
+) => {
+  const priceMeta = selectedPairsTokenData?.universe;
+  const metaTick = Number(priceMeta?.tickSize);
+
+  const decimalFallback = priceMeta?.pxDecimals;
+  const inferredTickFromDecimals =
+    typeof decimalFallback === 'number' ? Number((1 / 10 ** decimalFallback).toFixed(decimalFallback)) : undefined;
+
+  const baseTickCandidate =
+    (!Number.isNaN(metaTick) && metaTick) || inferredTickFromDecimals || (symbol === 'BTC' ? 1 : FALLBACK_TICK);
+
+  const baseTick = baseTickCandidate > 0 ? baseTickCandidate : FALLBACK_TICK;
+
   return {
-    baseTick: 0.000001,
-    allowedIncrements: [0.000001, 0.00001, 0.0001, 0.001, 0.01],
+    baseTick,
+    allowedIncrements: buildIncrementOptions(baseTick),
   };
 };
 
@@ -127,7 +145,7 @@ const addCumulativeTotals = (
 };
 
 const OrderBook = () => {
-  const { tokenPairs, pair } = usePairTokensContext();
+  const { tokenPairs, pair, selectedPairsTokenData } = usePairTokensContext();
   const { bookData, loadingBookData } = useOrderBookTradesContext();
   const [sizeUnit, setSizeUnit] = useState<SizeUnit>('SOL');
   const [priceIncrement, setPriceIncrement] = useState<number>(1);
@@ -136,16 +154,16 @@ const OrderBook = () => {
   const baseSymbol = tokenPairs?.[0] || 'SOL';
 
   useEffect(() => {
-    const { baseTick, allowedIncrements } = getTickConfigForAsset(baseSymbol);
+    const { baseTick, allowedIncrements } = getTickConfigForAsset(
+      baseSymbol,
+      selectedPairsTokenData || undefined
+    );
     setIncrementOptions(allowedIncrements);
-    setPriceIncrement((current) => {
-      const numeric = Number(current) || baseTick;
-      return numeric < baseTick ? baseTick : numeric;
-    });
-  }, [baseSymbol]);
+    setPriceIncrement(baseTick);
+  }, [baseSymbol, selectedPairsTokenData]);
 
   const processedBook = useMemo(() => {
-    const increment = priceIncrement || getTickConfigForAsset(baseSymbol).baseTick;
+    const increment = priceIncrement || getTickConfigForAsset(baseSymbol, selectedPairsTokenData).baseTick;
     const aggregatedAsks = aggregateByIncrement(bookData.asks, increment, 'ask');
     const aggregatedBids = aggregateByIncrement(bookData.bids, increment, 'bid');
 

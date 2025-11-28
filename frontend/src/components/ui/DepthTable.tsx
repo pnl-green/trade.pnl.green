@@ -134,9 +134,11 @@ const DepthTable: React.FC<DepthTableProps> = ({
       const center = centerRef.current;
       const offset =
         center.offsetTop - body.clientHeight / 2 + center.clientHeight / 2;
-      body.scrollTop = Math.max(offset, 0);
+      const maxScroll = Math.max(body.scrollHeight - body.clientHeight, 0);
+
+      body.scrollTop = Math.min(Math.max(offset, 0), maxScroll);
     }
-  }, [asks.length, bids.length]);
+  }, [asks.length, bids.length, spreadValue]);
 
   if (loading) {
     return <EmptyState>Loading order book…</EmptyState>;
