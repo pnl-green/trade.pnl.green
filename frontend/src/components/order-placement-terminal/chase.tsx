@@ -15,11 +15,12 @@ import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 
 const ChaseOrderTerminal = () => {
-  const { tokenPairs, pair } = usePairTokensContext();
+  const { tokenPairs, pair, tokenPairData, assetId } = usePairTokensContext();
   const { webData2 } = useWebDataContext();
   const { direction, setDirection } = useOrderTicketContext();
   const { base, quote } = derivePairSymbols(tokenPairs, pair);
   const currentPositionSize = getCurrentPositionSize(webData2, base);
+  const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
 
   const [radioValue, setRadioValue] = useState('');
   const [selectOrderType, setSelectOrderType] = useState('GTC');
@@ -77,18 +78,22 @@ const ChaseOrderTerminal = () => {
       >
         <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available balance</span>
+            <span>Available</span>
           </Tooltip>
           <span>
-            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
+            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}{' '}
+            {quote || 'USDC'}
           </span>
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Current position size</span>
+            <span>Position</span>
           </Tooltip>
           <span>
-            {currentPositionSize.toFixed(4)} {base || quote || '—'}
+            {currentPositionSize.toFixed(
+              Number.isFinite(szDecimals) ? szDecimals : 4
+            )}{' '}
+            {base || quote || '—'}
           </span>
         </FlexItems>
       </Box>
