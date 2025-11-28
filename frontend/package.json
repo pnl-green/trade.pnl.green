@@ -25,6 +25,7 @@
     "@thirdweb-dev/react": "^4.6.1",
     "@ygoe/msgpack": "^1.0.3",
     "axios": "^1.6.8",
+    "ccxt": "^4.3.83",
     "big.js": "^6.2.1",
     "ethers": "^5.7.2",
     "formidable": "^3.5.4",
