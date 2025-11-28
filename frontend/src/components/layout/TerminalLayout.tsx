@@ -8,13 +8,14 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { intelayerColors, intelayerFonts } from '@/styles/theme';
+import { intelayerColors } from '@/styles/theme';
 
 const MOBILE_BREAKPOINT = 1024;
 const GRID_COLS = 12;
 const GRID_ROW_HEIGHT = 36;
 const GRID_GAP = 16;
 export const LAYOUT_STORAGE_KEY = 'pnl_terminal_layout_v2';
+const RESIZE_HITBOX = 10;
 
 type PanelId =
   | 'chart'
@@ -33,6 +34,16 @@ type PanelLayout = {
   minW?: number;
   minH?: number;
 };
+
+type ResizeDirection =
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right';
 
 const defaultLayout: PanelLayout[] = [
   { i: 'chart', x: 0, y: 0, w: 6, h: 12, minW: 4, minH: 8 },
@@ -100,19 +111,6 @@ const GridItem = styled('div')(() => ({
   },
 }));
 
-const ResizeHandle = styled('span')(() => ({
-  position: 'absolute',
-  width: '12px',
-  height: '12px',
-  right: '4px',
-  bottom: '4px',
-  borderRadius: '3px',
-  background: `linear-gradient(135deg, ${intelayerColors.panelBorder}, ${intelayerColors.green[600]})`,
-  cursor: 'nwse-resize',
-  opacity: 0.9,
-  boxShadow: '0 0 0 1px rgba(255,255,255,0.12)',
-}));
-
 const StackedLayout = styled('div')(() => ({
   display: 'grid',
   gridTemplateColumns: '1fr',
@@ -143,6 +141,7 @@ type DragState =
       startX: number;
       startY: number;
       origin: PanelLayout;
+      direction?: ResizeDirection;
     };
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
@@ -258,8 +257,35 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
           const deltaH = Math.round(dy / (GRID_ROW_HEIGHT + GRID_GAP));
           const minW = nextItem.minW ?? 1;
           const minH = nextItem.minH ?? 1;
-          nextItem.w = clamp(nextItem.w + deltaW, minW, GRID_COLS - nextItem.x);
-          nextItem.h = clamp(nextItem.h + deltaH, minH, nextItem.h + 20);
+
+          const resizeLeft = state.direction?.includes('left');
+          const resizeRight = state.direction?.includes('right');
+          const resizeTop = state.direction?.includes('top');
+          const resizeBottom = state.direction?.includes('bottom');
+
+          let nextX = base.x;
+          let nextY = base.y;
+          let nextW = base.w;
+          let nextH = base.h;
+
+          if (resizeLeft) {
+            const proposedX = clamp(base.x + deltaW, 0, base.x + base.w - minW);
+            nextX = proposedX;
+            nextW = clamp(base.w + (base.x - proposedX), minW, GRID_COLS - proposedX);
+          } else if (resizeRight) {
+            const maxWidth = GRID_COLS - base.x;
+            nextW = clamp(base.w + deltaW, minW, maxWidth);
+          }
+
+          if (resizeTop) {
+            const proposedY = clamp(base.y + deltaH, 0, base.y + base.h - minH);
+            nextY = proposedY;
+            nextH = Math.max(minH, base.h + (base.y - proposedY));
+          } else if (resizeBottom) {
+            nextH = Math.max(minH, base.h + deltaH);
+          }
+
+          nextItem = { ...nextItem, x: nextX, y: nextY, w: nextW, h: nextH };
         }
 
         const updated = prevLayout.map((item) => (item.i === state.id ? nextItem : item));
@@ -285,9 +311,18 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
   }, [handlePointerMove, handlePointerUp]);
 
   const startInteraction = useCallback(
-    (id: PanelId, type: DragState['type']) =>
+    (
+      id: PanelId,
+      type: DragState['type'],
+      direction?: ResizeDirection,
+      stopPropagation?: boolean
+    ) =>
       (event: React.PointerEvent<HTMLDivElement | HTMLSpanElement>) => {
         if (!isDesktop) return;
+        if (stopPropagation) {
+          event.stopPropagation();
+          event.preventDefault();
+        }
         const current = layout.find((item) => item.i === id);
         if (!current) return;
         dragState.current = {
@@ -296,6 +331,7 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
           startX: event.clientX,
           startY: event.clientY,
           origin: { ...current },
+          direction,
         };
       },
     [isDesktop, layout]
@@ -324,6 +360,100 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
       portfolio,
     }),
     [chart, orderbook, ticket, positions, assistant, portfolio]
+  );
+
+  const resizeHandles = useMemo(
+    () => [
+      {
+        key: 'top',
+        direction: 'top' as const,
+        sx: {
+          top: 0,
+          left: RESIZE_HITBOX,
+          right: RESIZE_HITBOX,
+          height: RESIZE_HITBOX,
+          cursor: 'ns-resize',
+        },
+      },
+      {
+        key: 'bottom',
+        direction: 'bottom' as const,
+        sx: {
+          bottom: 0,
+          left: RESIZE_HITBOX,
+          right: RESIZE_HITBOX,
+          height: RESIZE_HITBOX,
+          cursor: 'ns-resize',
+        },
+      },
+      {
+        key: 'left',
+        direction: 'left' as const,
+        sx: {
+          top: RESIZE_HITBOX,
+          bottom: RESIZE_HITBOX,
+          left: 0,
+          width: RESIZE_HITBOX,
+          cursor: 'ew-resize',
+        },
+      },
+      {
+        key: 'right',
+        direction: 'right' as const,
+        sx: {
+          top: RESIZE_HITBOX,
+          bottom: RESIZE_HITBOX,
+          right: 0,
+          width: RESIZE_HITBOX,
+          cursor: 'ew-resize',
+        },
+      },
+      {
+        key: 'top-left',
+        direction: 'top-left' as const,
+        sx: {
+          top: 0,
+          left: 0,
+          width: RESIZE_HITBOX,
+          height: RESIZE_HITBOX,
+          cursor: 'nwse-resize',
+        },
+      },
+      {
+        key: 'top-right',
+        direction: 'top-right' as const,
+        sx: {
+          top: 0,
+          right: 0,
+          width: RESIZE_HITBOX,
+          height: RESIZE_HITBOX,
+          cursor: 'nesw-resize',
+        },
+      },
+      {
+        key: 'bottom-left',
+        direction: 'bottom-left' as const,
+        sx: {
+          bottom: 0,
+          left: 0,
+          width: RESIZE_HITBOX,
+          height: RESIZE_HITBOX,
+          cursor: 'nesw-resize',
+        },
+      },
+      {
+        key: 'bottom-right',
+        direction: 'bottom-right' as const,
+        sx: {
+          bottom: 0,
+          right: 0,
+          width: RESIZE_HITBOX,
+          height: RESIZE_HITBOX,
+          cursor: 'nwse-resize',
+        },
+      },
+    ],
+    []
   );
 
   const orderedLayout = useMemo(
@@ -363,7 +493,13 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
                 <Box sx={{ height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
                   {sections[item.i]}
                 </Box>
-                <ResizeHandle onPointerDown={startInteraction(item.i, 'resize')} />
+                {resizeHandles.map((handle) => (
+                  <Box
+                    key={handle.key}
+                    sx={{ position: 'absolute', zIndex: 2, ...handle.sx }}
+                    onPointerDown={startInteraction(item.i, 'resize', handle.direction, true)}
+                  />
+                ))}
               </GridItem>
             ))}
           </DesktopGrid>
