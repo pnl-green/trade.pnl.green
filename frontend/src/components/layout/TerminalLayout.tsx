@@ -14,7 +14,7 @@ const MOBILE_BREAKPOINT = 1024;
 
 const BASE_GRID_COLS = 12;
 const BASE_GRID_ROW_HEIGHT = 36;
-const BASE_GRID_GAP = 16;
+const BASE_GRID_GAP = 12;
 
 // Increase the grid resolution to reduce the perception of snapping during drag.
 // Layout values (x/y/w/h) are stored in higher-precision units derived from the
@@ -67,13 +67,13 @@ const scaleLayout = (layout: PanelLayout[], factor: number): PanelLayout[] =>
   }));
 
 const baseLayout: PanelLayout[] = [
-  { i: 'assetInfo', x: 0, y: 0, w: 6, h: 3, minW: 4, minH: 3 },
-  { i: 'chart', x: 0, y: 3, w: 6, h: 12, minW: 4, minH: 8 },
-  { i: 'orderbook', x: 6, y: 0, w: 3, h: 12, minW: 3, minH: 6 },
-  { i: 'ticket', x: 9, y: 0, w: 3, h: 12, minW: 3, minH: 8 },
-  { i: 'positions', x: 0, y: 15, w: 6, h: 10, minW: 4, minH: 6 },
-  { i: 'assistant', x: 6, y: 12, w: 3, h: 10, minW: 3, minH: 6 },
-  { i: 'portfolio', x: 9, y: 12, w: 3, h: 10, minW: 3, minH: 4 },
+  { i: 'assetInfo', x: 0, y: 0, w: 8, h: 2, minW: 6, minH: 2 },
+  { i: 'chart', x: 0, y: 2, w: 8, h: 14, minW: 6, minH: 10 },
+  { i: 'orderbook', x: 8, y: 0, w: 2, h: 12, minW: 2, minH: 6 },
+  { i: 'ticket', x: 10, y: 0, w: 2, h: 14, minW: 2, minH: 10 },
+  { i: 'positions', x: 0, y: 16, w: 6, h: 10, minW: 4, minH: 6 },
+  { i: 'assistant', x: 8, y: 12, w: 2, h: 10, minW: 2, minH: 6 },
+  { i: 'portfolio', x: 10, y: 12, w: 2, h: 10, minW: 2, minH: 4 },
 ];
 
 const defaultLayout: PanelLayout[] = scaleLayout(baseLayout, GRID_MULTIPLIER);
@@ -91,10 +91,10 @@ const TerminalRoot = styled(Box)(() => ({
   backgroundColor: intelayerColors.page,
   width: '100%',
   minHeight: '100svh',
-  padding: '16px clamp(12px, 3vw, 32px) 28px',
+  padding: '12px clamp(10px, 2vw, 28px) 22px',
   display: 'flex',
   flexDirection: 'column',
-  gap: '16px',
+  gap: '12px',
   overflowY: 'auto',
   overflowX: 'hidden',
   position: 'relative',
@@ -107,7 +107,7 @@ const TerminalRoot = styled(Box)(() => ({
     minHeight: '-webkit-fill-available',
   },
   [`@media (min-width: ${MOBILE_BREAKPOINT}px)`]: {
-    padding: '24px clamp(16px, 3vw, 32px) 32px',
+    padding: '18px clamp(14px, 2.5vw, 30px) 26px',
   },
 }));
 
@@ -116,7 +116,7 @@ const LayoutBody = styled('div')(() => ({
   minHeight: 0,
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
+  gap: '10px',
 }));
 
 const DesktopGrid = styled('div')(() => ({

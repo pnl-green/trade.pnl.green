@@ -5,7 +5,7 @@ export const TradingViewComponent = styled(Box)(() => ({
   display: 'flex',
   width: '100%',
   height: '100%',
-  minHeight: '420px',
+  minHeight: '520px',
   borderRadius: '12px',
   overflow: 'hidden',
   backgroundColor: intelayerColors.surface,

@@ -6,16 +6,18 @@ interface PanelCardProps extends BoxProps {
   title?: React.ReactNode;
   toolbar?: React.ReactNode;
   noPadding?: boolean;
+  compact?: boolean;
+  hideHeader?: boolean;
 }
 
 const PanelCardRoot = styled(Box)(() => ({
   backgroundColor: '#0b0f17',
-  borderRadius: '16px',
+  borderRadius: '12px',
   border: '1px solid rgba(255, 255, 255, 0.06)',
-  padding: '16px',
+  padding: '12px',
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
+  gap: '8px',
   minHeight: 0,
   boxShadow: '0 10px 28px rgba(0, 0, 0, 0.28)',
 }));
@@ -24,10 +26,10 @@ const PanelCardHeader = styled('header')(() => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: '12px',
+  gap: '10px',
   color: intelayerColors.ink,
   fontFamily: intelayerFonts.heading,
-  fontSize: '15px',
+  fontSize: '13px',
   fontWeight: 600,
 }));
 
@@ -35,6 +37,8 @@ const PanelCard: React.FC<PanelCardProps> = ({
   title,
   toolbar,
   noPadding,
+  compact,
+  hideHeader,
   children,
   sx,
   ...rest
@@ -43,11 +47,11 @@ const PanelCard: React.FC<PanelCardProps> = ({
     <PanelCardRoot
       {...rest}
       sx={{
-        padding: noPadding ? 0 : '16px',
+        padding: noPadding ? 0 : compact ? '10px' : '12px',
         ...sx,
       }}
     >
-      {(title || toolbar) && (
+      {(title || toolbar) && !hideHeader && (
         <PanelCardHeader>
           <Box component="span">{title}</Box>
           {toolbar && <Box component="div">{toolbar}</Box>}
