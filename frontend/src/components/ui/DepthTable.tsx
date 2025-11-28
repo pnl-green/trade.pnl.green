@@ -25,9 +25,9 @@ const Table = styled('div')(() => ({
   width: '100%',
   display: 'flex',
   flexDirection: 'column',
-  gap: '8px',
+  gap: '6px',
   fontFamily: intelayerFonts.body,
-  fontSize: '12px',
+  fontSize: '11px',
   flex: 1,
   height: '100%',
   minHeight: 0,
@@ -36,11 +36,11 @@ const Table = styled('div')(() => ({
 const HeaderRow = styled('div')(() => ({
   display: 'grid',
   gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-  gap: '8px',
-  padding: '6px 8px',
+  gap: '6px',
+  padding: '4px 6px',
   color: intelayerColors.subtle,
   fontWeight: 500,
-  fontSize: '11px',
+  fontSize: '10px',
   textAlign: 'right',
 }));
 
@@ -48,17 +48,17 @@ const DepthRow = styled('div')(() => ({
   position: 'relative',
   display: 'grid',
   gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-  gap: '8px',
-  padding: '0 8px',
+  gap: '6px',
+  padding: '0 6px',
   borderRadius: '6px',
   fontVariantNumeric: 'tabular-nums',
   textAlign: 'right',
   overflow: 'hidden',
   transition: 'background 0.2s ease',
-  height: '34px',
-  minHeight: '34px',
+  height: '28px',
+  minHeight: '28px',
   alignItems: 'center',
-  flex: '0 0 34px',
+  flex: '0 0 28px',
   '&:hover': {
     backgroundColor: 'rgba(20, 26, 35, 0.6)',
   },
@@ -70,7 +70,7 @@ const Body = styled('div')(() => ({
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',
-  gap: '4px',
+  gap: '3px',
 }));
 
 const DepthBar = styled('span')<{ side: 'bid' | 'ask'; widthPct: number }>(
@@ -96,16 +96,16 @@ const Cell = styled('span')(() => ({
 }));
 
 const SpreadRow = styled('div')(() => ({
-  padding: '0 8px',
+  padding: '0 6px',
   textAlign: 'right',
   color: intelayerColors.muted,
-  fontSize: '11px',
-  height: '34px',
-  minHeight: '34px',
+  fontSize: '10px',
+  height: '28px',
+  minHeight: '28px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
-  flex: '0 0 34px',
+  flex: '0 0 28px',
 }));
 
 const EmptyState = styled('div')(() => ({

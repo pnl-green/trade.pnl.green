@@ -11,7 +11,7 @@ interface TablerowsProps {
 export const OrderBookContainer = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: '8px',
+  gap: '6px',
   height: '100%',
   minHeight: 0,
 }));
@@ -74,28 +74,28 @@ export const StyledTable = styled('table')<TablerowsProps>((props) => ({
   width: '100%',
   borderCollapse: 'collapse',
   fontFamily: intelayerFonts.body,
-  fontSize: props.fontSize ? props.fontSize : '11px',
+  fontSize: props.fontSize ? props.fontSize : '10px',
   thead: {
     color: intelayerColors.subtle,
-    fontSize: props.fontSize ? props.fontSize : '11px',
+    fontSize: props.fontSize ? props.fontSize : '10px',
     fontWeight: 500,
     fontFamily: intelayerFonts.body,
     width: '100%',
     textAlign: 'left',
     th: {
-      padding: '4px 6px',
+      padding: '3px 4px',
     },
   },
   th: {
-    padding: '4px 6px',
+    padding: '3px 4px',
   },
   td: {
     position: 'relative',
-    padding: '4px 6px',
+    padding: '3px 4px',
   },
   tbody: {
     textAlign: 'left',
-    fontSize: props.fontSize ? props.fontSize : '10.5px',
+    fontSize: props.fontSize ? props.fontSize : '10px',
     fontWeight: 500,
     fontFamily: intelayerFonts.body,
     color: intelayerColors.ink,

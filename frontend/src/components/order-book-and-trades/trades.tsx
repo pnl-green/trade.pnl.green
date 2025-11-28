@@ -28,7 +28,7 @@ const Trades = ({ maxHeight = '240px' }: TradesProps) => {
         flex: 1,
       }}
     >
-      <StyledTable fontSize="13px">
+      <StyledTable fontSize="11px">
         <thead
           style={{
             position: 'sticky',
