@@ -20,6 +20,7 @@ import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import { useChartInteractionContext } from '@/context/chartInteractionContext';
+import SelectionInput from './SelectionInput';
 
 const PresetButton = styled('button')(() => ({
   border: `1px solid ${intelayerColors.panelBorder}`,
@@ -65,7 +66,10 @@ const LimitComponent = () => {
   const { tokenPairs, tokenPairData, assetId, pair } = usePairTokensContext();
   const { selectionMode, toggleSelectionMode } = useChartInteractionContext();
 
-  const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
+  const rawAvailableToTrade = Number(webData2.clearinghouseState?.withdrawable);
+  const availableToTrade = Number.isFinite(rawAvailableToTrade)
+    ? rawAvailableToTrade
+    : 0;
   const { base, quote } = derivePairSymbols(tokenPairs, pair);
   const currentPositionSize = getCurrentPositionSize(webData2, base);
 
@@ -222,13 +226,13 @@ const LimitComponent = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px', mt: '4px' }}>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available</span>
+            <span>Available USDC</span>
           </Tooltip>
           <span>{availableToTrade.toFixed(2)} {quote || 'USDC'}</span>
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Position</span>
+            <span>Current Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(Number.isFinite(szDecimals) ? szDecimals : 4)} {base || quote || '—'}
@@ -318,7 +322,7 @@ const LimitComponent = () => {
 
       <FlexItems sx={{ gap: '10px' }}>
         <CheckboxLabel>
-          <input
+          <SelectionInput
             type="checkbox"
             checked={reduceOnly}
             onChange={(e) => setReduceOnly(e.target.checked)}
@@ -339,7 +343,7 @@ const LimitComponent = () => {
       </FlexItems>
 
       <CheckboxLabel>
-        <input
+        <SelectionInput
           type="checkbox"
           checked={tpSlEnabled}
           onChange={(e) => setTpSlEnabled(e.target.checked)}

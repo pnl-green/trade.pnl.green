@@ -14,11 +14,12 @@ import { useOrderTicketContext } from '@/context/orderTicketContext';
 import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
+import SelectionInput from './SelectionInput';
 
 const SectionLabel = styled('div')(() => ({
   fontSize: '12px',
   color: intelayerColors.subtle,
-  fontFamily: intelayerFonts.mono,
+  fontFamily: intelayerFonts.body,
   marginBottom: '6px',
 }));
 
@@ -27,7 +28,10 @@ const ChaseOrderTerminal = () => {
   const { webData2 } = useWebDataContext();
   const { direction, setDirection } = useOrderTicketContext();
   const { base, quote } = derivePairSymbols(tokenPairs, pair);
-  const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
+  const rawAvailableToTrade = Number(webData2.clearinghouseState?.withdrawable);
+  const availableToTrade = Number.isFinite(rawAvailableToTrade)
+    ? rawAvailableToTrade
+    : 0;
   const currentPositionSize = getCurrentPositionSize(webData2, base);
   const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
 
@@ -133,16 +137,15 @@ const ChaseOrderTerminal = () => {
       >
         <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available</span>
+            <span>Available USDC</span>
           </Tooltip>
           <span>
-            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}{' '}
-            {quote || 'USDC'}
+            {availableToTrade.toFixed(2)} {quote || 'USDC'}
           </span>
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Position</span>
+            <span>Current Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(
@@ -238,7 +241,7 @@ const ChaseOrderTerminal = () => {
           }}
         >
           <label>
-            <input
+            <SelectionInput
               type="radio"
               name="radio"
               value="1"
@@ -254,7 +257,7 @@ const ChaseOrderTerminal = () => {
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
           <label>
-            <input
+            <SelectionInput
               type="radio"
               name="radio"
               value="2"

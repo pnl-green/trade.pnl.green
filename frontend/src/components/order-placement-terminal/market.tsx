@@ -20,11 +20,12 @@ import DirectionSelector from './DirectionSelector';
 import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
+import SelectionInput from './SelectionInput';
 
 const SectionLabel = styled('div')(() => ({
   fontSize: '12px',
   color: intelayerColors.subtle,
-  fontFamily: intelayerFonts.mono,
+  fontFamily: intelayerFonts.body,
   marginBottom: '6px',
 }));
 
@@ -37,7 +38,10 @@ const MarketComponent = () => {
   const balance = Number(
     webData2.clearinghouseState?.marginSummary.accountValue
   );
-  const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
+  const rawAvailableToTrade = Number(webData2.clearinghouseState?.withdrawable);
+  const availableToTrade = Number.isFinite(rawAvailableToTrade)
+    ? rawAvailableToTrade
+    : 0;
 
   const [radioValue, setRadioValue] = useState<string>('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -363,16 +367,15 @@ const MarketComponent = () => {
       >
         <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available</span>
+            <span>Available USDC</span>
           </Tooltip>
           <span>
-            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}{' '}
-            {quote || 'USDC'}
+            {availableToTrade.toFixed(2)} {quote || 'USDC'}
           </span>
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Position</span>
+            <span>Current Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(
@@ -471,7 +474,7 @@ const MarketComponent = () => {
       >
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
           <label>
-            <input
+            <SelectionInput
               type="radio"
               name="radio"
               value="1"
@@ -487,7 +490,7 @@ const MarketComponent = () => {
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
           <label>
-            <input
+            <SelectionInput
               type="radio"
               name="radio"
               value="2"
