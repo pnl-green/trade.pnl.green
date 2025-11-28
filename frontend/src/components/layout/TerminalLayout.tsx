@@ -76,6 +76,9 @@ const baseLayout: PanelLayout[] = [
 
 const defaultLayout: PanelLayout[] = scaleLayout(baseLayout, GRID_MULTIPLIER);
 
+const cloneLayout = (layout: PanelLayout[]): PanelLayout[] =>
+  layout.map((item) => ({ ...item }));
+
 const TerminalRoot = styled(Box)(() => ({
   backgroundColor: intelayerColors.page,
   width: '100%',
@@ -169,7 +172,7 @@ type DragState =
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const resolveCollisions = (layout: PanelLayout[], movingId: PanelId): PanelLayout[] => {
-  const items = [...layout];
+  const items = cloneLayout(layout);
   const moving = items.find((item) => item.i === movingId);
   if (!moving) return layout;
 
@@ -182,35 +185,117 @@ const resolveCollisions = (layout: PanelLayout[], movingId: PanelId): PanelLayou
     return !noOverlap;
   };
 
-  const sorted = items
-    .filter((item) => item.i !== movingId)
-    .sort((a, b) => a.y - b.y || a.x - b.x);
+  const enforceBounds = (item: PanelLayout) => {
+    const minW = item.minW ?? 1;
+    const minH = item.minH ?? 1;
+    const maxX = GRID_COLS - minW;
+    const nextX = clamp(item.x, 0, maxX);
+    const nextW = clamp(item.w, minW, GRID_COLS - nextX);
+    const nextY = Math.max(0, item.y);
+    return { ...item, x: nextX, w: nextW, y: nextY, h: Math.max(minH, item.h) };
+  };
 
-  sorted.forEach((item) => {
-    let current = { ...item };
-    while (collide(current, moving)) {
-      current = { ...current, y: moving.y + moving.h };
+  const pushItem = (item: PanelLayout, target: PanelLayout) => {
+    const overlapX =
+      Math.min(item.x + item.w, target.x + target.w) - Math.max(item.x, target.x);
+    const overlapY =
+      Math.min(item.y + item.h, target.y + target.h) - Math.max(item.y, target.y);
+    if (overlapX <= 0 || overlapY <= 0) return item;
+
+    const itemMinW = item.minW ?? 1;
+    const itemMinH = item.minH ?? 1;
+    const targetCenterX = target.x + target.w / 2;
+    const targetCenterY = target.y + target.h / 2;
+    const itemCenterX = item.x + item.w / 2;
+    const itemCenterY = item.y + item.h / 2;
+
+    const attemptHorizontal = overlapX <= overlapY;
+
+    const tryPushHorizontal = () => {
+      const pushRight = itemCenterX >= targetCenterX;
+      if (pushRight) {
+        const newX = target.x + target.w;
+        const availableWidth = GRID_COLS - newX;
+        const newW = clamp(item.w, itemMinW, availableWidth);
+        if (availableWidth >= itemMinW) {
+          return enforceBounds({ ...item, x: newX, w: newW });
+        }
+      } else {
+        const newX = Math.max(0, target.x - item.w);
+        const rightBound = newX + item.w;
+        if (rightBound > target.x) {
+          const adjustedWidth = clamp(target.x - newX, itemMinW, GRID_COLS - newX);
+          if (adjustedWidth >= itemMinW) {
+            return enforceBounds({ ...item, x: newX, w: adjustedWidth });
+          }
+        } else {
+          return enforceBounds({ ...item, x: newX });
+        }
+      }
+      return null;
+    };
+
+    const tryPushVertical = () => {
+      const pushDown = itemCenterY >= targetCenterY;
+      if (pushDown) {
+        const newY = target.y + target.h;
+        return enforceBounds({ ...item, y: newY });
+      }
+      const availableHeight = target.y - item.y;
+      if (availableHeight >= itemMinH) {
+        return enforceBounds({ ...item, h: availableHeight });
+      }
+      return null;
+    };
+
+    const horizontalFirst = attemptHorizontal ? [tryPushHorizontal, tryPushVertical] : [tryPushVertical, tryPushHorizontal];
+    for (const resolver of horizontalFirst) {
+      const next = resolver();
+      if (next) return next;
     }
-    Object.assign(item, current);
-  });
+    return enforceBounds(item);
+  };
 
-  return [moving, ...sorted].sort((a, b) => a.y - b.y || a.x - b.x);
+  let iterations = 0;
+  let changed = true;
+  while (changed && iterations < 20) {
+    changed = false;
+    iterations += 1;
+    for (let idx = 0; idx < items.length; idx += 1) {
+      const item = items[idx];
+      if (item.i === movingId) continue;
+      if (!collide(item, moving)) continue;
+      const pushed = pushItem(item, moving);
+      if (
+        pushed.x !== item.x ||
+        pushed.y !== item.y ||
+        pushed.w !== item.w ||
+        pushed.h !== item.h
+      ) {
+        items[idx] = pushed;
+        changed = true;
+      }
+    }
+  }
+
+  return items.sort((a, b) => a.y - b.y || a.x - b.x);
 };
 
 const loadLayout = (): PanelLayout[] => {
-  if (typeof window === 'undefined') return defaultLayout;
+  if (typeof window === 'undefined') return cloneLayout(defaultLayout);
   const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
-  if (!saved) return defaultLayout;
+  if (!saved) return cloneLayout(defaultLayout);
   try {
     const parsed = JSON.parse(saved) as PanelLayout[];
     if (Array.isArray(parsed) && parsed.every((item) => item.i && item.w && item.h)) {
       const needsScaling = parsed.some((item) => item.w <= BASE_GRID_COLS && item.h <= baseLayout[0].h);
-      return needsScaling ? scaleLayout(parsed, GRID_MULTIPLIER) : parsed;
+      const normalized = needsScaling ? scaleLayout(parsed, GRID_MULTIPLIER) : parsed;
+      return cloneLayout(normalized);
     }
   } catch (error) {
     console.error('Failed to parse stored layout', error);
   }
-  return defaultLayout;
+  return cloneLayout(defaultLayout);
 };
 
 const TerminalLayout: React.FC<TerminalLayoutProps> = ({
@@ -222,7 +307,7 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
   assistant,
   portfolio,
 }) => {
-  const [layout, setLayout] = useState<PanelLayout[]>(defaultLayout);
+  const [layout, setLayout] = useState<PanelLayout[]>(cloneLayout(defaultLayout));
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef<DragState>(null);
@@ -361,9 +446,10 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
   );
 
   const resetLayout = useCallback(() => {
-    saveLayout(defaultLayout);
+    const freshDefault = cloneLayout(defaultLayout);
+    saveLayout(freshDefault);
     if (typeof window !== 'undefined') {
-      localStorage.removeItem(LAYOUT_STORAGE_KEY);
+      localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(freshDefault));
     }
   }, [saveLayout]);
 
