@@ -1,7 +1,7 @@
 import { Box, Slider, styled } from '@mui/material';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
-import { BuySellBtn, FlexItems } from '@/styles/common.styles';
+import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import ConfirmationModal from '../Modals/confirmationModals';
@@ -17,6 +17,7 @@ import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import toast from 'react-hot-toast';
 import { useChartInteractionContext } from '@/context/chartInteractionContext';
+import SelectionInput from './SelectionInput';
 
 const SectionLabel = styled('div')(() => ({
   fontSize: '12px',
@@ -32,17 +33,6 @@ const CheckboxLabel = styled('label')(() => ({
   cursor: 'pointer',
   fontFamily: intelayerFonts.body,
   fontSize: '13px',
-}));
-
-const SummaryRow = styled(Box)(() => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  padding: '8px 12px',
-  borderRadius: '10px',
-  background: 'rgba(255, 255, 255, 0.02)',
-  border: `1px solid ${intelayerColors.panelBorder}`,
-  fontFamily: intelayerFonts.body,
-  fontSize: '12px',
 }));
 
 const ChartSelectButton = styled('button')(() => ({
@@ -107,8 +97,10 @@ const ScaleOrderTerminal = () => {
   const [estLiqPrice, setEstLiquidationPrice] = useState('100');
   const [fee, setFee] = useState('100');
 
-  const availableToTrade =
-    Number(webData2.clearinghouseState?.withdrawable) || 0;
+  const rawAvailableToTrade = Number(webData2.clearinghouseState?.withdrawable);
+  const availableToTrade = Number.isFinite(rawAvailableToTrade)
+    ? rawAvailableToTrade
+    : 0;
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
   const priceReference = Number(currentMarketPrice) || 0;
@@ -174,22 +166,6 @@ const ScaleOrderTerminal = () => {
     handleSliderChange({} as any, numeric);
   };
 
-  const sizeNotional = useMemo(() => {
-    const numericSize = Number(size) || 0;
-    if (selectItem.toUpperCase() === 'USDC') return numericSize;
-    if (!priceReference) return 0;
-    return numericSize * priceReference;
-  }, [priceReference, selectItem, size]);
-
-  const summaryOrderValue = sizeNotional
-    ? `${sizeNotional.toFixed(2)} USDC`
-    : '—';
-  const summaryStartPrice = scaleStartPrice ? `${scaleStartPrice} USDC` : '—';
-  const summaryEndPrice = scaleEndPrice ? `${scaleEndPrice} USDC` : '—';
-  const summaryMarginRequired = sizeNotional
-    ? `${(sizeNotional * 0.1).toFixed(2)} USDC`
-    : '—';
-
   const handlePlaceScaleOrder = () => {
     try {
       setConfirmModalOpen(false);
@@ -208,13 +184,13 @@ const ScaleOrderTerminal = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px', mt: '4px' }}>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available</span>
+            <span>Available USDC</span>
           </Tooltip>
           <span>{availableToTrade.toFixed(2)} {quote || 'USDC'}</span>
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Position</span>
+            <span>Current Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(
@@ -369,7 +345,7 @@ const ScaleOrderTerminal = () => {
           }}
         >
           <CheckboxLabel>
-            <input
+            <SelectionInput
               type="checkbox"
               checked={reduceOnly}
               onChange={(e) => setReduceOnly(e.target.checked)}
@@ -387,7 +363,7 @@ const ScaleOrderTerminal = () => {
         </Box>
 
         <CheckboxLabel>
-          <input
+          <SelectionInput
             type="checkbox"
             checked={tpSlEnabled}
             onChange={(e) => setTpSlEnabled(e.target.checked)}
@@ -464,49 +440,37 @@ const ScaleOrderTerminal = () => {
         )}
       </Box>
 
-      {establishedConnection ? (
-        <BuySellBtn
-          className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
-          onClick={() => setConfirmModalOpen(true)}
-        >
-          {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
-        </BuySellBtn>
-      ) : (
-        <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
-          <Tooltip content={orderTicketTooltips.enableTrading}>
-            <BuySellBtn
-              className="buyBtn"
-              sx={{ width: '100%' }}
-              onClick={() => setEstablishedConnModal(true)}
-            >
-              Enable trading
-            </BuySellBtn>
-          </Tooltip>
-        </Box>
-      )}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto' },
+          gap: '12px',
+          alignItems: 'center',
+          mt: '12px',
+        }}
+      >
+        <LiquidationContent />
 
-      <Box sx={{ display: 'grid', gap: '8px' }}>
-        <SectionLabel>Summary</SectionLabel>
-        <SummaryRow>
-          <span>Start Price</span>
-          <span>{summaryStartPrice}</span>
-        </SummaryRow>
-        <SummaryRow>
-          <span>End Price</span>
-          <span>{summaryEndPrice}</span>
-        </SummaryRow>
-        <SummaryRow>
-          <span>Order Value</span>
-          <span>{summaryOrderValue}</span>
-        </SummaryRow>
-        <SummaryRow>
-          <span>Margin Required</span>
-          <span>{summaryMarginRequired}</span>
-        </SummaryRow>
-        <SummaryRow>
-          <span>Fees</span>
-          <span>{fee ? `${fee} USDC` : '—'}</span>
-        </SummaryRow>
+        {establishedConnection ? (
+          <BuySellBtn
+            className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
+            onClick={() => setConfirmModalOpen(true)}
+          >
+            {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
+          </BuySellBtn>
+        ) : (
+          <Box sx={{ ...ButtonStyles, justifyContent: 'flex-end' }}>
+            <Tooltip content={orderTicketTooltips.enableTrading}>
+              <BuySellBtn
+                className="buyBtn"
+                sx={{ width: '100%' }}
+                onClick={() => setEstablishedConnModal(true)}
+              >
+                Enable trading
+              </BuySellBtn>
+            </Tooltip>
+          </Box>
+        )}
       </Box>
 
       {confirmModalOpen && (
@@ -540,8 +504,6 @@ const ScaleOrderTerminal = () => {
           isLoading={isLoading}
         />
       )}
-
-      <LiquidationContent />
     </Box>
   );
 };

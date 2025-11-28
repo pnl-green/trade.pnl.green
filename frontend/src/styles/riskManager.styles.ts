@@ -19,11 +19,9 @@ export const LiquidationWrapper = styled(Box)(() => ({
   gap: '6px',
   padding: '10px 6px',
   borderTop: `1px solid ${intelayerColors.panelBorder}`,
-  // position: "absolute",
-  // bottom: "0",
   width: '100%',
-  height: '112px',
-  // left: "0",
+  minHeight: '0',
+  height: 'auto',
 
   '.items': {
     display: 'flex',

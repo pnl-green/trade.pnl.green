@@ -5,35 +5,39 @@ import HandleSelectItems from '../handleSelectItems';
 import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import { usePairTokensContext } from '@/context/pairTokensContext';
-import ConfirmationModal from '../Modals/confirmationModals';
 import LiquidationContent from './liquidationContent';
 import { useWebDataContext } from '@/context/webDataContext';
 import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
-import { useOrderTicketContext } from '@/context/orderTicketContext';
 import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
+import SelectionInput from './SelectionInput';
+import { useHyperLiquidContext } from '@/context/hyperLiquidContext';
+import EstablishConnectionModal from '../Modals/establishConnectionModal';
 
 const SectionLabel = styled('div')(() => ({
   fontSize: '12px',
   color: intelayerColors.subtle,
-  fontFamily: intelayerFonts.mono,
+  fontFamily: intelayerFonts.body,
   marginBottom: '6px',
 }));
 
 const ChaseOrderTerminal = () => {
   const { tokenPairs, pair, tokenPairData, assetId } = usePairTokensContext();
   const { webData2 } = useWebDataContext();
-  const { direction, setDirection } = useOrderTicketContext();
+  const { establishedConnection, handleEstablishConnection } =
+    useHyperLiquidContext();
   const { base, quote } = derivePairSymbols(tokenPairs, pair);
-  const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
+  const rawAvailableToTrade = Number(webData2.clearinghouseState?.withdrawable);
+  const availableToTrade = Number.isFinite(rawAvailableToTrade)
+    ? rawAvailableToTrade
+    : 0;
   const currentPositionSize = getCurrentPositionSize(webData2, base);
   const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
 
   const [radioValue, setRadioValue] = useState('');
   const [selectOrderType, setSelectOrderType] = useState('GTC');
-  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [selectItem, setSelectItem] = useState(base || `${tokenPairs[0]}`);
   const [size, setSize] = useState<number>(0);
   const [sizePercent, setSizePercent] = useState<number>(0);
@@ -43,16 +47,15 @@ const ChaseOrderTerminal = () => {
   //Take Profit / Stop Loss
   const [takeProfitPrice, setTakeProfitPrice] = useState('');
   const [stopLossPrice, setStopLossPrice] = useState('');
-  const [gain, setGain] = useState('');
-  const [loss, setLoss] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [establishConnModal, setEstablishedConnModal] = useState(false);
+  const [tradingEnabled, setTradingEnabled] = useState(false);
 
-  const [estLiqPrice, setEstLiquidationPrice] = useState('100');
-  const [fee, setFee] = useState('100');
-
-  const toggleConfirmModal = (button: string) => {
-    setConfirmModalOpen(true);
-    setDirection(button as 'buy' | 'sell');
-  };
+  useEffect(() => {
+    if (establishedConnection) {
+      setTradingEnabled(true);
+    }
+  }, [establishedConnection]);
 
   const handleRadioChange = (e: {
     target: { value: React.SetStateAction<string> };
@@ -133,16 +136,15 @@ const ChaseOrderTerminal = () => {
       >
         <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available</span>
+            <span>Available USDC</span>
           </Tooltip>
           <span>
-            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}{' '}
-            {quote || 'USDC'}
+            {availableToTrade.toFixed(2)} {quote || 'USDC'}
           </span>
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Position</span>
+            <span>Current Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(
@@ -238,7 +240,7 @@ const ChaseOrderTerminal = () => {
           }}
         >
           <label>
-            <input
+            <SelectionInput
               type="radio"
               name="radio"
               value="1"
@@ -254,7 +256,7 @@ const ChaseOrderTerminal = () => {
 
         <FlexItems sx={{ justifyContent: 'flex-start' }}>
           <label>
-            <input
+            <SelectionInput
               type="radio"
               name="radio"
               value="2"
@@ -338,49 +340,45 @@ const ChaseOrderTerminal = () => {
         />
       </SelectItemsBox>
 
-      <Box sx={{ ...ButtonStyles }}>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="buyBtn"
-          onClick={() => toggleConfirmModal('buy')}
-        >
-          Buy
-        </BuySellBtn>
-        <BuySellBtn
-          sx={{ width: '112px' }}
-          className="sellBtn"
-          onClick={() => toggleConfirmModal('sell')}
-        >
-          Sell
-        </BuySellBtn>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto' },
+          gap: '12px',
+          alignItems: 'center',
+          mt: '12px',
+        }}
+      >
+        <LiquidationContent />
+
+        <Box sx={{ ...ButtonStyles, justifyContent: 'flex-end' }}>
+          <Tooltip content={orderTicketTooltips.enableTrading}>
+            <BuySellBtn
+              className="buyBtn"
+              sx={{ width: '100%' }}
+              disabled={tradingEnabled}
+              onClick={() =>
+                tradingEnabled ? null : setEstablishedConnModal(true)
+              }
+            >
+              {tradingEnabled ? 'Trading Enabled' : 'Enable Trading'}
+            </BuySellBtn>
+          </Tooltip>
+        </Box>
       </Box>
 
-      {confirmModalOpen && (
-        <ConfirmationModal
-          onClose={() => setConfirmModalOpen(false)}
-          onConfirm={function (): void {
-            throw new Error('Function not implemented.');
-          }}
-          isChase={true}
-          size={`${size} ${selectItem}`}
-          allowanceBeforeMarketPurchase={allowedBeforeMarketPurchase}
-          isTpSl={radioValue === '2' ? true : false}
-          takeProfitPrice={radioValue === '2' ? takeProfitPrice : undefined}
-          stopLossPrice={radioValue === '2' ? stopLossPrice : undefined}
-          estLiqPrice={estLiqPrice}
-          fee={fee}
-          isBuyOrSell={direction}
+      {establishConnModal && (
+        <EstablishConnectionModal
+          onClose={() => setEstablishedConnModal(false)}
+          onEstablishConnection={() =>
+            handleEstablishConnection({
+              setIsLoading: setIsLoading,
+              setEstablishedConnModal: setEstablishedConnModal,
+            })
+          }
+          isLoading={isLoading}
         />
       )}
-
-      <LiquidationContent
-      //TODO: Add props
-
-      // liquidationPrice={}
-      // orderValue={}
-      // marginRequired={}
-      // fees={}
-      />
     </Box>
   );
 };

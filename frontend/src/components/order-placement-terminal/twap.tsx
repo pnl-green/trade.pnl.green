@@ -16,6 +16,7 @@ import { useOrderTicketContext } from '@/context/orderTicketContext';
 import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
+import SelectionInput from './SelectionInput';
 
 const SectionLabel = styled('div')(() => ({
   fontSize: '12px',
@@ -31,17 +32,6 @@ const CheckboxLabel = styled('label')(() => ({
   cursor: 'pointer',
   fontFamily: intelayerFonts.body,
   fontSize: '13px',
-}));
-
-const SummaryRow = styled(Box)(() => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  padding: '8px 12px',
-  borderRadius: '10px',
-  background: 'rgba(255, 255, 255, 0.02)',
-  border: `1px solid ${intelayerColors.panelBorder}`,
-  fontFamily: intelayerFonts.body,
-  fontSize: '12px',
 }));
 
 const TwapOrderTerminal = () => {
@@ -75,8 +65,10 @@ const TwapOrderTerminal = () => {
   const [estLiqPrice, setEstLiquidationPrice] = useState('100');
   const [fee, setFee] = useState('100');
 
-  const availableToTrade =
-    Number(webData2.clearinghouseState?.withdrawable) || 0;
+  const rawAvailableToTrade = Number(webData2.clearinghouseState?.withdrawable);
+  const availableToTrade = Number.isFinite(rawAvailableToTrade)
+    ? rawAvailableToTrade
+    : 0;
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
   const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
   const priceReference = Number(currentMarketPrice) || 0;
@@ -159,16 +151,6 @@ const TwapOrderTerminal = () => {
     return Math.max(0, hours * 60 + minutes);
   }, [runtimeHours, runtimeMinutes]);
 
-  const ordersCount = useMemo(
-    () => Math.max(0, Number(totalNoOfOrders) || 0),
-    [totalNoOfOrders]
-  );
-
-  const frequencySeconds = useMemo(() => {
-    if (!ordersCount || !runtimeInMinutes) return 0;
-    return (runtimeInMinutes * 60) / ordersCount;
-  }, [ordersCount, runtimeInMinutes]);
-
   const formatDuration = (minutes: number) => {
     if (!minutes) return '—';
     const hrs = Math.floor(minutes / 60);
@@ -179,23 +161,6 @@ const TwapOrderTerminal = () => {
     return parts.length ? parts.join(' ') : '0m';
   };
 
-  const formatFrequency = (seconds: number) => {
-    if (!seconds) return '—';
-    if (seconds < 60) return `${seconds.toFixed(0)}s`;
-    const mins = seconds / 60;
-    return formatDuration(Math.round(mins));
-  };
-
-  const sizePerOrder = useMemo(() => {
-    if (!ordersCount) return 0;
-    return (Number(size) || 0) / ordersCount;
-  }, [ordersCount, size]);
-
-  const sizeDecimals = Number.isFinite(szDecimals) ? szDecimals : 4;
-  const sizeSummaryLabel = ordersCount
-    ? `${sizePerOrder.toFixed(sizeDecimals)} ${selectItem}`
-    : '—';
-
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       <DirectionSelector />
@@ -203,13 +168,13 @@ const TwapOrderTerminal = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px', mt: '4px' }}>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available</span>
+            <span>Available USDC</span>
           </Tooltip>
           <span>{availableToTrade.toFixed(2)} {quote || 'USDC'}</span>
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Position</span>
+            <span>Current Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(
@@ -322,7 +287,7 @@ const TwapOrderTerminal = () => {
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
           <CheckboxLabel>
-            <input
+            <SelectionInput
               type="checkbox"
               checked={randomize}
               onChange={(e) => setRandomize(e.target.checked)}
@@ -330,7 +295,7 @@ const TwapOrderTerminal = () => {
             <span>Randomize</span>
           </CheckboxLabel>
           <CheckboxLabel>
-            <input
+            <SelectionInput
               type="checkbox"
               checked={reduceOnly}
               onChange={(e) => setReduceOnly(e.target.checked)}
@@ -342,7 +307,7 @@ const TwapOrderTerminal = () => {
         </Box>
 
         <CheckboxLabel>
-          <input
+          <SelectionInput
             type="checkbox"
             checked={tpSlEnabled}
             onChange={(e) => setTpSlEnabled(e.target.checked)}
@@ -421,49 +386,37 @@ const TwapOrderTerminal = () => {
         )}
       </Box>
 
-      {!establishedConnection ? (
-        <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
-          <Tooltip content={orderTicketTooltips.enableTrading}>
-            <BuySellBtn
-              className="buyBtn"
-              sx={{ width: '100%' }}
-              onClick={() => setEstablishedConnModal(true)}
-            >
-              Enable trading
-            </BuySellBtn>
-          </Tooltip>
-        </Box>
-      ) : (
-        <BuySellBtn
-          className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
-          onClick={() => setConfirmModalOpen(true)}
-        >
-          {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
-        </BuySellBtn>
-      )}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto' },
+          gap: '12px',
+          alignItems: 'center',
+          mt: '12px',
+        }}
+      >
+        <LiquidationContent />
 
-      <Box sx={{ display: 'grid', gap: '8px' }}>
-        <SectionLabel>Summary</SectionLabel>
-        <SummaryRow>
-          <span>Frequency</span>
-          <span>{formatFrequency(frequencySeconds)}</span>
-        </SummaryRow>
-        <SummaryRow>
-          <span>Runtime</span>
-          <span>{formatDuration(runtimeInMinutes)}</span>
-        </SummaryRow>
-        <SummaryRow>
-          <span>Number of Orders</span>
-          <span>{ordersCount || '—'}</span>
-        </SummaryRow>
-        <SummaryRow>
-          <span>Size per Suborder</span>
-          <span>{sizeSummaryLabel}</span>
-        </SummaryRow>
-        <SummaryRow>
-          <span>Fees</span>
-          <span>{fee ? `${fee} USDC` : '—'}</span>
-        </SummaryRow>
+        {!establishedConnection ? (
+          <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
+            <Tooltip content={orderTicketTooltips.enableTrading}>
+              <BuySellBtn
+                className="buyBtn"
+                sx={{ width: '100%' }}
+                onClick={() => setEstablishedConnModal(true)}
+              >
+                Enable trading
+              </BuySellBtn>
+            </Tooltip>
+          </Box>
+        ) : (
+          <BuySellBtn
+            className={direction === 'buy' ? 'buyBtn' : 'sellBtn'}
+            onClick={() => setConfirmModalOpen(true)}
+          >
+            {direction === 'buy' ? `Buy ${base}` : `Sell ${base}`}
+          </BuySellBtn>
+        )}
       </Box>
 
       {confirmModalOpen && (
@@ -498,7 +451,6 @@ const TwapOrderTerminal = () => {
         />
       )}
 
-      <LiquidationContent />
     </Box>
   );
 };

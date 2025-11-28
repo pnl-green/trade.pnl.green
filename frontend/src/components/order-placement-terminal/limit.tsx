@@ -1,7 +1,7 @@
 import { Box, Slider, styled } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
-import { BuySellBtn, FlexItems } from '@/styles/common.styles';
+import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import ConfirmationModal from '../Modals/confirmationModals';
 import LiquidationContent from './liquidationContent';
@@ -20,6 +20,7 @@ import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
 import { intelayerColors, intelayerFonts } from '@/styles/theme';
 import { useChartInteractionContext } from '@/context/chartInteractionContext';
+import SelectionInput from './SelectionInput';
 
 const PresetButton = styled('button')(() => ({
   border: `1px solid ${intelayerColors.panelBorder}`,
@@ -65,7 +66,10 @@ const LimitComponent = () => {
   const { tokenPairs, tokenPairData, assetId, pair } = usePairTokensContext();
   const { selectionMode, toggleSelectionMode } = useChartInteractionContext();
 
-  const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
+  const rawAvailableToTrade = Number(webData2.clearinghouseState?.withdrawable);
+  const availableToTrade = Number.isFinite(rawAvailableToTrade)
+    ? rawAvailableToTrade
+    : 0;
   const { base, quote } = derivePairSymbols(tokenPairs, pair);
   const currentPositionSize = getCurrentPositionSize(webData2, base);
 
@@ -222,13 +226,13 @@ const LimitComponent = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '5px', mt: '4px' }}>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available</span>
+            <span>Available USDC</span>
           </Tooltip>
           <span>{availableToTrade.toFixed(2)} {quote || 'USDC'}</span>
         </FlexItems>
         <FlexItems>
           <Tooltip content={orderTicketTooltips.currentPositionSize}>
-            <span>Position</span>
+            <span>Current Position</span>
           </Tooltip>
           <span>
             {currentPositionSize.toFixed(Number.isFinite(szDecimals) ? szDecimals : 4)} {base || quote || '—'}
@@ -318,7 +322,7 @@ const LimitComponent = () => {
 
       <FlexItems sx={{ gap: '10px' }}>
         <CheckboxLabel>
-          <input
+          <SelectionInput
             type="checkbox"
             checked={reduceOnly}
             onChange={(e) => setReduceOnly(e.target.checked)}
@@ -339,7 +343,7 @@ const LimitComponent = () => {
       </FlexItems>
 
       <CheckboxLabel>
-        <input
+        <SelectionInput
           type="checkbox"
           checked={tpSlEnabled}
           onChange={(e) => setTpSlEnabled(e.target.checked)}
@@ -401,34 +405,46 @@ const LimitComponent = () => {
         </Box>
       )}
 
-      {!establishedConnection ? (
-        <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
-          <Tooltip content={orderTicketTooltips.enableTrading}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) auto' },
+          gap: '12px',
+          alignItems: 'center',
+          mt: '12px',
+        }}
+      >
+        <LiquidationContent />
+
+        {!establishedConnection ? (
+          <Box sx={{ ...ButtonStyles, justifyContent: 'flex-end' }}>
+            <Tooltip content={orderTicketTooltips.enableTrading}>
+              <BuySellBtn
+                className="buyBtn"
+                sx={{ width: '100%' }}
+                onClick={() => setEstablishedConnModal(true)}
+              >
+                Enable trading
+              </BuySellBtn>
+            </Tooltip>
+          </Box>
+        ) : (
+          <Box sx={{ ...ButtonStyles, justifyContent: 'flex-end' }}>
             <BuySellBtn
               className="buyBtn"
-              sx={{ width: '100%' }}
-              onClick={() => setEstablishedConnModal(true)}
+              onClick={() => toggleConfirmModal('buy')}
             >
-              Enable trading
+              Buy {base}
             </BuySellBtn>
-          </Tooltip>
-        </Box>
-      ) : (
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-          <BuySellBtn
-            className="buyBtn"
-            onClick={() => toggleConfirmModal('buy')}
-          >
-            Buy {base}
-          </BuySellBtn>
-          <BuySellBtn
-            className="sellBtn"
-            onClick={() => toggleConfirmModal('sell')}
-          >
-            Sell {base}
-          </BuySellBtn>
-        </Box>
-      )}
+            <BuySellBtn
+              className="sellBtn"
+              onClick={() => toggleConfirmModal('sell')}
+            >
+              Sell {base}
+            </BuySellBtn>
+          </Box>
+        )}
+      </Box>
 
       {confirmModalOpen && (
         <ConfirmationModal
@@ -459,7 +475,6 @@ const LimitComponent = () => {
         />
       )}
 
-      <LiquidationContent />
     </Box>
   );
 };
