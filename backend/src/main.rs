@@ -41,6 +41,7 @@ async fn main() -> anyhow::Result<()> {
     // Pull environment configuration (and `.env` fallbacks) before constructing any other
     // resources so all subsequent helpers rely on the same values.
     let config = Config::new()?;
+    let config_data = web::Data::new(config.clone());
 
     // Configure tracing before creating any async tasks to ensure logs from spawned workers use
     // the same subscriber.
@@ -261,7 +262,9 @@ async fn main() -> anyhow::Result<()> {
             .wrap(TracingLogger::default())
             .wrap(cors)
             .wrap(sm)
+            .app_data(config_data.clone())
             .route("/hyperliquid", web::post().to(api::hyperliquid))
+            .route("/ccxt/{tail:.*}", web::to(api::ccxt_proxy))
             .route("/status", web::get().to(api::status))
             .default_service(web::to(api::not_found))
             .app_data(chain.clone())
