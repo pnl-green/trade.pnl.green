@@ -20,6 +20,7 @@
       "@/styles/*": ["./src/styles/*"],
       "@/types/*": ["./types/*"],
       "@/server/*": ["./src/server/*"],
+      "@/utils": ["./utils/index"],
       "@/utils/*": ["./utils/*"],
       "@/services/*": ["./src/services/*"],
       "@/hooks/*": ["./src/hooks/*"],
