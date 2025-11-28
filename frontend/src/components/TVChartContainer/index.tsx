@@ -63,13 +63,30 @@ export const TVChartContainer = ({
 
       const chart = activeChart || (tvWidget as any).chart?.();
 
+      const getPriceFromClick = (param: any) => {
+        if (typeof param?.price === 'number') {
+          return param.price;
+        }
+
+        const yCoord = param?.point?.y;
+        const priceScale = chart?.priceScale?.('right') ?? chart?.priceScale?.();
+        if (typeof yCoord === 'number' && priceScale?.coordinateToPrice) {
+          const derivedPrice = priceScale.coordinateToPrice(yCoord);
+          if (typeof derivedPrice === 'number' && !Number.isNaN(derivedPrice)) {
+            return derivedPrice;
+          }
+        }
+
+        return undefined;
+      };
+
       if (chart?.onClick) {
         clickSubscription = chart.onClick().subscribe(null, (param: any) => {
-          if (
-            selectionModeRef.current !== 'none' &&
-            typeof param?.price === 'number'
-          ) {
-            onPriceFromChart?.(param.price);
+          if (selectionModeRef.current === 'none') return;
+
+          const price = getPriceFromClick(param);
+          if (typeof price === 'number') {
+            onPriceFromChart?.(price);
           }
         });
       }

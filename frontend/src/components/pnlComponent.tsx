@@ -319,9 +319,14 @@ const PnlComponent = () => {
 
   return (
     <TerminalLayout
+      assetInfo={
+        <PanelCard title="Asset Info" sx={{ height: '100%', minHeight: 0 }}>
+          <TokenPairInformation />
+        </PanelCard>
+      }
       chart={
         <PanelCard
-          title={<TokenPairInformation />}
+          title="Price Chart"
           sx={{ height: '100%', minHeight: 0 }}
         >
           {chartElement}
