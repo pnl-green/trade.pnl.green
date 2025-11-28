@@ -1,8 +1,7 @@
-import { SelectItemsBox } from '@/styles/riskManager.styles';
-import { Box } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { Box, Slider, styled } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
 import HandleSelectItems from '../handleSelectItems';
-import { ButtonStyles, BuySellBtn, FlexItems } from '@/styles/common.styles';
+import { BuySellBtn, FlexItems } from '@/styles/common.styles';
 import { RenderInput } from './commonInput';
 import ConfirmationModal from '../Modals/confirmationModals';
 import LiquidationContent from './liquidationContent';
@@ -14,26 +13,69 @@ import toast from 'react-hot-toast';
 import { OrderType } from '@/types/hyperliquid';
 import { getUsdSizeEquivalents } from '@/utils/usdEquivalents';
 import EstablishConnectionModal from '../Modals/establishConnectionModal';
-import { riskValues } from '@/utils/risk';
 import Tooltip from '../ui/Tooltip';
 import { orderTicketTooltips } from './tooltipCopy';
 import { useOrderTicketContext } from '@/context/orderTicketContext';
 import DirectionSelector from './DirectionSelector';
 import { derivePairSymbols, getCurrentPositionSize } from '@/utils';
+import { intelayerColors, intelayerFonts } from '@/styles/theme';
+import { useOrderBookTradesContext } from '@/context/orderBookTradesContext';
+
+const InlineStat = styled(Box)(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '10px 12px',
+  background: 'rgba(255, 255, 255, 0.02)',
+  borderRadius: '10px',
+  border: `1px solid ${intelayerColors.panelBorder}`,
+  fontFamily: intelayerFonts.body,
+  fontSize: '13px',
+}));
+
+const PresetButton = styled('button')(() => ({
+  border: `1px solid ${intelayerColors.panelBorder}`,
+  background: 'rgba(255, 255, 255, 0.02)',
+  color: intelayerColors.muted,
+  borderRadius: '8px',
+  padding: '6px 10px',
+  cursor: 'pointer',
+  fontFamily: intelayerFonts.body,
+  fontSize: '12px',
+  transition: 'all 0.15s ease',
+  '&:hover': {
+    borderColor: intelayerColors.green[500],
+    color: intelayerColors.green[500],
+  },
+}));
+
+const SectionLabel = styled('div')(() => ({
+  fontSize: '12px',
+  color: intelayerColors.subtle,
+  marginBottom: '6px',
+  fontFamily: intelayerFonts.body,
+}));
+
+const CheckboxLabel = styled('label')(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  cursor: 'pointer',
+  fontFamily: intelayerFonts.body,
+  fontSize: '13px',
+}));
 
 const LimitComponent = () => {
   const { webData2 } = useWebDataContext();
   const { hyperliquid, establishedConnection, handleEstablishConnection } =
     useHyperLiquidContext();
   const { tokenPairs, tokenPairData, assetId, pair } = usePairTokensContext();
+  const { bookData } = useOrderBookTradesContext();
 
-  const balance = Number(
-    webData2.clearinghouseState?.marginSummary.accountValue
-  );
+  const availableToTrade = Number(webData2.clearinghouseState?.withdrawable) || 0;
   const { base, quote } = derivePairSymbols(tokenPairs, pair);
   const currentPositionSize = getCurrentPositionSize(webData2, base);
 
-  //------Local State------
   const {
     direction,
     setDirection,
@@ -46,96 +88,58 @@ const LimitComponent = () => {
     takeProfits,
     setTakeProfits,
   } = useOrderTicketContext();
+
   const [selectOrderType, setSelectOrderType] = useState<
     'Gtc' | 'Ioc' | 'Alo' | 'FrontendMarket'
   >('Gtc');
-  const [radioValue, setRadioValue] = useState('');
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [selectItem, setSelectItem] = useState(base || `${tokenPairs[0]}`);
-  const [riskSelectItem, setRiskSelectItem] = useState(`${riskValues[0]}`);
   const [size, setSize] = useState<number>(0.0);
   const [isLoading, setIsLoading] = useState(false);
   const [establishConnModal, setEstablishedConnModal] = useState(false);
-  //Take Profit / Stop Loss
-  const [gain, setGain] = useState('');
-  const [loss, setLoss] = useState('');
-  const [risk, setRisk] = useState<number>(0.0);
-  const [estLiqPrice, setEstLiquidationPrice] = useState('');
-  const [fee, setFee] = useState('');
+  const [reduceOnly, setReduceOnly] = useState(false);
+  const [sizePercent, setSizePercent] = useState<number>(0);
 
   const takeProfitPrice = takeProfits[0] ?? '';
-
   const currentMarketPrice = tokenPairData[assetId]?.assetCtx.markPx;
-  let szDecimals = tokenPairData[assetId]?.universe.szDecimals;
+  const szDecimals = tokenPairData[assetId]?.universe.szDecimals;
+
+  const bestBid = useMemo(
+    () => [...bookData.bids].sort((a, b) => b.px - a.px)[0]?.px,
+    [bookData.bids]
+  );
+  const bestAsk = useMemo(
+    () => [...bookData.asks].sort((a, b) => a.px - b.px)[0]?.px,
+    [bookData.asks]
+  );
+  const midPrice = useMemo(() => {
+    if (!bestBid || !bestAsk) return undefined;
+    return (Number(bestBid) + Number(bestAsk)) / 2;
+  }, [bestAsk, bestBid]);
 
   const toggleConfirmModal = (button: string) => {
     setConfirmModalOpen(true);
     setDirection(button as 'buy' | 'sell');
   };
 
-  const handleRadioChange = (e: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
-    const value = e.target.value as string;
-    setRadioValue(value);
-    setTpSlEnabled(value === '2');
+  const pricePresets = {
+    mid: midPrice,
+    bid: bestBid,
+    ask: bestAsk,
   };
 
-  const handleRadioClick = (e: any) => {
-    if (radioValue === e.target.value) {
-      setRadioValue('');
-      setTpSlEnabled(false);
-      return;
-    }
-    setTpSlEnabled(e.target.value === '2');
-  };
-
-  const handleRiskInput = (e: {
-    target: { value: React.SetStateAction<number> };
-  }) => {
-    const value = e.target.value;
-    setRisk(value);
-  };
-
-  const handleRiskSelectItem = (value: string) => {
-    setRisk(0);
-    setRiskSelectItem(value);
-  };
-
-  const formatRiskValue = (
-    balance: number,
-    risk: string | number,
-    riskSelectItem: string
-  ) => {
-    if (!risk || isNaN(+risk)) {
-      return 0;
-    }
-
-    let riskValue = +parseSize(+risk, szDecimals);
-    if (riskSelectItem === 'Percent') {
-      riskValue = (balance * +parseSize(+risk, szDecimals)) / 100;
-    }
-    if (isNaN(+riskValue)) {
-      return 0;
-    }
-
-    return riskValue;
+  const setPriceFromPreset = (value?: number) => {
+    if (!value || Number.isNaN(value)) return;
+    const decimals = Math.max(2, szDecimals ?? 2);
+    setLimitPrice(value.toFixed(decimals));
   };
 
   useEffect(() => {
     setSelectItem(base || `${tokenPairs[0]}`);
   }, [base, tokenPairs]);
 
-  useEffect(() => {
-    if (tpSlEnabled) {
-      setRadioValue('2');
-    } else if (radioValue === '2') {
-      setRadioValue('');
-    }
-  }, [tpSlEnabled]);
-
   //setting the equivalent size in the selected token
-  let TokenSize = getUsdSizeEquivalents({
+  const TokenSize = getUsdSizeEquivalents({
     size: Number(size),
     currentMarkPrice: Number(currentMarketPrice),
     token: selectItem,
@@ -143,50 +147,75 @@ const LimitComponent = () => {
 
   //maintain the size equivalent state of the  token
   useEffect(() => {
-    if (TokenSize) {
-      let newSize = Number(TokenSize.toFixed(szDecimals));
+    if (TokenSize !== undefined && TokenSize !== null) {
+      const decimals = Number.isFinite(szDecimals) ? szDecimals : 4;
+      const newSize = Number(Number(TokenSize).toFixed(decimals));
       setSize(newSize);
     }
   }, [selectItem]);
 
-  //get the size equivalent in USDC
-  let sz =
-    selectItem.toUpperCase() === 'USDC'
-      ? size / Number(currentMarketPrice)
-      : size;
-  //
+  const priceReference = Number(currentMarketPrice) || 0;
+
+  const syncPercentWithSize = (nextSize: number) => {
+    if (!priceReference || !availableToTrade) {
+      setSizePercent(0);
+      return;
+    }
+
+    const usdNotional =
+      selectItem.toUpperCase() === 'USDC'
+        ? nextSize
+        : nextSize * Number(priceReference);
+
+    const nextPercent = Math.min(100, Math.max(0, (usdNotional / availableToTrade) * 100));
+    setSizePercent(Number.isFinite(nextPercent) ? Number(nextPercent.toFixed(2)) : 0);
+  };
+
+  const handleSizeInput = (value: number) => {
+    setSize(value);
+    syncPercentWithSize(value);
+  };
+
+  const handleSliderChange = (_: Event | React.SyntheticEvent, value: number | number[]) => {
+    const percent = Array.isArray(value) ? value[0] : value;
+    const normalizedPercent = Math.min(100, Math.max(0, percent));
+    setSizePercent(normalizedPercent);
+
+    const usdTarget = (availableToTrade * normalizedPercent) / 100;
+    const nextSize =
+      selectItem.toUpperCase() === 'USDC' || !priceReference
+        ? usdTarget
+        : usdTarget / Number(priceReference);
+
+    const decimals = Number.isFinite(szDecimals) ? szDecimals : 4;
+    setSize(Number(nextSize.toFixed(decimals)));
+  };
+
+  const limitPx = Number(limitPrice);
+  const sz = selectItem.toUpperCase() === 'USDC' ? size / Number(priceReference || 1) : size;
+
   const handlePlaceOrder = async () => {
     try {
       setIsLoading(true);
-      let isBuy = direction === 'buy';
-      let orderType: OrderType = {
+      const orderType: OrderType = {
         limit: {
           tif: selectOrderType,
         },
       };
-      let reduceOnly = radioValue === '1';
-      const riskIncluded = radioValue === '3';
 
       const { success, data, msg } = await hyperliquid.placeOrder({
         asset: Number(assetId),
-        isBuy,
-        limitPx: parsePrice(Number(limitPrice)),
+        isBuy: direction === 'buy',
+        limitPx: parsePrice(Number(limitPx)),
         sz: parseSize(sz, szDecimals),
         orderType,
         reduceOnly,
-        ...(riskIncluded && risk
-          ? {
-              risk: formatRiskValue(balance, risk, riskSelectItem),
-            }
-          : {}),
       });
 
       if (success) {
-        console.log('data', data);
         setIsLoading(false);
         setConfirmModalOpen(false);
 
-        // Check if there's an error in statuses[0]
         if (
           data &&
           typeof data === 'object' &&
@@ -197,21 +226,16 @@ const LimitComponent = () => {
           data.data.statuses.length > 0 &&
           data.data.statuses[0].error
         ) {
-          //Toast error message
           toast.error(
             (
               data.data.statuses[0].error || 'Error ocured please try again'
             ).toString()
           );
         } else {
-          //Toast success message if there's no error
           toast.success('Order placed successfully');
         }
       } else {
-        console.log('msg', msg);
         setIsLoading(false);
-
-        //Toast error msg
         toast.error((msg || 'Error ocured please try again').toString());
       }
     } catch (error) {
@@ -219,167 +243,161 @@ const LimitComponent = () => {
       setIsLoading(false);
     }
   };
+
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        height: radioValue === '2' ? 'calc(100% + 85px)' : '100%',
-      }}
-    >
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       <DirectionSelector />
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '5px',
-          mt: '20px',
-        }}
-      >
-        <FlexItems>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+        <InlineStat>
           <Tooltip content={orderTicketTooltips.availableBalance}>
-            <span>Available balance</span>
+            <span>Available to Trade</span>
+          </Tooltip>
+          <span>{availableToTrade.toFixed(2)} USDC</span>
+        </InlineStat>
+        <InlineStat>
+          <Tooltip content={orderTicketTooltips.currentPositionSize}>
+            <span>Current Position</span>
           </Tooltip>
           <span>
-            {Number(webData2.clearinghouseState?.withdrawable).toFixed(2)}
+            {currentPositionSize.toFixed(Number.isFinite(szDecimals) ? szDecimals : 4)} {base || quote || '—'}
           </span>
-        </FlexItems>
-        <FlexItems>
-          <Tooltip content={orderTicketTooltips.currentPositionSize}>
-          <span>Current position size</span>
-        </Tooltip>
-        <span>
-          {currentPositionSize.toFixed(
-            Number.isFinite(szDecimals) ? szDecimals : 4
-          )}{' '}
-          {base || quote || '—'}
-        </span>
-      </FlexItems>
+        </InlineStat>
       </Box>
 
-      <SelectItemsBox>
-        <RenderInput
-          label={'Size'}
-          tooltip={orderTicketTooltips.size}
-          placeholder="|"
-          value={size.toString()}
-          onChange={(e: any) => setSize(e.target.value)}
-          styles={{
-            background: 'transparent',
-            ':hover': {
-              border: 'none !important',
-            },
-          }}
-        />
-        <HandleSelectItems
-          selectItem={selectItem}
-          setSelectItem={setSelectItem}
-          selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
-        />
-      </SelectItemsBox>
+      <Box>
+        <SectionLabel>Price (USDC)</SectionLabel>
+        <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <RenderInput
+            label=""
+            tooltip={orderTicketTooltips.price}
+            placeholder="0"
+            type="number"
+            value={limitPrice?.toString() ?? ''}
+            onChange={(e: any) => setLimitPrice(e.target.value)}
+            styles={{
+              flex: 1,
+              marginTop: 0,
+              gap: 0,
+              width: '100%',
+              '.placeholder_box': {
+                fontSize: '12px',
+              },
+              input: { width: '100%', padding: '0' },
+            }}
+          />
+          <Box sx={{ display: 'flex', gap: '6px' }}>
+            <PresetButton onClick={() => setPriceFromPreset(pricePresets.bid)}>Best Bid</PresetButton>
+            <PresetButton onClick={() => setPriceFromPreset(pricePresets.mid)}>Mid</PresetButton>
+            <PresetButton onClick={() => setPriceFromPreset(pricePresets.ask)}>Best Ask</PresetButton>
+          </Box>
+        </Box>
+      </Box>
 
-      <RenderInput
-        label="Price"
-        tooltip={orderTicketTooltips.price}
-        placeholder="0"
-        type="number"
-        value={limitPrice?.toString() ?? ''}
-        onChange={(e: any) => setLimitPrice(e.target.value)}
-        styles={{
-          marginTop: '4px',
-          gap: 0,
-          width: '100%',
-          '.placeholder_box': {
-            fontSize: '12px',
-          },
-          input: { width: '30%', padding: '0' },
-        }}
-      />
+      <Box>
+        <SectionLabel>Size</SectionLabel>
+        <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <RenderInput
+            label=""
+            tooltip={orderTicketTooltips.size}
+            placeholder="|"
+            value={size.toString()}
+            onChange={(e: any) => handleSizeInput(Number(e.target.value))}
+            styles={{
+              background: 'transparent',
+              flex: 1,
+              ':hover': {
+                border: 'none !important',
+              },
+            }}
+          />
+          <HandleSelectItems
+            selectItem={selectItem}
+            setSelectItem={setSelectItem}
+            selectDataItems={[base || tokenPairs[0] || '—', quote || 'USDC', 'R']}
+          />
+        </Box>
+      </Box>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          mt: '20px',
-          gap: '8px',
-          label: {
-            marginRight: '8px',
-            cursor: 'pointer',
-          },
-        }}
-      >
-        <FlexItems
-          sx={{
-            justifyContent: 'flex-start',
-          }}
-        >
-          <label>
-            <input
-              type="radio"
-              name="radio"
-              value="1"
-              checked={radioValue === '1'}
-              onChange={handleRadioChange}
-              onClick={handleRadioClick}
-            />
-          </label>
+      <Box>
+        <SectionLabel>Size Slider</SectionLabel>
+        <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <Slider
+            min={0}
+            max={100}
+            step={1}
+            value={sizePercent}
+            onChange={handleSliderChange}
+            sx={{ flex: 1 }}
+            valueLabelDisplay="auto"
+          />
+          <RenderInput
+            label="%"
+            placeholder="0"
+            value={sizePercent.toString()}
+            onChange={(e: any) => handleSliderChange({}, Number(e.target.value))}
+            styles={{
+              width: '80px',
+              '.placeholder_box': {
+                width: '60%',
+              },
+              input: { width: '100%', padding: 0 },
+            }}
+          />
+        </Box>
+      </Box>
+
+      <FlexItems sx={{ gap: '10px' }}>
+        <CheckboxLabel>
+          <input
+            type="checkbox"
+            checked={reduceOnly}
+            onChange={(e) => setReduceOnly(e.target.checked)}
+          />
           <Tooltip content={orderTicketTooltips.reduceOnly}>
             <span>Reduce Only</span>
           </Tooltip>
-        </FlexItems>
+        </CheckboxLabel>
 
-        <FlexItems sx={{ justifyContent: 'flex-start' }}>
-          <label>
-            <input
-              type="radio"
-              name="radio"
-              value="2"
-              checked={radioValue === '2'}
-              onChange={handleRadioChange}
-              onClick={handleRadioClick}
-            />
-          </label>
-          <Tooltip content={orderTicketTooltips.takeProfitStopLoss}>
-            <span>Take Profit / Stop Loss</span>
-          </Tooltip>
-        </FlexItems>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '12px', color: intelayerColors.subtle }}>TIF</span>
+          <HandleSelectItems
+            selectItem={selectOrderType}
+            setSelectItem={setSelectOrderType}
+            selectDataItems={['Gtc', 'Ioc', 'Alo']}
+          />
+        </Box>
+      </FlexItems>
 
-        <FlexItems sx={{ justifyContent: 'flex-start' }}>
-          <label>
-            <input
-              type="radio"
-              name="radio"
-              value="3"
-              checked={radioValue === '3'}
-              onChange={handleRadioChange}
-              onClick={handleRadioClick}
-            />
-          </label>
-          <Tooltip content={orderTicketTooltips.addRisk}>
-            <span>Add Risk</span>
-          </Tooltip>
-        </FlexItems>
-      </Box>
+      <CheckboxLabel>
+        <input
+          type="checkbox"
+          checked={tpSlEnabled}
+          onChange={(e) => setTpSlEnabled(e.target.checked)}
+        />
+        <Tooltip content={orderTicketTooltips.takeProfitStopLoss}>
+          <span>Take Profit / Stop Loss</span>
+        </Tooltip>
+      </CheckboxLabel>
 
-      {radioValue === '2' && (
+      {tpSlEnabled && (
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
-            mt: '10px',
-            height: '70px',
-            gap: '2px',
+            gap: '8px',
           }}
         >
           <FlexItems>
-          <RenderInput
-            label="TP Price"
-            placeholder="0"
-            value={takeProfitPrice}
-            onChange={(e: any) => setTakeProfits([e.target.value])}
-            styles={{
-              gap: 0,
-              width: '49%',
-              '.placeholder_box': {
+            <RenderInput
+              label="TP Price"
+              placeholder="0"
+              value={takeProfitPrice}
+              onChange={(e: any) => setTakeProfits([e.target.value])}
+              styles={{
+                gap: 0,
+                width: '49%',
+                '.placeholder_box': {
                   fontSize: '12px',
                 },
                 input: { width: '30%', padding: '0' },
@@ -433,50 +451,8 @@ const LimitComponent = () => {
         </Box>
       )}
 
-      {radioValue === '3' && (
-        <SelectItemsBox sx={{ mt: '10px' }}>
-          <RenderInput
-            label={'Risk'}
-            tooltip={orderTicketTooltips.addRisk}
-            placeholder="|"
-            type="number"
-            value={risk.toString()}
-            onChange={(e: any) => handleRiskInput(e)}
-            styles={{
-              background: 'transparent',
-              ':hover': {
-                border: 'none !important',
-              },
-            }}
-          />
-          <HandleSelectItems
-            selectItem={riskSelectItem}
-            setSelectItem={handleRiskSelectItem}
-            selectDataItems={[`${riskValues[0]}`, `${riskValues[1]}`]}
-          />
-        </SelectItemsBox>
-      )}
-
-      <SelectItemsBox
-        sx={{
-          '&:hover': {
-            border: 'none !important',
-          },
-        }}
-      >
-        <span>Order Type</span>
-        <HandleSelectItems
-          selectItem={selectOrderType}
-          setSelectItem={setSelectOrderType}
-          selectDataItems={['Gtc', 'Ioc', 'Alo']}
-          styles={{
-            marginTop: radioValue === '2' ? '10px' : '0',
-          }}
-        />
-      </SelectItemsBox>
-
       {!establishedConnection ? (
-        <Box sx={{ ...ButtonStyles }}>
+        <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
           <Tooltip content={orderTicketTooltips.enableTrading}>
             <BuySellBtn
               className="buyBtn"
@@ -488,20 +464,18 @@ const LimitComponent = () => {
           </Tooltip>
         </Box>
       ) : (
-        <Box sx={{ ...ButtonStyles }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <BuySellBtn
-            sx={{ width: '112px' }}
             className="buyBtn"
             onClick={() => toggleConfirmModal('buy')}
           >
-            Buy
+            Buy {base}
           </BuySellBtn>
           <BuySellBtn
-            sx={{ width: '112px' }}
             className="sellBtn"
             onClick={() => toggleConfirmModal('sell')}
           >
-            Sell
+            Sell {base}
           </BuySellBtn>
         </Box>
       )}
@@ -513,11 +487,9 @@ const LimitComponent = () => {
           isLimit={true}
           size={`${parseSize(sz, szDecimals)} ${tokenPairs[0]}`}
           price={limitPrice}
-          isTpSl={radioValue === '2' ? true : false}
-          takeProfitPrice={radioValue === '2' ? takeProfits[0] : undefined}
-          stopLossPrice={radioValue === '2' ? stopLoss : undefined}
-          estLiqPrice={estLiqPrice}
-          fee={fee}
+          isTpSl={tpSlEnabled}
+          takeProfitPrice={tpSlEnabled ? takeProfits[0] : undefined}
+          stopLossPrice={tpSlEnabled ? stopLoss : undefined}
           isBuyOrSell={direction}
           loading={isLoading}
           setLoading={setIsLoading}
@@ -537,14 +509,7 @@ const LimitComponent = () => {
         />
       )}
 
-      <LiquidationContent
-      //TODO: Add props
-
-      // liquidationPrice={10}
-      // orderValue={}
-      // marginRequired={}
-      // fees={}
-      />
+      <LiquidationContent />
     </Box>
   );
 };
