@@ -10,7 +10,7 @@ export const getUsdSizeEquivalents = ({
   currentMarkPrice,
   token,
 }: SizeEquivalentsProps) => {
-  if (token.toUpperCase() === 'USD') {
+  if (token.toUpperCase() === 'USD' || token.toUpperCase() === 'USDC') {
     return size * currentMarkPrice;
   } else {
     return size / currentMarkPrice;
