@@ -21,7 +21,7 @@ interface SegmentedControlProps {
 
 const ControlRoot = styled('div')<{ centered?: boolean }>(({ centered }) => ({
   display: 'flex',
-  gap: '8px',
+  gap: '6px',
   width: centered ? 'auto' : '100%',
   flexWrap: 'wrap',
   justifyContent: centered ? 'center' : 'flex-start',
@@ -32,9 +32,9 @@ const ControlButton = styled('button')<{ centered?: boolean }>(({ centered }) =>
   backgroundColor: intelayerColors.gray[700],
   color: intelayerColors.ink,
   borderRadius: '10px',
-  padding: '9px 14px',
+  padding: '7px 12px',
   fontFamily: intelayerFonts.body,
-  fontSize: '13px',
+  fontSize: '12px',
   fontWeight: 500,
   cursor: 'pointer',
   transition: 'background-color 0.2s ease, color 0.2s ease, border 0.2s ease',

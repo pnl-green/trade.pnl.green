@@ -4,25 +4,25 @@ import { intelayerColors, intelayerFonts } from './theme';
 export const RiskManagerWrapper = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: '16px',
+  gap: '12px',
   width: '100%',
-  minWidth: '360px',
-  minHeight: '680px',
+  minWidth: '320px',
+  minHeight: '520px',
   height: '100%',
-  padding: '4px',
+  padding: '2px',
   position: 'relative',
 }));
 
 export const LiquidationWrapper = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: '10px',
-  padding: '20px 10px',
+  gap: '8px',
+  padding: '12px 8px',
   borderTop: `1px solid ${intelayerColors.panelBorder}`,
   // position: "absolute",
   // bottom: "0",
   width: '100%',
-  height: '135px',
+  height: '112px',
   // left: "0",
 
   '.items': {
@@ -30,7 +30,7 @@ export const LiquidationWrapper = styled(Box)(() => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
 
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: 500,
     fontFamily: intelayerFonts.body,
     color: intelayerColors.ink,
@@ -43,15 +43,15 @@ export const SelectItemsBox = styled(Box)(() => ({
   justifyContent: 'space-between',
   gap: '10px',
   width: '100%',
-  height: '46px',
-  borderRadius: '10px',
+  height: '38px',
+  borderRadius: '8px',
   background: intelayerColors.gray[700],
   marginTop: '10px',
   alignItems: 'center',
-  padding: '0 10px 0 10px',
+  padding: '0 8px 0 8px',
   border: `1px solid transparent`,
   '*': {
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: 500,
     fontFamily: intelayerFonts.body,
     color: intelayerColors.ink,
@@ -63,7 +63,7 @@ export const SelectItemsBox = styled(Box)(() => ({
     width: '100%',
     height: '100%',
     color: intelayerColors.ink,
-    paddingLeft: '10px',
+    paddingLeft: '8px',
     // cursor: "",
 
     '&:hover': {
@@ -81,7 +81,7 @@ export const SelectItemsBox = styled(Box)(() => ({
     borderRadius: '8px',
   },
 
-  span: { fontSize: '12px' },
+  span: { fontSize: '11px' },
 }));
 
 export const InputBox = styled(Box)(() => ({
@@ -90,15 +90,15 @@ export const InputBox = styled(Box)(() => ({
   justifyContent: 'space-between',
   gap: '10px',
   width: '100%',
-  height: '35px',
+  height: '32px',
   borderRadius: '8px',
   background: intelayerColors.gray[700],
   border: `1px solid transparent`,
   alignItems: 'center',
-  padding: '0 10px 0 5px',
+  padding: '0 8px 0 5px',
 
   '*': {
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: 500,
     fontFamily: intelayerFonts.body,
     color: intelayerColors.ink,
@@ -119,7 +119,7 @@ export const InputBox = styled(Box)(() => ({
     width: '50%',
     height: '100%',
     color: intelayerColors.ink,
-    paddingLeft: '10px',
+    paddingLeft: '8px',
     justifyContent: 'flex-end',
     textAlign: 'right',
 

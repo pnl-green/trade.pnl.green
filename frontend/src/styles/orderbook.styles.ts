@@ -11,7 +11,7 @@ interface TablerowsProps {
 export const OrderBookContainer = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
+  gap: '8px',
   height: '100%',
   minHeight: 0,
 }));
@@ -27,7 +27,7 @@ export const OrderBookTabsWrapper = styled(Box)(() => ({
 export const OrderBookTabs = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
-  gap: '12px',
+  gap: '8px',
   width: '100%',
   position: 'relative',
   button: {
@@ -35,9 +35,9 @@ export const OrderBookTabs = styled(Box)(() => ({
     background: 'transparent',
     color: intelayerColors.muted,
     fontFamily: intelayerFonts.heading,
-    fontSize: '15px',
+    fontSize: '13px',
     fontWeight: 500,
-    padding: '8px 0',
+    padding: '6px 0',
     cursor: 'pointer',
     position: 'relative',
     transition: 'color 0.2s ease',
@@ -65,7 +65,7 @@ export const SpreadAndPairSelects = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'space-between',
-  gap: '12px',
+  gap: '10px',
   width: '100%',
   flexWrap: 'wrap',
 }));
@@ -74,28 +74,28 @@ export const StyledTable = styled('table')<TablerowsProps>((props) => ({
   width: '100%',
   borderCollapse: 'collapse',
   fontFamily: intelayerFonts.body,
-  fontSize: props.fontSize ? props.fontSize : '12px',
+  fontSize: props.fontSize ? props.fontSize : '11px',
   thead: {
     color: intelayerColors.subtle,
-    fontSize: props.fontSize ? props.fontSize : '12px',
+    fontSize: props.fontSize ? props.fontSize : '11px',
     fontWeight: 500,
     fontFamily: intelayerFonts.body,
     width: '100%',
     textAlign: 'left',
     th: {
-      padding: '6px 8px',
+      padding: '4px 6px',
     },
   },
   th: {
-    padding: '6px 8px',
+    padding: '4px 6px',
   },
   td: {
     position: 'relative',
-    padding: '6px 8px',
+    padding: '4px 6px',
   },
   tbody: {
     textAlign: 'left',
-    fontSize: props.fontSize ? props.fontSize : '11px',
+    fontSize: props.fontSize ? props.fontSize : '10.5px',
     fontWeight: 500,
     fontFamily: intelayerFonts.body,
     color: intelayerColors.ink,

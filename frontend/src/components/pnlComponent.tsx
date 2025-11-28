@@ -320,44 +320,70 @@ const PnlComponent = () => {
   return (
     <TerminalLayout
       assetInfo={
-        <PanelCard title="Asset Info" sx={{ height: '100%', minHeight: 0 }}>
+        <PanelCard
+          title="Asset Info"
+          hideHeader
+          compact
+          sx={{ height: '100%', minHeight: 0 }}
+        >
           <TokenPairInformation />
         </PanelCard>
       }
       chart={
         <PanelCard
           title="Price Chart"
+          hideHeader
+          compact
           sx={{ height: '100%', minHeight: 0 }}
         >
           {chartElement}
         </PanelCard>
       }
       orderbook={
-        <PanelCard title="Order Book & Trades" sx={{ height: '100%', minHeight: 0 }}>
+        <PanelCard
+          title="Order Book & Trades"
+          hideHeader
+          compact
+          sx={{ height: '100%', minHeight: 0 }}
+        >
           <OrderBookAndTrades />
         </PanelCard>
       }
       ticket={
         <PanelCard
           title="Risk Manager & Order Ticket"
+          hideHeader
+          compact
           sx={{ height: '100%', minHeight: 0 }}
         >
           <OrderPlacement />
         </PanelCard>
       }
       positions={
-        <PanelCard title="Positions & History" sx={{ height: '100%', minHeight: 0 }}>
+        <PanelCard
+          title="Positions & History"
+          hideHeader
+          compact
+          sx={{ height: '100%', minHeight: 0 }}
+        >
           <PositionsOrdersHistory />
         </PanelCard>
       }
       assistant={
-        <PanelCard title="Intelayer Assistant" sx={{ height: '100%', minHeight: 0 }}>
+        <PanelCard
+          title="Intelayer Assistant"
+          hideHeader
+          compact
+          sx={{ height: '100%', minHeight: 0 }}
+        >
           <ChatComponent />
         </PanelCard>
       }
       portfolio={
         <PanelCard
           title="Portfolio Snapshot"
+          hideHeader
+          compact
           sx={{
             height: '100%',
             minHeight: 0,
