@@ -11,9 +11,18 @@ import React, {
 import { intelayerColors } from '@/styles/theme';
 
 const MOBILE_BREAKPOINT = 1024;
-const GRID_COLS = 12;
-const GRID_ROW_HEIGHT = 36;
-const GRID_GAP = 16;
+
+const BASE_GRID_COLS = 12;
+const BASE_GRID_ROW_HEIGHT = 36;
+const BASE_GRID_GAP = 16;
+
+// Increase the grid resolution to reduce the perception of snapping during drag.
+// Layout values (x/y/w/h) are stored in higher-precision units derived from the
+// base grid to keep panel sizes consistent while allowing smaller resize steps.
+const GRID_MULTIPLIER = 6;
+const GRID_COLS = BASE_GRID_COLS * GRID_MULTIPLIER;
+const GRID_ROW_HEIGHT = Math.max(6, Math.round(BASE_GRID_ROW_HEIGHT / GRID_MULTIPLIER));
+const GRID_GAP = Math.max(2, Math.round(BASE_GRID_GAP / GRID_MULTIPLIER));
 export const LAYOUT_STORAGE_KEY = 'pnl_terminal_layout_v2';
 const RESIZE_HITBOX = 10;
 
@@ -45,7 +54,18 @@ type ResizeDirection =
   | 'bottom-left'
   | 'bottom-right';
 
-const defaultLayout: PanelLayout[] = [
+const scaleLayout = (layout: PanelLayout[], factor: number): PanelLayout[] =>
+  layout.map((item) => ({
+    ...item,
+    x: item.x * factor,
+    y: item.y * factor,
+    w: item.w * factor,
+    h: item.h * factor,
+    minW: (item.minW ?? 1) * factor,
+    minH: (item.minH ?? 1) * factor,
+  }));
+
+const baseLayout: PanelLayout[] = [
   { i: 'chart', x: 0, y: 0, w: 6, h: 12, minW: 4, minH: 8 },
   { i: 'orderbook', x: 6, y: 0, w: 3, h: 12, minW: 3, minH: 6 },
   { i: 'ticket', x: 9, y: 0, w: 3, h: 12, minW: 3, minH: 8 },
@@ -53,6 +73,8 @@ const defaultLayout: PanelLayout[] = [
   { i: 'assistant', x: 6, y: 12, w: 3, h: 10, minW: 3, minH: 6 },
   { i: 'portfolio', x: 9, y: 12, w: 3, h: 10, minW: 3, minH: 4 },
 ];
+
+const defaultLayout: PanelLayout[] = scaleLayout(baseLayout, GRID_MULTIPLIER);
 
 const TerminalRoot = styled(Box)(() => ({
   backgroundColor: intelayerColors.page,
@@ -182,7 +204,8 @@ const loadLayout = (): PanelLayout[] => {
   try {
     const parsed = JSON.parse(saved) as PanelLayout[];
     if (Array.isArray(parsed) && parsed.every((item) => item.i && item.w && item.h)) {
-      return parsed;
+      const needsScaling = parsed.some((item) => item.w <= BASE_GRID_COLS && item.h <= baseLayout[0].h);
+      return needsScaling ? scaleLayout(parsed, GRID_MULTIPLIER) : parsed;
     }
   } catch (error) {
     console.error('Failed to parse stored layout', error);
