@@ -14,7 +14,7 @@ export const TokenPairsWrapper = styled(Box)<TokenPairsProps>(({ tableISOpen }) 
   borderRadius: '10px',
   backgroundColor: intelayerColors.surface,
   gap: '8px',
-  border: `1px solid ${intelayerColors.panelBorder}`,
+  border: `1px solid rgba(255, 255, 255, 0.03)`,
   flexWrap: 'nowrap',
 
   '.pair-section': {

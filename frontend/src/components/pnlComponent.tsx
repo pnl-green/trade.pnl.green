@@ -324,7 +324,13 @@ const PnlComponent = () => {
           title="Asset Info"
           hideHeader
           compact
-          sx={{ height: '100%', minHeight: 0 }}
+          sx={{
+            height: '100%',
+            minHeight: 0,
+            border: 'none',
+            boxShadow: 'none',
+            padding: '10px',
+          }}
         >
           <TokenPairInformation />
         </PanelCard>
@@ -334,7 +340,13 @@ const PnlComponent = () => {
           title="Price Chart"
           hideHeader
           compact
-          sx={{ height: '100%', minHeight: 0 }}
+          sx={{
+            height: '100%',
+            minHeight: 0,
+            border: 'none',
+            boxShadow: 'none',
+            padding: '10px',
+          }}
         >
           {chartElement}
         </PanelCard>

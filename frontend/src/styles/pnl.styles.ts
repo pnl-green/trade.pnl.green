@@ -5,11 +5,11 @@ export const TradingViewComponent = styled(Box)(() => ({
   display: 'flex',
   width: '100%',
   height: '100%',
-  minHeight: '520px',
+  minHeight: '480px',
   borderRadius: '12px',
   overflow: 'hidden',
   backgroundColor: intelayerColors.surface,
-  border: `1px solid ${intelayerColors.panelBorder}`,
+  border: 'none',
   position: 'relative',
   isolation: 'isolate',
   '&::before': {

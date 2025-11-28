@@ -18,7 +18,7 @@ interface OrderTypeSelectorProps {
 const ControlRoot = styled('div')(() => ({
   display: 'flex',
   alignItems: 'center',
-  gap: '6px',
+  gap: '5px',
   width: '100%',
   flexWrap: 'wrap',
 }));
@@ -28,10 +28,10 @@ const ControlButton = styled('button')(() => ({
   backgroundColor: intelayerColors.surface,
   color: intelayerColors.muted,
   borderRadius: '8px',
-  padding: '7px 12px',
+  padding: '6px 10px',
   fontFamily: intelayerFonts.body,
-  fontSize: '12px',
-  fontWeight: 500,
+  fontSize: '11px',
+  fontWeight: 600,
   cursor: 'pointer',
   transition: 'background-color 0.2s ease, color 0.2s ease, border 0.2s ease',
   flex: '0 0 auto',
