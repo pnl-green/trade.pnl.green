@@ -1,0 +1,27 @@
+{
+  "name": "PNL.GREΞN",
+  "short_name": "PNL Green",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#05070B",
+  "theme_color": "#0bd88d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/icon-256x256.svg",
+      "sizes": "256x256",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/icon-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

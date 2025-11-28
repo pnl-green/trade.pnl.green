@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="PNL Green icon">
+  <defs>
+    <linearGradient id="g" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop stop-color="#0bd88d" offset="0" />
+      <stop stop-color="#0ba8d8" offset="1" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="48" fill="#05070b" />
+  <rect x="32" y="48" width="192" height="160" rx="28" fill="url(#g)" opacity="0.12" />
+  <path fill="#0bd88d" d="M80 84h96a14 14 0 0 1 14 14v60a14 14 0 0 1-14 14h-54l-24 28a5 5 0 0 1-8-3V98a14 14 0 0 1 14-14Zm0 10a4 4 0 0 0-4 4v82.2L92.4 146A4 4 0 0 1 95.6 144H176a4 4 0 0 0 4-4V98a4 4 0 0 0-4-4Z" />
+</svg>
