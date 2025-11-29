@@ -13,6 +13,8 @@ pub enum Error {
     BadRequestError(String),
     #[error("{0:?}")]
     FloatParsingFailed(#[from] std::num::ParseFloatError),
+    #[error("{0:?}")]
+    HyperliquidError(#[from] hyperliquid::Error),
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
 }
