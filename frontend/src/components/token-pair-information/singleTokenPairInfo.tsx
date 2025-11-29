@@ -77,13 +77,13 @@ const SingleTokenPairInfo = ({
   const metrics = [
     {
       label: 'Mark Price',
-      value: pairDataInformation()?.assetCtx?.markPx,
+      value: assetInfo?.markPrice ?? assetInfo?.last ?? pairDataInformation()?.assetCtx?.markPx,
       tooltip:
         "Mark Price is Intelayer's reference price for this market. It is usually a fair value index used for PnL and liquidation calculations.",
     },
     {
       label: 'Oracle Price',
-      value: pairDataInformation()?.assetCtx?.oraclePx,
+      value: assetInfo?.oraclePrice ?? pairDataInformation()?.assetCtx?.oraclePx,
       tooltip:
         "Oracle Price is the external reference price provided by the venue's oracle. It is used for funding and risk checks, not necessarily for order execution.",
     },
@@ -91,13 +91,13 @@ const SingleTokenPairInfo = ({
       label: '24hr Change',
       subLabel: '(in % and $)',
       value:
-        pairDataInformation()?.change24hPct !== undefined
-          ? `${Number(pairDataInformation()?.change24hPct).toFixed(2)}% ($${
-              Number(pairDataInformation()?.change24hUsd).toFixed(2)
-            })`
-          : pairDataInformation()?.hr24change
-            ? pairDataInformation()?.hr24change
-            : '--',
+        assetInfo?.change24hPct !== undefined
+          ? `${Number(assetInfo?.change24hPct).toFixed(2)}% ($${Number(assetInfo?.change24hUsd).toFixed(2)})`
+          : assetInfo?.percentage !== undefined
+            ? `${Number(assetInfo?.percentage).toFixed(2)}% ($${Number(assetInfo?.change ?? 0).toFixed(2)})`
+            : pairDataInformation()?.hr24change
+              ? pairDataInformation()?.hr24change
+              : '--',
       tooltip:
         '24hr Change shows how much the mark price has moved in the last 24 hours, in both percentage and absolute terms.',
       isRed: true,
@@ -105,14 +105,19 @@ const SingleTokenPairInfo = ({
     {
       label: '24hr Volume',
       value:
-        pairDataInformation()?.volume24h ??
+        assetInfo?.volume24h ??
+        assetInfo?.baseVolume ??
+        assetInfo?.quoteVolume ??
         pairDataInformation()?.volume ??
         '--',
       tooltip: '24hr Volume is the total traded volume in this market over the last 24 hours.',
     },
     {
       label: 'OI',
-      value: pairDataInformation()?.openInterest ?? pairDataInformation()?.assetCtx?.openInterest,
+      value:
+        assetInfo?.openInterest ??
+        pairDataInformation()?.openInterest ??
+        pairDataInformation()?.assetCtx?.openInterest,
       tooltip:
         'OI (Open Interest) is the notional value of all open positions in this market. It is a proxy for market activity and crowding.',
     },
@@ -121,8 +126,8 @@ const SingleTokenPairInfo = ({
       subLabel: 'Countdown',
       value: (
         <span className="value">
-          <span id="toGreen">{pairDataInformation()?.fundingRate ?? pairDataInformation()?.funding}&nbsp;&nbsp;</span>
-          {pairDataInformation()?.fundingCountdown ?? pairDataInformation()?.countDown}
+          <span id="toGreen">{assetInfo?.fundingRate ?? assetInfo?.funding ?? pairDataInformation()?.funding}&nbsp;&nbsp;</span>
+          {assetInfo?.fundingCountdown ?? pairDataInformation()?.fundingCountdown ?? pairDataInformation()?.countDown}
         </span>
       ),
       tooltip:

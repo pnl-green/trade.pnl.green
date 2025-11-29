@@ -62,7 +62,6 @@ const PnlComponent = () => {
   const [pairs, setPairs] = useState([]);
 
   useEffect(() => {
-    if (pairs.length !== 0) return;
     let merged = tokenPairData;
     merged = merged.concat(allTokenPairs);
     const normalizedPairs = merged.map((item: any) => ({
@@ -70,7 +69,7 @@ const PnlComponent = () => {
       pairs: normalizePairName(item.pairs),
     }));
     setPairs(normalizedPairs);
-  }, [allTokenPairs, pairs.length, tokenPairData]);
+  }, [allTokenPairs, tokenPairData, currentExchangeId]);
 
   const lastBarsCache = new Map();
 
@@ -195,7 +194,7 @@ const PnlComponent = () => {
         return;
       }
 
-      const logicalSymbol = `${parsedSymbol.fromSymbol.toUpperCase()}-PERP`;
+      const logicalSymbol = `${parsedSymbol.fromSymbol.toUpperCase()}-${parsedSymbol.toSymbol.toUpperCase()}`;
       const resolutionMap = (res: string) => {
         const normalized = res.toString().toUpperCase();
         if (normalized.endsWith('H')) return `${normalized.replace('H', '')}h`;

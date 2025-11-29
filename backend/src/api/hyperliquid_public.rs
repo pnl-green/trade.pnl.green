@@ -1,20 +1,21 @@
 use actix_web::{web, HttpResponse};
 use hyperliquid::{
-    types::{
-        info::response::{Asset, AssetContext, Ctx},
-        Chain,
-    },
-    Hyperliquid, Info,
+    types::info::response::{AssetContext, Ctx, Universe},
+    Chain, Hyperliquid, Info,
 };
 
 use crate::{error::Error, prelude::Result};
 
 fn coin_from_symbol(symbol: &str) -> String {
     let upper = symbol.to_ascii_uppercase();
-    upper.split('-').next().unwrap_or(symbol).to_string()
+    upper
+        .split('-')
+        .next()
+        .unwrap_or(symbol)
+        .to_string()
 }
 
-fn extract_asset_ctx<'a>(ctxs: &'a [AssetContext], coin: &str) -> Result<(&'a Ctx, &'a Asset)> {
+fn extract_asset_ctx<'a>(ctxs: &'a [AssetContext], coin: &str) -> Result<(&'a Ctx, &'a Universe)> {
     let contexts = ctxs
         .get(1)
         .ok_or_else(|| Error::BadRequestError("Missing asset contexts".into()))?;
@@ -31,7 +32,7 @@ fn extract_asset_ctx<'a>(ctxs: &'a [AssetContext], coin: &str) -> Result<(&'a Ct
         return Err(Error::BadRequestError("Unexpected ctx shape".into()));
     };
 
-    let (index, asset_meta) = meta
+    let (index, universe) = meta
         .universe
         .iter()
         .enumerate()
@@ -42,7 +43,7 @@ fn extract_asset_ctx<'a>(ctxs: &'a [AssetContext], coin: &str) -> Result<(&'a Ct
         .get(index)
         .ok_or_else(|| Error::BadRequestError("Asset context missing".into()))?;
 
-    Ok((asset_ctx, asset_meta))
+    Ok((asset_ctx, universe))
 }
 
 pub async fn asset_info(path: web::Path<String>) -> Result<HttpResponse> {
@@ -51,7 +52,7 @@ pub async fn asset_info(path: web::Path<String>) -> Result<HttpResponse> {
 
     let info: Info = Hyperliquid::new(Chain::Arbitrum);
     let ctxs = info.contexts().await?;
-    let (asset_ctx, asset_meta) = extract_asset_ctx(&ctxs, &coin)?;
+    let (asset_ctx, universe) = extract_asset_ctx(&ctxs, &coin)?;
 
     let mark_px: f64 = asset_ctx.mark_px.parse().unwrap_or_default();
     let oracle_px: f64 = asset_ctx.oracle_px.parse().unwrap_or_default();
@@ -81,9 +82,10 @@ pub async fn asset_info(path: web::Path<String>) -> Result<HttpResponse> {
         "fundingRate": funding_rate,
         "fundingCountdown": countdown_secs,
         "meta": {
-            "maxLeverage": asset_meta.max_leverage,
-            "szDecimals": asset_meta.sz_decimals,
-            "onlyIsolated": asset_meta.only_isolated,
+            "maxLeverage": universe.max_leverage,
+            "tickSize": universe.tick_size,
+            "pxDecimals": universe.px_decimals,
+            "szDecimals": universe.sz_decimals,
         }
     })))
 }
@@ -98,36 +100,28 @@ pub async fn orderbook(path: web::Path<String>) -> Result<HttpResponse> {
     let bids = book
         .levels
         .get(1)
-        .map(|levels| {
-            levels
-                .iter()
-                .map(|level| {
-                    serde_json::json!({
-                        "px": level.px.parse::<f64>().unwrap_or_default(),
-                        "sz": level.sz.parse::<f64>().unwrap_or_default(),
-                        "n": level.n,
-                    })
-                })
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
+        .cloned()
+        .unwrap_or_default()
+        .into_iter()
+        .map(|level| serde_json::json!({
+            "px": level.px.parse::<f64>().unwrap_or_default(),
+            "sz": level.sz.parse::<f64>().unwrap_or_default(),
+            "n": level.n.unwrap_or(0),
+        }))
+        .collect::<Vec<_>>();
 
     let asks = book
         .levels
         .first()
-        .map(|levels| {
-            levels
-                .iter()
-                .map(|level| {
-                    serde_json::json!({
-                        "px": level.px.parse::<f64>().unwrap_or_default(),
-                        "sz": level.sz.parse::<f64>().unwrap_or_default(),
-                        "n": level.n,
-                    })
-                })
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
+        .cloned()
+        .unwrap_or_default()
+        .into_iter()
+        .map(|level| serde_json::json!({
+            "px": level.px.parse::<f64>().unwrap_or_default(),
+            "sz": level.sz.parse::<f64>().unwrap_or_default(),
+            "n": level.n.unwrap_or(0),
+        }))
+        .collect::<Vec<_>>();
 
     Ok(HttpResponse::Ok().json(serde_json::json!({
         "symbol": symbol,
@@ -143,19 +137,17 @@ pub async fn trades(path: web::Path<String>) -> Result<HttpResponse> {
     let coin = coin_from_symbol(&symbol);
 
     let info: Info = Hyperliquid::new(Chain::Arbitrum);
-    let trades = info.recent_trades(coin.clone()).await?;
+    let trades = info.trades(coin.clone(), None).await?;
 
     let normalized = trades
         .into_iter()
-        .map(|trade| {
-            serde_json::json!({
-                "px": trade.px.parse::<f64>().unwrap_or_default(),
-                "sz": trade.sz.parse::<f64>().unwrap_or_default(),
-                "side": trade.side,
-                "hash": trade.hash,
-                "timestamp": trade.time,
-            })
-        })
+        .map(|trade| serde_json::json!({
+            "px": trade.px.parse::<f64>().unwrap_or_default(),
+            "sz": trade.sz.parse::<f64>().unwrap_or_default(),
+            "side": trade.side,
+            "hash": trade.hash,
+            "timestamp": trade.time,
+        }))
         .collect::<Vec<_>>();
 
     Ok(HttpResponse::Ok().json(serde_json::json!({
@@ -165,10 +157,7 @@ pub async fn trades(path: web::Path<String>) -> Result<HttpResponse> {
     })))
 }
 
-pub async fn candles(
-    symbol: web::Path<String>,
-    query: web::Query<serde_json::Value>,
-) -> Result<HttpResponse> {
+pub async fn candles(symbol: web::Path<String>, query: web::Query<serde_json::Value>) -> Result<HttpResponse> {
     let logical_symbol = symbol.into_inner();
     let coin = coin_from_symbol(&logical_symbol);
     let tf = query
@@ -176,7 +165,10 @@ pub async fn candles(
         .and_then(|v| v.as_str())
         .unwrap_or("1m")
         .to_string();
-    let from = query.get("from").and_then(|v| v.as_u64()).unwrap_or(0);
+    let from = query
+        .get("from")
+        .and_then(|v| v.as_u64())
+        .unwrap_or(0);
     let to = query.get("to").and_then(|v| v.as_u64()).unwrap_or_else(|| {
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -185,20 +177,20 @@ pub async fn candles(
     });
 
     let info: Info = Hyperliquid::new(Chain::Arbitrum);
-    let data = info.candle_snapshot(coin.clone(), tf, from, to).await?;
+    let data = info
+        .candle_snapshot(coin.clone(), tf, from, to)
+        .await?;
 
     let candles = data
         .into_iter()
-        .map(|c| {
-            serde_json::json!({
-                "time": c.t,
-                "open": c.o.parse::<f64>().unwrap_or_default(),
-                "high": c.h.parse::<f64>().unwrap_or_default(),
-                "low": c.l.parse::<f64>().unwrap_or_default(),
-                "close": c.c.parse::<f64>().unwrap_or_default(),
-                "volume": c.v.parse::<f64>().unwrap_or_default(),
-            })
-        })
+        .map(|c| serde_json::json!({
+            "time": c.t,
+            "open": c.o.parse::<f64>().unwrap_or_default(),
+            "high": c.h.parse::<f64>().unwrap_or_default(),
+            "low": c.l.parse::<f64>().unwrap_or_default(),
+            "close": c.c.parse::<f64>().unwrap_or_default(),
+            "volume": c.v.parse::<f64>().unwrap_or_default(),
+        }))
         .collect::<Vec<_>>();
 
     Ok(HttpResponse::Ok().json(serde_json::json!({
