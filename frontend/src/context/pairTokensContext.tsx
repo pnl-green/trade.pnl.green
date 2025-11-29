@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActiveAssetData, PairData } from '../../types/hyperliquid';
 import { useHyperLiquidContext } from './hyperLiquidContext';
 import { useAddress, useChainId } from '@thirdweb-dev/react';
+import { useExchange } from './exchangeContext';
 
 //default dummy token data
 const defaultDummyTokenData: PairData | any = {
@@ -82,10 +83,13 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   const userAddress = useAddress();
   const chainId = useChainId();
   const { hyperliquid } = useHyperLiquidContext();
+  const { currentExchangeId } = useExchange();
 
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
   const [tokenPairData, setTokenPairData] = useState([]); //all token pair data
   const [allTokenPairs, setAllTokenPairs] = useState([]); //all token pair data
+  const [hyperliquidPairs, setHyperliquidPairs] = useState<any[]>([]);
+  const [coinbasePairs, setCoinbasePairs] = useState<any[]>([]);
   const [selectedPairsTokenData, setSelectPairsTokenData] =
     useState<PairData | null>(defaultDummyTokenData);
   //single token pair data
@@ -168,8 +172,12 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
                 ...tokenData,
               }));
 
-              setAllTokenPairs(tokenPair as any);
-              setTokenPairData(tokenPair as any);
+              setHyperliquidPairs(tokenPair as any);
+
+              if (currentExchangeId === 'hyperliquid') {
+                setAllTokenPairs(tokenPair as any);
+                setTokenPairData(tokenPair as any);
+              }
             });
         }
       } else if (message.channel === 'error') {
@@ -187,7 +195,81 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       ws.close();
     };
-  }, [hyperliquid]);
+  }, [hyperliquid, currentExchangeId, chainId]);
+
+  useEffect(() => {
+    if (currentExchangeId !== 'coinbase') return;
+    const controller = new AbortController();
+
+    const fetchMarkets = async () => {
+      try {
+        const res = await fetch('/ccxt/coinbase/markets', {
+          signal: controller.signal,
+        }).then((r) => r.json());
+        const markets = res?.data || [];
+
+        const mapped = markets.map((market: any, index: number) => ({
+          pairs: normalizePairName(`${market.base}-${market.quote}`),
+          assetId: index,
+          universe: {
+            name: `${market.base}-${market.quote}`,
+            maxLeverage: market.limits?.leverage?.max ?? '--',
+            szDecimals: market.precision?.amount ?? '--',
+          },
+          assetCtx: { openInterest: market.info?.openInterest },
+        }));
+
+        setCoinbasePairs(mapped);
+
+        if (currentExchangeId === 'coinbase') {
+          setTokenPairData(mapped);
+          setAllTokenPairs(mapped);
+          if (mapped[0]) {
+            setSelectPairsTokenData(mapped[0]);
+            sessionStorage.setItem('assetId', JSON.stringify(0));
+            sessionStorage.setItem(
+              'selectPairsTokenData',
+              JSON.stringify(mapped[0])
+            );
+          }
+        }
+      } catch (error) {
+        if ((error as any).name !== 'AbortError') {
+          console.error('Failed to fetch coinbase markets', error);
+        }
+      }
+    };
+
+    fetchMarkets();
+
+    return () => controller.abort();
+  }, [currentExchangeId]);
+
+  useEffect(() => {
+    if (currentExchangeId === 'hyperliquid') {
+      setTokenPairData(hyperliquidPairs);
+      setAllTokenPairs(hyperliquidPairs);
+      if (hyperliquidPairs[0]) {
+        setSelectPairsTokenData(hyperliquidPairs[0]);
+        sessionStorage.setItem('assetId', JSON.stringify(0));
+        sessionStorage.setItem(
+          'selectPairsTokenData',
+          JSON.stringify(hyperliquidPairs[0])
+        );
+      }
+    } else if (currentExchangeId === 'coinbase') {
+      setTokenPairData(coinbasePairs);
+      setAllTokenPairs(coinbasePairs);
+      if (coinbasePairs[0]) {
+        setSelectPairsTokenData(coinbasePairs[0]);
+        sessionStorage.setItem('assetId', JSON.stringify(0));
+        sessionStorage.setItem(
+          'selectPairsTokenData',
+          JSON.stringify(coinbasePairs[0])
+        );
+      }
+    }
+  }, [currentExchangeId, hyperliquidPairs, coinbasePairs]);
 
   //get active assetData with current leverage value
   useEffect(() => {
