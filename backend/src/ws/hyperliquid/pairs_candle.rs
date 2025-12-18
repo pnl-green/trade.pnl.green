@@ -57,6 +57,9 @@ impl PairsCandle {
         let payload_right = serde_json::to_string(&method_right)
             .context("Failed to serialize subscription payload")?;
 
+        // Check if the quote symbol is a stablecoin/fiat that doesn't need a subscription
+        let is_stable_right = ["USDC", "USD", "USDT"].contains(&symbol_right.as_str());
+
         let (mut stream, _response) =
             tokio_tungstenite::connect_async("wss://api.hyperliquid.xyz/ws")
                 .await
@@ -67,14 +70,17 @@ impl PairsCandle {
             .send(Message::Text(payload_left))
             .await
             .context("Failed to subscribe to desired coin candle")?;
-        stream
-            .send(Message::Text(payload_right))
-            .await
-            .context("Failed to subscribe to desired coin candle")?;
+        
+        if !is_stable_right {
+            stream
+                .send(Message::Text(payload_right))
+                .await
+                .context("Failed to subscribe to desired coin candle")?;
+        }
         // TODO: add pings
 
-        let mut symbol_left_candle = None;
-        let mut symbol_right_candle = None;
+        let mut symbol_left_candle: Option<Candle> = None;
+        let mut symbol_right_candle: Option<Candle> = None;
 
         while let Some(msg) = stream.next().await {
             let Ok(msg) = msg else {
@@ -105,6 +111,24 @@ impl PairsCandle {
                         symbol_left_candle = Some(candle);
                     } else if &candle.symbol == symbol_right {
                         symbol_right_candle = Some(candle);
+                    }
+                    
+                    // If stablecoin, mock the right candle if checks pass
+                    if is_stable_right {
+                         if let Some(left) = &symbol_left_candle {
+                            symbol_right_candle = Some(Candle {
+                                open_time: left.open_time,
+                                close_time: left.close_time,
+                                symbol: symbol_right.clone(),
+                                interval: left.interval.clone(),
+                                open_price: 1.0,
+                                close_price: 1.0,
+                                high_price: 1.0,
+                                low_price: 1.0,
+                                volume: 0.0,
+                                num_trade: 0,
+                            });
+                         }
                     }
 
                     if let Some((left, right)) = symbol_left_candle

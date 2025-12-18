@@ -75,7 +75,13 @@ function buildSymbolMap(logicalSymbol, exchangeId, exchange) {
   const market = Object.values(exchange.markets || {}).find((m) => {
     const isDeriv = ['swap', 'future'].includes(m.type);
     const matchesBase = m.base === base;
-    const matchesQuote = targetQuote ? m.quote === targetQuote : true;
+
+    // Allow USD/USDC to be interchangeable for finding the market
+    const aliases = targetQuote ? [targetQuote] : [];
+    if (targetQuote === 'USD') aliases.push('USDC');
+    if (targetQuote === 'USDC') aliases.push('USD');
+
+    const matchesQuote = targetQuote ? aliases.includes(m.quote) : true;
     return isDeriv && matchesBase && matchesQuote;
   });
 
