@@ -83,7 +83,9 @@ pub enum Info {
     },
     /// Query Hyperliquid spot metadata from the info endpoint.
     SpotMeta,
-    Liquidity { req: LiquidityRequest },
+    Liquidity {
+        req: LiquidityRequest,
+    },
 }
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]

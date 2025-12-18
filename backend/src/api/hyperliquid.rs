@@ -8,9 +8,8 @@ use crate::{
     error::Error::BadRequestError,
     model::{
         hyperliquid::{
-            Agent, BookKind, ChannelConnection, Condition,
-            DepthCalculationResponse, Exchange, Info, InternalRequest, LiquidityResponse,
-            QueueElem, Request, ValueKind, CONNECTIONS,
+            Agent, BookKind, ChannelConnection, Condition, DepthCalculationResponse, Exchange,
+            Info, InternalRequest, LiquidityResponse, QueueElem, Request, ValueKind, CONNECTIONS,
         },
         Response,
     },
@@ -223,7 +222,7 @@ pub async fn hyperliquid(
                     match req.book_kind {
                         Some(BookKind::Ask) => top_bid = None,
                         Some(BookKind::Bid) => top_ask = None,
-                        _ => {},
+                        _ => {}
                     }
 
                     let (top_ask_qty, top_ask_price, top_bid_qty, top_bid_price) =
@@ -263,13 +262,11 @@ pub async fn hyperliquid(
                         msg: None,
                     })
                 }
-                Info::Delta { req: _ } => {
-                    HttpResponse::Ok().json(Response::<()> {
-                        success: false,
-                        data: None,
-                        msg: Some("Delta endpoint not implemented".into()),
-                    })
-                }
+                Info::Delta { req: _ } => HttpResponse::Ok().json(Response::<()> {
+                    success: false,
+                    data: None,
+                    msg: Some("Delta endpoint not implemented".into()),
+                }),
             }
         }
 

@@ -36,9 +36,11 @@ pub async fn proxy(
         Some(body.to_vec())
     };
 
-    let response = actix_web::rt::task::spawn_blocking(move || forward_request(&method, &url, payload.as_deref()))
-        .await
-        .map_err(|err| Error::UnexpectedError(err.into()))??;
+    let response = actix_web::rt::task::spawn_blocking(move || {
+        forward_request(&method, &url, payload.as_deref())
+    })
+    .await
+    .map_err(|err| Error::UnexpectedError(err.into()))??;
 
     Ok(HttpResponse::build(response.status).body(response.body))
 }
@@ -53,7 +55,10 @@ fn forward_request(method: &str, url: &str, body: Option<&[u8]>) -> Result<Forwa
 
     let mut stream = TcpStream::connect((host.as_str(), port))?;
 
-    let mut request = format!("{} {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n", method, path, host);
+    let mut request = format!(
+        "{} {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n",
+        method, path, host
+    );
 
     if let Some(body) = body {
         request.push_str("Content-Type: application/json\r\n");

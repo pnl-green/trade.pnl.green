@@ -1,6 +1,7 @@
 import { parseFullSymbol } from './helpers';
 
 const channelToSubscription = new Map<string, any>();
+const pollingIntervals = new Map<string, NodeJS.Timeout>();
 
 const socketUrl =
   process.env.NEXT_PUBLIC_WS_URL || 'wss://api.hyperliquid.xyz/ws';
@@ -134,14 +135,84 @@ export function subscribeOnStream(
   };
   channelToSubscription.set(channelString, subscriptionItem);
 
-  sendMessage(`
-  {
-    "method": "pairs_candle",
-    "data": {
-        "symbol_left": "${parsedSymbol.fromSymbol}",
-        "symbol_right": "${parsedSymbol.toSymbol}"
+  if (parsedSymbol.exchange === 'Hyperliquid') {
+    sendMessage(`
+    {
+      "method": "pairs_candle",
+      "data": {
+          "symbol_left": "${parsedSymbol.fromSymbol}",
+          "symbol_right": "${parsedSymbol.toSymbol}"
+      }
+    }`);
+  } else {
+    // Polling for non-Hyperliquid exchanges
+    // Fetch immediately
+    fetchLatestCandle(parsedSymbol, resolution, onRealtimeCallback, channelString);
+
+    // Set up interval
+    const intervalId = setInterval(() => {
+      fetchLatestCandle(parsedSymbol, resolution, onRealtimeCallback, channelString);
+    }, 5000); // Poll every 5 seconds
+
+    pollingIntervals.set(channelString, intervalId);
+  }
+}
+
+async function fetchLatestCandle(
+  parsedSymbol: any,
+  resolution: string,
+  onRealtimeCallback: any,
+  channelString: string
+) {
+  try {
+    const resolutionMap = (res: string) => {
+      const normalized = res.toString().toUpperCase();
+      if (normalized.endsWith('H')) return `${normalized.replace('H', '')}h`;
+      if (normalized.endsWith('D')) return `${normalized.replace('D', '')}d`;
+      if (normalized.endsWith('W')) return `${normalized.replace('W', '')}w`;
+      if (normalized.endsWith('M')) return `${normalized.replace('M', '')}M`;
+      return '1m';
+    };
+
+    const logicalSymbol = `${parsedSymbol.fromSymbol}-${parsedSymbol.toSymbol}`;
+    const params = new URLSearchParams({
+      symbol: logicalSymbol,
+      tf: resolutionMap(resolution),
+      limit: '1',
+    });
+
+    const url = `/ccxt/${parsedSymbol.exchange.toLowerCase()}/candles?${params.toString()}`;
+    const response = await fetch(url).then((res) => res.json());
+
+    if (response.success && response.data && response.data.length > 0) {
+      const barData = response.data[response.data.length - 1]; // Get latest candle
+      // Check if it's the array format [time, open, high, low, close, volume]
+      let bar;
+      if (Array.isArray(barData)) {
+        bar = {
+          time: Number(barData[0]),
+          open: Number(barData[1]),
+          high: Number(barData[2]),
+          low: Number(barData[3]),
+          close: Number(barData[4]),
+          volume: Number(barData[5] ?? 0),
+        };
+      } else {
+        bar = {
+          time: Number(barData.time),
+          open: Number(barData.open),
+          high: Number(barData.high),
+          low: Number(barData.low),
+          close: Number(barData.close),
+          volume: Number(barData.volume ?? 0),
+        };
+      }
+
+      onRealtimeCallback(bar);
     }
-  }`);
+  } catch (err) {
+    console.error(`[polling] Failed to fetch candle for ${channelString}`, err);
+  }
 }
 
 export function unsubscribeFromStream(subscriberUID: string) {
@@ -163,11 +234,21 @@ export function unsubscribeFromStream(subscriberUID: string) {
           '[unsubscribeBars]: Unsubscribe from streaming. Channel:',
           channelString
         );
-        const subRequest = {
-          action: 'SubRemove',
-          subs: [channelString],
-        };
-        // socket.send(JSON.stringify(subRequest));
+
+        // Clear polling interval if exists
+        if (pollingIntervals.has(channelString)) {
+          clearInterval(pollingIntervals.get(channelString));
+          pollingIntervals.delete(channelString);
+        } else {
+          // Only send WS unsubscribe if we were using WS (though for now we just drop the handler locally for WS, 
+          // as the original code didn't seem to have a robust unsubscribe message implemented deeply)
+          const subRequest = {
+            action: 'SubRemove',
+            subs: [channelString],
+          };
+          // socket.send(JSON.stringify(subRequest));
+        }
+
         channelToSubscription.delete(channelString);
         break;
       }

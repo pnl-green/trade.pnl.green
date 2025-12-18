@@ -45,7 +45,7 @@ const SingleTokenPairInfo = ({
         if (currentExchangeId === 'hyperliquid') {
           url = `/hl/${pair}/asset-info`;
         } else {
-          url = `/ccxt/coinbase/asset-info?symbol=${encodeURIComponent(pair)}`;
+          url = `/ccxt/${currentExchangeId}/asset-info?symbol=${encodeURIComponent(pair)}`;
         }
 
         const response = await fetch(url).then((res) => res.json());
