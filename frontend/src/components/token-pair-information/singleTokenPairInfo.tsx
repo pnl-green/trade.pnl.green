@@ -39,16 +39,32 @@ const SingleTokenPairInfo = ({
     const fetchInfo = async () => {
       try {
         const pair = selectedPairsTokenData?.pairs || tokenPairData[assetId]?.pairs;
-        if (!pair) return;
+      if (!pair) return;
 
-        let url = '';
-        if (currentExchangeId === 'hyperliquid') {
-          url = `/hl/${pair}/asset-info`;
-        } else {
-          url = `/ccxt/${currentExchangeId}/asset-info?symbol=${encodeURIComponent(pair)}`;
+      const url = `/ccxt/${currentExchangeId}/asset-info?symbol=${encodeURIComponent(pair)}`;
+
+        const rawResponse = await fetch(url);
+        if (!rawResponse.ok) {
+          console.error(`Failed to fetch asset info: ${rawResponse.status} ${rawResponse.statusText}`);
+          setAssetInfo(null);
+          return;
         }
-
-        const response = await fetch(url).then((res) => res.json());
+        
+        const response = await rawResponse.json();
+        
+        // Check for errors in CCXT responses
+        if (!response.success && response.error) {
+          console.error('CCXT API error:', response.error);
+          console.error('This might be due to:', {
+            'Missing API keys': 'Some exchanges require API keys even for public data',
+            'CCXT service not running': 'Check if the ccxt-service is running on port 4001',
+            'Invalid symbol': 'The trading pair might not exist on this exchange',
+            'Network issue': 'Check your connection to the backend service'
+          });
+          setAssetInfo(null);
+          return;
+        }
+        
         const data = response?.data || response;
         setAssetInfo(data);
       } catch (error) {
@@ -83,7 +99,7 @@ const SingleTokenPairInfo = ({
     },
     {
       label: 'Oracle Price',
-      value: assetInfo?.oraclePrice ?? pairDataInformation()?.assetCtx?.oraclePx,
+      value: assetInfo?.oraclePrice ?? pairDataInformation()?.assetCtx?.oraclePx ?? '--',
       tooltip:
         "Oracle Price is the external reference price provided by the venue's oracle. It is used for funding and risk checks, not necessarily for order execution.",
     },
@@ -91,9 +107,9 @@ const SingleTokenPairInfo = ({
       label: '24hr Change',
       subLabel: '(in % and $)',
       value:
-        assetInfo?.change24hPct !== undefined
-          ? `${Number(assetInfo?.change24hPct).toFixed(2)}% ($${Number(assetInfo?.change24hUsd).toFixed(2)})`
-          : assetInfo?.percentage !== undefined
+        assetInfo?.change24hPct !== undefined && assetInfo?.change24hPct !== null
+          ? `${Number(assetInfo?.change24hPct).toFixed(2)}% ($${Number(assetInfo?.change24hUsd ?? 0).toFixed(2)})`
+          : assetInfo?.percentage !== undefined && assetInfo?.percentage !== null
             ? `${Number(assetInfo?.percentage).toFixed(2)}% ($${Number(assetInfo?.change ?? 0).toFixed(2)})`
             : pairDataInformation()?.hr24change
               ? pairDataInformation()?.hr24change
@@ -117,7 +133,8 @@ const SingleTokenPairInfo = ({
       value:
         assetInfo?.openInterest ??
         pairDataInformation()?.openInterest ??
-        pairDataInformation()?.assetCtx?.openInterest,
+        pairDataInformation()?.assetCtx?.openInterest ??
+        '--',
       tooltip:
         'OI (Open Interest) is the notional value of all open positions in this market. It is a proxy for market activity and crowding.',
     },
@@ -126,8 +143,8 @@ const SingleTokenPairInfo = ({
       subLabel: 'Countdown',
       value: (
         <span className="value">
-          <span id="toGreen">{assetInfo?.fundingRate ?? assetInfo?.funding ?? pairDataInformation()?.funding}&nbsp;&nbsp;</span>
-          {assetInfo?.fundingCountdown ?? pairDataInformation()?.fundingCountdown ?? pairDataInformation()?.countDown}
+          <span id="toGreen">{(assetInfo?.fundingRate ?? assetInfo?.funding ?? pairDataInformation()?.funding) || '--'}&nbsp;&nbsp;</span>
+          {(assetInfo?.fundingCountdown ?? pairDataInformation()?.fundingCountdown ?? pairDataInformation()?.countDown) || '--'}
         </span>
       ),
       tooltip:

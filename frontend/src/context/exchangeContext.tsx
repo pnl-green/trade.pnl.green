@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 
-type ExchangeId = 'hyperliquid' | 'coinbase';
+type ExchangeId = 'coinbase' | 'kraken' | 'okx' | 'bitfinex' | 'gate';
 
 type ExchangeContextValue = {
   currentExchangeId: ExchangeId;
@@ -10,7 +10,7 @@ type ExchangeContextValue = {
 const ExchangeContext = createContext<ExchangeContextValue | undefined>(undefined);
 
 export const ExchangeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [currentExchangeId, setCurrentExchangeId] = useState<ExchangeId>('hyperliquid');
+  const [currentExchangeId, setCurrentExchangeId] = useState<ExchangeId>('coinbase');
 
   const value = useMemo(
     () => ({ currentExchangeId, setCurrentExchangeId }),

@@ -182,7 +182,14 @@ async function fetchLatestCandle(
     });
 
     const url = `/ccxt/${parsedSymbol.exchange.toLowerCase()}/candles?${params.toString()}`;
-    const response = await fetch(url).then((res) => res.json());
+    const rawResponse = await fetch(url);
+    
+    if (!rawResponse.ok) {
+      console.error(`[polling] Failed to fetch candle: ${rawResponse.status} ${rawResponse.statusText}`);
+      return;
+    }
+    
+    const response = await rawResponse.json();
 
     if (response.success && response.data && response.data.length > 0) {
       const barData = response.data[response.data.length - 1]; // Get latest candle
@@ -209,6 +216,8 @@ async function fetchLatestCandle(
       }
 
       onRealtimeCallback(bar);
+    } else if (!response.success && response.error) {
+      console.error(`[polling] CCXT API error for ${channelString}:`, response.error);
     }
   } catch (err) {
     console.error(`[polling] Failed to fetch candle for ${channelString}`, err);

@@ -17,9 +17,11 @@ pub async fn proxy(
         .next()
         .ok_or_else(|| Error::BadRequestError("Missing exchange".into()))?;
 
+    // Allow all supported exchanges
+    // Supported exchanges: coinbase, kraken, okx, bitfinex, gate
     match exchange {
-        "hyperliquid" | "coinbase" => {}
-        _ => return Err(Error::BadRequestError("Unsupported exchange".into())),
+        "coinbase" | "kraken" | "okx" | "bitfinex" | "gate" => {}
+        _ => return Err(Error::BadRequestError(format!("Unsupported exchange: {}. Supported exchanges: coinbase, kraken, okx, bitfinex, gate", exchange).into())),
     }
 
     let mut url = format!("{}/api/{}", config.ccxt_service_url(), tail);

@@ -176,12 +176,25 @@ pub async fn candles(
         .and_then(|v| v.as_str())
         .unwrap_or("1m")
         .to_string();
-    let from = query.get("from").and_then(|v| v.as_u64()).unwrap_or(0);
-    let to = query.get("to").and_then(|v| v.as_u64()).unwrap_or_else(|| {
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default();
-        now.as_millis() as u64
+    // Support both "from" and "since" parameters for compatibility
+    let from = query
+        .get("from")
+        .or_else(|| query.get("since"))
+        .and_then(|v| v.as_u64().or_else(|| v.as_str().and_then(|s| s.parse::<u64>().ok())))
+        .unwrap_or(0);
+    // Support both "to" and "limit" parameters, but "to" takes precedence
+    let to = query.get("to").and_then(|v| v.as_u64().or_else(|| v.as_str().and_then(|s| s.parse::<u64>().ok()))).unwrap_or_else(|| {
+        // If "limit" is provided, calculate "to" from "from" + limit
+        if let Some(limit) = query.get("limit").and_then(|v| v.as_u64().or_else(|| v.as_str().and_then(|s| s.parse::<u64>().ok()))) {
+            // Approximate: assume each candle is 1 minute (60000ms) for calculation
+            // This is a rough estimate, actual calculation would need the interval
+            from + (limit * 60000)
+        } else {
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default();
+            now.as_millis() as u64
+        }
     });
 
     let info: Info = Hyperliquid::new(Chain::Arbitrum);

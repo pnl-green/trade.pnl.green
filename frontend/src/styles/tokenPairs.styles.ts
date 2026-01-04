@@ -5,7 +5,9 @@ interface TokenPairsProps {
   tableISOpen?: boolean;
 }
 
-export const TokenPairsWrapper = styled(Box)<TokenPairsProps>(({ tableISOpen }) => ({
+export const TokenPairsWrapper = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'tableISOpen',
+})<TokenPairsProps>(({ tableISOpen }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: '4px 8px',

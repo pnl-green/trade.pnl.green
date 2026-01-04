@@ -294,7 +294,10 @@ const resolveCollisions = (layout: PanelLayout[], movingId: PanelId): PanelLayou
 const loadLayout = (): PanelLayout[] => {
   if (typeof window === 'undefined') return cloneLayout(defaultLayout);
   const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
-  if (!saved) return cloneLayout(defaultLayout);
+  // Check if saved value is null, undefined, or the string "undefined"
+  if (!saved || saved === 'undefined' || saved === 'null') {
+    return cloneLayout(defaultLayout);
+  }
   try {
     const parsed = JSON.parse(saved) as PanelLayout[];
     if (Array.isArray(parsed) && parsed.every((item) => item.i && item.w && item.h)) {
@@ -304,6 +307,8 @@ const loadLayout = (): PanelLayout[] => {
     }
   } catch (error) {
     console.error('Failed to parse stored layout', error);
+    // Clear invalid data from localStorage
+    localStorage.removeItem(LAYOUT_STORAGE_KEY);
   }
   return cloneLayout(defaultLayout);
 };

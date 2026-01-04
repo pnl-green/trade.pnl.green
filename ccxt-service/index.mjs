@@ -2,8 +2,11 @@ import express from 'express';
 import ccxt from 'ccxt';
 
 const SYMBOL_MAP = {
-  hyperliquid: {},
   coinbase: {},
+  kraken: {},
+  okx: {},
+  bitfinex: {},
+  gate: {},
 };
 
 const defaultType = process.env.DEFAULT_MARKET_TYPE || 'swap';
@@ -38,16 +41,34 @@ function makeExchange(id, { defaultType: overrideType, keyPrefix, extraOptions =
 }
 
 const exchanges = {
-  hyperliquid: makeExchange('hyperliquid', { keyPrefix: 'HL' }),
-  coinbase: makeExchange(process.env.COINBASE_ID || 'coinbaseinternational', {
+  coinbase: makeExchange(process.env.COINBASE_ID || 'coinbase', {
     keyPrefix: 'CB',
-    defaultType: process.env.COINBASE_DEFAULT_TYPE || 'swap',
+    defaultType: process.env.COINBASE_DEFAULT_TYPE || 'spot',
+  }),
+  kraken: makeExchange('kraken', {
+    keyPrefix: 'KR',
+    defaultType: process.env.KRAKEN_DEFAULT_TYPE || 'spot',
+  }),
+  okx: makeExchange('okx', {
+    keyPrefix: 'OK',
+    defaultType: process.env.OKX_DEFAULT_TYPE || 'spot',
+  }),
+  bitfinex: makeExchange('bitfinex', {
+    keyPrefix: 'BF',
+    defaultType: process.env.BITFINEX_DEFAULT_TYPE || 'spot',
+  }),
+  gate: makeExchange('gate', {
+    keyPrefix: 'GT',
+    defaultType: process.env.GATE_DEFAULT_TYPE || 'spot',
   }),
 };
 
 const marketsLoaded = {
-  hyperliquid: null,
   coinbase: null,
+  kraken: null,
+  okx: null,
+  bitfinex: null,
+  gate: null,
 };
 
 async function getExchange(exchangeId) {
@@ -57,9 +78,19 @@ async function getExchange(exchangeId) {
   }
 
   if (!marketsLoaded[exchangeId]) {
-    marketsLoaded[exchangeId] = exchange.loadMarkets();
+    marketsLoaded[exchangeId] = exchange.loadMarkets().catch((err) => {
+      console.error(`Failed to load markets for ${exchangeId}:`, err);
+      throw new Error(`Failed to load markets for ${exchangeId}: ${err.message}`);
+    });
   }
-  await marketsLoaded[exchangeId];
+  
+  try {
+    await marketsLoaded[exchangeId];
+  } catch (err) {
+    // Reset the promise so we can retry
+    marketsLoaded[exchangeId] = null;
+    throw err;
+  }
 
   return exchange;
 }
@@ -69,24 +100,51 @@ function buildSymbolMap(logicalSymbol, exchangeId, exchange) {
     return SYMBOL_MAP[exchangeId][logicalSymbol];
   }
 
+  if (!exchange.markets || Object.keys(exchange.markets).length === 0) {
+    throw new Error(`Markets not loaded for ${exchangeId}. Please ensure the exchange is properly configured.`);
+  }
+
   const [base, quoted] = (logicalSymbol || '').split('-');
+  if (!base) {
+    throw new Error(`Invalid symbol format: ${logicalSymbol}. Expected format: BASE-QUOTE (e.g., SOL-USDC)`);
+  }
+  
   const targetQuote = quoted === 'PERP' ? undefined : quoted;
 
+  // For spot markets, look for exact match
   const market = Object.values(exchange.markets || {}).find((m) => {
-    const isDeriv = ['swap', 'future'].includes(m.type);
-    const matchesBase = m.base === base;
+    const matchesBase = m.base && m.base.toUpperCase() === base.toUpperCase();
 
-    // Allow USD/USDC to be interchangeable for finding the market
-    const aliases = targetQuote ? [targetQuote] : [];
-    if (targetQuote === 'USD') aliases.push('USDC');
-    if (targetQuote === 'USDC') aliases.push('USD');
+    // Allow USD/USDC/USDT to be interchangeable for finding the market
+    const aliases = targetQuote ? [targetQuote.toUpperCase()] : [];
+    if (targetQuote && targetQuote.toUpperCase() === 'USD') {
+      aliases.push('USDC', 'USDT');
+    }
+    if (targetQuote && targetQuote.toUpperCase() === 'USDC') {
+      aliases.push('USD', 'USDT');
+    }
+    if (targetQuote && targetQuote.toUpperCase() === 'USDT') {
+      aliases.push('USD', 'USDC');
+    }
 
-    const matchesQuote = targetQuote ? aliases.includes(m.quote) : true;
-    return isDeriv && matchesBase && matchesQuote;
+    const matchesQuote = targetQuote ? aliases.includes((m.quote || '').toUpperCase()) : true;
+    const matchesType = m.type === 'spot'; // Only look for spot markets
+    return matchesType && matchesBase && matchesQuote;
   });
 
   if (!market) {
-    throw new Error(`Symbol mapping missing for ${exchangeId}:${logicalSymbol}`);
+    // Provide helpful error message with available markets
+    const availableMarkets = Object.values(exchange.markets || {})
+      .filter((m) => m.type === 'spot')
+      .slice(0, 10)
+      .map((m) => `${m.base}-${m.quote}`)
+      .join(', ');
+    
+    throw new Error(
+      `Symbol mapping missing for ${exchangeId}:${logicalSymbol}. ` +
+      `Available markets include: ${availableMarkets}${Object.values(exchange.markets || {}).length > 10 ? '...' : ''}. ` +
+      `Please check if the symbol exists on this exchange.`
+    );
   }
 
   SYMBOL_MAP[exchangeId][logicalSymbol] = market.symbol;
@@ -116,8 +174,9 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 app.get('/api/:exchange/markets', async (req, res) => {
   try {
     const exchange = await getExchange(req.params.exchange);
+    // Filter for spot markets for all exchanges
     const markets = Object.values(exchange.markets).filter((m) =>
-      ['swap', 'future'].includes(m.type)
+      m.type === 'spot'
     );
     res.json({ success: true, data: markets });
   } catch (err) {
@@ -134,11 +193,46 @@ app.get('/api/:exchange/candles', async (req, res) => {
     }
     const exchange = await getExchange(req.params.exchange);
     const resolvedSymbol = await mapSymbol(symbol, req.params.exchange);
+    
+    // Gate.io has a limit: "Maximum 10000 points ago are allowed"
+    // Calculate the maximum allowed 'since' timestamp based on timeframe and limit
+    let sinceTimestamp = since ? Number(since) : undefined;
+    let requestLimit = limit ? Number(limit) : undefined;
+    
+    if (req.params.exchange === 'gate') {
+      const now = Date.now();
+      const maxPoints = 10000;
+      
+      // Parse timeframe to get milliseconds per candle
+      const timeframeMs = parseTimeframe(tf);
+      if (timeframeMs) {
+        // Calculate maximum allowed 'since' based on maxPoints and timeframe
+        const maxAgeMs = maxPoints * timeframeMs;
+        const minAllowedSince = now - maxAgeMs;
+        
+        // If requested 'since' is too far back, don't pass it at all
+        // Gate.io will return the most recent candles instead
+        if (sinceTimestamp && sinceTimestamp < minAllowedSince) {
+          console.warn(`Gate.io: Requested 'since' (${new Date(sinceTimestamp).toISOString()}) is too far back (max ${maxPoints} points). Omitting 'since' parameter to fetch recent candles.`);
+          sinceTimestamp = undefined;
+        }
+        
+        // Always limit the number of candles to maxPoints for Gate.io
+        if (requestLimit && requestLimit > maxPoints) {
+          console.warn(`Gate.io: Requested limit (${requestLimit}) exceeds maximum. Capping to ${maxPoints}`);
+          requestLimit = maxPoints;
+        } else if (!requestLimit) {
+          // If no limit specified, use a safe default for Gate.io
+          requestLimit = Math.min(1000, maxPoints);
+        }
+      }
+    }
+    
     const candles = await exchange.fetchOHLCV(
       resolvedSymbol,
       tf,
-      since ? Number(since) : undefined,
-      limit ? Number(limit) : undefined
+      sinceTimestamp,
+      requestLimit
     );
     res.json({ success: true, data: candles });
   } catch (err) {
@@ -146,6 +240,25 @@ app.get('/api/:exchange/candles', async (req, res) => {
     res.status(500).json(formatError(err));
   }
 });
+
+// Helper function to parse timeframe string to milliseconds
+function parseTimeframe(tf) {
+  const match = tf.match(/^(\d+)([mhdwM])$/);
+  if (!match) return null;
+  
+  const value = parseInt(match[1]);
+  const unit = match[2];
+  
+  const multipliers = {
+    'm': 60 * 1000,        // minutes
+    'h': 60 * 60 * 1000,   // hours
+    'd': 24 * 60 * 60 * 1000, // days
+    'w': 7 * 24 * 60 * 60 * 1000, // weeks
+    'M': 30 * 24 * 60 * 60 * 1000, // months (approximate)
+  };
+  
+  return value * (multipliers[unit] || 0);
+}
 
 app.get('/api/:exchange/orderbook', async (req, res) => {
   const { symbol, limit } = req.query;
@@ -155,9 +268,28 @@ app.get('/api/:exchange/orderbook', async (req, res) => {
     }
     const exchange = await getExchange(req.params.exchange);
     const resolvedSymbol = await mapSymbol(symbol, req.params.exchange);
+    
+    // Bitfinex has specific limit requirements: 1, 25, 100, 250, 500
+    // Map common limit values to valid Bitfinex limits
+    let orderbookLimit = limit ? Number(limit) : undefined;
+    if (req.params.exchange === 'bitfinex' && orderbookLimit) {
+      // Map to nearest valid Bitfinex limit
+      if (orderbookLimit <= 1) {
+        orderbookLimit = 1;
+      } else if (orderbookLimit <= 25) {
+        orderbookLimit = 25;
+      } else if (orderbookLimit <= 100) {
+        orderbookLimit = 100;
+      } else if (orderbookLimit <= 250) {
+        orderbookLimit = 250;
+      } else {
+        orderbookLimit = 500;
+      }
+    }
+    
     const book = await exchange.fetchOrderBook(
       resolvedSymbol,
-      limit ? Number(limit) : undefined
+      orderbookLimit
     );
     res.json({
       success: true,
@@ -177,11 +309,13 @@ app.get('/api/:exchange/trades', async (req, res) => {
     }
     const exchange = await getExchange(req.params.exchange);
     const resolvedSymbol = await mapSymbol(symbol, req.params.exchange);
+    
     const trades = await exchange.fetchTrades(
       resolvedSymbol,
       since ? Number(since) : undefined,
       limit ? Number(limit) : undefined
     );
+    
     const normalized = trades.map((t) => ({
       id: t.id,
       timestamp: t.timestamp,
@@ -212,18 +346,51 @@ app.get('/api/:exchange/asset-info', async (req, res) => {
     ]);
 
     const market = markets.find((m) => m.symbol === resolvedSymbol);
+    
+    // Calculate 24h change in USD from previous day price
+    const prevDayPrice = ticker.previousClose ?? ticker.open ?? ticker.last;
+    const change24hUsd = ticker.change ?? (ticker.last && prevDayPrice && prevDayPrice !== ticker.last 
+      ? ticker.last - prevDayPrice 
+      : undefined);
+    const change24hPct = ticker.percentage ?? (prevDayPrice && prevDayPrice !== 0 && change24hUsd !== undefined
+      ? ((change24hUsd / prevDayPrice) * 100) 
+      : undefined);
+
+    // Helper to return undefined instead of null for missing values
+    const orUndefined = (value) => value !== null && value !== undefined ? value : undefined;
 
     res.json({
       success: true,
       data: {
         symbol,
         marketId: resolvedSymbol,
+        // Mark Price (use last price as mark price for spot markets)
+        markPrice: ticker.last,
         last: ticker.last,
-        percentage: ticker.percentage,
-        change: ticker.change,
-        baseVolume: ticker.baseVolume ?? ticker.info?.base_volume,
-        quoteVolume: ticker.quoteVolume ?? ticker.info?.quote_volume,
-        funding: ticker.fundingRate ?? ticker.info?.funding_rate,
+        // Oracle Price (not available for most exchanges)
+        oraclePrice: orUndefined(ticker.info?.oracle_price ?? ticker.info?.index_price),
+        // 24hr Change
+        change24hPct: orUndefined(change24hPct),
+        change24hUsd: orUndefined(change24hUsd),
+        percentage: orUndefined(ticker.percentage),
+        change: orUndefined(ticker.change),
+        // 24hr Volume - try multiple sources
+        volume24h: orUndefined(
+          ticker.baseVolume ?? 
+          ticker.info?.base_volume ?? 
+          ticker.info?.volume_24h ??
+          ticker.info?.volume24h ??
+          ticker.info?.volume
+        ),
+        baseVolume: orUndefined(ticker.baseVolume ?? ticker.info?.base_volume),
+        quoteVolume: orUndefined(ticker.quoteVolume ?? ticker.info?.quote_volume),
+        // Open Interest (only for derivatives)
+        openInterest: orUndefined(ticker.openInterest ?? ticker.info?.open_interest ?? ticker.info?.oi),
+        // Funding Rate (only for perpetual swaps)
+        fundingRate: orUndefined(ticker.fundingRate ?? ticker.info?.funding_rate),
+        funding: orUndefined(ticker.fundingRate ?? ticker.info?.funding_rate),
+        // Funding Countdown (not available from CCXT)
+        fundingCountdown: orUndefined(ticker.info?.funding_countdown ?? ticker.info?.next_funding_time),
         info: ticker.info,
         meta: market ? { type: market.type, contractSize: market.contractSize } : undefined,
       },

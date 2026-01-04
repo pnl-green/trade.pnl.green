@@ -48,7 +48,7 @@ const Navbar = () => {
         <select
           value={currentExchangeId}
           onChange={(event) =>
-            setCurrentExchangeId(event.target.value as 'hyperliquid' | 'coinbase')
+            setCurrentExchangeId(event.target.value as any)
           }
           style={{
             background: 'transparent',
@@ -58,8 +58,11 @@ const Navbar = () => {
             padding: '6px 8px',
           }}
         >
-          <option value="hyperliquid">Hyperliquid</option>
           <option value="coinbase">Coinbase</option>
+          <option value="kraken" disabled>Kraken (coming soon)</option>
+          <option value="okx" disabled>OKX (coming soon)</option>
+          <option value="bitfinex" disabled>Bitfinex (coming soon)</option>
+          <option value="gate" disabled>Gate.io (coming soon)</option>
         </select>
       </Box>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paper, Table, TableBody, TableHead } from '@mui/material';
+import { Paper, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { useWebDataContext } from '@/context/webDataContext';
 import {
   BodyCell,
@@ -60,9 +60,17 @@ const PositionComponentTable = () => {
           </TableHead>
           <TableBody>
             {loadingWebData2 ? (
-              <EmptyState>loading...</EmptyState>
+              <TableRow>
+                <TableCell colSpan={columns.length} align="center">
+                  <EmptyState>loading...</EmptyState>
+                </TableCell>
+              </TableRow>
             ) : (!loadingWebData2 && webData2.length === 0) || PositionsData.length === 0 ? (
-              <EmptyState>No open position yet</EmptyState>
+              <TableRow>
+                <TableCell colSpan={columns.length} align="center">
+                  <EmptyState>No open position yet</EmptyState>
+                </TableCell>
+              </TableRow>
             ) : !loadingWebData2 &&
               webData2?.length !== 0 &&
               PositionsData.length !== 0 ? (

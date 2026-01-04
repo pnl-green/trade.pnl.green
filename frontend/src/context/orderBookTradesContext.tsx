@@ -53,17 +53,35 @@ const OrderBookTradesProvider = ({
     const controller = new AbortController();
 
     const fetchTrades = async () => {
+      if (!pair) {
+        return; // Don't fetch if pair is not set
+      }
+      
       try {
-        let url = '';
-        if (currentExchangeId === 'hyperliquid') {
-          url = `/hl/${pair}/trades`;
-        } else {
-          const params = new URLSearchParams({ symbol: pair, limit: '50' });
-          url = `/ccxt/${currentExchangeId}/trades?${params.toString()}`;
-        }
+        const params = new URLSearchParams({ symbol: pair, limit: '50' });
+        const url = `/ccxt/${currentExchangeId}/trades?${params.toString()}`;
 
-        const response = await fetch(url, { signal: controller.signal }).then((r) => r.json());
-        const trades = currentExchangeId === 'hyperliquid' ? response.trades : response.data;
+        const rawResponse = await fetch(url, { signal: controller.signal });
+        if (!rawResponse.ok) {
+          console.error(`Failed to fetch trades: ${rawResponse.status} ${rawResponse.statusText}`);
+          return;
+        }
+        
+        const response = await rawResponse.json();
+        
+        // Check for errors in CCXT responses
+        if (!response.success && response.error) {
+          console.error('CCXT API error:', response.error);
+          console.error('This might be due to:', {
+            'Missing API keys': 'Some exchanges require API keys even for public data',
+            'CCXT service not running': 'Check if the ccxt-service is running on port 4001',
+            'Invalid symbol': 'The trading pair might not exist on this exchange',
+            'Network issue': 'Check your connection to the backend service'
+          });
+          return;
+        }
+        
+        const trades = response.data;
 
         if (Array.isArray(trades)) {
           const mapped = trades.map((trade: any) => {
@@ -105,18 +123,42 @@ const OrderBookTradesProvider = ({
     const controller = new AbortController();
 
     const fetchOrderBook = async () => {
+      if (!pair) {
+        setBookData({ asks: [], bids: [] });
+        setLoadingBookData(false);
+        return; // Don't fetch if pair is not set
+      }
+      
       setLoadingBookData(true);
       try {
-        let url = '';
-        if (currentExchangeId === 'hyperliquid') {
-          url = `/hl/${pair}/orderbook`;
-        } else {
-          const params = new URLSearchParams({ symbol: pair, limit: '50' });
-          url = `/ccxt/${currentExchangeId}/orderbook?${params.toString()}`;
-        }
+        const params = new URLSearchParams({ symbol: pair, limit: '50' });
+        const url = `/ccxt/${currentExchangeId}/orderbook?${params.toString()}`;
 
-        const response = await fetch(url, { signal: controller.signal }).then((r) => r.json());
-        const data = currentExchangeId === 'hyperliquid' ? response : response.data;
+        const rawResponse = await fetch(url, { signal: controller.signal });
+        if (!rawResponse.ok) {
+          console.error(`Failed to fetch orderbook: ${rawResponse.status} ${rawResponse.statusText}`);
+          setBookData({ asks: [], bids: [] });
+          setLoadingBookData(false);
+          return;
+        }
+        
+        const response = await rawResponse.json();
+        
+        // Check for errors in CCXT responses
+        if (!response.success && response.error) {
+          console.error('CCXT API error:', response.error);
+          console.error('This might be due to:', {
+            'Missing API keys': 'Some exchanges require API keys even for public data',
+            'CCXT service not running': 'Check if the ccxt-service is running on port 4001',
+            'Invalid symbol': 'The trading pair might not exist on this exchange',
+            'Network issue': 'Check your connection to the backend service'
+          });
+          setBookData({ asks: [], bids: [] });
+          setLoadingBookData(false);
+          return;
+        }
+        
+        const data = response.data;
 
         const parseSide = (levels: any[] = []) =>
           levels.map((level) => {

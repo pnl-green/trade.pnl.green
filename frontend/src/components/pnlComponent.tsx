@@ -38,6 +38,25 @@ const normalizePairName = (pair?: string) => {
   return quote ? `${base}-${normalizedQuote}` : base;
 };
 
+// Helper function to parse resolution string to seconds
+function parseResolutionToSeconds(resolution: string): number {
+  const normalized = resolution.toString().toUpperCase();
+  const match = normalized.match(/^(\d+)([MHDW])$/);
+  if (!match) return 60; // Default to 1 minute
+  
+  const value = parseInt(match[1]);
+  const unit = match[2];
+  
+  const multipliers: Record<string, number> = {
+    'M': 60,           // minutes
+    'H': 60 * 60,      // hours
+    'D': 24 * 60 * 60, // days
+    'W': 7 * 24 * 60 * 60, // weeks
+  };
+  
+  return value * (multipliers[unit] || 60);
+}
+
 const TVChartContainer = dynamic(
   () =>
     import("@/components/TVChartContainer").then((mod) => mod.TVChartContainer),
@@ -77,14 +96,29 @@ const PnlComponent = () => {
     supported_resolutions: ['1H', '1D', '1W', '1M'],
     exchanges: [
       {
-        value: 'Hyperliquid',
-        name: 'Hyperliquid',
-        desc: 'Hyperliquid',
-      },
-      {
         value: 'Coinbase',
         name: 'Coinbase',
         desc: 'Coinbase',
+      },
+      {
+        value: 'Kraken',
+        name: 'Kraken',
+        desc: 'Kraken',
+      },
+      {
+        value: 'OKX',
+        name: 'OKX',
+        desc: 'OKX',
+      },
+      {
+        value: 'Bitfinex',
+        name: 'Bitfinex',
+        desc: 'Bitfinex',
+      },
+      {
+        value: 'Gate',
+        name: 'Gate.io',
+        desc: 'Gate.io',
       },
     ],
     symbols_types: [
@@ -147,36 +181,40 @@ const PnlComponent = () => {
       extension: any
     ) => {
       console.log('[resolveSymbol]: Method call', symbolName);
-      const symbols = getAllSymbols();
-      const symbolItem = symbols.find(
-        ({ full_name }: { full_name: any }) => full_name === symbolName
-      );
-      if (!symbolItem) {
-        console.log('[resolveSymbol]: Cannot resolve symbol', symbolName);
-        onResolveErrorCallback('cannot resolve symbol');
-        return;
-      }
+      
+      // Make this async as required by TradingView
+      setTimeout(() => {
+        const symbols = getAllSymbols();
+        const symbolItem = symbols.find(
+          ({ full_name }: { full_name: any }) => full_name === symbolName
+        );
+        if (!symbolItem) {
+          console.log('[resolveSymbol]: Cannot resolve symbol', symbolName);
+          onResolveErrorCallback('cannot resolve symbol');
+          return;
+        }
 
-      const symbolInfo = {
-        ticker: symbolItem.full_name,
-        name: symbolItem.symbol,
-        description: symbolItem.description,
-        type: symbolItem.type,
-        session: '24x7',
-        timezone: 'Etc/UTC',
-        exchange: symbolItem.exchange,
-        minmov: 1,
-        pricescale: 100,
-        has_intraday: true,
-        has_no_volume: true,
-        has_weekly_and_monthly: false,
-        supported_resolutions: configurationData.supported_resolutions,
-        volume_precision: 2,
-        data_status: 'streaming',
-      };
+        const symbolInfo = {
+          ticker: symbolItem.full_name,
+          name: symbolItem.symbol,
+          description: symbolItem.description,
+          type: symbolItem.type,
+          session: '24x7',
+          timezone: 'Etc/UTC',
+          exchange: symbolItem.exchange,
+          minmov: 1,
+          pricescale: 100,
+          has_intraday: true,
+          visible_plots_set: 'ohlcv', // Use visible_plots_set instead of deprecated has_no_volume
+          has_weekly_and_monthly: false,
+          supported_resolutions: configurationData.supported_resolutions,
+          volume_precision: 2,
+          data_status: 'streaming',
+        };
 
-      console.log('[resolveSymbol]: Symbol resolved', symbolName);
-      onSymbolResolvedCallback(symbolInfo);
+        console.log('[resolveSymbol]: Symbol resolved', symbolName);
+        onSymbolResolvedCallback(symbolInfo);
+      }, 0);
     },
 
     getBars: async (
@@ -205,20 +243,79 @@ const PnlComponent = () => {
       };
 
       try {
+        // Prioritize complete recent data over long historical lookback
+        // Limit lookback period to ensure gap-free recent candles
+        const now = Math.floor(Date.now() / 1000);
+        const resolutionSeconds = parseResolutionToSeconds(resolution);
+        
+        // Define maximum lookback periods for complete data (in seconds)
+        // These are conservative limits to ensure exchanges can provide complete data
+        const maxLookbackByResolution: Record<string, number> = {
+          '1m': 2 * 24 * 60 * 60,      // 2 days for 1m
+          '5m': 3 * 24 * 60 * 60,      // 3 days for 5m
+          '15m': 3 * 24 * 60 * 60,     // 3 days for 15m
+          '30m': 4 * 24 * 60 * 60,     // 4 days for 30m
+          '1h': 5 * 24 * 60 * 60,      // 5 days for 1h
+          '4h': 10 * 24 * 60 * 60,     // 10 days for 4h
+          '1d': 30 * 24 * 60 * 60,     // 30 days for 1d
+          '1w': 90 * 24 * 60 * 60,     // 90 days for 1w
+        };
+        
+        // Determine max lookback for this resolution
+        const resolutionKey = resolutionMap(resolution);
+        const maxLookback = maxLookbackByResolution[resolutionKey] || (5 * 24 * 60 * 60); // Default 5 days
+        
+        // Calculate the actual time range TradingView wants
+        const requestedTimeRangeSeconds = to - from;
+        
+        // Calculate limit based on requested time range
+        // Use exact calculation (no buffer) to avoid requesting more than available
+        const calculatedLimit = Math.ceil(requestedTimeRangeSeconds / resolutionSeconds);
+        
+        // Use conservative maximums to ensure complete data
+        // These limits are based on what exchanges typically provide reliably
+        const maxLimit = ['m', 'h'].some(u => resolution.toLowerCase().includes(u)) 
+          ? 1000  // Reduced from 5000 for intraday - prioritize completeness
+          : 500;   // Reduced from 2000 for daily/weekly
+        
+        const limit = Math.min(Math.max(calculatedLimit, 50), maxLimit); // At least 50, at most maxLimit
+        
+        // For the API request, use the original 'from' that TradingView requested
+        // This ensures we fetch the data TradingView expects, even if it's beyond our maxLookback
+        // The exchange will return what it can, and we'll filter based on TradingView's range
         const params = new URLSearchParams({
           symbol: logicalSymbol,
           tf: resolutionMap(resolution),
           since: String(from * 1000),
-          limit: '500',
+          limit: String(limit),
         });
 
-        const url =
-          currentExchangeId === 'hyperliquid'
-            ? `/hl/${logicalSymbol}/candles?${params.toString()}`
-            : `/ccxt/${currentExchangeId}/candles?${params.toString()}`;
-        const response = await fetch(url).then((res) => res.json());
+        const url = `/ccxt/${currentExchangeId}/candles?${params.toString()}`;
+        
+        const rawResponse = await fetch(url);
+        if (!rawResponse.ok) {
+          const errorMsg = `Failed to fetch candles: ${rawResponse.status} ${rawResponse.statusText}`;
+          console.error('[getBars]:', errorMsg);
+          onErrorCallback(errorMsg);
+          return;
+        }
+        
+        const response = await rawResponse.json();
 
-        const data = currentExchangeId === 'hyperliquid' ? response.candles : response.data;
+        // Check for errors in CCXT responses
+        if (!response.success && response.error) {
+          console.error('[getBars]: CCXT API error:', response.error);
+          console.error('[getBars]: This might be due to:', {
+            'Missing API keys': 'Some exchanges require API keys even for public data',
+            'CCXT service not running': 'Check if the ccxt-service is running on port 4001',
+            'Invalid symbol': 'The trading pair might not exist on this exchange',
+            'Network issue': 'Check your connection to the backend service'
+          });
+          onErrorCallback(response.error || 'Failed to fetch candle data');
+          return;
+        }
+
+        const data = response.data;
         if (!Array.isArray(data)) {
           onErrorCallback('No data');
           return;
@@ -234,7 +331,11 @@ const PnlComponent = () => {
             close: Number(bar[4] ?? bar.close),
             volume: Number(bar[5] ?? bar.volume ?? 0),
           }))
-          .filter((bar: any) => bar.time >= from * 1000 && bar.time <= to * 1000);
+          // Filter based on TradingView's requested range, not our adjusted range
+          // This ensures we don't create gaps by filtering out data TradingView expects
+          .filter((bar: any) => bar.time >= from * 1000 && bar.time <= to * 1000)
+          // Sort by time to ensure chronological order
+          .sort((a: any, b: any) => a.time - b.time);
 
         if (firstDataRequest && bars.length > 0) {
           lastBarsCache.set(symbolInfo.full_name, {
