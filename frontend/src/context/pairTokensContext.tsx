@@ -4,6 +4,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ActiveAssetData, PairData } from '../../types/hyperliquid';
 import { useHyperLiquidContext } from './hyperLiquidContext';
 import { useAddress, useChainId } from '@thirdweb-dev/react';
+import { useVersionContext } from './versionContext';
+import { useExchangeContext } from './exchangeContext';
 
 //default dummy token data
 const defaultDummyTokenData: PairData | any = {
@@ -82,6 +84,15 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
   const userAddress = useAddress();
   const chainId = useChainId();
   const { hyperliquid } = useHyperLiquidContext();
+  const { isV2 } = useVersionContext();
+  // Exchange context is only available in v2
+  let currentExchangeId = 'coinbase'; // default
+  try {
+    const exchangeContext = useExchangeContext();
+    currentExchangeId = exchangeContext.currentExchangeId;
+  } catch {
+    // Exchange context not available (v1), use default
+  }
 
   const [loadingWebData2, setLoadingWebData2] = useState<boolean>(true);
   const [tokenPairData, setTokenPairData] = useState([]); //all token pair data
@@ -130,7 +141,90 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
     splitTokenPairs();
   }, [selectedPairsTokenData]);
 
+  // Fetch markets via CCXT for v2
   useEffect(() => {
+    if (!isV2) return;
+    
+    const controller = new AbortController();
+    
+    const fetchMarkets = async () => {
+      try {
+        setLoadingWebData2(true);
+        const rawResponse = await fetch(`/ccxt/${currentExchangeId}/markets`, {
+          signal: controller.signal,
+        });
+
+        if (!rawResponse.ok) {
+          console.error(`Failed to fetch ${currentExchangeId} markets: ${rawResponse.status} ${rawResponse.statusText}`);
+          setLoadingWebData2(false);
+          return;
+        }
+
+        const res = await rawResponse.json();
+
+        if (!res.success && res.error) {
+          console.error(`Failed to fetch ${currentExchangeId} markets:`, res.error);
+          setLoadingWebData2(false);
+          return;
+        }
+
+        const markets = res?.data || [];
+        
+        // Map CCXT markets to our format
+        const tokenPair = markets
+          .filter((market: any) => {
+            // Filter for spot markets with USDC/USD/USDT quotes
+            const quote = (market.quote || '').toUpperCase();
+            return market.type === 'spot' && ['USDC', 'USD', 'USDT'].includes(quote);
+          })
+          .map((market: any) => {
+            const base = market.base?.toUpperCase() || '';
+            const quote = (market.quote || '').toUpperCase();
+            const normalizedQuote = normalizeQuote(quote);
+            return {
+              pairs: `${base}-${normalizedQuote}`,
+              assetId: market.id || `${base}-${normalizedQuote}`,
+              universe: {
+                maxLeverage: '--',
+                name: base,
+                onlyIsolated: '--',
+                szDecimals: market.precision?.amount || 8,
+              },
+              assetCtx: {
+                dayNtlVlm: '--',
+                funding: '--',
+                impactPxs: ['--', '--'],
+                markPx: market.info?.last || '--',
+                midPx: market.info?.last || '--',
+                openInterest: '--',
+                oraclePx: market.info?.last || '--',
+                premium: '--',
+                prevDayPx: '--',
+              },
+            };
+          });
+
+        setAllTokenPairs(tokenPair as any);
+        setTokenPairData(tokenPair as any);
+        setLoadingWebData2(false);
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Error fetching CCXT markets:', error);
+          setLoadingWebData2(false);
+        }
+      }
+    };
+
+    fetchMarkets();
+    
+    return () => {
+      controller.abort();
+    };
+  }, [isV2, currentExchangeId]);
+
+  // v1: Hyperliquid WebSocket connection
+  useEffect(() => {
+    if (isV2) return; // Skip Hyperliquid for v2
     // Create a new WebSocket connection
     const ws = new WebSocket(
       chainId === 42161
@@ -187,7 +281,7 @@ const PairTokensProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       ws.close();
     };
-  }, [hyperliquid]);
+  }, [hyperliquid, isV2]);
 
   //get active assetData with current leverage value
   useEffect(() => {

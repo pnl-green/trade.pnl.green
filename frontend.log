@@ -1,0 +1,4170 @@
+
+> intelayer@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.14
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1327ms
+ ○ Compiling / ...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled / in 6.3s (3728 modules)
+ GET /_next/static/webpack/f99ca1d2380a30d2.webpack.hot-update.json 404 in 7053ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET / 200 in 7275ms
+ GET / 200 in 4ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 16ms
+(node:33349) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ GET / 200 in 122ms
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=SOL-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=BTC-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/candles?symbol=BTC-USDC&tf=1m&since=1766314660000&limit=500 Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=SOL-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=BTC-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=BTC-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=BTC-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+ GET / 200 in 16ms
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=SOL-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=BTC-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/candles?symbol=BTC-USDC&tf=1m&since=1766314734000&limit=500 Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 11ms
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=SOL-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=BTC-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=BTC-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/hyperliquid/asset-info?symbol=BTC-USDC Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketCloseListener (node:_http_client:491:27)
+    at Socket.emit (node:events:531:35)
+    at TCP.<anonymous> (node:net:346:12) {
+  code: 'ECONNRESET'
+}
+ ✓ Compiled in 1262ms (3726 modules)
+ ✓ Compiled in 207ms (3726 modules)
+ ✓ Compiled in 861ms (3726 modules)
+ ✓ Compiled in 1538ms (3726 modules)
+ ✓ Compiled in 345ms (3726 modules)
+ ✓ Compiled in 196ms (3726 modules)
+ ✓ Compiled in 406ms (3726 modules)
+ ✓ Compiled in 1133ms (3726 modules)
+ ✓ Compiled in 258ms (3726 modules)
+ ✓ Compiled in 350ms (3726 modules)
+ ✓ Compiled in 262ms (3726 modules)
+ ✓ Compiled in 149ms (3726 modules)
+ ✓ Compiled in 136ms (3726 modules)
+ ✓ Compiled in 427ms (3726 modules)
+ GET / 200 in 124ms
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1295ms (3728 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 1315ms
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+ GET / 200 in 154ms
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 10ms
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/okx/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=BTC-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=BTC-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+ GET / 200 in 13ms
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+ GET / 200 in 6ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 11ms
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=AAVE-USDC Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=AAVE-USDC&limit=50 Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/candles?symbol=AAVE-USDC&tf=1m&limit=1 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/candles?symbol=AAVE-USDC&tf=1m&limit=1 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=AAVE-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/candles?symbol=AAVE-USDC&tf=1m&limit=1 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/candles?symbol=AAVE-USDC&tf=1m&limit=1 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/asset-info?symbol=AAVE-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/candles?symbol=AAVE-USDC&tf=1m&limit=1 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/trades?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/bitfinex/orderbook?symbol=AAVE-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 45ms
+ GET / 200 in 6ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 17ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 20ms
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=ALEPH-USDT&limit=50 Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=ALEPH-USDT Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Error: socket hang up
+    at Socket.socketOnEnd (node:_http_client:542:25)
+    at Socket.emit (node:events:531:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'ECONNRESET'
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=ALEPH-USDT Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=ALEPH-USDT Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=ALEPH-USDT Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=ALEPH-USDT Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/candles?symbol=ALEPH-USDT&tf=1m&since=1766000000000&limit=500 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=ALEPH-USDT Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=ALEPH-USDT Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+ GET / 200 in 55ms
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 13ms
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=ALEPH-USDT Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/trades?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/trades?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/orderbook?symbol=ALEPH-USDT&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+ GET / 200 in 21ms
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/coinbase/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/markets Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 5ms
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/asset-info?symbol=SOL-USDC Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/trades?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Failed to proxy http://127.0.0.1:5002/ccxt/gate/orderbook?symbol=SOL-USDC&limit=50 Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+Error: connect ECONNREFUSED 127.0.0.1:5002
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16) {
+  errno: -61,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 5002
+}
+ GET / 200 in 9ms
+ GET / 200 in 7ms
+ ✓ Compiled in 974ms (3726 modules)
+ ✓ Compiled in 393ms (3726 modules)
+ ✓ Compiled in 358ms (3726 modules)
+ GET / 200 in 130ms
+ ✓ Compiled in 791ms (3726 modules)
+ ✓ Compiled in 203ms (3726 modules)
+ ✓ Compiled in 207ms (3726 modules)
+ GET / 200 in 105ms
+ GET / 200 in 37ms
+ ✓ Compiled in 485ms (3726 modules)
+ ✓ Compiled in 268ms (3726 modules)
+ ✓ Compiled in 298ms (3726 modules)
+ GET / 200 in 147ms
+ GET / 200 in 17ms
+ GET / 200 in 15ms
+ ✓ Compiled in 1000ms (3726 modules)
+ ✓ Compiled in 283ms (3726 modules)
+[?25h

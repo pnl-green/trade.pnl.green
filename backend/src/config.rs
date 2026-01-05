@@ -20,6 +20,14 @@ pub struct Config {
 
     /// Secret used to sign session cookies.
     pub cookie_key: String,
+
+    /// CCXT service URL for v2 implementation.
+    #[serde(default = "default_ccxt_service_url")]
+    pub ccxt_service_url: String,
+}
+
+fn default_ccxt_service_url() -> String {
+    "http://localhost:4001".to_string()
 }
 
 impl Config {
@@ -56,6 +64,11 @@ impl Config {
     /// Helper that returns the websocket bind target as `host:port`.
     pub fn ws_url(&self) -> String {
         format!("{}:{}", self.ws_host, self.ws_port)
+    }
+
+    /// Helper that returns the CCXT service URL.
+    pub fn ccxt_service_url(&self) -> &str {
+        &self.ccxt_service_url
     }
 
     /// Allow integration tests to override the HTTP port while reusing the rest of the config.

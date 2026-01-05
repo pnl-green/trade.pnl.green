@@ -1,0 +1,11 @@
+{
+  "name": "ccxt-service",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.mjs",
+  "license": "MIT",
+  "dependencies": {
+    "ccxt": "^4.3.2",
+    "express": "^4.19.2"
+  }
+}

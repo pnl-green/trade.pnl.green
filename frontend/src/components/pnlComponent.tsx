@@ -8,6 +8,8 @@ import OrderBookAndTrades from './order-book-and-trades';
 import TokenPairInformation from './token-pair-information';
 import { usePairTokensContext } from '@/context/pairTokensContext';
 import { useWebDataContext } from '@/context/webDataContext';
+import { useVersionContext } from '@/context/versionContext';
+import { useExchangeContext } from '@/context/exchangeContext';
 import dynamic from "next/dynamic";
 import {
   ChartingLibraryWidgetOptions,
@@ -56,6 +58,15 @@ const PnlComponent = () => {
   const { tokenPairs } = usePairTokensContext();
   const { allTokenPairs, tokenPairData } = usePairTokensContext();
   const { selectionMode, handleChartPricePick } = useChartInteractionContext();
+  const { isV2 } = useVersionContext();
+  // Exchange context is only available in v2
+  let currentExchangeId = 'coinbase'; // default
+  try {
+    const exchangeContext = useExchangeContext();
+    currentExchangeId = exchangeContext.currentExchangeId;
+  } catch {
+    // Exchange context not available (v1), use default
+  }
 
   const [pairs, setPairs] = useState([]);
 
@@ -188,6 +199,69 @@ const PnlComponent = () => {
         return;
       }
 
+      // Use context values (captured from component scope)
+
+      // v2: Use CCXT endpoints
+      if (isV2) {
+        try {
+          const logicalSymbol = `${parsedSymbol.fromSymbol.toUpperCase()}-${parsedSymbol.toSymbol.toUpperCase()}`;
+          
+          // Map resolution to CCXT timeframe
+          const resolutionMap = (res: string) => {
+            const normalized = res.toString().toUpperCase();
+            if (normalized.endsWith('H')) return `${normalized.replace('H', '')}h`;
+            if (normalized.endsWith('D')) return `${normalized.replace('D', '')}d`;
+            if (normalized.endsWith('W')) return `${normalized.replace('W', '')}w`;
+            if (normalized.endsWith('M')) return `${normalized.replace('M', '')}M`;
+            return '1m';
+          };
+
+          const params = new URLSearchParams({
+            symbol: logicalSymbol,
+            tf: resolutionMap(resolution),
+            since: String(from * 1000),
+            limit: '1000',
+          });
+
+          const url = `/ccxt/${currentExchangeId}/candles?${params.toString()}`;
+          const response = await fetch(url).then((res) => res.json());
+          
+          if (!response?.success || !Array.isArray(response.data)) {
+            onErrorCallback(response?.error || 'No data');
+            return;
+          }
+
+          const bars = response.data
+            .filter((bar: any) => Array.isArray(bar) && bar.length >= 6)
+            .map((bar: any) => ({
+              time: Number(bar[0]),
+              open: Number(bar[1]),
+              high: Number(bar[2]),
+              low: Number(bar[3]),
+              close: Number(bar[4]),
+              volume: Number(bar[5]),
+            }))
+            .filter((bar: any) => bar.time >= from * 1000 && bar.time <= to * 1000);
+
+          if (firstDataRequest && bars.length > 0) {
+            lastBarsCache.set(symbolInfo.full_name, {
+              ...bars[bars.length - 1],
+            });
+          }
+
+          if (bars.length > 0) {
+            onHistoryCallback(bars, { noData: false });
+          } else {
+            onHistoryCallback([], { noData: true });
+          }
+        } catch (error) {
+          console.log('[getBars]: CCXT error', error);
+          onErrorCallback(error);
+        }
+        return;
+      }
+
+      // v1: Use Hyperliquid endpoints
       const quoteSymbol = parsedSymbol.toSymbol?.toUpperCase();
       try {
         let headers = new Headers();
