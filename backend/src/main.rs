@@ -235,6 +235,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Share global application state with the Actix data registry so request handlers can access
     // the Hyperliquid chain choice, TWAP sender, and queue storage.
+    let config_data = web::Data::new(config);
     let chain = web::Data::new(chain);
     let sender = web::Data::new(tx);
 
