@@ -1,4 +1,5 @@
 import React from 'react';
+import { VersionProvider } from './versionContext';
 import PairTokensProvider from './pairTokensContext';
 import OrderBookTradesProvider from './orderBookTradesContext';
 import WebDataProvider from './webDataContext';
@@ -13,29 +14,31 @@ import { ChartInteractionProvider } from './chartInteractionContext';
 
 const ContextProviders = ({ children }: { children: React.ReactNode }) => {
   return (
-    <WebDataProvider>
-      <HyperliquidProvider>
-        <PairTokensProvider>
-          <OrderBookTradesProvider>
-            <TradeHistoryProvider>
-              <FundingHistoryProvider>
-                <OrderHistoryProvider>
-                  <TwapHistoryProvider>
-                    <SwitchAccountProvider>
-                      <OrderTicketProvider>
-                        <ChartInteractionProvider>
-                          <React.Fragment>{children}</React.Fragment>
-                        </ChartInteractionProvider>
-                      </OrderTicketProvider>
-                    </SwitchAccountProvider>
-                  </TwapHistoryProvider>
-                </OrderHistoryProvider>
-              </FundingHistoryProvider>
-            </TradeHistoryProvider>
-          </OrderBookTradesProvider>
-        </PairTokensProvider>
-      </HyperliquidProvider>
-    </WebDataProvider>
+    <VersionProvider>
+      <WebDataProvider>
+        <HyperliquidProvider>
+          <PairTokensProvider>
+            <OrderBookTradesProvider>
+              <TradeHistoryProvider>
+                <FundingHistoryProvider>
+                  <OrderHistoryProvider>
+                    <TwapHistoryProvider>
+                      <SwitchAccountProvider>
+                        <OrderTicketProvider>
+                          <ChartInteractionProvider>
+                            <React.Fragment>{children}</React.Fragment>
+                          </ChartInteractionProvider>
+                        </OrderTicketProvider>
+                      </SwitchAccountProvider>
+                    </TwapHistoryProvider>
+                  </OrderHistoryProvider>
+                </FundingHistoryProvider>
+              </TradeHistoryProvider>
+            </OrderBookTradesProvider>
+          </PairTokensProvider>
+        </HyperliquidProvider>
+      </WebDataProvider>
+    </VersionProvider>
   );
 };
 
