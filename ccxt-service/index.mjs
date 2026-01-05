@@ -1,69 +1,99 @@
 import express from 'express';
 import ccxt from 'ccxt';
 
-const SYMBOL_MAP = {
-  'BTC-PERP': {
-    hyperliquid: 'BTC/USDC:USDC',
-    coinbase: 'BTC-USD-PERP',
-  },
-  'ETH-PERP': {
-    hyperliquid: 'ETH/USDC:USDC',
-    coinbase: 'ETH-USD-PERP',
-  },
-};
+// Initialize exchanges with error handling
+const exchanges = {};
 
-const defaultType = process.env.DEFAULT_MARKET_TYPE || 'swap';
-
-function createExchange(id, { apiKey, secret, password }) {
+function makeExchange(id, options = {}) {
   const exchangeClass = ccxt[id];
   if (!exchangeClass) {
     throw new Error(`Exchange ${id} is not supported by ccxt`);
   }
-
   return new exchangeClass({
-    apiKey,
-    secret,
-    password,
-    options: { defaultType },
+    ...options,
     enableRateLimit: true,
   });
 }
 
-function buildExchanges() {
-  return {
-    hyperliquid: createExchange('hyperliquid', {
-      apiKey: process.env.HL_KEY,
-      secret: process.env.HL_SECRET,
-      password: process.env.HL_PASSWORD,
-    }),
-    coinbase: createExchange(process.env.COINBASE_ID || 'coinbase', {
-      apiKey: process.env.CB_KEY,
-      secret: process.env.CB_SECRET,
-      password: process.env.CB_PASSPHRASE,
-    }),
-  };
+try {
+  exchanges.coinbase = makeExchange('coinbase', {
+    keyPrefix: 'CB',
+    defaultType: 'spot', // Always use 'spot' for Coinbase public data
+  });
+  console.log('Coinbase exchange initialized:', exchanges.coinbase.id);
+} catch (err) {
+  console.error('Failed to initialize Coinbase exchange:', err);
 }
 
-const exchanges = buildExchanges();
+try {
+  exchanges.kraken = makeExchange('kraken', {
+    keyPrefix: 'KR',
+    defaultType: process.env.KRAKEN_DEFAULT_TYPE || 'spot',
+  });
+  exchanges.okx = makeExchange('okx', {
+    keyPrefix: 'OK',
+    defaultType: process.env.OKX_DEFAULT_TYPE || 'spot',
+  });
+  exchanges.bitfinex = makeExchange('bitfinex', {
+    keyPrefix: 'BF',
+    defaultType: process.env.BITFINEX_DEFAULT_TYPE || 'spot',
+  });
+  exchanges.gate = makeExchange('gate', {
+    keyPrefix: 'GT',
+    defaultType: process.env.GATE_DEFAULT_TYPE || 'spot',
+  });
+  console.log('Other exchanges initialized:', Object.keys(exchanges).filter(k => k !== 'coinbase'));
+} catch (err) {
+  console.error('Failed to initialize other exchanges:', err);
+}
 
 function getExchange(exchangeId) {
   const exchange = exchanges[exchangeId];
   if (!exchange) {
-    throw new Error(`Unknown exchange ${exchangeId}`);
+    throw new Error(`Unknown exchange ${exchangeId}. Available: ${Object.keys(exchanges).join(', ')}`);
   }
   return exchange;
 }
 
-function mapSymbol(logicalSymbol, exchangeId) {
-  const mapping = SYMBOL_MAP[logicalSymbol];
-  if (!mapping) {
-    throw new Error(`Unknown logical symbol ${logicalSymbol}`);
+// Convert logical symbol (e.g., "BTC-USDC") to exchange-specific format
+function buildSymbolMap(exchange, logicalSymbol) {
+  if (!exchange.markets || Object.keys(exchange.markets).length === 0) {
+    throw new Error('Markets not loaded for exchange');
   }
-  const symbol = mapping[exchangeId];
-  if (!symbol) {
-    throw new Error(`Symbol mapping missing for ${exchangeId}`);
+
+  const [base, quote] = logicalSymbol.split('-');
+  if (!base || !quote) {
+    throw new Error(`Invalid symbol format: ${logicalSymbol}. Expected format: BASE-QUOTE`);
   }
-  return symbol;
+
+  // Normalize quote symbols (USD/USDC/USDT are interchangeable)
+  const normalizedQuote = quote.toUpperCase();
+  const quoteVariants = [normalizedQuote];
+  if (normalizedQuote === 'USD') {
+    quoteVariants.push('USDC', 'USDT');
+  } else if (normalizedQuote === 'USDC') {
+    quoteVariants.push('USD', 'USDT');
+  } else if (normalizedQuote === 'USDT') {
+    quoteVariants.push('USD', 'USDC');
+  }
+
+  // Try to find matching market
+  for (const quoteVar of quoteVariants) {
+    // Try different symbol formats
+    const formats = [
+      `${base}/${quoteVar}`,      // BTC/USD
+      `${base}-${quoteVar}`,      // BTC-USD
+      `${base}_${quoteVar}`,      // BTC_USD
+    ];
+
+    for (const format of formats) {
+      if (exchange.markets[format]) {
+        return format;
+      }
+    }
+  }
+
+  throw new Error(`Symbol ${logicalSymbol} not found on ${exchange.id}`);
 }
 
 function formatError(err) {
@@ -83,9 +113,16 @@ app.get('/api/:exchange/markets', async (req, res) => {
   try {
     const exchange = getExchange(req.params.exchange);
     await exchange.loadMarkets();
-    const markets = Object.values(exchange.markets).filter((m) =>
-      ['swap', 'future'].includes(m.type)
-    );
+    
+    // Filter for spot markets for most exchanges
+    const marketType = req.params.exchange === 'coinbase' ? 'spot' : 'spot';
+    const markets = Object.values(exchange.markets).filter((m) => {
+      if (m.type !== marketType) return false;
+      // Filter for markets with USD/USDC/USDT quotes
+      const quote = (m.quote || '').toUpperCase();
+      return ['USD', 'USDC', 'USDT'].includes(quote);
+    });
+    
     res.json({ success: true, data: markets });
   } catch (err) {
     console.error(err);
@@ -97,7 +134,8 @@ app.get('/api/:exchange/candles', async (req, res) => {
   const { symbol, tf = '1m', since, limit } = req.query;
   try {
     const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = mapSymbol(symbol, req.params.exchange);
+    await exchange.loadMarkets();
+    const resolvedSymbol = buildSymbolMap(exchange, symbol);
     const candles = await exchange.fetchOHLCV(
       resolvedSymbol,
       tf,
@@ -115,10 +153,21 @@ app.get('/api/:exchange/orderbook', async (req, res) => {
   const { symbol, limit } = req.query;
   try {
     const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = mapSymbol(symbol, req.params.exchange);
+    await exchange.loadMarkets();
+    const resolvedSymbol = buildSymbolMap(exchange, symbol);
+    
+    // Bitfinex requires specific limit values
+    let orderbookLimit = limit ? Number(limit) : undefined;
+    if (req.params.exchange === 'bitfinex' && orderbookLimit) {
+      const validLimits = [1, 25, 100, 250, 500];
+      orderbookLimit = validLimits.reduce((prev, curr) => 
+        Math.abs(curr - orderbookLimit) < Math.abs(prev - orderbookLimit) ? curr : prev
+      );
+    }
+    
     const book = await exchange.fetchOrderBook(
       resolvedSymbol,
-      limit ? Number(limit) : undefined
+      orderbookLimit
     );
     res.json({
       success: true,
@@ -134,12 +183,27 @@ app.get('/api/:exchange/trades', async (req, res) => {
   const { symbol, limit, since } = req.query;
   try {
     const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = mapSymbol(symbol, req.params.exchange);
-    const trades = await exchange.fetchTrades(
+    await exchange.loadMarkets();
+    const resolvedSymbol = buildSymbolMap(exchange, symbol);
+    
+    // Add timeout for exchanges that might hang
+    const timeout = req.params.exchange === 'hyperliquid' ? 8000 : undefined;
+    const tradesPromise = exchange.fetchTrades(
       resolvedSymbol,
       since ? Number(since) : undefined,
       limit ? Number(limit) : undefined
     );
+    
+    let trades;
+    if (timeout) {
+      trades = await Promise.race([
+        tradesPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+      ]);
+    } else {
+      trades = await tradesPromise;
+    }
+    
     const normalized = trades.map((t) => ({
       id: t.id,
       timestamp: t.timestamp,
@@ -151,7 +215,12 @@ app.get('/api/:exchange/trades', async (req, res) => {
     res.json({ success: true, data: normalized });
   } catch (err) {
     console.error(err);
-    res.status(500).json(formatError(err));
+    // Return empty array on timeout instead of error
+    if (err.message === 'Timeout') {
+      res.json({ success: true, data: [] });
+    } else {
+      res.status(500).json(formatError(err));
+    }
   }
 });
 
@@ -170,7 +239,8 @@ app.get('/api/:exchange/positions', async (req, res) => {
   const { symbol } = req.query;
   try {
     const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = symbol ? mapSymbol(symbol, req.params.exchange) : undefined;
+    await exchange.loadMarkets();
+    const resolvedSymbol = symbol ? buildSymbolMap(exchange, symbol) : undefined;
     const positions = await exchange.fetchPositions(
       resolvedSymbol ? [resolvedSymbol] : undefined
     );
@@ -195,7 +265,8 @@ app.get('/api/:exchange/position-history', async (req, res) => {
   const { symbol, since, limit } = req.query;
   try {
     const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = symbol ? mapSymbol(symbol, req.params.exchange) : undefined;
+    await exchange.loadMarkets();
+    const resolvedSymbol = symbol ? buildSymbolMap(exchange, symbol) : undefined;
     const trades = await exchange.fetchMyTrades(
       resolvedSymbol,
       since ? Number(since) : undefined,
@@ -212,7 +283,8 @@ app.post('/api/:exchange/order', async (req, res) => {
   const { symbol, type, side, size, price, params = {} } = req.body || {};
   try {
     const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = mapSymbol(symbol, req.params.exchange);
+    await exchange.loadMarkets();
+    const resolvedSymbol = buildSymbolMap(exchange, symbol);
     const order = await exchange.createOrder(
       resolvedSymbol,
       type,
@@ -233,7 +305,8 @@ app.delete('/api/:exchange/order/:id', async (req, res) => {
   const { symbol, params = {} } = req.query;
   try {
     const exchange = getExchange(req.params.exchange);
-    const resolvedSymbol = symbol ? mapSymbol(symbol, req.params.exchange) : undefined;
+    await exchange.loadMarkets();
+    const resolvedSymbol = symbol ? buildSymbolMap(exchange, symbol) : undefined;
     const result = await exchange.cancelOrder(id, resolvedSymbol, params);
     res.json({ success: true, data: result });
   } catch (err) {
