@@ -76,10 +76,13 @@ jobs:
             fi
             if [ -n "${EC2_BACKEND_PM2_NAME}" ]; then
               if pm2 list | grep -q "${EC2_BACKEND_PM2_NAME}"; then
-                pm2 restart "${EC2_BACKEND_PM2_NAME}"
-              else
-                echo "PM2 process '${EC2_BACKEND_PM2_NAME}' not found, skipping restart."
+                echo "Stopping and deleting existing PM2 process '${EC2_BACKEND_PM2_NAME}'..."
+                pm2 delete "${EC2_BACKEND_PM2_NAME}" || true
               fi
+              echo "Starting backend from /home/ubuntu/deploy/backend..."
+              cd /home/ubuntu/deploy/backend
+              pm2 start ./backend --name "${EC2_BACKEND_PM2_NAME}" --cwd /home/ubuntu/deploy/backend
+              pm2 save
             else
               echo "EC2_BACKEND_PM2_NAME not set, skipping backend restart."
             fi

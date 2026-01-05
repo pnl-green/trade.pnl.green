@@ -2,6 +2,7 @@ import { Box, styled } from '@mui/material';
 
 export const FooterContainer = styled(Box)(() => ({
   display: 'flex',
+  flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
   padding: '20px 30px',
