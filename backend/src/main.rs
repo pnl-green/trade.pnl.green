@@ -42,23 +42,26 @@ async fn main() -> anyhow::Result<()> {
     // resources so all subsequent helpers rely on the same values.
     let config = Config::new()?;
 
+    // Create web::Data wrapper for config early, before any fields are moved
+    let config_data = web::Data::new(config);
+
     // Configure tracing before creating any async tasks to ensure logs from spawned workers use
     // the same subscriber.
     let subscriber = log::get_subscriber(
         env!("CARGO_PKG_NAME").into(),
-        &config.level,
+        &config_data.level,
         std::io::stdout,
     );
 
     log::init_subscriber(subscriber);
 
     // Build the inbound listeners that back both HTTP and websocket surfaces.
-    let listener = TcpListener::bind(config.server_url()).context("Failed to bind to port")?;
-    let ws_listener = tokio::net::TcpListener::bind(config.ws_url()).await?;
+    let listener = TcpListener::bind(config_data.server_url()).context("Failed to bind to port")?;
+    let ws_listener = tokio::net::TcpListener::bind(config_data.ws_url()).await?;
 
-    let cookie_key = Key::from(config.cookie_key.as_bytes());
+    let cookie_key = Key::from(config_data.cookie_key.as_bytes());
 
-    let store = RedisSessionStore::new(config.redis_url).await?;
+    let store = RedisSessionStore::new(config_data.redis_url.clone()).await?;
 
     let (tx, mut rx) = mpsc::channel::<InternalRequest>(128);
 
@@ -235,7 +238,6 @@ async fn main() -> anyhow::Result<()> {
 
     // Share global application state with the Actix data registry so request handlers can access
     // the Hyperliquid chain choice, TWAP sender, and queue storage.
-    let config_data = web::Data::new(config);
     let chain = web::Data::new(chain);
     let sender = web::Data::new(tx);
 
